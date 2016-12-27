@@ -1,0 +1,1 @@
+ make -j4 TARGET=unwired BOARD=udboards/cc26xx
