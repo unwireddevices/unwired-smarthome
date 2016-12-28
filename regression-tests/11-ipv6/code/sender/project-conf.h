@@ -1,7 +1,0 @@
-#undef UIP_CONF_ND6_SEND_NA
-#define UIP_CONF_ND6_SEND_NA 1
-
-#ifdef BUFSIZE
-#undef UIP_CONF_BUFFER_SIZE
-#define UIP_CONF_BUFFER_SIZE BUFSIZE
-#endif /* BUFSIZE */
