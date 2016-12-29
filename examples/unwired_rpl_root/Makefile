@@ -1,4 +1,4 @@
-all: unwired_receiver
+all: unwired_rpl_root
 APPS=servreg-hack
 CONTIKI=../..
 

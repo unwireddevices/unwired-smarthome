@@ -47,7 +47,6 @@
 #include <string.h>
 
 #define UDP_PORT 4003
-#define SERVICE_ID 190 //delete?
 
 static struct simple_udp_connection unicast_connection;
 
@@ -126,8 +125,6 @@ PROCESS_THREAD(rpl_root_process, ev, data)
   printf("Creating RPL DAG...\n");
 
   create_rpl_dag(ipaddr);
-
-  servreg_hack_register(SERVICE_ID, ipaddr); //delete?
 
   simple_udp_register(&unicast_connection, UDP_PORT, NULL, UDP_PORT, receiver);
 
