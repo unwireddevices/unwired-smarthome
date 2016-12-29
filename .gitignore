@@ -1,5 +1,6 @@
 *.a
 *.unwired
+*.co
 *.bin
 *.map
 *.png
