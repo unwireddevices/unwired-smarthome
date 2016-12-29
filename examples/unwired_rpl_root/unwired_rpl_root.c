@@ -39,19 +39,23 @@
 #include "net/ip/uip-debug.h"
 
 #include "simple-udp.h"
-#include "servreg-hack.h"
+//#include "servreg-hack.h"
 
 #include "net/rpl/rpl.h"
 
 #include <stdio.h>
 #include <string.h>
 
+#include "button-sensor.h"
+#include "board-peripherals.h"
+
+
 #define UDP_PORT 4003
 
 static struct simple_udp_connection unicast_connection;
 
 /*---------------------------------------------------------------------------*/
-PROCESS(rpl_root_process, "Unwired RPL root and udp data receiver example");
+PROCESS(rpl_root_process, "Unwired RPL root and udp data receiver");
 AUTOSTART_PROCESSES(&rpl_root_process);
 /*---------------------------------------------------------------------------*/
 static void
@@ -110,6 +114,7 @@ create_rpl_dag(uip_ipaddr_t *ipaddr)
     printf("Failed to create a new RPL DAG\n");
   }
 }
+
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(rpl_root_process, ev, data)
 {
@@ -118,7 +123,7 @@ PROCESS_THREAD(rpl_root_process, ev, data)
   PROCESS_BEGIN();
   printf("Unwired RLP root and udp reciever\n");
 
-  servreg_hack_init();
+  //servreg_hack_init();
 
   ipaddr = set_global_address();
 
@@ -128,29 +133,6 @@ PROCESS_THREAD(rpl_root_process, ev, data)
 
   simple_udp_register(&unicast_connection, UDP_PORT, NULL, UDP_PORT, receiver);
 
-//   open_udp_connection(struct uip_udp_conn *server_conn, uint32_t port)
-// {
-//   /* The data sink runs with a 100% duty cycle in order to ensure high 
-//    *      packet reception rates. */
-//   //NETSTACK_MAC.off(1);
-
-//   server_conn = udp_new(NULL, 0, NULL);
-//   if(server_conn == NULL) {
-//     LOG6LBR_ERROR("ACK: No UDP connection available, exiting the process!\n");
-//     return -1; 
-//   }
-//   udp_bind(server_conn, UIP_HTONS(port));
-
-//   if(server_conn == NULL) {
-//     LOG6LBR_ERROR("ACK: Bind error, exiting the process!\n");
-//     return -1; 
-//   }
-//   //LOG6LBR_INFO("ACK: Created a server connection with");
-//   //LOG6LBR_6ADDR(&server_conn->ripaddr);
-//   //LOG6LBR_INFO(" local/remote port %u/%u\n", UIP_HTONS(server_conn->lport),
-//   //    UIP_HTONS(server_conn->rport));
-//   return 1;
-// }
 
   while(1) {
     PROCESS_WAIT_EVENT();

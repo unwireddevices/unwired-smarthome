@@ -1,6 +1,6 @@
 CFLAGS += -DBOARD_UNWM1=1
 
-CONTIKI_TARGET_DIRS += udboards
+CONTIKI_TARGET_DIRS += srf06
 
 BOARD_SOURCEFILES += board.c board-i2c.c sht21.c leds-arch.c
 BOARD_SOURCEFILES += lps331ap.c button-sensor.c

@@ -175,7 +175,7 @@ timeout_handler(void)
       if(client_conn != NULL) {
         PRINTF("6LBR Client Process: Created a connection with the server ");
         PRINT6ADDR(&client_conn->ripaddr);
-        PRINTF(" local/remote port %u/%u\n",
+        PRINTF(" local port %u, remote port %u\n",
                UIP_HTONS(client_conn->lport), UIP_HTONS(client_conn->rport));
       } else {
         PRINTF("6LBR Client Process: Could not open connection\n");
@@ -220,10 +220,10 @@ timeout_handler(void)
       }
 
 #if WITH_MQTT_API
-      sprintf(end, "] %lx ", DEVICE_ABILITY);
+      sprintf(end, "] ability: %lx ", DEVICE_ABILITY);
 #endif
 
-      PRINTF("6LBR Client Process:  (msg: %s)\n", buf);
+      PRINTF(" (msg: %s)\n", buf);
       uip_udp_packet_send(client_conn, buf, strlen(buf));
     } else {
       PRINTF("6LBR Client Process: No connection created\n");

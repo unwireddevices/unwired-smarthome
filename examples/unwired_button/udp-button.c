@@ -87,9 +87,9 @@ SENSORS(&button_select_sensor, &button_left_sensor, &button_right_sensor,
 #define UDP_CLIENT_PORT 	0
 #define UDP_SERVER_PORT 	4003
 
-//static struct uip_udp_conn *server_conn;//TODO: delete old udp
+//static struct uip_udp_conn *server_conn; //TODO: delete old udp
 uip_ip6addr_t dest_ip_addr;
-uint8_t connected_flag = 1;
+uint8_t connected_flag = 0;
 
 
 char udp_message_buf[20]; //buffer for simple_udp_send
@@ -193,6 +193,7 @@ PROCESS_THREAD(udp_button_process, ev, data)
       }
       if(data == CC26XX_BUTTON_5) {
         PRINTF("Buttons control process: Button 5.\n");
+        //lpm_shutdown(BOARD_IOID_KEY_RIGHT, IOC_IOPULL_UP, IOC_WAKE_ON_LOW);
         if(connected_flag == 1) {
 
         }
