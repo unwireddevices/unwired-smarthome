@@ -56,17 +56,17 @@
 #include "board-peripherals.h"
 #include "dev/watchdog.h"
 #include "udp-button.h"
-#include "udp-common.h"
- #include "simple-udp.h"
+//#include "udp-common.h"//TODO: delete old udp
+#include "simple-udp.h"
 
- SENSORS(&button_select_sensor, &button_left_sensor, &button_right_sensor,
-         &button_up_sensor, &button_down_sensor);
+SENSORS(&button_select_sensor, &button_left_sensor, &button_right_sensor,
+       &button_up_sensor, &button_down_sensor);
 
- #define CC26XX_BUTTON_1      &button_left_sensor
- #define CC26XX_BUTTON_2      &button_up_sensor
- #define CC26XX_BUTTON_3      &button_select_sensor
- #define CC26XX_BUTTON_4      &button_down_sensor
- #define CC26XX_BUTTON_5      &button_right_sensor
+#define CC26XX_BUTTON_1      &button_left_sensor
+#define CC26XX_BUTTON_2      &button_up_sensor
+#define CC26XX_BUTTON_3      &button_select_sensor
+#define CC26XX_BUTTON_4      &button_down_sensor
+#define CC26XX_BUTTON_5      &button_right_sensor
 
 /*---------------------------------------------------------------------------*/
 #define DEBUG 1
@@ -87,14 +87,17 @@
 #define UDP_CLIENT_PORT 	0
 #define UDP_SERVER_PORT 	4003
 
-static struct uip_udp_conn *server_conn;
+//static struct uip_udp_conn *server_conn;//TODO: delete old udp
 uip_ip6addr_t dest_ip_addr;
 uint8_t connected_flag = 1;
 
+
+char udp_message_buf[20]; //buffer for simple_udp_send
+static struct simple_udp_connection unicast_connection; //struct for simple_udp_send
+
+
+
 PROCESS(udp_button_process, "UDP Buttons control process");
-
-
-
 /*---------------------------------------------------------------------------*/
 static void
 tcpip_handler(void)
@@ -120,7 +123,7 @@ PROCESS_THREAD(udp_button_process, ev, data)
   uint8_t button_number = 0;
 
   //aaaa::212:4b00:79e:b282, aaaa::212:4b00:6e2:728c
-  dest_ip_addr.u16[0] = UIP_HTONS(0xAAAA);
+  dest_ip_addr.u16[0] = UIP_HTONS(0xAAAA); //нахуя заполнять адрес, который потом заменится, осмысленной информацией?
   dest_ip_addr.u16[1] = UIP_HTONS(0x0000);
   dest_ip_addr.u16[2] = UIP_HTONS(0x0000);
   dest_ip_addr.u16[3] = UIP_HTONS(0x0000);
@@ -129,7 +132,8 @@ PROCESS_THREAD(udp_button_process, ev, data)
   dest_ip_addr.u16[6] = UIP_HTONS(0x079E);
   dest_ip_addr.u16[7] = UIP_HTONS(0xB804);
 
-  server_conn = udp_new(&dest_ip_addr, UIP_HTONS(4003), NULL);
+  //server_conn = udp_new(&dest_ip_addr, UIP_HTONS(4003), NULL); //TODO: delete old udp
+  simple_udp_register(&unicast_connection, 4003, NULL, 4003, NULL); //register simple_udp_connection
 
   PRINTF("Buttons control process: paused\n");
   PROCESS_PAUSE();
@@ -146,8 +150,7 @@ PROCESS_THREAD(udp_button_process, ev, data)
       if(data != NULL) {
         connected_flag = ((connect_info_t *)data)->connected;
         if(((connect_info_t *)data)->root_addr != NULL) {
-          //copy dest addr
-          ipv6_addr_copy(&dest_ip_addr, ((connect_info_t *)data)->root_addr);
+          ipv6_addr_copy(&dest_ip_addr, ((connect_info_t *)data)->root_addr); //replace dest_ip_addr<-rlp_root(see cetic-6lbr-client)
           PRINTF("Found RPL root. Addr: ");
           PRINT6ADDR(&dest_ip_addr);
           PRINTF("\n");
@@ -157,64 +160,47 @@ PROCESS_THREAD(udp_button_process, ev, data)
     else
     if(ev == sensors_event) {
       if(data == CC26XX_BUTTON_1) {
-        PRINTF("Buttons control process: Button 1.\n");
+        PRINTF("Buttons control process: Button 1 pressed\n");
         if(connected_flag == 1) {
-          PRINTF("Buttons control process: Send 1 to tick node. Addr: ");
+          PRINTF("Buttons control process: send message to RPL root node on ");
           PRINT6ADDR(&dest_ip_addr);
           PRINTF("\n");
-          button_number = 1;
-          send_udp_to_mote(server_conn, &dest_ip_addr, 4003, "1");
-
-
-          char buf[20];
-          printf("Sending unicast");
-          sprintf(buf, "Message %d", 1);
-          static struct simple_udp_connection unicast_connection;
-          simple_udp_register(&unicast_connection, 4003, NULL, 4003, NULL);
-          simple_udp_sendto(&unicast_connection, buf, strlen(buf) + 1, &dest_ip_addr);
+          sprintf(udp_message_buf, "Button %d", 1);
+          simple_udp_sendto(&unicast_connection, udp_message_buf, strlen(udp_message_buf) + 1, &dest_ip_addr);
         }
-        leds_toggle(LEDS_GREEN);
+        //leds_toggle(LEDS_GREEN);
       }
       if(data == CC26XX_BUTTON_2) {
         PRINTF("Buttons control process: Button 2.\n");
         if(connected_flag == 1) {
-          PRINTF("Buttons control process: Send 2 to tick node. Addr: ");
-          PRINT6ADDR(&dest_ip_addr);
-          PRINTF("\n");
-          button_number = 2;
-          send_udp_to_mote(server_conn, &dest_ip_addr, 4003, "2");
+
         }
-        leds_toggle(LEDS_ORANGE);
+        //leds_toggle(LEDS_ORANGE);
       }
       if(data == CC26XX_BUTTON_3) {
         PRINTF("Buttons control process: Button 3.\n");
         if(connected_flag == 1) {
-          PRINTF("Buttons control process: Send 3 to tick node. Addr: ");
-          PRINT6ADDR(&dest_ip_addr);
-          PRINTF("\n");
-          button_number = 3;
-          send_udp_to_mote(server_conn, &dest_ip_addr, 4003, "3");
+
         }
-        leds_toggle(LEDS_YELLOW);
+        //leds_toggle(LEDS_YELLOW);
       }
       if(data == CC26XX_BUTTON_4) {
         PRINTF("Buttons control process: Button 4.\n");
         if(connected_flag == 1) {
-          PRINTF("Buttons control process: Send 4 to tick node. Addr: ");
-          PRINT6ADDR(&dest_ip_addr);
-          PRINTF("\n");
-          button_number = 4;
-          send_udp_to_mote(server_conn, &dest_ip_addr, 4003, "4");
+
         }
-        leds_toggle(LEDS_RED);
+        //leds_toggle(LEDS_RED);
       }
       if(data == CC26XX_BUTTON_5) {
-        PRINTF("Buttons control process: Button 5. reboot.\n");
-        watchdog_reboot();
+        PRINTF("Buttons control process: Button 5.\n");
+        if(connected_flag == 1) {
+
+        }
+        //leds_toggle(LEDS_RED);
       }
     }
   }
-  printf("Buttons control process: disable --- UDP 4001\r\n");
+  printf("Buttons control process: end\r\n");
 
   PROCESS_END();
 }
