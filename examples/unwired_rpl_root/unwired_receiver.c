@@ -38,7 +38,6 @@
 #include "net/ipv6/uip-ds6.h"
 #include "net/ip/uip-debug.h"
 
-
 #include "simple-udp.h"
 #include "servreg-hack.h"
 
@@ -48,16 +47,13 @@
 #include <string.h>
 
 #define UDP_PORT 4003
-#define SERVICE_ID 190
-
-#define SEND_INTERVAL		(60 * CLOCK_SECOND)
-#define SEND_TIME		(random_rand() % (SEND_INTERVAL))
+#define SERVICE_ID 190 //delete?
 
 static struct simple_udp_connection unicast_connection;
 
 /*---------------------------------------------------------------------------*/
-PROCESS(unicast_receiver_process, "Unicast receiver example process");
-AUTOSTART_PROCESSES(&unicast_receiver_process);
+PROCESS(rpl_root_process, "Unwired RPL root and udp data receiver example");
+AUTOSTART_PROCESSES(&rpl_root_process);
 /*---------------------------------------------------------------------------*/
 static void
 receiver(struct simple_udp_connection *c,
@@ -70,8 +66,7 @@ receiver(struct simple_udp_connection *c,
 {
   printf("Data received from ");
   uip_debug_ipaddr_print(sender_addr);
-  printf(" on port %d from port %d with length %d: '%s'\n",
-         receiver_port, sender_port, datalen, data);
+  printf(" on port %d from port %d with length %d: '%s'\n", receiver_port, sender_port, datalen, data);
 }
 /*---------------------------------------------------------------------------*/
 static uip_ipaddr_t *
@@ -111,31 +106,54 @@ create_rpl_dag(uip_ipaddr_t *ipaddr)
     dag = rpl_get_any_dag();
     uip_ip6addr(&prefix, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
     rpl_set_prefix(dag, &prefix, 64);
-    printf("created a new RPL dag\n");
+    printf("Created a new RPL DAG\n");
   } else {
-    printf("failed to create a new RPL DAG\n");
+    printf("Failed to create a new RPL DAG\n");
   }
 }
 /*---------------------------------------------------------------------------*/
-PROCESS_THREAD(unicast_receiver_process, ev, data)
+PROCESS_THREAD(rpl_root_process, ev, data)
 {
   uip_ipaddr_t *ipaddr;
 
   PROCESS_BEGIN();
-  printf("Unicast reciever\n");
+  printf("Unwired RLP root and udp reciever\n");
 
   servreg_hack_init();
 
   ipaddr = set_global_address();
 
-  printf("Creating RPL DAG\n");
+  printf("Creating RPL DAG...\n");
 
   create_rpl_dag(ipaddr);
 
-  servreg_hack_register(SERVICE_ID, ipaddr);
+  servreg_hack_register(SERVICE_ID, ipaddr); //delete?
 
-  simple_udp_register(&unicast_connection, UDP_PORT,
-                      NULL, UDP_PORT, receiver);
+  simple_udp_register(&unicast_connection, UDP_PORT, NULL, UDP_PORT, receiver);
+
+//   open_udp_connection(struct uip_udp_conn *server_conn, uint32_t port)
+// {
+//   /* The data sink runs with a 100% duty cycle in order to ensure high 
+//    *      packet reception rates. */
+//   //NETSTACK_MAC.off(1);
+
+//   server_conn = udp_new(NULL, 0, NULL);
+//   if(server_conn == NULL) {
+//     LOG6LBR_ERROR("ACK: No UDP connection available, exiting the process!\n");
+//     return -1; 
+//   }
+//   udp_bind(server_conn, UIP_HTONS(port));
+
+//   if(server_conn == NULL) {
+//     LOG6LBR_ERROR("ACK: Bind error, exiting the process!\n");
+//     return -1; 
+//   }
+//   //LOG6LBR_INFO("ACK: Created a server connection with");
+//   //LOG6LBR_6ADDR(&server_conn->ripaddr);
+//   //LOG6LBR_INFO(" local/remote port %u/%u\n", UIP_HTONS(server_conn->lport),
+//   //    UIP_HTONS(server_conn->rport));
+//   return 1;
+// }
 
   while(1) {
     PROCESS_WAIT_EVENT();
