@@ -23,15 +23,19 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-/**
- * \addtogroup cc26xx-web-demo
- * @{
- *
+
+
+ /*---------------------------------------------------------------------------*/
+ /*
  * \file
- *     An implementation of a 6LBR UDP client. Is used to populate the 6LBR
- *     web server's 'sensors' tab
+ *         RPL-node service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
+ * \author
+ *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
+ *         Mikhail Churikov mc@unwds.com
  */
-/*---------------------------------------------------------------------------*/
+ /*---------------------------------------------------------------------------*/
+
+
 #include "contiki.h"
 #include "contiki-lib.h"
 #include "contiki-net.h"

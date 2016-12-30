@@ -26,9 +26,18 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * This file is part of the Contiki operating system.
- *
+ * 
+ *  
  */
+
+ /*---------------------------------------------------------------------------*/
+ /*
+ * \file
+ *         RPL-root service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
+ * \author
+ *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
+ */
+ /*---------------------------------------------------------------------------*/
 
 #include "contiki.h"
 #include "lib/random.h"

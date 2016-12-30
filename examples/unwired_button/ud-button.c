@@ -28,14 +28,17 @@
  * This file is part of the Contiki operating system.
  *
  */
-/*---------------------------------------------------------------------------*/
-/**
+
+
+ /*---------------------------------------------------------------------------*/
+ /*
  * \file
- *         UDP reporting button service.  
+ *         UDP reporting button service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
  * \author
+ *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  *         Mikhail Churikov mc@unwds.com
  */
-/*---------------------------------------------------------------------------*/
+ /*---------------------------------------------------------------------------*/
 
 #include "contiki.h"
 #include "contiki-lib.h"

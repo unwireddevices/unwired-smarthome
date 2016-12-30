@@ -30,24 +30,24 @@
  *
  */
 
-/**
+ /*---------------------------------------------------------------------------*/
+ /*
  * \file
- *         A very simple Contiki application showing how Contiki programs look
+ *         Main process file for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
  * \author
- *         Adam Dunkels <adam@sics.se>
+ *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
+ *         Mikhail Churikov mc@unwds.com
  */
+ /*---------------------------------------------------------------------------*/
 
-/*---------------------------INCLUDE-----------------------------------------*/
-
+#include <stdio.h>
 #include "contiki.h"
 #include "net/ip/uip.h"
 #include "dev/leds.h"
-
 #include "mac.h"
+
 #include "ud-button.h"
 #include "ud-dag_node.h"
-
-#include <stdio.h>
 
 /*---------------------------DEFINES-----------------------------------------*/
 
@@ -63,14 +63,6 @@
 #define PRINTF(...)
 #define PRINT6ADDR(addr)
 #endif
-
-#define PING6_NB 5
-#define PING6_DATALEN 16
-
-#define UIP_IP_BUF                ((struct uip_ip_hdr *)&uip_buf[UIP_LLH_LEN])
-#define UIP_ICMP_BUF            ((struct uip_icmp_hdr *)&uip_buf[uip_l2_l3_hdr_len])
-
-/*---------------------------GLOBAL VARS---------------------------------------*/
 
 /*---------------------------------------------------------------------------*/
 PROCESS(ud_world_process, "Unwired Devices process");
