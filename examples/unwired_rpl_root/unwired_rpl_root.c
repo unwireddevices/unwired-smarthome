@@ -53,6 +53,8 @@
 #define UDP_PORT 4003
 
 static struct simple_udp_connection unicast_connection;
+SENSORS(&button_select_sensor);
+
 
 /*---------------------------------------------------------------------------*/
 PROCESS(rpl_root_process, "Unwired RPL root and udp data receiver");
