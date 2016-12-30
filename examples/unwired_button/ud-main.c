@@ -44,8 +44,8 @@
 #include "dev/leds.h"
 
 #include "mac.h"
-#include "udp-button.h"
-#include "cetic-6lbr-client.h"
+#include "ud-button.h"
+#include "ud-dag_node.h"
 
 #include <stdio.h>
 

@@ -42,9 +42,8 @@
 #include <stdio.h>
 
 #if UNWM_BUTTON
-#include "udp-button.h"
+#include "ud-button.h"
 #endif
-#include "udp-common.h"
 
 /*---------------------------------------------------------------------------*/
 #define DEBUG 1

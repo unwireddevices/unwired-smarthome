@@ -1,4 +1,4 @@
-all: unwired_rpl_root
+all: ud-rpl_root
 
 CONTIKI=../..
 CONTIKI_WITH_IPV6 = 1

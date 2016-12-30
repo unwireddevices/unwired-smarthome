@@ -51,13 +51,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include "ud-world.h"
+
 #include "button-sensor.h"
 #include "board-peripherals.h"
 #include "dev/watchdog.h"
-#include "udp-button.h"
-//#include "udp-common.h"//TODO: delete old udp
 #include "simple-udp.h"
+
+#include "ud-button.h"
+#include "ud-main.h"
+
 
 SENSORS(&button_select_sensor, &button_left_sensor, &button_right_sensor,
        &button_up_sensor, &button_down_sensor);
@@ -80,21 +82,17 @@ SENSORS(&button_select_sensor, &button_left_sensor, &button_right_sensor,
 #define PRINT6ADDR(addr)
 #endif
 /*---------------------------------------------------------------------------*/
-#include "net/ip/uip-debug.h"
 
 #define UIP_IP_BUF   ((struct uip_ip_hdr *)&uip_buf[UIP_LLH_LEN])
 
 #define UDP_CLIENT_PORT 	0
 #define UDP_SERVER_PORT 	4003
 
-//static struct uip_udp_conn *server_conn; //TODO: delete old udp
 uip_ip6addr_t dest_ip_addr;
 uint8_t connected_flag = 0;
 
-
 char udp_message_buf[20]; //buffer for simple_udp_send
 static struct simple_udp_connection unicast_connection; //struct for simple_udp_send
-
 
 
 PROCESS(udp_button_process, "UDP Buttons control process");
@@ -132,7 +130,6 @@ PROCESS_THREAD(udp_button_process, ev, data)
   dest_ip_addr.u16[6] = UIP_HTONS(0x079E);
   dest_ip_addr.u16[7] = UIP_HTONS(0xB804);
 
-  //server_conn = udp_new(&dest_ip_addr, UIP_HTONS(4003), NULL); //TODO: delete old udp
   simple_udp_register(&unicast_connection, 4003, NULL, 4003, NULL); //register simple_udp_connection
 
   PRINTF("Buttons control process: paused\n");
