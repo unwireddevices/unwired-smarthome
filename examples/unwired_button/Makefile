@@ -1,7 +1,7 @@
 CONTIKI_PROJECT = ud-world
 all: $(CONTIKI_PROJECT)
 #APPS += 
-PROJECT_SOURCEFILES += udp-common.c cetic-6lbr-client.c udp-button.c
+PROJECT_SOURCEFILES += cetic-6lbr-client.c udp-button.c
 
 DEFINES+=PROJECT_CONF_H=\"project-conf.h\"
 
