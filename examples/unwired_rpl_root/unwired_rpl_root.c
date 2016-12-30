@@ -39,7 +39,6 @@
 #include "net/ip/uip-debug.h"
 
 #include "simple-udp.h"
-//#include "servreg-hack.h"
 
 #include "net/rpl/rpl.h"
 
@@ -124,8 +123,6 @@ PROCESS_THREAD(rpl_root_process, ev, data)
 
   PROCESS_BEGIN();
   printf("Unwired RLP root and udp reciever\n");
-
-  //servreg_hack_init();
 
   ipaddr = set_global_address();
 
