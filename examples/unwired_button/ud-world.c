@@ -40,9 +40,6 @@
 /*---------------------------INCLUDE-----------------------------------------*/
 
 #include "contiki.h"
-//#include "contiki-lib.h"
-//#include "contiki-net.h"
-//#include "sys/rtimer.h"
 #include "net/ip/uip.h"
 #include "dev/leds.h"
 
@@ -50,7 +47,6 @@
 #include "udp-button.h"
 #include "cetic-6lbr-client.h"
 
-//#include <string.h>
 #include <stdio.h>
 
 /*---------------------------DEFINES-----------------------------------------*/
@@ -83,24 +79,22 @@ AUTOSTART_PROCESSES(&ud_world_process);
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(ud_world_process, ev, data)
 {
-  //uint8_t cont = 1;
 
   PROCESS_BEGIN();
-  PRINTF("UD World process: started\n");
 
-  //leds_on(LEDS_RED);
   process_start(&udp_button_process, NULL);
   process_start(&cetic_6lbr_client_process, NULL);
   
 
-  /*etimer_set(&ping6_periodic_timer, 15*CLOCK_SECOND);
+  /*
+  etimer_set(&ping6_periodic_timer, 15*CLOCK_SECOND);
 
   while(cont) {
     PROCESS_YIELD();
     cont = ping6handler(ev, data); 
   }
-*/
-  PRINTF("UD World process: ended\n");
+  */
+
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
