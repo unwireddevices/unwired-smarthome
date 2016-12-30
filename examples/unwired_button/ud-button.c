@@ -121,10 +121,9 @@ PROCESS_THREAD(udp_button_process, ev, data)
 {
   PROCESS_BEGIN();
   PRINTF("Buttons control process: started\n");
-  uint8_t button_number = 0;
 
   //aaaa::212:4b00:79e:b282, aaaa::212:4b00:6e2:728c
-  dest_ip_addr.u16[0] = UIP_HTONS(0xAAAA); //нахуя заполнять адрес, который потом заменится, осмысленной информацией?
+  dest_ip_addr.u16[0] = UIP_HTONS(0xAAAA); //зачем заполнять адрес, который потом заменится, осмысленной информацией?
   dest_ip_addr.u16[1] = UIP_HTONS(0x0000);
   dest_ip_addr.u16[2] = UIP_HTONS(0x0000);
   dest_ip_addr.u16[3] = UIP_HTONS(0x0000);

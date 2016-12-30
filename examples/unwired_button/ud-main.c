@@ -71,12 +71,10 @@ AUTOSTART_PROCESSES(&ud_world_process);
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(ud_world_process, ev, data)
 {
-
   PROCESS_BEGIN();
 
   process_start(&udp_button_process, NULL);
-  process_start(&cetic_6lbr_client_process, NULL);
-  
+  process_start(&rpl_node_process, NULL);
 
   /*
   etimer_set(&ping6_periodic_timer, 15*CLOCK_SECOND);

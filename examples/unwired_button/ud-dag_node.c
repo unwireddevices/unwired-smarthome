@@ -53,40 +53,19 @@
 #define DEBUG 1
 #include "net/ip/uip-debug.h"
 /*---------------------------------------------------------------------------*/
-#ifndef CETIC_6LBR_NODE_INFO_PORT
-#define CETIC_6LBR_NODE_INFO_PORT 4003
-#endif
+
+#define MESSAGE_PORT 4003
 
 #define MAX_PAYLOAD_LEN    60
 #define MSG_INTERVAL       (30 * CLOCK_SECOND)
 
-#define UMDK_GPIO_INDEX       0
-#define UMDK_PWM_INDEX        1
-#define UMDK_BUTTON_INDEX     2
-#define UMDK_GPIO_INPUT_INDEX 3
-#define UMDK_ADC_INDEX        4
-#define UMDK_DALI_INDEX       5
-#define UMDK_SHT21_INDEX      6
-#define UMDK_LPS331_INDEX     7
-
-#if WITH_MQTT_API
-#undef DEVICE_ABILITY
-#define DEVICE_ABILITY ((UNWM_LEDS << UMDK_GPIO_INDEX) | \
-                        (UNWM_PWM << UMDK_PWM_INDEX) | \
-                        (UNWM_BUTTON << UMDK_BUTTON_INDEX) | \
-                        (UNWM_ADC << UMDK_ADC_INDEX) | \
-                        (UNWM_DALI << UMDK_DALI_INDEX) | \
-                        (UNWM_SHT21 << UMDK_SHT21_INDEX) | \
-                        (UNWM_LPS331 << UMDK_LPS331_INDEX) | \
-                        (UNWM_GPIO_INPUT << UMDK_GPIO_INPUT_INDEX))
-#endif
 
 /*---------------------------------------------------------------------------*/
 static struct uip_udp_conn *client_conn = NULL;
 static struct etimer et;
 static uip_ip6addr_t dest_addr;
 /*---------------------------------------------------------------------------*/
-PROCESS(cetic_6lbr_client_process, "6LBR Client Process");
+PROCESS(rpl_node_process, "RPL-node process");
 /*---------------------------------------------------------------------------*/
 static void
 tcpip_handler(void)
@@ -96,7 +75,7 @@ tcpip_handler(void)
   if(uip_newdata()) {
     str = uip_appdata;
     str[uip_datalen()] = '\0';
-    PRINTF("6LBR Client Process: Response from the server: '%s'\n", str);
+    PRINTF("RPL Node: Response from the server: '%s'\n", str);
   }
 }
 /*---------------------------------------------------------------------------*/
@@ -133,10 +112,11 @@ timeout_handler(void)
   char buf[MAX_PAYLOAD_LEN];
   int i;
   uip_ip6addr_t *globaladdr = NULL;
-  uint16_t dest_port = CETIC_6LBR_NODE_INFO_PORT;
+  uint16_t dest_port = MESSAGE_PORT;
   int has_dest = 0;
   rpl_dag_t *dag;
   char *end;
+  
 #if UNWM_BUTTON
   connect_info_t message_for_button;
   message_for_button.connected = 0;
@@ -160,7 +140,7 @@ timeout_handler(void)
 
   if(has_dest) {
     if(client_conn == NULL) {
-      PRINTF("6LBR Client Process: address destination: ");
+      PRINTF("RPL Node: address destination: ");
       PRINT6ADDR(&dest_addr);
       PRINTF("\n");
       client_conn = udp_new(&dest_addr, UIP_HTONS(dest_port), NULL);
@@ -176,16 +156,16 @@ timeout_handler(void)
 #endif
 
       if(client_conn != NULL) {
-        PRINTF("6LBR Client Process: Created a connection with the server ");
+        PRINTF("RPL Node: Created a connection with the server ");
         PRINT6ADDR(&client_conn->ripaddr);
         PRINTF(" local port %u, remote port %u\n",
                UIP_HTONS(client_conn->lport), UIP_HTONS(client_conn->rport));
       } else {
-        PRINTF("6LBR Client Process: Could not open connection\n");
+        PRINTF("RPL Node: Could not open connection\n");
       }
     } else {
       if(memcmp(&client_conn->ripaddr, &dest_addr, sizeof(uip_ipaddr_t)) != 0) {
-        PRINTF("6LBR Client Process: new address destination: ");
+        PRINTF("RPL Node: new address destination: ");
         PRINT6ADDR(&dest_addr);
         PRINTF("\n");
         uip_udp_remove(client_conn);
@@ -201,17 +181,17 @@ timeout_handler(void)
         process_post(&udp_gpio_input_process, PROCESS_EVENT_CONTINUE, &message_for_input);
 #endif
         if(client_conn != NULL) {
-          PRINTF("6LBR Client Process: Created a connection with the server ");
+          PRINTF("RPL Node: Created a connection with the server ");
           PRINT6ADDR(&client_conn->ripaddr);
           PRINTF(" local/remote port %u/%u\n",
                  UIP_HTONS(client_conn->lport), UIP_HTONS(client_conn->rport));
         } else {
-          PRINTF("6LBR Client Process: Could not open connection\n");
+          PRINTF("RPL Node: Could not open connection\n");
         }
       }
     }
     if(client_conn != NULL) {
-      PRINTF("6LBR Client Process: Client sending to: ");
+      PRINTF("RPL Node: Client sending to: ");
       PRINT6ADDR(&client_conn->ripaddr);
       i = sprintf(buf, "%d |", ++seq_id);
       dag = rpl_get_any_dag();
@@ -222,17 +202,13 @@ timeout_handler(void)
         end = buf + i + 6;
       }
 
-#if WITH_MQTT_API
-      sprintf(end, "] ability: %lx ", DEVICE_ABILITY);
-#endif
-
       PRINTF(" (msg: %s)\n", buf);
       uip_udp_packet_send(client_conn, buf, strlen(buf));
     } else {
-      PRINTF("6LBR Client Process: No connection created\n");
+      PRINTF("RPL Node: No connection created\n");
     }
   } else {
-    PRINTF("6LBR Client Process: No address configured\n");
+    PRINTF("RPL Node: No address configured\n");
 #if UNWM_BUTTON
     message_for_button.connected = 0;
     message_for_button.root_addr = NULL;
@@ -245,15 +221,12 @@ timeout_handler(void)
   }
 }
 /*---------------------------------------------------------------------------*/
-PROCESS_THREAD(cetic_6lbr_client_process, ev, data)
+PROCESS_THREAD(rpl_node_process, ev, data)
 {
 
   PROCESS_BEGIN();
 
-  printf("6LBR Client Process: started\n");
-#if WITH_MQTT_API
-  PRINTF("6LBR Client Process: device ability %d\n", DEVICE_ABILITY);
-#endif
+  printf("RPL Node: started\n");
 
   memset(&dest_addr, 0, sizeof(uip_ipaddr_t));
 

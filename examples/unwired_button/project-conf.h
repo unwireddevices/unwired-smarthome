@@ -32,15 +32,14 @@
 #define PROJECT_CONF_H_
 /*---------------------------------------------------------------------------*/
 /* Disable button shutdown functionality */
-#define BUTTON_SENSOR_CONF_ENABLE_SHUTDOWN    0
+#define BUTTON_SENSOR_CONF_ENABLE_SHUTDOWN    0 //??????
 /*---------------------------------------------------------------------------*/
-/* Change to match your configuration */
 #define IEEE802154_CONF_PANID            0xABCD
 #define RF_CORE_CONF_CHANNEL                 26
+
 #define RF_BLE_CONF_ENABLED                   0
 #define STARTUP_CONF_VERBOSE                  1
 /*---------------------------------------------------------------------------*/
-#define WITH_MQTT_API   1
 
 #define UNWM_LEDS       0
 #define UNWM_PWM        0
