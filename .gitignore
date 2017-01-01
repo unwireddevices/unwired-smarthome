@@ -2,8 +2,7 @@
 *.unwired
 *.co
 ud-world
-.project
-.cproject
+
 *.bin
 *.map
 *.png
