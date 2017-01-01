@@ -26,7 +26,36 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+#undef IEEE802154_CONF_PANID
+#define IEEE802154_CONF_PANID					0xABCD
+#undef RF_CORE_CONF_CHANNEL
+#define RF_CORE_CONF_CHANNEL					26
 
+#undef RF_BLE_CONF_ENABLED
+#define RF_BLE_CONF_ENABLED						0
+#undef STARTUP_CONF_VERBOSE
+#define STARTUP_CONF_VERBOSE					1
 
- #define RF_CORE_CONF_CHANNEL                 26
+/* MAC tune option */
+#undef NETSTACK_CONF_MAC
+#define NETSTACK_CONF_MAC						csma_driver //nullmac_driver
+#undef NETSTACK_CONF_RDC
+#define NETSTACK_CONF_RDC						contikimac_driver //nullrc_driver
+#undef NETSTACK_CONF_FRAMER
+#define NETSTACK_CONF_FRAMER					framer_802154 //framer_nullmac
+#undef NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE
+#define NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE	8 //in Hz, 2, 4, 8, 16, 32...
 
+/* Encryption */
+#undef LLSEC802154_CONF_ENABLED
+#define LLSEC802154_CONF_ENABLED          		1
+#undef NETSTACK_CONF_FRAMER
+#define NETSTACK_CONF_FRAMER              		noncoresec_framer
+#undef NETSTACK_CONF_LLSEC
+#define NETSTACK_CONF_LLSEC               		noncoresec_driver
+#undef NONCORESEC_CONF_SEC_LVL
+#define NONCORESEC_CONF_SEC_LVL           		0x05
+#undef LLSEC802154_CONF_SECURITY_LEVEL
+#define LLSEC802154_CONF_SECURITY_LEVEL 		0x05
+#undef NONCORESEC_CONF_KEY
+#define NONCORESEC_CONF_KEY						{0xF3,0x01,0x02,0x03,0x04,0x05,0x07,0x07,0x06,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F}
