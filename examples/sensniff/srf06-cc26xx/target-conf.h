@@ -35,6 +35,9 @@
 #define CC26XX_UART_CONF_BAUD_RATE    460800
 #define RF_BLE_CONF_ENABLED                0
 #define ROM_BOOTLOADER_ENABLE              1
+#define RF_CORE_CONF_CHANNEL                 26
+#define BOARD_CONF_DEBUGGER_DEVPACK        0
+#define PROP_MODE_CONF_SNIFFER                    1
 /*---------------------------------------------------------------------------*/
 #define SENSNIFF_IO_DRIVER_H "pool/cc13xx-cc26xx-io.h"
 /*---------------------------------------------------------------------------*/

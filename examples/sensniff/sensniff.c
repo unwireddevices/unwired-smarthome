@@ -43,6 +43,10 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdio.h>
+
+
+#include "button-sensor.h"
+#include "board-peripherals.h"
 /*---------------------------------------------------------------------------*/
 #define DEBUG 1
 #if DEBUG
@@ -53,6 +57,7 @@
 /*---------------------------------------------------------------------------*/
 PROCESS(sensniff_process, "sensniff process");
 AUTOSTART_PROCESSES(&sensniff_process);
+SENSORS(&button_select_sensor);
 /*---------------------------------------------------------------------------*/
 /* Timeout handling for incoming characters. */
 #define TIMEOUT (CLOCK_SECOND >> 1)
