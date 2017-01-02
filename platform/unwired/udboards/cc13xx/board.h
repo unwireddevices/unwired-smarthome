@@ -75,6 +75,11 @@
 #define LEDS_GREEN     4 /**< LED3 (Green)  */
 #define LEDS_ORANGE    8 /**< LED4 (Orange) */
 
+#define LED_A           1
+#define LED_B           2
+#define LED_C           4
+#define LED_E           8
+
 #define LEDS_CONF_ALL 15
 
 /* Notify various examples that we have LEDs */

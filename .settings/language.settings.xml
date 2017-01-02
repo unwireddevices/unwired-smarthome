@@ -12,7 +12,7 @@
 			<provider-reference id="org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider" ref="shared-provider"/>
 		</extension>
 	</configuration>
-	<configuration id="cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.581015413" name="button">
+	<configuration id="cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.581015413" name="ud-button">
 		<extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
 			<provider copy-of="extension" id="org.eclipse.cdt.ui.UserLanguageSettingsProvider"/>
 			<provider-reference id="org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider" ref="shared-provider"/>
@@ -48,7 +48,7 @@
 			<provider-reference id="org.eclipse.cdt.managedbuilder.core.MBSLanguageSettingsProvider" ref="shared-provider"/>
 		</extension>
 	</configuration>
-	<configuration id="cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.1481005715.1218693168.1943838773" name="button(CC2650)">
+	<configuration id="cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.1481005715.1218693168.1943838773" name="ud-button(BF)">
 		<extension point="org.eclipse.cdt.core.LanguageSettingsProvider">
 			<provider copy-of="extension" id="org.eclipse.cdt.ui.UserLanguageSettingsProvider"/>
 			<provider-reference id="org.eclipse.cdt.core.ReferencedProjectsLanguageSettingsProvider" ref="shared-provider"/>

@@ -75,6 +75,11 @@
 #define LEDS_GREEN     4 /**< LED3 (Green)  */
 #define LEDS_ORANGE    8 /**< LED4 (Orange) */
 
+#define LED_A           1
+#define LED_B           2
+#define LED_C           4
+#define LED_D           8
+
 #define LEDS_CONF_ALL 15
 
 /* Notify various examples that we have LEDs */
@@ -87,10 +92,10 @@
  * Those values are not meant to be modified by the user
  * @{
  */
-#define BOARD_IOID_LED_1          IOID_22
-#define BOARD_IOID_LED_2          IOID_2
-#define BOARD_IOID_LED_3          IOID_3
-#define BOARD_IOID_LED_4          IOID_1
+#define BOARD_IOID_LED_1          IOID_25
+#define BOARD_IOID_LED_2          IOID_27
+#define BOARD_IOID_LED_3          IOID_7
+#define BOARD_IOID_LED_4          IOID_6
 #define BOARD_LED_1               (1 << BOARD_IOID_LED_1)
 #define BOARD_LED_2               (1 << BOARD_IOID_LED_2)
 #define BOARD_LED_3               (1 << BOARD_IOID_LED_3)

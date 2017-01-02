@@ -100,6 +100,14 @@ leds_set(unsigned char ledv)
 }
 /*---------------------------------------------------------------------------*/
 void
+led_blink(unsigned char ledv)
+{
+    show_leds(leds ^ ledv);
+    clock_delay(200);
+    show_leds(leds ^ ledv);
+}
+/*---------------------------------------------------------------------------*/
+void
 leds_on(unsigned char ledv)
 {
   show_leds(leds | ledv);
