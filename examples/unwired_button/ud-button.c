@@ -64,8 +64,7 @@
 #include "ud-main.h"
 
 
-SENSORS(&button_select_sensor, &button_left_sensor, &button_right_sensor,
-       &button_up_sensor, &button_down_sensor);
+SENSORS(&button_a_sensor, &button_b_sensor, &button_c_sensor, &button_d_sensor, &button_e_sensor);
 
 #define CC26XX_BUTTON_1      &button_left_sensor
 #define CC26XX_BUTTON_2      &button_up_sensor
@@ -167,40 +166,40 @@ PROCESS_THREAD(udp_button_process, ev, data)
     }
     else
     if(ev == sensors_event) {
-      if(data == CC26XX_BUTTON_1) {
-        PRINTF("Buttons control process: Button 1 pressed\n");
+      if(data == &button_a_sensor) {
+        PRINTF("Buttons control process: Button A\n");
         if(connected_flag == 1) {
           PRINTF("Buttons control process: send message to RPL root node on ");
           PRINT6ADDR(&dest_ip_addr);
           PRINTF("\n");
-          sprintf(udp_message_buf, "Button %d", 1);
+          sprintf(udp_message_buf, "Button A", 1);
           simple_udp_sendto(&unicast_connection, udp_message_buf, strlen(udp_message_buf) + 1, &dest_ip_addr);
         }
         //leds_toggle(LEDS_GREEN);
       }
-      if(data == CC26XX_BUTTON_2) {
-        PRINTF("Buttons control process: Button 2.\n");
+      if(data == &button_b_sensor) {
+        PRINTF("Buttons control process: Button B\n");
         if(connected_flag == 1) {
 
         }
         //leds_toggle(LEDS_ORANGE);
       }
-      if(data == CC26XX_BUTTON_3) {
-        PRINTF("Buttons control process: Button 3.\n");
+      if(data == &button_c_sensor) {
+        PRINTF("Buttons control process: Button C\n");
         if(connected_flag == 1) {
 
         }
         //leds_toggle(LEDS_YELLOW);
       }
-      if(data == CC26XX_BUTTON_4) {
-        PRINTF("Buttons control process: Button 4.\n");
+      if(data == &button_d_sensor) {
+        PRINTF("Buttons control process: Button D\n");
         if(connected_flag == 1) {
 
         }
         //leds_toggle(LEDS_RED);
       }
-      if(data == CC26XX_BUTTON_5) {
-        PRINTF("Buttons control process: Button 5.\n");
+      if(data == &button_e_sensor) {
+        PRINTF("Buttons control process: Button E\n");
         //lpm_shutdown(BOARD_IOID_KEY_RIGHT, IOC_IOPULL_UP, IOC_WAKE_ON_LOW);
         if(connected_flag == 1) {
 

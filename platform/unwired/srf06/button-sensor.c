@@ -77,63 +77,59 @@ static void
 button_press_handler(uint8_t ioid)
 {
   if(ioid == BOARD_IOID_KEY_A) {
-    if(!timer_expired(&e_timer.debounce)) {
+    if(!timer_expired(&a_timer.debounce)) {
       return;
     }
-
-    timer_set(&e_timer.debounce, DEBOUNCE_DURATION);
-
+    timer_set(&a_timer.debounce, DEBOUNCE_DURATION);
     /*
      * Start press duration counter on press (falling), notify on release
      * (rising)
      */
     if(ti_lib_gpio_read_dio(BOARD_IOID_KEY_A) == 0) {
-      e_timer.start = clock_time();
-      e_timer.duration = 0;
+      a_timer.start = clock_time();
+      a_timer.duration = 0;
     } else {
-      e_timer.duration = clock_time() - e_timer.start;
-      sensors_changed(&button_select_sensor);
+      a_timer.duration = clock_time() - a_timer.start;
+      sensors_changed(&button_a_sensor);
     }
   }
 
   if(ioid == BOARD_IOID_KEY_B) {
-    if(!timer_expired(&a_timer.debounce)) {
+    if(!timer_expired(&b_timer.debounce)) {
       return;
     }
-
-    timer_set(&a_timer.debounce, DEBOUNCE_DURATION);
-
+    timer_set(&b_timer.debounce, DEBOUNCE_DURATION);
     /*
      * Start press duration counter on press (falling), notify on release
      * (rising)
      */
     if(ti_lib_gpio_read_dio(BOARD_IOID_KEY_B) == 0) {
-      a_timer.start = clock_time();
-      a_timer.duration = 0;
+      b_timer.start = clock_time();
+      b_timer.duration = 0;
     } else {
-      a_timer.duration = clock_time() - a_timer.start;
-      sensors_changed(&button_left_sensor);
+      b_timer.duration = clock_time() - b_timer.start;
+      sensors_changed(&button_b_sensor);
     }
   }
 
   if(ioid == BOARD_IOID_KEY_C) {
     if(BUTTON_SENSOR_ENABLE_SHUTDOWN == 0) {
-      if(!timer_expired(&b_timer.debounce)) {
+      if(!timer_expired(&c_timer.debounce)) {
         return;
       }
 
-      timer_set(&b_timer.debounce, DEBOUNCE_DURATION);
+      timer_set(&c_timer.debounce, DEBOUNCE_DURATION);
 
       /*
        * Start press duration counter on press (falling), notify on release
        * (rising)
        */
       if(ti_lib_gpio_read_dio(BOARD_IOID_KEY_C) == 0) {
-        b_timer.start = clock_time();
-        b_timer.duration = 0;
+        c_timer.start = clock_time();
+        c_timer.duration = 0;
       } else {
-        b_timer.duration = clock_time() - b_timer.start;
-        sensors_changed(&button_right_sensor);
+        c_timer.duration = clock_time() - c_timer.start;
+        sensors_changed(&button_c_sensor);
       }
     } else {
       lpm_shutdown(BOARD_IOID_KEY_C, IOC_IOPULL_UP, IOC_WAKE_ON_LOW);
@@ -141,26 +137,6 @@ button_press_handler(uint8_t ioid)
   }
 
   if(ioid == BOARD_IOID_KEY_D) {
-    if(!timer_expired(&c_timer.debounce)) {
-      return;
-    }
-
-    timer_set(&c_timer.debounce, DEBOUNCE_DURATION);
-
-    /*
-     * Start press duration counter on press (falling), notify on release
-     * (rising)
-     */
-    if(ti_lib_gpio_read_dio(BOARD_IOID_KEY_D) == 0) {
-      c_timer.start = clock_time();
-      c_timer.duration = 0;
-    } else {
-      c_timer.duration = clock_time() - c_timer.start;
-      sensors_changed(&button_up_sensor);
-    }
-  }
-
-  if(ioid == BOARD_IOID_KEY_E) {
     if(!timer_expired(&d_timer.debounce)) {
       return;
     }
@@ -171,12 +147,30 @@ button_press_handler(uint8_t ioid)
      * Start press duration counter on press (falling), notify on release
      * (rising)
      */
-    if(ti_lib_gpio_read_dio(BOARD_IOID_KEY_E) == 0) {
+    if(ti_lib_gpio_read_dio(BOARD_IOID_KEY_D) == 0) {
       d_timer.start = clock_time();
       d_timer.duration = 0;
     } else {
       d_timer.duration = clock_time() - d_timer.start;
-      sensors_changed(&button_down_sensor);
+      sensors_changed(&button_d_sensor);
+    }
+  }
+
+  if(ioid == BOARD_IOID_KEY_E) {
+    if(!timer_expired(&e_timer.debounce)) {
+      return;
+    }
+    timer_set(&e_timer.debounce, DEBOUNCE_DURATION);
+    /*
+     * Start press duration counter on press (falling), notify on release
+     * (rising)
+     */
+    if(ti_lib_gpio_read_dio(BOARD_IOID_KEY_E) == 0) {
+      e_timer.start = clock_time();
+      e_timer.duration = 0;
+    } else {
+      e_timer.duration = clock_time() - e_timer.start;
+      sensors_changed(&button_e_sensor);
     }
   }
 }
@@ -230,8 +224,7 @@ config_buttons(int type, int c, uint32_t key)
 static int
 config_e(int type, int value)
 {
-  config_buttons(type, value, BOARD_IOID_KEY_E;
-
+  config_buttons(type, value, BOARD_IOID_KEY_E);
   return 1;
 }
 /*---------------------------------------------------------------------------*/
@@ -253,7 +246,6 @@ static int
 config_a(int type, int value)
 {
   config_buttons(type, value, BOARD_IOID_KEY_A);
-
   return 1;
 }
 /*---------------------------------------------------------------------------*/
@@ -275,7 +267,6 @@ static int
 config_b(int type, int value)
 {
   config_buttons(type, value, BOARD_IOID_KEY_B);
-
   return 1;
 }
 /*---------------------------------------------------------------------------*/
@@ -297,7 +288,6 @@ static int
 config_c(int type, int value)
 {
   config_buttons(type, value, BOARD_IOID_KEY_C);
-
   return 1;
 }
 /*---------------------------------------------------------------------------*/
@@ -319,7 +309,6 @@ static int
 config_d(int type, int value)
 {
   config_buttons(type, value, BOARD_IOID_KEY_D);
-
   return 1;
 }
 /*---------------------------------------------------------------------------*/

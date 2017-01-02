@@ -106,7 +106,7 @@
 #define BOARD_LED_B               (1 << BOARD_IOID_LED_B)
 #define BOARD_LED_C               (1 << BOARD_IOID_LED_C)
 #define BOARD_LED_D               (1 << BOARD_IOID_LED_D)
-#define BOARD_LED_ALL             (BOARD_LED_A | BOARD_LED_B | BOARD_LED_C | \
+#define BOARD_A_LED_ALL             (BOARD_LED_A | BOARD_LED_B | BOARD_LED_C | \
                                    BOARD_LED_D)
 /** @} */
 /*---------------------------------------------------------------------------*/
