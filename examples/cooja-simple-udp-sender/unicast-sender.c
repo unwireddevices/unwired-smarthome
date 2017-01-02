@@ -26,18 +26,9 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * 
- *  
+ * This file is part of the Contiki operating system.
+ *
  */
-
- /*---------------------------------------------------------------------------*/
- /*
- * \file
- *         RPL-root service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
- * \author
- *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
- */
- /*---------------------------------------------------------------------------*/
 
 #include "contiki.h"
 #include "lib/random.h"
@@ -46,28 +37,27 @@
 #include "net/ip/uip.h"
 #include "net/ipv6/uip-ds6.h"
 #include "net/ip/uip-debug.h"
+#include "net/rpl/rpl.h"
+
+#include "sys/node-id.h"
 
 #include "simple-udp.h"
-
-#include "net/rpl/rpl.h"
+#include "servreg-hack.h"
 
 #include <stdio.h>
 #include <string.h>
 
-#include "button-sensor.h"
-
 #define UDP_PORT 4003
+#define SERVICE_ID 190
 
-#define DEBUG 1
-#include "net/ip/uip-debug_UD.h"
-
+#define SEND_INTERVAL		(2 * CLOCK_SECOND)
+#define SEND_TIME		 (1 * CLOCK_SECOND)//(random_rand() % (SEND_INTERVAL))
 
 static struct simple_udp_connection unicast_connection;
-//SENSORS_ACTIVATE(button_sensor);
 
 /*---------------------------------------------------------------------------*/
-PROCESS(rpl_root_process, "Unwired RPL root and udp data receiver");
-AUTOSTART_PROCESSES(&rpl_root_process);
+PROCESS(unicast_sender_process, "Unicast sender example process");
+AUTOSTART_PROCESSES(&unicast_sender_process);
 /*---------------------------------------------------------------------------*/
 static void
 receiver(struct simple_udp_connection *c,
@@ -78,15 +68,14 @@ receiver(struct simple_udp_connection *c,
          const uint8_t *data,
          uint16_t datalen)
 {
-  printf("Data received from ");
-  uip_debug_ipaddr_print(sender_addr);
-  printf(" '%s'\n", data);
+  printf("Data received on port %d from port %d with length %d\n",
+         receiver_port, sender_port, datalen);
 }
 /*---------------------------------------------------------------------------*/
-static uip_ipaddr_t *
+static void
 set_global_address(void)
 {
-  static uip_ipaddr_t ipaddr;
+  uip_ipaddr_t ipaddr;
   int i;
   uint8_t state;
 
@@ -100,52 +89,67 @@ set_global_address(void)
     if(uip_ds6_if.addr_list[i].isused &&
        (state == ADDR_TENTATIVE || state == ADDR_PREFERRED)) {
       uip_debug_ipaddr_print(&uip_ds6_if.addr_list[i].ipaddr);
-      printf(", ");
+      printf("\n");
     }
   }
-  printf("\n");
-
-  return &ipaddr;
 }
 /*---------------------------------------------------------------------------*/
-static void
-create_rpl_dag(uip_ipaddr_t *ipaddr)
+PROCESS_THREAD(unicast_sender_process, ev, data)
 {
-  struct uip_ds6_addr *root_if;
-  root_if = uip_ds6_addr_lookup(ipaddr);
-  if(root_if != NULL) {
-    rpl_dag_t *dag;
-    uip_ipaddr_t prefix;
-    rpl_set_root(RPL_DEFAULT_INSTANCE, ipaddr);
-    dag = rpl_get_any_dag();
-    uip_ip6addr(&prefix, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
-    rpl_set_prefix(dag, &prefix, 64);
-    printf("Created a new RPL DAG\n");
-  } else {
-    printf("Failed to create a new RPL DAG\n");
-  }
-}
-
-/*---------------------------------------------------------------------------*/
-PROCESS_THREAD(rpl_root_process, ev, data)
-{
-  uip_ipaddr_t *ipaddr;
+  static struct etimer periodic_timer;
+  static struct etimer send_timer;
+  uip_ipaddr_t *addr;
 
   PROCESS_BEGIN();
-  printf("Unwired RLP root and udp reciever\n");
 
-  ipaddr = set_global_address();
+  set_global_address();
 
-  printf("Creating RPL DAG...\n");
+  simple_udp_register(&unicast_connection, UDP_PORT,
+                      NULL, UDP_PORT, receiver);
 
-  create_rpl_dag(ipaddr);
-
-  simple_udp_register(&unicast_connection, UDP_PORT, NULL, UDP_PORT, receiver);
-
-
+  etimer_set(&periodic_timer, SEND_INTERVAL);
   while(1) {
-    PROCESS_WAIT_EVENT();
+
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&periodic_timer));
+    etimer_reset(&periodic_timer);
+    etimer_set(&send_timer, SEND_TIME);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_timer));
+
+    uip_ip6addr_t *globaladdr = NULL;
+    rpl_dag_t *dag;
+    static uip_ip6addr_t dest_addr;
+    uip_ds6_addr_t *addr_desc = uip_ds6_get_global(ADDR_PREFERRED);
+    if(addr_desc != NULL) {
+      globaladdr = &addr_desc->ipaddr;
+        printf("globaladdr: ");
+        uip_debug_ipaddr_print(globaladdr); //fd00::212:7402:2:202 IP
+        printf("\n");
+      dag = rpl_get_any_dag();
+        printf("rpl_get_any_dag: ");
+        uip_debug_ipaddr_print(dag); //fd00::212:7401:1:101 IP
+        printf("\n");
+      if(dag) {
+        uip_ipaddr_copy(&dest_addr, globaladdr);
+        memcpy(&dest_addr.u8[8], &dag->dag_id.u8[8], sizeof(uip_ipaddr_t) / 2);
+      }
+    }
+
+
+    if(&dest_addr != NULL) {
+      static unsigned int message_number;
+      char buf[20];
+
+      printf("Sending unicast to ");
+      uip_debug_ipaddr_print(&dest_addr); //Sending unicast to fd00::212:7401:1:101
+      printf("\n");
+      sprintf(buf, "Message %d", message_number);
+      message_number++;
+      simple_udp_sendto(&unicast_connection, buf, strlen(buf) + 1, &dest_addr);
+    } else {
+      printf("Service %d not found\n", SERVICE_ID);
+    }
   }
+
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/

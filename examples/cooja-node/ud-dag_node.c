@@ -57,28 +57,15 @@
 #define MESSAGE_PORT 4003
 
 #define MAX_PAYLOAD_LEN    60
-#define MSG_INTERVAL       (1 * CLOCK_SECOND)
+#define MSG_INTERVAL       (10 * CLOCK_SECOND)
 
 /*---------------------------------------------------------------------------*/
 static struct uip_udp_conn *client_conn = NULL;
 static struct etimer et;
 static uip_ip6addr_t dest_addr;
 
-char udp_message_buf[20]; //buffer for simple_udp_send
-static struct simple_udp_connection unicast_connection; //struct for simple_udp_send
 /*---------------------------------------------------------------------------*/
 PROCESS(rpl_node_process, "RPL-node process");
-/*---------------------------------------------------------------------------*/
-static void
-tcpip_handler(void)
-{
-  char *str;
-  if(uip_newdata()) {
-    str = uip_appdata;
-    str[uip_datalen()] = '\0';
-    PRINTF("RPL Node: Response from the server: '%s'\n", str);
-  }
-}
 /*---------------------------------------------------------------------------*/
 static char *
 add_ipaddr(char *buf, const uip_ipaddr_t *addr)
@@ -133,58 +120,7 @@ timeout_handler(void)
     }
   }
 
-  if(has_dest) {
-    if(client_conn == NULL) {
-      PRINTF("RPL Node: address destination: ");
-      PRINT6ADDR(&dest_addr);
-      PRINTF("\n");
-      client_conn = udp_new(&dest_addr, UIP_HTONS(dest_port), NULL);
-      message_for_button.connected = 1;
-      message_for_button.root_addr = &dest_addr;
-      process_post(&udp_button_process, PROCESS_EVENT_CONTINUE, &message_for_button);
 
-    } else {
-      if(memcmp(&client_conn->ripaddr, &dest_addr, sizeof(uip_ipaddr_t)) != 0) {
-        PRINTF("RPL Node: new address destination: ");
-        PRINT6ADDR(&dest_addr);
-        PRINTF("\n");
-        uip_udp_remove(client_conn);
-        client_conn = udp_new(&dest_addr, UIP_HTONS(dest_port), NULL);
-        message_for_button.connected = 1;
-        message_for_button.root_addr = &dest_addr;
-        process_post(&udp_button_process, PROCESS_EVENT_CONTINUE, &message_for_button);
-        if(client_conn != NULL) {
-          PRINTF("RPL Node: Created a connection with the server ");
-          PRINT6ADDR(&client_conn->ripaddr);
-          PRINTF(" local/remote port %u/%u\n",
-          UIP_HTONS(client_conn->lport), UIP_HTONS(client_conn->rport));
-        } 
-      }
-    }
-    if(client_conn != NULL) {
-      PRINTF("RPL Node: Client sending to: ");
-      PRINT6ADDR(&client_conn->ripaddr);
-      i = sprintf(buf, "%d |", ++seq_id);
-      dag = rpl_get_any_dag();
-      if(dag && dag->instance->def_route) {
-        end = add_ipaddr(buf + i, &dag->instance->def_route->ipaddr);
-      } else {
-        sprintf(buf + i, "(null)");
-        end = buf + i + 6;
-      }
-
-      //PRINTF(" (msg: %s)\n", buf);
-      PRINTF("\n");
-      sprintf(udp_message_buf, "ping", 1);
-      simple_udp_register(&unicast_connection, 4003, NULL, 4003, NULL); //register simple_udp_connection
-      simple_udp_sendto(&unicast_connection, udp_message_buf, strlen(udp_message_buf) + 1, &client_conn->ripaddr);
-    } 
-  } else {
-    PRINTF("RPL Node: No address configured\n");
-    message_for_button.connected = 0;
-    message_for_button.root_addr = NULL;
-    process_post(&udp_button_process, PROCESS_EVENT_CONTINUE, &message_for_button);
-  }
 }
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(rpl_node_process, ev, data)
@@ -203,7 +139,6 @@ PROCESS_THREAD(rpl_node_process, ev, data)
       timeout_handler();
       etimer_set(&et, MSG_INTERVAL);
     } else if(ev == tcpip_event) {
-      tcpip_handler();
     }
   }
 

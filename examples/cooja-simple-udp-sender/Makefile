@@ -1,0 +1,8 @@
+all: unicast-sender
+CONTIKI=../../..
+DEFINES+=PROJECT_CONF_H=\"project-conf.h\"
+
+
+CONTIKI_WITH_IPV6 = 1
+include $(CONTIKI)/Makefile.include
+

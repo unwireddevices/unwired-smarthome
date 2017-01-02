@@ -62,81 +62,8 @@
 #include "ud-button.h"
 #include "ud-main.h"
 
-/*---------------------------------------------------------------------------*/
-#define DEBUG 1
-#include "net/ip/uip-debug_UD.h"
-/*---------------------------------------------------------------------------*/
-
-#define UIP_IP_BUF   ((struct uip_ip_hdr *)&uip_buf[UIP_LLH_LEN])
-
-#define UDP_CLIENT_PORT 	0
-#define UDP_SERVER_PORT 	4003
-
-uip_ip6addr_t dest_ip_addr;
-uint8_t connected_flag = 0;
-
-char udp_message_buf[20]; //buffer for simple_udp_send
-static struct simple_udp_connection unicast_connection; //struct for simple_udp_send
+//SENSORS(&button_sensor);
 
 
-PROCESS(udp_button_process, "UDP Buttons control process");
-/*---------------------------------------------------------------------------*/
-static void
-tcpip_handler(void)
-{
-  if(uip_newdata()) {  }
-  return;
-}
-/*---------------------------------------------------------------------------*/
-void
-ipv6_addr_copy(uip_ip6addr_t *dest, uip_ip6addr_t *source)
-{
-  memcpy(dest, source, sizeof(uip_ip6addr_t));
-}
-/*---------------------------------------------------------------------------*/
 
-
-PROCESS_THREAD(udp_button_process, ev, data)
-{
-  PROCESS_BEGIN();
-  PRINTF("Buttons control process: started\n");
-
-  //aaaa::212:4b00:79e:b282, aaaa::212:4b00:6e2:728c
-  dest_ip_addr.u16[0] = UIP_HTONS(0xAAAA); //зачем заполнять адрес, который потом заменится, осмысленной информацией?
-  dest_ip_addr.u16[1] = UIP_HTONS(0x0000);
-  dest_ip_addr.u16[2] = UIP_HTONS(0x0000);
-  dest_ip_addr.u16[3] = UIP_HTONS(0x0000);
-  dest_ip_addr.u16[4] = UIP_HTONS(0x0212);
-  dest_ip_addr.u16[5] = UIP_HTONS(0x4B00);
-  dest_ip_addr.u16[6] = UIP_HTONS(0x079E);
-  dest_ip_addr.u16[7] = UIP_HTONS(0xB804);
-
-  simple_udp_register(&unicast_connection, 4003, NULL, 4003, NULL); //register simple_udp_connection
-
-  PROCESS_PAUSE();
-
-  while(1) {
-    PROCESS_YIELD();
-    if(ev == tcpip_event) {
-      tcpip_handler();
-    }
-    else 
-    if(ev == PROCESS_EVENT_CONTINUE) {
-      if(data != NULL) {
-        connected_flag = ((connect_info_t *)data)->connected;
-        if(((connect_info_t *)data)->root_addr != NULL) {
-          ipv6_addr_copy(&dest_ip_addr, ((connect_info_t *)data)->root_addr); //replace dest_ip_addr<-rlp_root(see cetic-6lbr-client)
-          PRINTF("Found RPL root. Addr: "); //no rpl root?
-          PRINT6ADDR(&dest_ip_addr);
-          PRINTF("\n");
-        }
-      }
-    }
-    
-
-  }
-  printf("Buttons control process: end\r\n");
-
-  PROCESS_END();
-}
 /*---------------------------------------------------------------------------*/

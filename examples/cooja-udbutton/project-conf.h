@@ -54,17 +54,23 @@
 #undef NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE
 #define NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE	8 //in Hz, 2, 4, 8, 16, 32...
 
+ /* RPL tune option */
+#undef RPL_CONF_MAX_INSTANCES
+#define RPL_CONF_MAX_INSTANCES					3
+#undef RPL_CONF_MAX_DAG_PER_INSTANCE
+#define RPL_CONF_MAX_DAG_PER_INSTANCE			4
+
 /* Encryption */
 #undef LLSEC802154_CONF_ENABLED
 #define LLSEC802154_CONF_ENABLED          		1
-#undef NETSTACK_CONF_FRAMER
-#define NETSTACK_CONF_FRAMER              		noncoresec_framer
-#undef NETSTACK_CONF_LLSEC
-#define NETSTACK_CONF_LLSEC               		noncoresec_driver
+//#undef NETSTACK_CONF_FRAMER
+//#define NETSTACK_CONF_FRAMER              		noncoresec_framer
+//#undef NETSTACK_CONF_LLSEC
+//#define NETSTACK_CONF_LLSEC               		noncoresec_driver
 #undef NONCORESEC_CONF_SEC_LVL
-#define NONCORESEC_CONF_SEC_LVL           		0x05
+#define NONCORESEC_CONF_SEC_LVL           		0x00
 #undef LLSEC802154_CONF_SECURITY_LEVEL
-#define LLSEC802154_CONF_SECURITY_LEVEL 		0x05
+#define LLSEC802154_CONF_SECURITY_LEVEL 		0x00
 #undef NONCORESEC_CONF_KEY
 #define NONCORESEC_CONF_KEY						{0xF3,0x01,0x02,0x03,0x04,0x05,0x07,0x07,0x06,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F}
 
