@@ -1,5 +1,5 @@
 all: unicast-sender
-CONTIKI=../../..
+CONTIKI=../..
 DEFINES+=PROJECT_CONF_H=\"project-conf.h\"
 
 
