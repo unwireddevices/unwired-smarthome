@@ -57,11 +57,14 @@
 #include "button-sensor.h"
 #include "board-peripherals.h"
 
-
 #define UDP_PORT 4003
 
+#define DEBUG 1
+#include "net/ip/uip-debug_UD.h"
+
+
 static struct simple_udp_connection unicast_connection;
-SENSORS(&button_select_sensor);
+SENSORS(&button_a_sensor);
 
 
 /*---------------------------------------------------------------------------*/

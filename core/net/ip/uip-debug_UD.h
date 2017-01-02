@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2006, Swedish Institute of Computer Science.
+ * Copyright (c) 2010, Swedish Institute of Computer Science.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -29,49 +29,32 @@
  * This file is part of the Contiki operating system.
  *
  */
-
- /*---------------------------------------------------------------------------*/
- /*
+/**
  * \file
- *         Main process file for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
- * \author
- *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
- *         Mikhail Churikov mc@unwds.com
+ *         A set of debugging macros for the IP stack
+ *
+ * \author Nicolas Tsiftes <nvt@sics.se>
+ *         Niclas Finne <nfi@sics.se>
+ *         Joakim Eriksson <joakime@sics.se>
+ *         Simon Duquennoy <simon.duquennoy@inria.fr>
  */
- /*---------------------------------------------------------------------------*/
 
-#include <stdio.h>
-#include "contiki.h"
+
+#include "net/net-debug.h"
 #include "net/ip/uip.h"
-#include "dev/leds.h"
-#include "mac.h"
+#include <stdio.h>
 
-#include "ud-button.h"
-#include "ud-dag_node.h"
-
-#define DEBUG 1
-#include "net/ip/uip-debug_UD.h"
-/*---------------------------------------------------------------------------*/
-PROCESS(ud_world_process, "Unwired Devices process");
-AUTOSTART_PROCESSES(&ud_world_process);
-
-/*---------------------------------------------------------------------------*/
-PROCESS_THREAD(ud_world_process, ev, data)
-{
-  PROCESS_BEGIN();
-
-  process_start(&udp_button_process, NULL);
-  process_start(&rpl_node_process, NULL);
-
-  /*
-  etimer_set(&ping6_periodic_timer, 15*CLOCK_SECOND);
-
-  while(cont) {
-    PROCESS_YIELD();
-    cont = ping6handler(ev, data); 
-  }
-  */
-
-  PROCESS_END();
-}
-/*---------------------------------------------------------------------------*/
+ #if DEBUG
+ #include <stdio.h>
+ #undef PRINTF
+ #define PRINTF(...) printf(__VA_ARGS__)
+ #undef PRINT6ADDR
+ #define PRINT6ADDR(addr) PRINTF(" %02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x ", ((uint8_t *)addr)[0], ((uint8_t *)addr)[1], ((uint8_t *)addr)[2], ((uint8_t *)addr)[3], ((uint8_t *)addr)[4], ((uint8_t *)addr)[5], ((uint8_t *)addr)[6], ((uint8_t *)addr)[7], ((uint8_t *)addr)[8], ((uint8_t *)addr)[9], ((uint8_t *)addr)[10], ((uint8_t *)addr)[11], ((uint8_t *)addr)[12], ((uint8_t *)addr)[13], ((uint8_t *)addr)[14], ((uint8_t *)addr)[15])
+ #undef PRINTLLADDR
+ #define PRINTLLADDR(lladdr) PRINTF(" %02x:%02x:%02x:%02x:%02x:%02x ",lladdr->addr[0], lladdr->addr[1], lladdr->addr[2], lladdr->addr[3],lladdr->addr[4], lladdr->addr[5])
+ #else
+ #undef PRINTF
+ #define PRINTF(...)
+ #undef PRINT6ADDR
+ #define PRINT6ADDR(addr)
+ #endif

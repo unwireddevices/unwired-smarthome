@@ -73,25 +73,8 @@ SENSORS(&button_a_sensor, &button_b_sensor, &button_c_sensor, &button_d_sensor, 
 #define CC26XX_BUTTON_5      &button_right_sensor
 
 /*---------------------------------------------------------------------------*/
-// #define DEBUG 1
-
-// #if DEBUG
-// #include <stdio.h>
-// #undef PRINTF
-// #define PRINTF(...) printf(__VA_ARGS__)
-// #undef PRINT6ADDR
-// #define PRINT6ADDR(addr) PRINTF(" %02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x:%02x%02x ", ((uint8_t *)addr)[0], ((uint8_t *)addr)[1], ((uint8_t *)addr)[2], ((uint8_t *)addr)[3], ((uint8_t *)addr)[4], ((uint8_t *)addr)[5], ((uint8_t *)addr)[6], ((uint8_t *)addr)[7], ((uint8_t *)addr)[8], ((uint8_t *)addr)[9], ((uint8_t *)addr)[10], ((uint8_t *)addr)[11], ((uint8_t *)addr)[12], ((uint8_t *)addr)[13], ((uint8_t *)addr)[14], ((uint8_t *)addr)[15])
-// #undef PRINTLLADDR
-// #define PRINTLLADDR(lladdr) PRINTF(" %02x:%02x:%02x:%02x:%02x:%02x ",lladdr->addr[0], lladdr->addr[1], lladdr->addr[2], lladdr->addr[3],lladdr->addr[4], lladdr->addr[5])
-// #else
-// #undef PRINTF
-// #define PRINTF(...)
-// #undef PRINT6ADDR
-// #define PRINT6ADDR(addr)
-// #endif
-
 #define DEBUG 1
-#include "net/ip/uip-debug.h"
+#include "net/ip/uip-debug_UD.h"
 /*---------------------------------------------------------------------------*/
 
 #define UIP_IP_BUF   ((struct uip_ip_hdr *)&uip_buf[UIP_LLH_LEN])
@@ -111,9 +94,7 @@ PROCESS(udp_button_process, "UDP Buttons control process");
 static void
 tcpip_handler(void)
 {
-  if(uip_newdata()) {
-  }
-
+  if(uip_newdata()) {  }
   return;
 }
 /*---------------------------------------------------------------------------*/
