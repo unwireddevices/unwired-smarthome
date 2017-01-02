@@ -88,8 +88,8 @@
  * @{
  */
 #define BOARD_IOID_LED_1          IOID_22
-#define BOARD_IOID_LED_2          IOID_27//2//IOID_27
-#define BOARD_IOID_LED_3          IOID_28//3//IOID_28
+#define BOARD_IOID_LED_2          IOID_27
+#define BOARD_IOID_LED_3          IOID_28
 #define BOARD_IOID_LED_4          IOID_4
 #define BOARD_LED_1               (1 << BOARD_IOID_LED_1)
 #define BOARD_LED_2               (1 << BOARD_IOID_LED_2)
@@ -97,6 +97,17 @@
 #define BOARD_LED_4               (1 << BOARD_IOID_LED_4)
 #define BOARD_LED_ALL             (BOARD_LED_1 | BOARD_LED_2 | BOARD_LED_3 | \
                                    BOARD_LED_4)
+
+#define BOARD_IOID_LED_A          IOID_22
+#define BOARD_IOID_LED_B          IOID_27
+#define BOARD_IOID_LED_C          IOID_28
+#define BOARD_IOID_LED_D          IOID_4
+#define BOARD_LED_A               (1 << BOARD_IOID_LED_A)
+#define BOARD_LED_B               (1 << BOARD_IOID_LED_B)
+#define BOARD_LED_C               (1 << BOARD_IOID_LED_C)
+#define BOARD_LED_D               (1 << BOARD_IOID_LED_D)
+#define BOARD_LED_ALL             (BOARD_LED_A | BOARD_LED_B | BOARD_LED_C | \
+                                   BOARD_LED_D)
 /** @} */
 /*---------------------------------------------------------------------------*/
 /**
@@ -131,6 +142,17 @@
 #define BOARD_KEY_UP              (1 << BOARD_IOID_KEY_UP)
 #define BOARD_KEY_DOWN            (1 << BOARD_IOID_KEY_DOWN)
 #define BOARD_KEY_SELECT          (1 << BOARD_IOID_KEY_SELECT)
+
+#define BOARD_IOID_KEY_A            IOID_7
+#define BOARD_IOID_KEY_B            IOID_6
+#define BOARD_IOID_KEY_C            IOID_2
+#define BOARD_IOID_KEY_D            IOID_3
+#define BOARD_IOID_KEY_E            IOID_8
+#define BOARD_KEY_A                 (1 << BOARD_IOID_KEY_A)
+#define BOARD_KEY_B                 (1 << BOARD_IOID_KEY_B)
+#define BOARD_KEY_C                 (1 << BOARD_IOID_KEY_C)
+#define BOARD_KEY_D                 (1 << BOARD_IOID_KEY_D)
+#define BOARD_KEY_E                 (1 << BOARD_IOID_KEY_E)
 /** @} */
 /*---------------------------------------------------------------------------*/
 /**

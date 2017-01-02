@@ -97,6 +97,17 @@
 #define BOARD_LED_4               (1 << BOARD_IOID_LED_4)
 #define BOARD_LED_ALL             (BOARD_LED_1 | BOARD_LED_2 | BOARD_LED_3 | \
                                    BOARD_LED_4)
+
+#define BOARD_IOID_LED_A          BOARD_IOID_LED_1
+#define BOARD_IOID_LED_B          BOARD_IOID_LED_2
+#define BOARD_IOID_LED_C          BOARD_IOID_LED_3
+#define BOARD_IOID_LED_D          BOARD_IOID_LED_4
+#define BOARD_LED_A               (1 << BOARD_IOID_LED_A)
+#define BOARD_LED_B               (1 << BOARD_IOID_LED_B)
+#define BOARD_LED_C               (1 << BOARD_IOID_LED_C)
+#define BOARD_LED_D               (1 << BOARD_IOID_LED_D)
+#define BOARD_LED_ALL             (BOARD_LED_A | BOARD_LED_B | BOARD_LED_C | \
+                                   BOARD_LED_D)
 /** @} */
 /*---------------------------------------------------------------------------*/
 /**
@@ -121,16 +132,27 @@
  * Those values are not meant to be modified by the user
  * @{
  */
-#define BOARD_IOID_KEY_LEFT       IOID_7//4//TODO WRONG 4!
-#define BOARD_IOID_KEY_RIGHT      IOID_6//1
-#define BOARD_IOID_KEY_UP         IOID_2//5
-#define BOARD_IOID_KEY_DOWN       IOID_3//7
-#define BOARD_IOID_KEY_SELECT     IOID_8//6
+#define BOARD_IOID_KEY_LEFT       IOID_15
+#define BOARD_IOID_KEY_RIGHT      IOID_18
+#define BOARD_IOID_KEY_UP         IOID_19
+#define BOARD_IOID_KEY_DOWN       IOID_12
+#define BOARD_IOID_KEY_SELECT     IOID_11
 #define BOARD_KEY_LEFT            (1 << BOARD_IOID_KEY_LEFT)
 #define BOARD_KEY_RIGHT           (1 << BOARD_IOID_KEY_RIGHT)
 #define BOARD_KEY_UP              (1 << BOARD_IOID_KEY_UP)
 #define BOARD_KEY_DOWN            (1 << BOARD_IOID_KEY_DOWN)
 #define BOARD_KEY_SELECT          (1 << BOARD_IOID_KEY_SELECT)
+
+#define BOARD_IOID_KEY_A            BOARD_IOID_KEY_LEFT
+#define BOARD_IOID_KEY_B            BOARD_IOID_KEY_RIGHT
+#define BOARD_IOID_KEY_C            BOARD_IOID_KEY_UP
+#define BOARD_IOID_KEY_D            BOARD_IOID_KEY_DOWN
+#define BOARD_IOID_KEY_E            BOARD_IOID_KEY_SELECT
+#define BOARD_KEY_A                 (1 << BOARD_IOID_KEY_A)
+#define BOARD_KEY_B                 (1 << BOARD_IOID_KEY_B)
+#define BOARD_KEY_C                 (1 << BOARD_IOID_KEY_C)
+#define BOARD_KEY_D                 (1 << BOARD_IOID_KEY_D)
+#define BOARD_KEY_E                 (1 << BOARD_IOID_KEY_E)
 /** @} */
 /*---------------------------------------------------------------------------*/
 /**
