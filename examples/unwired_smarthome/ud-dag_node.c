@@ -52,8 +52,10 @@
 #include "net/ip/uip-debug_UD.h"
 /*---------------------------------------------------------------------------*/
 
-#define UDP_CLIENT_PORT   4000
-#define UDP_SERVER_PORT   4003
+#define PROTOCOL_VERSION 0x01 //protocol version 1
+
+#define UDP_DAG_CLIENT_PORT   5000
+#define UDP_DAG_SERVER_PORT   5005
 
 #define MAX_PAYLOAD_LEN    60
 
@@ -64,6 +66,41 @@
 static struct simple_udp_connection dag_node_connection; //struct for simple_udp_send
 /*---------------------------------------------------------------------------*/
 PROCESS(rpl_node_process, "RPL-node process");
+/*---------------------------------------------------------------------------*/
+void
+send_join_packet(const uip_ip6addr_t dest_addr, struct simple_udp_connection dag_node_connection)
+{
+    char buf[9];
+    //---header start---
+    buf[0] = PROTOCOL_VERSION;
+    buf[1] = device_version;
+    buf[2] = 0x01; //data type(01 - net join packet + device profile)
+    //---header end---
+    //---data start---
+    buf[3] = device_type;
+    buf[4] = device_sleep_type;
+    buf[5] = device_ability_1;
+    buf[6] = device_ability_2;
+    buf[7] = device_ability_3;
+    buf[8] = device_ability_4;
+    //---data end---
+    simple_udp_sendto(&dag_node_connection, buf, strlen(buf) + 1, &dest_addr);
+}
+
+static void
+udp_dag_receiver(struct simple_udp_connection *c,
+         const uip_ipaddr_t *sender_addr,
+         uint16_t sender_port,
+         const uip_ipaddr_t *receiver_addr,
+         uint16_t receiver_port,
+         const uint8_t *data,
+         uint16_t datalen)
+{
+  printf("Data received from ");
+  uip_debug_ipaddr_print(sender_addr);
+  printf(" on port %d from port %d with length %d: '%s'\n", receiver_port, sender_port, datalen, data);
+}
+
 /*---------------------------------------------------------------------------*/
 
 PROCESS_THREAD(rpl_node_process, ev, data)
@@ -76,7 +113,7 @@ PROCESS_THREAD(rpl_node_process, ev, data)
   connect_info_t message_for_button;
   message_for_button.connected = 0;
   message_for_button.root_addr = NULL;
-  simple_udp_register(&dag_node_connection, UDP_CLIENT_PORT, NULL, UDP_SERVER_PORT, NULL); //register simple_udp_connection for button event
+  simple_udp_register(&dag_node_connection, UDP_DAG_CLIENT_PORT, NULL, UDP_DAG_SERVER_PORT, udp_dag_receiver); //register simple_udp_connection for button event
   
   printf("DAG Node: started\n");
 
@@ -110,7 +147,7 @@ PROCESS_THREAD(rpl_node_process, ev, data)
     }
 
     if(found_rpl_root == 1) {
-      char buf[20];
+      send_join_packet(dest_addr, dag_node_connection);
 
       leds_on(LED_A);
       message_for_button.connected = 1;
@@ -120,8 +157,7 @@ PROCESS_THREAD(rpl_node_process, ev, data)
       printf("DAG Node: Sending data to ");
       uip_debug_ipaddr_print(&dest_addr);
       printf("\n");
-      sprintf(buf, "Message new device");
-      simple_udp_sendto(&dag_node_connection, buf, strlen(buf) + 1, &dest_addr);
+
     } 
     else {
       printf("DAG Node: RPL Root not found\n");

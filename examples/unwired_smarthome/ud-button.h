@@ -44,6 +44,13 @@
 /*---------------------------------------------------------------------------*/
 PROCESS_NAME(udp_button_process);
 
+const int device_version;
+const int device_sleep_type;
+const int device_type;
+const int ex_device_type_1;
+const int ex_device_type_2;
+const int ex_device_type_3;
+
 typedef struct 
 {
   uint8_t connected;

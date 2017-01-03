@@ -62,10 +62,8 @@
 #define DEBUG 1
 #include "net/ip/uip-debug_UD.h"
 
-
 static struct simple_udp_connection unicast_connection;
 SENSORS(&button_a_sensor);
-
 
 /*---------------------------------------------------------------------------*/
 PROCESS(rpl_root_process, "Unwired RPL root and udp data receiver");
