@@ -1,4 +1,9 @@
 eclipse.preferences.version=1
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.1481005715.1218693168.1943838773.1981407488/PATH/delimiter=\:
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.1481005715.1218693168.1943838773.1981407488/PATH/operation=replace
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.1481005715.1218693168.1943838773.1981407488/PATH/value=/opt/local/bin\:/opt/local/sbin\:/usr/local/bin\:/usr/bin\:/bin\:/usr/sbin\:/sbin
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.1481005715.1218693168.1943838773.1981407488/append=true
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.1481005715.1218693168.1943838773.1981407488/appendContributed=true
 environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.1481005715.1218693168.1943838773/PATH/delimiter=\:
 environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.1481005715.1218693168.1943838773/PATH/operation=replace
 environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.1481005715.1218693168.1943838773/PATH/value=/opt/local/bin\:/opt/local/sbin\:/usr/local/bin\:/usr/bin\:/bin\:/usr/sbin\:/sbin
