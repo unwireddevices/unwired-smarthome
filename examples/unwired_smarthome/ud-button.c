@@ -56,37 +56,30 @@
 #include <ctype.h>
 
 #include "button-sensor.h"
+#include "board-peripherals.h"
 #include "dev/watchdog.h"
 #include "simple-udp.h"
 
 #include "ud-button.h"
-#include "ud-main.h"
+#include "ud-dag_node.h"
 
 /*---------------------------------------------------------------------------*/
 #define DEBUG 1
 #include "net/ip/uip-debug_UD.h"
 /*---------------------------------------------------------------------------*/
-
-#define UIP_IP_BUF   ((struct uip_ip_hdr *)&uip_buf[UIP_LLH_LEN])
-
-#define UDP_CLIENT_PORT 	0
-#define UDP_SERVER_PORT 	4003
-
+#define UDP_CLIENT_PORT 	4000
+#define UDP_SERVER_PORT   4003
+/*---------------------------------------------------------------------------*/
 uip_ip6addr_t dest_ip_addr;
 uint8_t connected_flag = 0;
-
 char udp_message_buf[20]; //buffer for simple_udp_send
 static struct simple_udp_connection unicast_connection; //struct for simple_udp_send
 
-
-PROCESS(udp_button_process, "UDP Buttons control process");
 /*---------------------------------------------------------------------------*/
-static void
-tcpip_handler(void)
-{
-  if(uip_newdata()) {  }
-  return;
-}
+SENSORS(&button_a_sensor, &button_b_sensor, &button_c_sensor, &button_d_sensor, &button_e_sensor); //register button sensors
+
+PROCESS(udp_button_process, "UDP Buttons control process"); //register main button process
+AUTOSTART_PROCESSES(&udp_button_process, &rpl_node_process); //set autostart processes
 /*---------------------------------------------------------------------------*/
 void
 ipv6_addr_copy(uip_ip6addr_t *dest, uip_ip6addr_t *source)
@@ -95,47 +88,72 @@ ipv6_addr_copy(uip_ip6addr_t *dest, uip_ip6addr_t *source)
 }
 /*---------------------------------------------------------------------------*/
 
-
 PROCESS_THREAD(udp_button_process, ev, data)
 {
   PROCESS_BEGIN();
   PRINTF("Buttons control process: started\n");
 
-  //aaaa::212:4b00:79e:b282, aaaa::212:4b00:6e2:728c
-  dest_ip_addr.u16[0] = UIP_HTONS(0xAAAA); //зачем заполнять адрес, который потом заменится, осмысленной информацией?
-  dest_ip_addr.u16[1] = UIP_HTONS(0x0000);
-  dest_ip_addr.u16[2] = UIP_HTONS(0x0000);
-  dest_ip_addr.u16[3] = UIP_HTONS(0x0000);
-  dest_ip_addr.u16[4] = UIP_HTONS(0x0212);
-  dest_ip_addr.u16[5] = UIP_HTONS(0x4B00);
-  dest_ip_addr.u16[6] = UIP_HTONS(0x079E);
-  dest_ip_addr.u16[7] = UIP_HTONS(0xB804);
-
-  simple_udp_register(&unicast_connection, 4003, NULL, 4003, NULL); //register simple_udp_connection
+  simple_udp_register(&unicast_connection, UDP_CLIENT_PORT, NULL, UDP_SERVER_PORT, NULL); //register simple_udp_connection for button event
 
   PROCESS_PAUSE();
-
+  
   while(1) {
     PROCESS_YIELD();
-    if(ev == tcpip_event) {
-      tcpip_handler();
-    }
-    else 
     if(ev == PROCESS_EVENT_CONTINUE) {
       if(data != NULL) {
         connected_flag = ((connect_info_t *)data)->connected;
-        if(((connect_info_t *)data)->root_addr != NULL) {
+        if(((connect_info_t *)data)->root_addr != NULL && connected_flag == 1) {
           ipv6_addr_copy(&dest_ip_addr, ((connect_info_t *)data)->root_addr); //replace dest_ip_addr<-rlp_root(see cetic-6lbr-client)
-          PRINTF("Found RPL root. Addr: "); //no rpl root?
+          PRINTF("Buttons control process: Found RPL root. Addr: ");
           PRINT6ADDR(&dest_ip_addr);
           PRINTF("\n");
         }
       }
     }
-    
+    else
+    if(ev == sensors_event) {
+      if(data == &button_a_sensor) {
+        PRINTF("Buttons control process: Button A\n");
+        if(connected_flag == 1) {
+          PRINTF("Buttons control process: send message to RPL root node on ");
+          PRINT6ADDR(&dest_ip_addr);
+          PRINTF("\n");
+          sprintf(udp_message_buf, "Button A", 1);
+          simple_udp_sendto(&unicast_connection, udp_message_buf, strlen(udp_message_buf) + 1, &dest_ip_addr);
+        }
+        led_blink(LED_B);
+      }
+      if(data == &button_b_sensor) {
+        PRINTF("Buttons control process: Button B\n");
+        if(connected_flag == 1) {
 
+        }
+        led_blink(LED_B);
+      }
+      if(data == &button_c_sensor) {
+        PRINTF("Buttons control process: Button C\n");
+        if(connected_flag == 1) {
+
+        }
+        led_blink(LED_B);
+      }
+      if(data == &button_d_sensor) {
+        PRINTF("Buttons control process: Button D\n");
+        if(connected_flag == 1) {
+
+        }
+        led_blink(LED_B);
+      }
+      if(data == &button_e_sensor) {
+        PRINTF("Buttons control process: Button E\n");
+        //lpm_shutdown(BOARD_IOID_KEY_RIGHT, IOC_IOPULL_UP, IOC_WAKE_ON_LOW);
+        if(connected_flag == 1) {
+
+        }
+        led_blink(LED_B);
+      }
+    }
   }
-  printf("Buttons control process: end\r\n");
 
   PROCESS_END();
 }

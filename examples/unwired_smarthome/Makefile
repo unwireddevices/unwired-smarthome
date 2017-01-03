@@ -1,7 +1,7 @@
-CONTIKI_PROJECT = ud-dag_node
+CONTIKI_PROJECT = ud-button ud-rpl_root
 all: $(CONTIKI_PROJECT)
-APPS += 
-PROJECT_SOURCEFILES += 
+#APPS += 
+PROJECT_SOURCEFILES += ud-dag_node.c 
 
 DEFINES+=PROJECT_CONF_H=\"project-conf.h\"
 
