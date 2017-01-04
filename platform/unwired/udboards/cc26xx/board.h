@@ -65,18 +65,20 @@
  */
 /* Some files include leds.h before us, so we need to get rid of defaults in
  * leds.h before we provide correct definitions */
-#undef LEDS_GREEN
-#undef LEDS_YELLOW
-#undef LEDS_RED
+#undef LED_A
+#undef LED_B
+#undef LED_C
+#undef LED_D
+#undef LED_E
 #undef LEDS_CONF_ALL
-
 
 #define LED_A           1
 #define LED_B           2
 #define LED_C           4
-#define LED_E           8
+#define LED_D           8
+#define LED_E           16
 
-#define LEDS_CONF_ALL 15
+#define LEDS_CONF_ALL 31
 
 /* Notify various examples that we have LEDs */
 #define PLATFORM_HAS_LEDS        1
@@ -92,12 +94,14 @@
 #define BOARD_IOID_LED_B          IOID_21
 #define BOARD_IOID_LED_C          IOID_22
 #define BOARD_IOID_LED_D          IOID_23
+#define BOARD_IOID_LED_E          IOID_24 //led on radio-board
 #define BOARD_LED_A               (1 << BOARD_IOID_LED_A)
 #define BOARD_LED_B               (1 << BOARD_IOID_LED_B)
 #define BOARD_LED_C               (1 << BOARD_IOID_LED_C)
 #define BOARD_LED_D               (1 << BOARD_IOID_LED_D)
+#define BOARD_LED_E               (1 << BOARD_IOID_LED_E)
 #define BOARD_LED_ALL             (BOARD_LED_A | BOARD_LED_B | BOARD_LED_C | \
-                                   BOARD_LED_D)
+                                   BOARD_LED_D | BOARD_LED_E)
 /** @} */
 /*---------------------------------------------------------------------------*/
 /**

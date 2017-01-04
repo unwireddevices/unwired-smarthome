@@ -51,10 +51,12 @@ leds_arch_init(void)
   }
   inited = 1;
 
-  ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_LED_1);
-  ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_LED_2);
-  ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_LED_3);
-  ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_LED_4);
+  ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_LED_A);
+  ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_LED_B);
+  ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_LED_C);
+  ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_LED_D);
+  ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_LED_E);
+
 
   ti_lib_gpio_clear_multi_dio(BOARD_LED_ALL);
 }
@@ -74,16 +76,19 @@ leds_arch_set(unsigned char leds)
   ti_lib_gpio_clear_multi_dio(BOARD_LED_ALL);
 
   if((leds & LED_A) == LED_A) {
-    ti_lib_gpio_set_dio(BOARD_IOID_LED_1);
+    ti_lib_gpio_set_dio(BOARD_IOID_LED_A);
   }
   if((leds & LED_B) == LED_B) {
-    ti_lib_gpio_set_dio(BOARD_IOID_LED_2);
+    ti_lib_gpio_set_dio(BOARD_IOID_LED_B);
   }
   if((leds & LED_C) == LED_C) {
-    ti_lib_gpio_set_dio(BOARD_IOID_LED_3);
+    ti_lib_gpio_set_dio(BOARD_IOID_LED_C);
   }
   if((leds & LED_D) == LED_D) {
-    ti_lib_gpio_set_dio(BOARD_IOID_LED_4);
+    ti_lib_gpio_set_dio(BOARD_IOID_LED_D);
+  }
+  if((leds & LED_E) == LED_E) {
+    ti_lib_gpio_set_dio(BOARD_IOID_LED_E);
   }
 }
 /*---------------------------------------------------------------------------*/

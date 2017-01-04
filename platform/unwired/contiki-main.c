@@ -166,7 +166,7 @@ main(void)
    */
   ti_lib_pwr_ctrl_io_freeze_disable();
 
-  fade(LEDS_RED);
+  fade(LED_A);
 
   ti_lib_int_master_enable();
 
@@ -202,7 +202,7 @@ main(void)
   energest_init();
   ENERGEST_ON(ENERGEST_TYPE_CPU);
 
-  fade(LEDS_YELLOW);
+  fade(LED_B);
 
   printf(" Net: ");
   printf("%s\n", NETSTACK_NETWORK.name);
@@ -227,7 +227,7 @@ main(void)
   process_start(&tcpip_process, NULL);
 #endif /* NETSTACK_CONF_WITH_IPV6 */
 
-  fade(LEDS_GREEN);
+  fade(LED_C);
 
   process_start(&sensors_process, NULL);
 
@@ -235,7 +235,7 @@ main(void)
 
   watchdog_start();
 
-  fade(LEDS_ORANGE);
+  fade(LED_D);
 
   while(1) {
     uint8_t r;
