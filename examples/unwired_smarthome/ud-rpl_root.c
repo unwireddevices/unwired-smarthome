@@ -72,6 +72,7 @@ SENSORS(&button_a_sensor);
 PROCESS(rpl_root_process, "Unwired RPL root and udp data receiver");
 AUTOSTART_PROCESSES(&rpl_root_process);
 /*---------------------------------------------------------------------------*/
+
 static void
 udp_dag_root_receiver(struct simple_udp_connection *c,
          const uip_ipaddr_t *sender_addr,
@@ -81,9 +82,26 @@ udp_dag_root_receiver(struct simple_udp_connection *c,
          const uint8_t *data,
          uint16_t datalen)
 {
-  printf("DAG data received from ");
+  printf("DEBUG: DAG data received from ");
   uip_debug_ipaddr_print(sender_addr);
-  printf(" on port %d from port %d with length %d: '%s'\n", receiver_port, sender_port, datalen, data);
+  printf(" on port %d: ", receiver_port);
+  printf("0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X \n",
+         data[0],
+         data[1],
+         data[2],
+         data[3],
+         data[4],
+         data[5],
+         data[6],
+         data[7],
+         data[8],
+         data[9]);
+  if (data[0] != 0x01) {
+      printf("Incompatible protocol version!");
+  }
+  if (data[1] != 0x01) {
+      printf("Incompatible device version!");
+  }
 }
 
 static void
@@ -159,7 +177,6 @@ PROCESS_THREAD(rpl_root_process, ev, data)
 
   simple_udp_register(&dag_root_connection, UDP_DAG_PORT, NULL, UDP_DAG_PORT, udp_dag_root_receiver);
   simple_udp_register(&data_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_data_receiver);
-
 
   while(1) {
     PROCESS_WAIT_EVENT();

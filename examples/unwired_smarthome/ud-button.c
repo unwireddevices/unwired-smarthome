@@ -79,10 +79,10 @@ static struct simple_udp_connection button_connection; //struct for simple_udp_s
 const int device_version = 0x01; //device version 1
 const int device_sleep_type = 0x03; //device sleep type(03 - sleep, int)
 const int device_type = 0x01; //device type(01 - buttons/switches)
-const int device_ability_1 = 0b10000000; //device ability(1 - buttons)
-const int device_ability_2 = 0b00000000; //device ability(none)
-const int device_ability_3 = 0b00000000; //device ability(none)
-const int device_ability_4 = 0b00000000; //device ability(none)
+const int device_ability_1 = 0b10000001; //device ability(1 - buttons)
+const int device_ability_2 = 0b00000001; //device ability(none)
+const int device_ability_3 = 0b00000001; //device ability(none)
+const int device_ability_4 = 0b00000001; //device ability(none)
 
 /*---------------------------------------------------------------------------*/
 SENSORS(&button_a_sensor, &button_b_sensor, &button_c_sensor, &button_d_sensor, &button_e_sensor); //register button sensors
@@ -96,9 +96,27 @@ ipv6_addr_copy(uip_ip6addr_t *dest, uip_ip6addr_t *source)
   memcpy(dest, source, sizeof(uip_ip6addr_t));
 }
 
+static void
+udp_data_receiver(struct simple_udp_connection *c,
+         const uip_ipaddr_t *sender_addr,
+         uint16_t sender_port,
+         const uip_ipaddr_t *receiver_addr,
+         uint16_t receiver_port,
+         const uint8_t *data,
+         uint16_t datalen)
+{
+  printf("Data received from ");
+  uip_debug_ipaddr_print(sender_addr);
+  printf(" on port %d from port %d with length %d: '%s'\n", receiver_port, sender_port, datalen, data);
+}
+
 void
 send_button_status_packet(const uip_ip6addr_t dest_addr, struct simple_udp_connection button_connection, char button_number)
 {
+    PRINTF("Buttons control process: send message to RPL root node on ");
+    PRINT6ADDR(&dest_ip_addr);
+    PRINTF("\n");
+
     char buf[10];
     //---header start---
     buf[0] = PROTOCOL_VERSION;
@@ -108,12 +126,12 @@ send_button_status_packet(const uip_ip6addr_t dest_addr, struct simple_udp_conne
 
     //---data start---
     buf[3] = 0x01; //Ability data number(0x01 - buttons status)
-    buf[4] = 0x00; //reserved
-    buf[5] = button_number; //Button number(0x00 - button A)
+    buf[4] = 0xFF; //reserved
+    buf[5] = button_number; //Button number
     buf[6] = 0x01; //Button status(0x01 - button fast pressed)
-    buf[7] = 0x00; //reserved
-    buf[8] = 0x00; //reserved
-    buf[9] = 0x00; //reserved
+    buf[7] = 0xFF; //reserved
+    buf[8] = 0xFF; //reserved
+    buf[9] = 0xFF; //reserved
     //---data end---
     simple_udp_sendto(&button_connection, buf, strlen(buf) + 1, &dest_addr);
 }
@@ -124,7 +142,7 @@ PROCESS_THREAD(udp_button_process, ev, data)
   PROCESS_BEGIN();
   PRINTF("Buttons control process: started\n");
 
-  simple_udp_register(&button_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, NULL);
+  simple_udp_register(&button_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_data_receiver);
   //register simple_udp_connection for button event
 
   PROCESS_PAUSE();
@@ -133,9 +151,23 @@ PROCESS_THREAD(udp_button_process, ev, data)
     PROCESS_YIELD();
     if(ev == PROCESS_EVENT_CONTINUE) {
       if(data != NULL) {
-        connected_flag = ((connect_info_t *)data)->connected;
-        if(((connect_info_t *)data)->root_addr != NULL && connected_flag == 1) {
-          ipv6_addr_copy(&dest_ip_addr, ((connect_info_t *)data)->root_addr); //replace dest_ip_addr<-rlp_root(see cetic-6lbr-client)
+          if (((connect_info_t *)data)->root_addr != NULL)
+          {
+              PRINTF("DEBUG: IP ");
+              uip_debug_ip6addr_print(((connect_info_t *)data)->root_addr);
+              PRINTF("\n");
+          }
+          else
+          {
+              PRINTF("DEBUG: IP NULL");
+          }
+
+        PRINTF("DEBUG: connected = %u \n", ((connect_info_t *)data)->connected);
+        PRINTF("DEBUG: 1 = %u\n", 1);
+        if(((connect_info_t *)data)->root_addr != NULL && ((connect_info_t *)data)->connected == 1) {
+          connected_flag = 1;
+          PRINTF("DEBUG: connected_flag = %u\n", connected_flag);
+          ipv6_addr_copy(&dest_ip_addr, ((connect_info_t *)data)->root_addr); //replace dest_ip_addr<-rlp_root(see dag node)
           PRINTF("Buttons control process: Found RPL root. Addr: ");
           PRINT6ADDR(&dest_ip_addr);
           PRINTF("\n");
@@ -147,9 +179,6 @@ PROCESS_THREAD(udp_button_process, ev, data)
       if(data == &button_a_sensor) {
         PRINTF("Buttons control process: Button A\n");
         if(connected_flag == 1) {
-          PRINTF("Buttons control process: send message to RPL root node on ");
-          PRINT6ADDR(&dest_ip_addr);
-          PRINTF("\n");
           send_button_status_packet(dest_ip_addr, button_connection, 0x01);
         }
         led_blink(LED_B);
@@ -157,21 +186,21 @@ PROCESS_THREAD(udp_button_process, ev, data)
       if(data == &button_b_sensor) {
         PRINTF("Buttons control process: Button B\n");
         if(connected_flag == 1) {
-
+            send_button_status_packet(dest_ip_addr, button_connection, 0x02);
         }
         led_blink(LED_B);
       }
       if(data == &button_c_sensor) {
         PRINTF("Buttons control process: Button C\n");
         if(connected_flag == 1) {
-
+            send_button_status_packet(dest_ip_addr, button_connection, 0x03);
         }
         led_blink(LED_B);
       }
       if(data == &button_d_sensor) {
         PRINTF("Buttons control process: Button D\n");
         if(connected_flag == 1) {
-
+            send_button_status_packet(dest_ip_addr, button_connection, 0x04);
         }
         led_blink(LED_B);
       }
@@ -179,7 +208,7 @@ PROCESS_THREAD(udp_button_process, ev, data)
         PRINTF("Buttons control process: Button E\n");
         //lpm_shutdown(BOARD_IOID_KEY_RIGHT, IOC_IOPULL_UP, IOC_WAKE_ON_LOW);
         if(connected_flag == 1) {
-
+            send_button_status_packet(dest_ip_addr, button_connection, 0x05);
         }
         led_blink(LED_B);
       }

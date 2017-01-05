@@ -59,9 +59,7 @@
 
 #define UDP_DAG_PORT       5005
 
-#define MAX_PAYLOAD_LEN    60
-
-#define SEND_INTERVAL   (4 * CLOCK_SECOND)
+#define SEND_INTERVAL   (10 * CLOCK_SECOND)
 #define SEND_INTERVAL_RANDOM    (random_rand() % (SEND_INTERVAL))
 
 /*---------------------------------------------------------------------------*/
@@ -85,7 +83,7 @@ send_join_packet(const uip_ip6addr_t dest_addr, struct simple_udp_connection dag
     buf[6] = device_ability_2;
     buf[7] = device_ability_3;
     buf[8] = device_ability_4;
-    buf[9] = 0x00; //reserved
+    buf[9] = 0xFF; //reserved
     //---data end---
     simple_udp_sendto(&dag_node_connection, buf, strlen(buf) + 1, &dest_addr);
 
@@ -139,39 +137,53 @@ PROCESS_THREAD(rpl_node_process, ev, data)
     uip_ds6_addr_t *addr_desc = uip_ds6_get_global(ADDR_PREFERRED);
     if(addr_desc != NULL) {
       globaladdr = &addr_desc->ipaddr;
-      printf("DAG Node: Local address: ");
-      uip_debug_ip6addr_print(globaladdr);
+      //printf("DAG Node: Local address: ");
+      //uip_debug_ip6addr_print(globaladdr);
       printf("\n");
       dag = rpl_get_any_dag();
-      printf("DAG Node: RPL root address: ");
-      uip_debug_ipaddr_print(&dag->dag_id);
+      //printf("DAG Node: RPL root address: ");
+      //uip_debug_ipaddr_print(&dag->dag_id);
       printf("\n");
-      if(dag) {
+      if(dag)
+      {
         uip_ipaddr_copy(&dest_addr, globaladdr); //не понимаю, что оно делает.
         memcpy(&dest_addr.u8[8], &dag->dag_id.u8[8], sizeof(uip_ipaddr_t) / 2); //не понимаю, что оно делает.
-        found_rpl_root = 1;
+
+        send_join_packet(dest_addr, dag_node_connection);
+
+        leds_on(LED_A);
+        message_for_button.connected = 1;
+        message_for_button.root_addr = &dest_addr;
+        process_post(&udp_button_process, PROCESS_EVENT_CONTINUE, &message_for_button);
+
+        printf("DAG Node: Sending data to RPL root: ");
+        uip_debug_ipaddr_print(&dest_addr);
+        printf("\n");
+      }
+      else
+      {
+        printf("DAG Node: RPL Root not found\n");
+        leds_off(LED_A);
+        message_for_button.connected = 0;
+        message_for_button.root_addr = NULL;
+        process_post(&udp_button_process, PROCESS_EVENT_CONTINUE, &message_for_button);
       }
     }
+    else
+    {
+        printf("DAG Node: RPL Root not found\n");
+        leds_off(LED_A);
+        message_for_button.connected = 0;
+        message_for_button.root_addr = NULL;
+        process_post(&udp_button_process, PROCESS_EVENT_CONTINUE, &message_for_button);
+    }
+
 
     if(found_rpl_root == 1) {
-      send_join_packet(dest_addr, dag_node_connection);
-
-      leds_on(LED_A);
-      message_for_button.connected = 1;
-      message_for_button.root_addr = &dest_addr;
-      process_post(&udp_button_process, PROCESS_EVENT_CONTINUE, &message_for_button);
-
-      printf("DAG Node: Sending data to ");
-      uip_debug_ipaddr_print(&dest_addr);
-      printf("\n");
 
     } 
     else {
-      printf("DAG Node: RPL Root not found\n");
-      leds_off(LED_A);
-      message_for_button.connected = 0;
-      message_for_button.root_addr = NULL;
-      process_post(&udp_button_process, PROCESS_EVENT_CONTINUE, &message_for_button);
+
     }
   }
 
