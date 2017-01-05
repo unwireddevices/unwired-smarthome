@@ -61,7 +61,7 @@
 							<option id="cdt.managedbuild.option.gnu.cross.prefix.1248279874" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix"/>
 							<option id="cdt.managedbuild.option.gnu.cross.path.428130442" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.1525091873" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
-							<builder arguments="ud-button.hex" buildPath="${workspace_loc:/Contiki UnwiredD}/examples/unwired_smarthome/" command="/Applications/ti/uniflash_osx_64/flash_cc2650.sh" id="cdt.managedbuild.builder.gnu.cross.849721132" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+							<builder arguments="ud-button.hex" buildPath="${workspace_loc:/Contiki UnwiredD}/examples/unwired_smarthome/" command="/Applications/Ti/Uniflash/flash_cc2650.sh" id="cdt.managedbuild.builder.gnu.cross.849721132" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1698235337" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.898807944" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -102,7 +102,7 @@
 							<option id="cdt.managedbuild.option.gnu.cross.prefix.799329705" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix"/>
 							<option id="cdt.managedbuild.option.gnu.cross.path.491746165" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.619856224" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
-							<builder arguments="ud-rpl_root.hex" buildPath="${workspace_loc:/Contiki UnwiredD}/examples/unwired_smarthome/" command="/Applications/ti/uniflash_osx_64/flash_cc2650.sh" id="cdt.managedbuild.builder.gnu.cross.874782236" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+							<builder arguments="ud-rpl_root.hex" buildPath="${workspace_loc:/Contiki UnwiredD}/examples/unwired_smarthome/" command="/Applications/Ti/Uniflash/flash_cc2650.sh" id="cdt.managedbuild.builder.gnu.cross.874782236" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.1996031678" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.120044102" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -133,17 +133,9 @@
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
-		<configuration configurationName="button"/>
-		<configuration configurationName="button(CC2650)">
-			<resource resourceType="PROJECT" workspacePath="/Contiki UnwiredD"/>
-		</configuration>
+		<configuration configurationName="Build on SRF06-CC26"/>
 		<configuration configurationName="ud-button"/>
-		<configuration configurationName="rpl_root(CC2650)">
-			<resource resourceType="PROJECT" workspacePath="/Contiki UnwiredD"/>
-		</configuration>
-		<configuration configurationName="RPL_Root">
-			<resource resourceType="PROJECT" workspacePath="/Contiki UnwiredD"/>
-		</configuration>
+		<configuration configurationName="Flash ud-rpl_root"/>
 		<configuration configurationName="rpl_root">
 			<resource resourceType="PROJECT" workspacePath="/Contiki UnwiredD"/>
 		</configuration>
@@ -156,10 +148,21 @@
 		<configuration configurationName="sensniff">
 			<resource resourceType="PROJECT" workspacePath="/Contiki UnwiredD"/>
 		</configuration>
-		<configuration configurationName="sensniff(CC2650)"/>
 		<configuration configurationName="Default">
 			<resource resourceType="PROJECT" workspacePath="/Contiki UnwiredD"/>
 		</configuration>
+		<configuration configurationName="Flash ud-button"/>
+		<configuration configurationName="button"/>
+		<configuration configurationName="button(CC2650)">
+			<resource resourceType="PROJECT" workspacePath="/Contiki UnwiredD"/>
+		</configuration>
+		<configuration configurationName="rpl_root(CC2650)">
+			<resource resourceType="PROJECT" workspacePath="/Contiki UnwiredD"/>
+		</configuration>
+		<configuration configurationName="RPL_Root">
+			<resource resourceType="PROJECT" workspacePath="/Contiki UnwiredD"/>
+		</configuration>
+		<configuration configurationName="sensniff(CC2650)"/>
 	</storageModule>
 	<storageModule moduleId="null.devicePreference"/>
 	<storageModule moduleId="cpuFamily"/>
