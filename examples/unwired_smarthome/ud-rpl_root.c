@@ -57,12 +57,15 @@
 #include "button-sensor.h"
 #include "board-peripherals.h"
 
-#define UDP_PORT 4003
+#define UDP_DAG_PORT       5005
+#define UDP_DATA_PORT      4004
 
 #define DEBUG 1
 #include "net/ip/uip-debug_UD.h"
 
-static struct simple_udp_connection unicast_connection;
+static struct simple_udp_connection dag_root_connection;
+static struct simple_udp_connection data_connection;
+
 SENSORS(&button_a_sensor);
 
 /*---------------------------------------------------------------------------*/
@@ -70,7 +73,7 @@ PROCESS(rpl_root_process, "Unwired RPL root and udp data receiver");
 AUTOSTART_PROCESSES(&rpl_root_process);
 /*---------------------------------------------------------------------------*/
 static void
-receiver(struct simple_udp_connection *c,
+udp_dag_root_receiver(struct simple_udp_connection *c,
          const uip_ipaddr_t *sender_addr,
          uint16_t sender_port,
          const uip_ipaddr_t *receiver_addr,
@@ -78,7 +81,21 @@ receiver(struct simple_udp_connection *c,
          const uint8_t *data,
          uint16_t datalen)
 {
-  printf("Data received from ");
+  printf("DAG data received from ");
+  uip_debug_ipaddr_print(sender_addr);
+  printf(" on port %d from port %d with length %d: '%s'\n", receiver_port, sender_port, datalen, data);
+}
+
+static void
+udp_data_receiver(struct simple_udp_connection *c,
+         const uip_ipaddr_t *sender_addr,
+         uint16_t sender_port,
+         const uip_ipaddr_t *receiver_addr,
+         uint16_t receiver_port,
+         const uint8_t *data,
+         uint16_t datalen)
+{
+  printf("User data received from ");
   uip_debug_ipaddr_print(sender_addr);
   printf(" on port %d from port %d with length %d: '%s'\n", receiver_port, sender_port, datalen, data);
 }
@@ -132,7 +149,7 @@ PROCESS_THREAD(rpl_root_process, ev, data)
   uip_ipaddr_t *ipaddr;
 
   PROCESS_BEGIN();
-  printf("Unwired RLP root and udp reciever\n");
+  printf("Unwired RLP root and UDP data receiver\n");
 
   ipaddr = set_global_address();
 
@@ -140,7 +157,8 @@ PROCESS_THREAD(rpl_root_process, ev, data)
 
   create_rpl_dag(ipaddr);
 
-  simple_udp_register(&unicast_connection, UDP_PORT, NULL, UDP_PORT, receiver);
+  simple_udp_register(&dag_root_connection, UDP_DAG_PORT, NULL, UDP_DAG_PORT, udp_dag_root_receiver);
+  simple_udp_register(&data_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_data_receiver);
 
 
   while(1) {

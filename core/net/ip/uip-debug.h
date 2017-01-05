@@ -47,6 +47,8 @@
 #include <stdio.h>
 
 void uip_debug_ipaddr_print(const uip_ipaddr_t *addr);
+void uip_debug_ip6addr_print(const uip_ipaddr_t *addr);
+
 
 #if (DEBUG) & DEBUG_PRINT
 #define PRINT6ADDR(addr) uip_debug_ipaddr_print(addr)

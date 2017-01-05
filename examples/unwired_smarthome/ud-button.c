@@ -56,6 +56,7 @@
 #include <ctype.h>
 
 #include "button-sensor.h"
+#include "cc26xx/board.h"
 #include "board-peripherals.h"
 #include "dev/watchdog.h"
 #include "simple-udp.h"
@@ -67,9 +68,8 @@
 #define DEBUG 1
 #include "net/ip/uip-debug_UD.h"
 /*---------------------------------------------------------------------------*/
-#define UDP_CLIENT_PORT 	4000
-#define UDP_SERVER_PORT   4003
-#define PROTOCOL_VERSION 0x01 //protocol version 1
+#define UDP_DATA_PORT       4004
+#define PROTOCOL_VERSION    0x01 //protocol version 1
 /*---------------------------------------------------------------------------*/
 uip_ip6addr_t dest_ip_addr;
 uint8_t connected_flag = 0;
@@ -80,9 +80,9 @@ const int device_version = 0x01; //device version 1
 const int device_sleep_type = 0x03; //device sleep type(03 - sleep, int)
 const int device_type = 0x01; //device type(01 - buttons/switches)
 const int device_ability_1 = 0b10000000; //device ability(1 - buttons)
-const int device_ability_2 = 0b00000000; //device ability
-const int device_ability_3 = 0b00000000; //device ability
-const int device_ability_4 = 0b00000000; //device ability
+const int device_ability_2 = 0b00000000; //device ability(none)
+const int device_ability_3 = 0b00000000; //device ability(none)
+const int device_ability_4 = 0b00000000; //device ability(none)
 
 /*---------------------------------------------------------------------------*/
 SENSORS(&button_a_sensor, &button_b_sensor, &button_c_sensor, &button_d_sensor, &button_e_sensor); //register button sensors
@@ -97,21 +97,23 @@ ipv6_addr_copy(uip_ip6addr_t *dest, uip_ip6addr_t *source)
 }
 
 void
-send_button_status_packet(const uip_ip6addr_t dest_addr, struct simple_udp_connection button_connection)
+send_button_status_packet(const uip_ip6addr_t dest_addr, struct simple_udp_connection button_connection, char button_number)
 {
-    char buf[8];
+    char buf[10];
     //---header start---
     buf[0] = PROTOCOL_VERSION;
     buf[1] = device_version;
     buf[2] = 0x02; //data type(02 - data from sensors)
     //---header end---
+
     //---data start---
-    buf[3] = device_type;
-    buf[4] = device_sleep_type;
-    buf[5] = device_ability_1;
-    buf[6] = device_ability_2;
-    buf[7] = device_ability_3;
-    buf[7] = device_ability_4;
+    buf[3] = 0x01; //Ability data number(0x01 - buttons status)
+    buf[4] = 0x00; //reserved
+    buf[5] = button_number; //Button number(0x00 - button A)
+    buf[6] = 0x01; //Button status(0x01 - button fast pressed)
+    buf[7] = 0x00; //reserved
+    buf[8] = 0x00; //reserved
+    buf[9] = 0x00; //reserved
     //---data end---
     simple_udp_sendto(&button_connection, buf, strlen(buf) + 1, &dest_addr);
 }
@@ -122,7 +124,8 @@ PROCESS_THREAD(udp_button_process, ev, data)
   PROCESS_BEGIN();
   PRINTF("Buttons control process: started\n");
 
-  simple_udp_register(&button_connection, UDP_CLIENT_PORT, NULL, UDP_SERVER_PORT, NULL); //register simple_udp_connection for button event
+  simple_udp_register(&button_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, NULL);
+  //register simple_udp_connection for button event
 
   PROCESS_PAUSE();
   
@@ -147,9 +150,7 @@ PROCESS_THREAD(udp_button_process, ev, data)
           PRINTF("Buttons control process: send message to RPL root node on ");
           PRINT6ADDR(&dest_ip_addr);
           PRINTF("\n");
-          send_button_status_packet(dest_ip_addr, button_connection);
-          //sprintf(udp_message_buf, "Button A", 1);
-          //simple_udp_sendto(&button_connection, udp_message_buf, strlen(udp_message_buf) + 1, &dest_ip_addr);
+          send_button_status_packet(dest_ip_addr, button_connection, 0x01);
         }
         led_blink(LED_B);
       }

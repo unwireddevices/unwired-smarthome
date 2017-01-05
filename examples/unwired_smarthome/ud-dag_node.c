@@ -40,6 +40,9 @@
 #include "contiki-net.h"
 #include "net/rpl/rpl.h"
 #include "net/ip/uip.h"
+#include "dev/leds.h"
+#include "cc26xx/board.h"
+#include "net/ip/uip-debug.h"
 
 #include <string.h>
 #include <stdio.h>
@@ -54,8 +57,7 @@
 
 #define PROTOCOL_VERSION 0x01 //protocol version 1
 
-#define UDP_DAG_CLIENT_PORT   5000
-#define UDP_DAG_SERVER_PORT   5005
+#define UDP_DAG_PORT       5005
 
 #define MAX_PAYLOAD_LEN    60
 
@@ -70,7 +72,7 @@ PROCESS(rpl_node_process, "RPL-node process");
 void
 send_join_packet(const uip_ip6addr_t dest_addr, struct simple_udp_connection dag_node_connection)
 {
-    char buf[9];
+    char buf[10];
     //---header start---
     buf[0] = PROTOCOL_VERSION;
     buf[1] = device_version;
@@ -83,12 +85,15 @@ send_join_packet(const uip_ip6addr_t dest_addr, struct simple_udp_connection dag
     buf[6] = device_ability_2;
     buf[7] = device_ability_3;
     buf[8] = device_ability_4;
+    buf[9] = 0x00; //reserved
     //---data end---
     simple_udp_sendto(&dag_node_connection, buf, strlen(buf) + 1, &dest_addr);
+
+    //rpl_get_parent() - get parent
 }
 
 static void
-udp_dag_receiver(struct simple_udp_connection *c,
+udp_dag_node_receiver(struct simple_udp_connection *c,
          const uip_ipaddr_t *sender_addr,
          uint16_t sender_port,
          const uip_ipaddr_t *receiver_addr,
@@ -113,7 +118,9 @@ PROCESS_THREAD(rpl_node_process, ev, data)
   connect_info_t message_for_button;
   message_for_button.connected = 0;
   message_for_button.root_addr = NULL;
-  simple_udp_register(&dag_node_connection, UDP_DAG_CLIENT_PORT, NULL, UDP_DAG_SERVER_PORT, udp_dag_receiver); //register simple_udp_connection for button event
+
+  //register simple_udp_connection for dag_node
+  simple_udp_register(&dag_node_connection, UDP_DAG_PORT, NULL, UDP_DAG_PORT, udp_dag_node_receiver);
   
   printf("DAG Node: started\n");
 
@@ -133,11 +140,11 @@ PROCESS_THREAD(rpl_node_process, ev, data)
     if(addr_desc != NULL) {
       globaladdr = &addr_desc->ipaddr;
       printf("DAG Node: Local address: ");
-      uip_debug_ipaddr_print(globaladdr);
+      uip_debug_ip6addr_print(globaladdr);
       printf("\n");
       dag = rpl_get_any_dag();
       printf("DAG Node: RPL root address: ");
-      uip_debug_ipaddr_print(dag); 
+      uip_debug_ipaddr_print(&dag->dag_id);
       printf("\n");
       if(dag) {
         uip_ipaddr_copy(&dest_addr, globaladdr); //не понимаю, что оно делает.
