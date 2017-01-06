@@ -58,13 +58,14 @@
 #define UDP_DATA_PORT      4004
 #define PROTOCOL_VERSION   0x01 //protocol version 1
 #define DEVICE_VERSION     0x01 //device version 1
-
-#define INTERVAL   (5 * CLOCK_SECOND)
+#define MIN_INTERVAL       (5 * CLOCK_SECOND)
+#define MAX_INTERVAL       (50 * CLOCK_SECOND)
 
 /*---------------------------------------------------------------------------*/
 struct simple_udp_connection udp_connection; //struct for simple_udp_send
 uint8_t dag_active = 0; //set to 1, if rpl root found and answer to join packet
 uip_ip6addr_t root_addr;
+clock_time_t dag_interval = MIN_INTERVAL;
 /*---------------------------------------------------------------------------*/
 PROCESS(dag_node_process, "DAG-node process");
 /*---------------------------------------------------------------------------*/
@@ -163,7 +164,17 @@ PROCESS_THREAD(dag_node_process, ev, data)
   printf("DAG Node: started\n");
 
   while(1) {
-    etimer_set(&dag_timer, INTERVAL);
+     if (dag_active == 0 && dag_interval != MIN_INTERVAL) {
+         dag_interval = MIN_INTERVAL;
+         printf("DAG: Change timer to min interval\n");
+     }
+     if (dag_active == 1 && dag_interval != MAX_INTERVAL) {
+         dag_interval = MAX_INTERVAL;
+         printf("DAG: Change timer to max interval\n");
+
+     }
+
+    etimer_set(&dag_timer, dag_interval);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&dag_timer));
     dag_root_find();
 
