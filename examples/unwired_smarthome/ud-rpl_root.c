@@ -70,7 +70,7 @@ static struct simple_udp_connection udp_connection;
 
 #include "ti-lib.h"
 
-SENSORS(&button_a_sensor);
+SENSORS(&button_e_sensor);
 
 /*---------------------------------------------------------------------------*/
 PROCESS(rpl_root_process, "Unwired RPL root and udp data receiver");
@@ -112,16 +112,27 @@ udp_data_receiver(struct simple_udp_connection *connection,
   //printf(" on port %d: ", receiver_port);
   //printf("0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X \n",
   //       data[0], data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
+    printf("DAGROOTRAW: ");
+    uip_debug_ipaddr_print(sender_addr);
+    printf(" 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X \n",
+           data[0], data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
 
   if (data[0] == 0x01 && data[1] == 0x01) {  //device and protocol version(0x01, 0x01)
       switch ( data[2] ) {
       case 0x01: //data type(0x01 - Join network packet)
-          printf("DEBUG: DAG join packet received, confirmation packet sending\n");
+          printf("DEBUG: DAG join packet from ");
+          uip_debug_ipaddr_print(sender_addr);
+          printf(" received, confirmation packet sending\n");
+
           send_confirmation_packet(sender_addr, connection);
           break;
       case 0x02: //data type(0x02 - data from sensors)
-          printf("DEBUG: data from sensor received, confirmation packet NOT sending\n");
-          printf("Button: 0x%02X type event: 0x%02X\n", data[5], data[6]);
+          printf("DEBUG: data sensor from ");
+          uip_debug_ipaddr_print(sender_addr);
+          printf(" received, not confirmation send\n");
+          printf("DEBUG: type sensor: 0x%02X, type event: 0x%02X, number sensor: 0x%02X  \n", data[3], data[6], data[5]);
+
+
           //send_confirmation_packet(sender_addr, connection);
           break;
       default:
@@ -190,13 +201,20 @@ PROCESS_THREAD(rpl_root_process, ev, data)
 
   simple_udp_register(&udp_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_data_receiver);
 
+  //ti_lib_ioc_pin_type_gpio_output(IOID_22);
+  //ti_lib_gpio_set_dio(IOID_22);
+  //ti_lib_gpio_set_output_enable_dio(IOID_3, GPIO_OUTPUT_ENABLE);
+
+
   leds_on(LED_A);
-  leds_on(LED_B);
-  leds_on(LED_C);
-  leds_on(LED_D);
 
   while(1) {
     PROCESS_WAIT_EVENT();
+    if(ev == sensors_event) {
+        if(data == &button_e_sensor) {
+            PRINTF("Buttons control process: Button E\n");
+        }
+    }
   }
   PROCESS_END();
 }
