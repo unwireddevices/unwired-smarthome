@@ -120,8 +120,44 @@ PROCESS_THREAD(udp_button_process, ev, data)
   PROCESS_BEGIN();
   PRINTF("Unwired buttons device. HELL-IN-CODE free. I hope.\n");
 
+/*
+  //ti_lib_ioc_pin_type_gpio_output(IOID_1);
+  //ti_lib_ioc_pin_type_gpio_output(IOID_2);
+  //ti_lib_ioc_pin_type_gpio_output(IOID_3);
+  ti_lib_ioc_pin_type_gpio_output(IOID_4);
+  ti_lib_ioc_pin_type_gpio_output(IOID_5);
+  ti_lib_ioc_pin_type_gpio_output(IOID_6);
+  //ti_lib_ioc_pin_type_gpio_output(IOID_7);
+  ti_lib_ioc_pin_type_gpio_output(IOID_8);
+  ti_lib_ioc_pin_type_gpio_output(IOID_9);
+  ti_lib_ioc_pin_type_gpio_output(IOID_10);
+  //ti_lib_ioc_pin_type_gpio_output(IOID_11);
+  //ti_lib_ioc_pin_type_gpio_output(IOID_12);
+  //ti_lib_ioc_pin_type_gpio_output(IOID_13);
+  ti_lib_ioc_pin_type_gpio_output(IOID_14);
+  //ti_lib_ioc_pin_type_gpio_output(IOID_15);
+  ti_lib_ioc_pin_type_gpio_output(IOID_16);
+  ti_lib_ioc_pin_type_gpio_output(IOID_17);
+  //ti_lib_ioc_pin_type_gpio_output(IOID_18);
+  //ti_lib_ioc_pin_type_gpio_output(IOID_19);
+  ti_lib_ioc_pin_type_gpio_output(IOID_20);
+  ti_lib_ioc_pin_type_gpio_output(IOID_21);
+  ti_lib_ioc_pin_type_gpio_output(IOID_22);
+  ti_lib_ioc_pin_type_gpio_output(IOID_23);
+  //ti_lib_ioc_pin_type_gpio_output(IOID_24);
+  //ti_lib_ioc_pin_type_gpio_output(IOID_25);
+  //ti_lib_ioc_pin_type_gpio_output(IOID_26);
+  //ti_lib_ioc_pin_type_gpio_output(IOID_27);
+  ti_lib_ioc_pin_type_gpio_output(IOID_28);
+  ti_lib_ioc_pin_type_gpio_output(IOID_29);
+  ti_lib_ioc_pin_type_gpio_output(IOID_30);
+  ti_lib_ioc_pin_type_gpio_output(IOID_31);
+  */
+
   PROCESS_PAUSE();
   
+
+
   while(1) {
     PROCESS_YIELD();
     if(ev == sensors_event) {
