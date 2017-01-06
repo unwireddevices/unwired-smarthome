@@ -49,31 +49,61 @@
 #include "simple-udp.h"
 
 #include "ud-button.h"
+#include "ud-dag_node.h"
 
 /*---------------------------------------------------------------------------*/
 #define DEBUG 1
 #include "net/ip/uip-debug_UD.h"
 /*---------------------------------------------------------------------------*/
 
-#define PROTOCOL_VERSION 0x01 //protocol version 1
+#define UDP_DATA_PORT      4004
+#define PROTOCOL_VERSION   0x01 //protocol version 1
+#define DEVICE_VERSION     0x01 //device version 1
 
-#define UDP_DAG_PORT       5005
-
-#define SEND_INTERVAL   (10 * CLOCK_SECOND)
-#define SEND_INTERVAL_RANDOM    (random_rand() % (SEND_INTERVAL))
+#define INTERVAL   (5 * CLOCK_SECOND)
 
 /*---------------------------------------------------------------------------*/
-static struct simple_udp_connection dag_node_connection; //struct for simple_udp_send
+struct simple_udp_connection udp_connection; //struct for simple_udp_send
+uint8_t dag_active = 0; //set to 1, if rpl root found and answer to join packet
+uip_ip6addr_t root_addr;
 /*---------------------------------------------------------------------------*/
-PROCESS(rpl_node_process, "RPL-node process");
+PROCESS(dag_node_process, "DAG-node process");
 /*---------------------------------------------------------------------------*/
+static void
+udp_receiver(struct simple_udp_connection *c,
+         const uip_ipaddr_t *sender_addr,
+         uint16_t sender_port,
+         const uip_ipaddr_t *receiver_addr,
+         uint16_t receiver_port,
+         const uint8_t *data,
+         uint16_t datalen)
+{
+  //printf("DEBUG: DAG data received from ");
+  //uip_debug_ipaddr_print(sender_addr);
+  //printf(" on port %d: ", receiver_port);
+  //printf("0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X \n",
+  //       data[0], data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
+
+  if (data[0] == 0x01 && data[1] == 0x01) { //device and protocol version(0x01, 0x01)
+      if (data[2] == 0x03) { //data type(0x03 - Data received confirmation)
+          printf("DEBUG: DAG join packet confirmation received, DAG active\n");
+          leds_on(LED_A);
+          dag_active = 1;
+          root_addr = *sender_addr;
+      }
+  }
+  else  {
+      printf("DEBUG: Incompatible device or protocol version!\n");
+  }
+}
+
 void
-send_join_packet(const uip_ip6addr_t dest_addr, struct simple_udp_connection dag_node_connection)
+send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *connection)
 {
     char buf[10];
     //---header start---
     buf[0] = PROTOCOL_VERSION;
-    buf[1] = device_version;
+    buf[1] = DEVICE_VERSION;
     buf[2] = 0x01; //data type(01 - net join packet + device profile)
     //---header end---
     //---data start---
@@ -85,106 +115,61 @@ send_join_packet(const uip_ip6addr_t dest_addr, struct simple_udp_connection dag
     buf[8] = device_ability_4;
     buf[9] = 0xFF; //reserved
     //---data end---
-    simple_udp_sendto(&dag_node_connection, buf, strlen(buf) + 1, &dest_addr);
+    simple_udp_sendto(connection, buf, strlen(buf) + 1, dest_addr);
 
     //rpl_get_parent() - get parent
 }
 
 static void
-udp_dag_node_receiver(struct simple_udp_connection *c,
-         const uip_ipaddr_t *sender_addr,
-         uint16_t sender_port,
-         const uip_ipaddr_t *receiver_addr,
-         uint16_t receiver_port,
-         const uint8_t *data,
-         uint16_t datalen)
+dag_root_find(void)
 {
-  printf("Data received from ");
-  uip_debug_ipaddr_print(sender_addr);
-  printf(" on port %d from port %d with length %d: '%s'\n", receiver_port, sender_port, datalen, data);
+    rpl_dag_t *dag;
+    uip_ip6addr_t addr;
+
+    uip_ds6_addr_t *addr_desc = uip_ds6_get_global(ADDR_PREFERRED);
+    if(addr_desc != NULL) {
+        dag = rpl_get_any_dag();
+        if(dag) {
+            led_blink(LED_A);
+            if(dag->instance->def_route) {
+                //send_button_status_packet(&dag->instance->def_route->ipaddr, &udp_connection, 0x01);
+                if (dag_active == 0) {
+                    uip_ip6addr_copy(&addr, &dag->instance->def_route->ipaddr);
+                    PRINTF("RPL: default route destination: ");
+                    PRINT6ADDR(&addr);
+                    PRINTF("\n");
+
+                    PRINTF("DAG node: send join packet to root \n");
+                    send_join_packet(&addr, &udp_connection);
+                }
+            }
+            else
+            {
+                PRINTF("RPL: address destination: none \n");
+                dag_active = 0;
+            }
+        }
+    }
+
+
 }
 
 /*---------------------------------------------------------------------------*/
 
-PROCESS_THREAD(rpl_node_process, ev, data)
+PROCESS_THREAD(dag_node_process, ev, data)
 {
   PROCESS_BEGIN();
 
-  static struct etimer periodic_timer;
-  static struct etimer send_timer;
+  static struct etimer dag_timer;
+  simple_udp_register(&udp_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_receiver);
 
-  connect_info_t message_for_button;
-  message_for_button.connected = 0;
-  message_for_button.root_addr = NULL;
-
-  //register simple_udp_connection for dag_node
-  simple_udp_register(&dag_node_connection, UDP_DAG_PORT, NULL, UDP_DAG_PORT, udp_dag_node_receiver);
-  
   printf("DAG Node: started\n");
 
-  etimer_set(&periodic_timer, SEND_INTERVAL_RANDOM);
-  PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&periodic_timer));
-  etimer_reset(&periodic_timer);
   while(1) {
-    etimer_set(&send_timer, SEND_INTERVAL);
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_timer));
+    etimer_set(&dag_timer, INTERVAL);
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&dag_timer));
+    dag_root_find();
 
-    uip_ip6addr_t *globaladdr = NULL;
-    rpl_dag_t *dag;
-    static uip_ip6addr_t dest_addr;
-    int found_rpl_root = 0;
-
-    uip_ds6_addr_t *addr_desc = uip_ds6_get_global(ADDR_PREFERRED);
-    if(addr_desc != NULL) {
-      globaladdr = &addr_desc->ipaddr;
-      //printf("DAG Node: Local address: ");
-      //uip_debug_ip6addr_print(globaladdr);
-      printf("\n");
-      dag = rpl_get_any_dag();
-      //printf("DAG Node: RPL root address: ");
-      //uip_debug_ipaddr_print(&dag->dag_id);
-      printf("\n");
-      if(dag)
-      {
-        uip_ipaddr_copy(&dest_addr, globaladdr); //не понимаю, что оно делает.
-        memcpy(&dest_addr.u8[8], &dag->dag_id.u8[8], sizeof(uip_ipaddr_t) / 2); //не понимаю, что оно делает.
-
-        send_join_packet(dest_addr, dag_node_connection);
-
-        leds_on(LED_A);
-        message_for_button.connected = 1;
-        message_for_button.root_addr = &dest_addr;
-        process_post(&udp_button_process, PROCESS_EVENT_CONTINUE, &message_for_button);
-
-        printf("DAG Node: Sending data to RPL root: ");
-        uip_debug_ipaddr_print(&dest_addr);
-        printf("\n");
-      }
-      else
-      {
-        printf("DAG Node: RPL Root not found\n");
-        leds_off(LED_A);
-        message_for_button.connected = 0;
-        message_for_button.root_addr = NULL;
-        process_post(&udp_button_process, PROCESS_EVENT_CONTINUE, &message_for_button);
-      }
-    }
-    else
-    {
-        printf("DAG Node: RPL Root not found\n");
-        leds_off(LED_A);
-        message_for_button.connected = 0;
-        message_for_button.root_addr = NULL;
-        process_post(&udp_button_process, PROCESS_EVENT_CONTINUE, &message_for_button);
-    }
-
-
-    if(found_rpl_root == 1) {
-
-    } 
-    else {
-
-    }
   }
 
   PROCESS_END();

@@ -31,9 +31,9 @@
 /*---------------------------------------------------------------------------*/
 /**
  * \file
- *         Header file for the UDP server for cc26xx/cc13xx 
+ *         Header file
  * \author
- *         Mikhail Churikov mc@unwds.com
+ *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
 /*---------------------------------------------------------------------------*/
 #ifndef UDP_BUTTON_H_
@@ -44,19 +44,16 @@
 /*---------------------------------------------------------------------------*/
 PROCESS_NAME(udp_button_process);
 
-const int device_version;
-const int device_sleep_type;
-const int device_type;
-const int device_ability_1;
-const int device_ability_2;
-const int device_ability_3;
-const int device_ability_4;
 
+void send_button_status_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *connection, char button_number);
 
-typedef struct 
-{
-  uint8_t connected;
-  uip_ip6addr_t *root_addr; 
-} connect_info_t;
+const uint8_t device_version;
+const uint8_t device_sleep_type;
+const uint8_t device_type;
+const uint8_t device_ability_1;
+const uint8_t device_ability_2;
+const uint8_t device_ability_3;
+const uint8_t device_ability_4;
+
 /*---------------------------------------------------------------------------*/
 #endif /* UDP_LEDS_H_ */

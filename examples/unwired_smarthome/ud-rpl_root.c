@@ -57,14 +57,15 @@
 #include "button-sensor.h"
 #include "board-peripherals.h"
 
-#define UDP_DAG_PORT       5005
 #define UDP_DATA_PORT      4004
+#define PROTOCOL_VERSION   0x01 //protocol version 1
+#define DEVICE_VERSION     0x01 //device version 1
 
 #define DEBUG 1
 #include "net/ip/uip-debug_UD.h"
 
-static struct simple_udp_connection dag_root_connection;
-static struct simple_udp_connection data_connection;
+static struct simple_udp_connection udp_connection;
+
 
 SENSORS(&button_a_sensor);
 
@@ -72,40 +73,30 @@ SENSORS(&button_a_sensor);
 PROCESS(rpl_root_process, "Unwired RPL root and udp data receiver");
 AUTOSTART_PROCESSES(&rpl_root_process);
 /*---------------------------------------------------------------------------*/
-
-static void
-udp_dag_root_receiver(struct simple_udp_connection *c,
-         const uip_ipaddr_t *sender_addr,
-         uint16_t sender_port,
-         const uip_ipaddr_t *receiver_addr,
-         uint16_t receiver_port,
-         const uint8_t *data,
-         uint16_t datalen)
+void
+send_confirmation_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *connection)
 {
-  printf("DEBUG: DAG data received from ");
-  uip_debug_ipaddr_print(sender_addr);
-  printf(" on port %d: ", receiver_port);
-  printf("0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X \n",
-         data[0],
-         data[1],
-         data[2],
-         data[3],
-         data[4],
-         data[5],
-         data[6],
-         data[7],
-         data[8],
-         data[9]);
-  if (data[0] != 0x01) {
-      printf("Incompatible protocol version!");
-  }
-  if (data[1] != 0x01) {
-      printf("Incompatible device version!");
-  }
+    char buf[10];
+    //---header start---
+    buf[0] = PROTOCOL_VERSION;
+    buf[1] = DEVICE_VERSION;
+    buf[2] = 0x03; //data type(0x03 - Data received confirmation)
+    //---header end---
+    //---data start---
+    buf[3] = 0xFF; //reserved
+    buf[4] = 0xFF; //reserved
+    buf[5] = 0xFF; //reserved
+    buf[6] = 0xFF; //reserved
+    buf[7] = 0xFF; //reserved
+    buf[8] = 0xFF; //reserved
+    buf[9] = 0xFF; //reserved
+    //---data end---
+    simple_udp_sendto(connection, buf, strlen(buf) + 1, dest_addr);
 }
 
+
 static void
-udp_data_receiver(struct simple_udp_connection *c,
+udp_data_receiver(struct simple_udp_connection *connection,
          const uip_ipaddr_t *sender_addr,
          uint16_t sender_port,
          const uip_ipaddr_t *receiver_addr,
@@ -113,9 +104,31 @@ udp_data_receiver(struct simple_udp_connection *c,
          const uint8_t *data,
          uint16_t datalen)
 {
-  printf("User data received from ");
-  uip_debug_ipaddr_print(sender_addr);
-  printf(" on port %d from port %d with length %d: '%s'\n", receiver_port, sender_port, datalen, data);
+  //printf("DEBUG: DAG data received from ");
+  //uip_debug_ipaddr_print(sender_addr);
+  //printf(" on port %d: ", receiver_port);
+  //printf("0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X \n",
+  //       data[0], data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
+
+  if (data[0] == 0x01 && data[1] == 0x01) {  //device and protocol version(0x01, 0x01)
+      switch ( data[2] ) {
+      case 0x01: //data type(0x01 - Join network packet)
+          printf("DEBUG: DAG join packet received, confirmation packet sending\n");
+          send_confirmation_packet(sender_addr, connection);
+          break;
+      case 0x02: //data type(0x02 - data from sensors)
+          printf("DEBUG: data from sensor received, confirmation packet NOT sending\n");
+          printf("Button: 0x%02X type event: 0x%02X\n", data[5], data[6]);
+          //send_confirmation_packet(sender_addr, connection);
+          break;
+      default:
+        break;
+      }
+  }
+  else
+  {
+      printf("Incompatible device or protocol version!\n");
+  }
 }
 /*---------------------------------------------------------------------------*/
 static uip_ipaddr_t *
@@ -155,9 +168,9 @@ create_rpl_dag(uip_ipaddr_t *ipaddr)
     dag = rpl_get_any_dag();
     uip_ip6addr(&prefix, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
     rpl_set_prefix(dag, &prefix, 64);
-    printf("Created a new RPL DAG\n");
+    printf("Created a new RPL DAG, i'm root!\n");
   } else {
-    printf("Failed to create a new RPL DAG\n");
+    printf("Failed to create a new RPL DAG :(\n");
   }
 }
 
@@ -167,16 +180,12 @@ PROCESS_THREAD(rpl_root_process, ev, data)
   uip_ipaddr_t *ipaddr;
 
   PROCESS_BEGIN();
-  printf("Unwired RLP root and UDP data receiver\n");
+  printf("Unwired RLP root and UDP data receiver. HELL-IN-CODE free. I hope.\n");
 
   ipaddr = set_global_address();
-
-  printf("Creating RPL DAG...\n");
-
   create_rpl_dag(ipaddr);
 
-  simple_udp_register(&dag_root_connection, UDP_DAG_PORT, NULL, UDP_DAG_PORT, udp_dag_root_receiver);
-  simple_udp_register(&data_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_data_receiver);
+  simple_udp_register(&udp_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_data_receiver);
 
   while(1) {
     PROCESS_WAIT_EVENT();
