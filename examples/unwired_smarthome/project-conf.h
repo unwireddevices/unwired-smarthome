@@ -48,10 +48,14 @@
 #undef RF_CORE_CONF_CHANNEL
 #define RF_CORE_CONF_CHANNEL					    26
 
-#undef RF_BLE_CONF_ENABLED
-#define RF_BLE_CONF_ENABLED						0
 #undef STARTUP_CONF_VERBOSE
 #define STARTUP_CONF_VERBOSE					    1
+
+/* LEAF mode */
+#define RF_BLE_CONF_ENABLED                      0
+#define UIP_DS6_CONF_PERIOD                      CLOCK_SECOND //def = (CLOCK_SECOND/10)
+#define UIP_CONF_TCP                             0
+#define RPL_CONF_LEAF_ONLY                       0
 
 /* MAC tune option */
 #undef NETSTACK_CONF_MAC
@@ -61,7 +65,9 @@
 #undef NETSTACK_CONF_FRAMER
 #define NETSTACK_CONF_FRAMER					    framer_802154 //framer_nullmac
 #undef NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE
-#define NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE	    8 //in Hz, 2, 4, 8, 16, 32...
+#define NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE	    8 //in Hz, 2, 4, ->8, 16, 32...
+#define RPL_CONF_DIO_INTERVAL_MIN                12 // 12 def
+#define RPL_CONF_DIO_INTERVAL_DOUBLINGS          8  //8 def
 
 /* Encryption */
 #undef LLSEC802154_CONF_ENABLED
@@ -79,7 +85,7 @@
 
 /* Bootloader */
 #define SET_CCFG_BL_CONFIG_BOOTLOADER_ENABLE     0xC5 // 0xC5 - Enable ROM boot loader, 0x00 disable
-#define SET_CCFG_BL_CONFIG_BL_LEVEL              0x0  // Active low level to open boot loader backdoor
+#define SET_CCFG_BL_CONFIG_BL_LEVEL              0x00 // Active low level to open boot loader backdoor
 #define SET_CCFG_BL_CONFIG_BL_PIN_NUMBER         0x01 // DIO number 1 for boot loader backdoor
 #define SET_CCFG_BL_CONFIG_BL_ENABLE             0xC5 // 0xC5 - Enabled boot loader backdoor, 0xFF disable
 
