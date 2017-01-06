@@ -5,9 +5,9 @@ ifndef CONTIKI
 endif
 
 ### Board and BSP selection
-ifeq ($(BOARD),)
-  BOARD=srf06/cc26xx
-endif
+#ifeq ($(BOARD),)
+#  BOARD=udboards/cc26xx
+#endif
 
 CONTIKI_TARGET_DIRS += .
 
