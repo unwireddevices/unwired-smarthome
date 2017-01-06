@@ -50,6 +50,8 @@
 #include "ud-button.h"
 #include "ud-dag_node.h"
 
+#include "ti-lib.h"
+
 /*---------------------------------------------------------------------------*/
 #define DEBUG 1
 #include "net/ip/uip-debug_UD.h"

@@ -68,6 +68,7 @@
 
 static struct simple_udp_connection udp_connection;
 
+#include "ti-lib.h"
 
 SENSORS(&button_a_sensor);
 
