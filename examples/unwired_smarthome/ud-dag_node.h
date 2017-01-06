@@ -35,11 +35,8 @@
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
-/*---------------------------------------------------------------------------*
-
-#ifndef _UD_WORLD_H_
-#define _UD_WORLD_H_
 /*---------------------------------------------------------------------------*/
+
 #include "contiki.h"
 /*---------------------------------------------------------------------------*/
 uint8_t dag_active;
@@ -47,4 +44,4 @@ struct simple_udp_connection udp_connection;
 uip_ip6addr_t root_addr;
 PROCESS_NAME(dag_node_process);
 /*---------------------------------------------------------------------------*/
-#endif
+

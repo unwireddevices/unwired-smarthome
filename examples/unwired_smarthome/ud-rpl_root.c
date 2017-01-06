@@ -43,12 +43,14 @@
 #include "lib/random.h"
 #include "sys/ctimer.h"
 #include "sys/etimer.h"
+
+#include "dev/leds.h"
+#include "cc26xx/board.h"
+
 #include "net/ip/uip.h"
 #include "net/ipv6/uip-ds6.h"
 #include "net/ip/uip-debug.h"
-
 #include "simple-udp.h"
-
 #include "net/rpl/rpl.h"
 
 #include <stdio.h>
@@ -186,6 +188,11 @@ PROCESS_THREAD(rpl_root_process, ev, data)
   create_rpl_dag(ipaddr);
 
   simple_udp_register(&udp_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_data_receiver);
+
+  leds_on(LED_A);
+  leds_on(LED_B);
+  leds_on(LED_C);
+  leds_on(LED_D);
 
   while(1) {
     PROCESS_WAIT_EVENT();
