@@ -155,7 +155,6 @@ PROCESS_THREAD(udp_button_process, ev, data)
       }
       if(data == &button_e_sensor) {
         PRINTF("Buttons control process: Button E\n");
-        //lpm_shutdown(BOARD_IOID_KEY_RIGHT, IOC_IOPULL_UP, IOC_WAKE_ON_LOW);
         if(dag_active == 1) {
             send_button_status_packet(&root_addr, &udp_connection, 0x05);
         }

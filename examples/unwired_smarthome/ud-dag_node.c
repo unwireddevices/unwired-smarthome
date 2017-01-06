@@ -134,7 +134,6 @@ dag_root_find(void)
         if(dag) {
             led_blink(LED_A);
             if(dag->instance->def_route) {
-                //send_button_status_packet(&dag->instance->def_route->ipaddr, &udp_connection, 0x01);
                 if (dag_active == 0) {
                     uip_ip6addr_copy(&addr, &dag->instance->def_route->ipaddr);
                     PRINTF("RPL: default route destination: ");
