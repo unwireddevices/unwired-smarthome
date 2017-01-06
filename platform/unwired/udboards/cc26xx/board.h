@@ -91,10 +91,10 @@
  * @{
  */
 #define BOARD_IOID_LED_A          IOID_22 //led on radio-board
-#define BOARD_IOID_LED_B          IOID_22
-#define BOARD_IOID_LED_C          IOID_22
-#define BOARD_IOID_LED_D          IOID_22
-#define BOARD_IOID_LED_E          IOID_22
+#define BOARD_IOID_LED_B          IOID_25 //on UMDK-BUTTON
+#define BOARD_IOID_LED_C          IOID_26 //on UMDK-BUTTON
+#define BOARD_IOID_LED_D          IOID_27 //on UMDK-BUTTON
+#define BOARD_IOID_LED_E          IOID_28 //on UMDK-BUTTON
 #define BOARD_LED_A               (1 << BOARD_IOID_LED_A)
 #define BOARD_LED_B               (1 << BOARD_IOID_LED_B)
 #define BOARD_LED_C               (1 << BOARD_IOID_LED_C)
@@ -128,11 +128,11 @@
  * Those values are not meant to be modified by the user
  * @{
  */
-#define BOARD_IOID_KEY_A            IOID_4
-#define BOARD_IOID_KEY_B            IOID_5
-#define BOARD_IOID_KEY_C            IOID_6
-#define BOARD_IOID_KEY_D            IOID_7
-#define BOARD_IOID_KEY_E            IOID_1
+#define BOARD_IOID_KEY_A            IOID_4 //on UMDK-BUTTON
+#define BOARD_IOID_KEY_B            IOID_5 //on UMDK-BUTTON
+#define BOARD_IOID_KEY_C            IOID_6 //on UMDK-BUTTON
+#define BOARD_IOID_KEY_D            IOID_7 //on UMDK-BUTTON
+#define BOARD_IOID_KEY_E            IOID_1 //generic connect/prog
 #define BOARD_KEY_A                 (1 << BOARD_IOID_KEY_A)
 #define BOARD_KEY_B                 (1 << BOARD_IOID_KEY_B)
 #define BOARD_KEY_C                 (1 << BOARD_IOID_KEY_C)
