@@ -81,11 +81,11 @@ leds_blink(void)
   /* Blink all leds that were initially off. */
   unsigned char blink;
   blink = ~leds;
-  leds_toggle(blink);
+  led_toggle(blink);
 
   clock_delay(400);
 
-  leds_toggle(blink);
+  led_toggle(blink);
 }
 
 
@@ -117,19 +117,19 @@ led_blink_long(unsigned char ledv)
 }
 /*---------------------------------------------------------------------------*/
 void
-leds_on(unsigned char ledv)
+led_on(unsigned char ledv)
 {
   show_leds(leds | ledv);
 }
 /*---------------------------------------------------------------------------*/
 void
-leds_off(unsigned char ledv)
+led_off(unsigned char ledv)
 {
   show_leds(leds & ~ledv);
 }
 /*---------------------------------------------------------------------------*/
 void
-leds_toggle(unsigned char ledv)
+led_toggle(unsigned char ledv)
 {
   show_leds(leds ^ ledv);
 }

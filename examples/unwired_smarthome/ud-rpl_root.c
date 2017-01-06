@@ -201,12 +201,11 @@ PROCESS_THREAD(rpl_root_process, ev, data)
 
   simple_udp_register(&udp_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_data_receiver);
 
+  led_on(LED_A);
+
   //ti_lib_ioc_pin_type_gpio_output(IOID_22);
   //ti_lib_gpio_set_dio(IOID_22);
   //ti_lib_gpio_set_output_enable_dio(IOID_3, GPIO_OUTPUT_ENABLE);
-
-
-  leds_on(LED_A);
 
   while(1) {
     PROCESS_WAIT_EVENT();

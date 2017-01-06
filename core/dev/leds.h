@@ -86,9 +86,9 @@ unsigned char leds_get(void);
 void leds_set(unsigned char leds);
 void led_blink(unsigned char leds);
 void led_blink_long(unsigned char ledv);
-void leds_on(unsigned char leds);
-void leds_off(unsigned char leds);
-void leds_toggle(unsigned char leds);
+void led_on(unsigned char leds);
+void led_off(unsigned char leds);
+void led_toggle(unsigned char leds);
 
 /**
  * Leds implementation

@@ -89,7 +89,7 @@ udp_receiver(struct simple_udp_connection *c,
   if (data[0] == 0x01 && data[1] == 0x01) { //device and protocol version(0x01, 0x01)
       if (data[2] == 0x03) { //data type(0x03 - Data received confirmation)
           printf("DEBUG: DAG join packet confirmation received, DAG active\n");
-          leds_on(LED_A);
+          led_on(LED_A);
           dag_active = 1;
           root_addr = *sender_addr;
       }

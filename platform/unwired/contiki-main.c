@@ -83,11 +83,11 @@ fade(unsigned char l)
   for(k = 0; k < 800; ++k) {
     j = k > 400 ? 800 - k : k;
 
-    leds_on(l);
+    led_on(l);
     for(i = 0; i < j; ++i) {
       __asm("nop");
     }
-    leds_off(l);
+    led_off(l);
     for(i = 0; i < 400 - j; ++i) {
       __asm("nop");
     }
