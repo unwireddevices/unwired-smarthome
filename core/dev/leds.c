@@ -43,26 +43,26 @@ show_leds(unsigned char new_leds)
   changed = leds ^ new_leds;
   leds = new_leds;
 
-  if(changed & LEDS_GREEN) {
+  if(changed & LED_A) {
     /* Green did change */
-    if(leds & LEDS_GREEN) {
-      ENERGEST_ON(ENERGEST_TYPE_LED_GREEN);
+    if(leds & LED_A) {
+      ENERGEST_ON(ENERGEST_TYPE_LED_A);
     } else {
-      ENERGEST_OFF(ENERGEST_TYPE_LED_GREEN);
+      ENERGEST_OFF(ENERGEST_TYPE_LED_A);
     }
   }
-  if(changed & LEDS_YELLOW) {
-    if(leds & LEDS_YELLOW) {
-      ENERGEST_ON(ENERGEST_TYPE_LED_YELLOW);
+  if(changed & LED_B) {
+    if(leds & LED_B) {
+      ENERGEST_ON(ENERGEST_TYPE_LED_B);
     } else {
-      ENERGEST_OFF(ENERGEST_TYPE_LED_YELLOW);
+      ENERGEST_OFF(ENERGEST_TYPE_LED_B);
     }
   }
-  if(changed & LEDS_RED) {
-    if(leds & LEDS_RED) {
-      ENERGEST_ON(ENERGEST_TYPE_LED_RED);
+  if(changed & LED_C) {
+    if(leds & LED_C) {
+      ENERGEST_ON(ENERGEST_TYPE_LED_C);
     } else {
-      ENERGEST_OFF(ENERGEST_TYPE_LED_RED);
+      ENERGEST_OFF(ENERGEST_TYPE_LED_C);
     }
   }
   leds_arch_set(leds);
