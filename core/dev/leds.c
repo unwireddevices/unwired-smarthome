@@ -87,6 +87,8 @@ leds_blink(void)
 
   leds_toggle(blink);
 }
+
+
 /*---------------------------------------------------------------------------*/
 unsigned char
 leds_get(void) {
@@ -104,6 +106,13 @@ led_blink(unsigned char ledv)
 {
     show_leds(leds ^ ledv);
     clock_delay(200);
+    show_leds(leds ^ ledv);
+}
+void
+led_blink_long(unsigned char ledv)
+{
+    show_leds(leds ^ ledv);
+    clock_delay(1000);
     show_leds(leds ^ ledv);
 }
 /*---------------------------------------------------------------------------*/
