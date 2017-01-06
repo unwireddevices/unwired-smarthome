@@ -90,11 +90,11 @@
  * Those values are not meant to be modified by the user
  * @{
  */
-#define BOARD_IOID_LED_A          IOID_2 //led on radio-board
-#define BOARD_IOID_LED_B          IOID_3
-#define BOARD_IOID_LED_C          IOID_1
+#define BOARD_IOID_LED_A          IOID_22 //led on radio-board
+#define BOARD_IOID_LED_B          IOID_22
+#define BOARD_IOID_LED_C          IOID_22
 #define BOARD_IOID_LED_D          IOID_22
-#define BOARD_IOID_LED_E          IOID_20
+#define BOARD_IOID_LED_E          IOID_22
 #define BOARD_LED_A               (1 << BOARD_IOID_LED_A)
 #define BOARD_LED_B               (1 << BOARD_IOID_LED_B)
 #define BOARD_LED_C               (1 << BOARD_IOID_LED_C)

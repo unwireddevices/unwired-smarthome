@@ -117,9 +117,7 @@ button_press_handler(uint8_t ioid)
       if(!timer_expired(&c_timer.debounce)) {
         return;
       }
-
       timer_set(&c_timer.debounce, DEBOUNCE_DURATION);
-
       /*
        * Start press duration counter on press (falling), notify on release
        * (rising)
@@ -140,9 +138,7 @@ button_press_handler(uint8_t ioid)
     if(!timer_expired(&d_timer.debounce)) {
       return;
     }
-
     timer_set(&d_timer.debounce, DEBOUNCE_DURATION);
-
     /*
      * Start press duration counter on press (falling), notify on release
      * (rising)
@@ -467,10 +463,10 @@ status_d(int type)
   return status(type, BOARD_IOID_KEY_D);
 }
 /*---------------------------------------------------------------------------*/
-SENSORS_SENSOR(button_e_sensor, BUTTON_SENSOR, value_e, config_e, status_e);
 SENSORS_SENSOR(button_a_sensor, BUTTON_SENSOR, value_a, config_a, status_a);
 SENSORS_SENSOR(button_b_sensor, BUTTON_SENSOR, value_b, config_b, status_b);
 SENSORS_SENSOR(button_c_sensor, BUTTON_SENSOR, value_c, config_c, status_c);
 SENSORS_SENSOR(button_d_sensor, BUTTON_SENSOR, value_d, config_d, status_d);
+SENSORS_SENSOR(button_e_sensor, BUTTON_SENSOR, value_e, config_e, status_e);
 /*---------------------------------------------------------------------------*/
 /** @} */
