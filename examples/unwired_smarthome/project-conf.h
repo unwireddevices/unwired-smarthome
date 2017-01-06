@@ -77,6 +77,12 @@
 #undef NONCORESEC_CONF_KEY
 #define NONCORESEC_CONF_KEY						{0xF3,0x01,0x02,0x03,0x04,0x05,0x07,0x07,0x06,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F}
 
+/* Bootloader */
+#define SET_CCFG_BL_CONFIG_BOOTLOADER_ENABLE        0xC5 // 0xC5 - Enable ROM boot loader, 0x00 disable
+#define SET_CCFG_BL_CONFIG_BL_LEVEL                 0x0  // Active low level to open boot loader backdoor
+#define SET_CCFG_BL_CONFIG_BL_PIN_NUMBER            0x01 // DIO number 1 for boot loader backdoor
+#define SET_CCFG_BL_CONFIG_BL_ENABLE                0xC5 // 0xC5 - Enabled boot loader backdoor, 0xFF disable
+
 /*---------------------------------------------------------------------------*/
 
 #endif /* PROJECT_CONF_H_ */
