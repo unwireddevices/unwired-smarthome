@@ -63,7 +63,7 @@ const struct sensors_sensor *sensors_find(const char *type);
 const struct sensors_sensor *sensors_next(const struct sensors_sensor *s);
 const struct sensors_sensor *sensors_first(void);
 
-//void sensors_changed(const struct sensors_sensor *s);
+void sensors_changed(const struct sensors_sensor *s);
 
 extern process_event_t sensors_event;
 
