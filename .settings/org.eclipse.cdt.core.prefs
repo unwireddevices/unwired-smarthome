@@ -24,6 +24,11 @@ environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.15137813
 environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.1481005715/PATH/value=/opt/local/bin\:/opt/local/sbin\:/usr/local/bin\:/usr/bin\:/bin\:/usr/sbin\:/sbin
 environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.1481005715/append=true
 environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.1481005715/appendContributed=true
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.581015413.687036090/PATH/delimiter=\:
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.581015413.687036090/PATH/operation=replace
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.581015413.687036090/PATH/value=/opt/local/bin\:/opt/local/sbin\:/usr/local/bin\:/usr/bin\:/bin\:/usr/sbin\:/sbin
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.581015413.687036090/append=true
+environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.581015413.687036090/appendContributed=true
 environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.581015413/PATH/delimiter=\:
 environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.581015413/PATH/operation=replace
 environment/project/cdt.managedbuild.toolchain.gnu.cross.base.797922341.151378134.581015413/PATH/value=/opt/local/bin\:/opt/local/sbin\:/usr/local/bin\:/usr/bin\:/bin\:/usr/sbin\:/sbin
