@@ -76,7 +76,7 @@
 
 /* Bootloader */
 #define SET_CCFG_BL_CONFIG_BOOTLOADER_ENABLE	0xC5 // 0xC5 - Enable ROM boot loader, 0x00 disable
-#define SET_CCFG_BL_CONFIG_BL_LEVEL				0x00 // Active low level to open boot loader backdoor
+#define SET_CCFG_BL_CONFIG_BL_LEVEL			0x00 // Active low level to open boot loader backdoor
 #define SET_CCFG_BL_CONFIG_BL_PIN_NUMBER		0x01 // DIO number 1 for boot loader backdoor
 #define SET_CCFG_BL_CONFIG_BL_ENABLE			0xC5 // 0xC5 - Enabled boot loader backdoor, 0xFF disable
 
