@@ -32,7 +32,7 @@ cleanall: clean
 	-rm -rf obj_unwired
 	-rm -f *.hex
 	
-ud-button-flashb: ud-button-CLEAN4
+ud-button-flashb: ud-button-CLEAN
 	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v ud-button.hex
 
 ud-rpl_root-flashb: ud-rpl_root-CLEAN
