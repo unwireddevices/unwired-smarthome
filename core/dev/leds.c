@@ -82,13 +82,9 @@ leds_blink(void)
   unsigned char blink;
   blink = ~leds;
   led_toggle(blink);
-
   clock_delay(400);
-
   led_toggle(blink);
 }
-
-
 /*---------------------------------------------------------------------------*/
 unsigned char
 leds_get(void) {
