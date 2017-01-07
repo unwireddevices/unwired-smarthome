@@ -68,6 +68,8 @@
 
 #include "driverlib/driverlib_release.h"
 
+#include <inttypes.h>
+
 #include <stdio.h>
 /*---------------------------------------------------------------------------*/
 unsigned short node_id = 0;
@@ -131,6 +133,15 @@ set_rf_params(void)
   /* also set the global node id */
   node_id = short_addr;
   printf(" Node ID: %d\n", node_id);
+  printf(" PAN ID: 0x%04X\n", IEEE802154_PANID);
+  printf(" Security level: 0x%02X\n", NONCORESEC_CONF_SEC_LVL);
+  printf(" Leaf: %d\n", RPL_CONF_LEAF_ONLY);
+  printf(" RDC channel check rate: %d Hz\n", NETSTACK_RDC_CHANNEL_CHECK_RATE);
+  //printf(" Debounce duration: %d\n", DEBOUNCE_DURATION);
+
+
+
+
 }
 /*---------------------------------------------------------------------------*/
 /**
