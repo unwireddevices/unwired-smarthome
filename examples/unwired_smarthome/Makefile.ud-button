@@ -1,7 +1,7 @@
 all: ud-button
 
 PROJECT_SOURCEFILES += ud-dag_node.c 
-DEFINES+=PROJECT_CONF_H=\"leaf-project-conf.h\"
+DEFINES+=PROJECT_CONF_H=\"project-conf-leaf.h\"
 CONTIKI = ../..
 CONTIKI_WITH_IPV6 = 1
 include $(CONTIKI)/Makefile.include
