@@ -190,7 +190,7 @@ main(void)
   printf("With DriverLib v%u.%u\n", DRIVERLIB_RELEASE_GROUP,
          DRIVERLIB_RELEASE_BUILD);
   printf(BOARD_STRING "\n");
-  printf("IEEE 802.15.4: %s, CC13xx: %s",
+  printf("IEEE 802.15.4: %s, CC13xx: %s\n",
          ti_lib_chipinfo_supports_ieee_802_15_4() == true ? "Yes" : "No",
          ti_lib_chipinfo_chip_family_is_cc13xx() == true ? "Yes" : "No");
 
