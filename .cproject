@@ -20,7 +20,7 @@
 							<option id="cdt.managedbuild.option.gnu.cross.prefix.904888668" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix"/>
 							<option id="cdt.managedbuild.option.gnu.cross.path.1666653322" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.953860974" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
-							<builder arguments="-j5 TARGET=unwired BOARD=srf06/cc26xx" buildPath="${workspace_loc:/Contiki UnwiredD}/examples/unwired_smarthome/" command="make" id="cdt.managedbuild.builder.gnu.cross.782536921" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+							<builder arguments="BOARD=srf06" buildPath="${workspace_loc:/Contiki UnwiredD}/examples/unwired_smarthome/" command="make" id="cdt.managedbuild.builder.gnu.cross.782536921" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.504728023" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.364356052" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -61,7 +61,7 @@
 							<option id="cdt.managedbuild.option.gnu.cross.prefix.2012597160" name="Prefix" superClass="cdt.managedbuild.option.gnu.cross.prefix"/>
 							<option id="cdt.managedbuild.option.gnu.cross.path.207501779" name="Path" superClass="cdt.managedbuild.option.gnu.cross.path"/>
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="cdt.managedbuild.targetPlatform.gnu.cross.1882271189" isAbstract="false" osList="all" superClass="cdt.managedbuild.targetPlatform.gnu.cross"/>
-							<builder arguments="-j5 TARGET=unwired BOARD=udboards/cc26xx" buildPath="${workspace_loc:/Contiki UnwiredD}/examples/unwired_smarthome/" command="make" id="cdt.managedbuild.builder.gnu.cross.1492473374" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
+							<builder arguments="BOARD=udboards" buildPath="${workspace_loc:/Contiki UnwiredD}/examples/unwired_smarthome/" command="make" id="cdt.managedbuild.builder.gnu.cross.1492473374" keepEnvironmentInBuildfile="false" managedBuildOn="false" name="Gnu Make Builder" superClass="cdt.managedbuild.builder.gnu.cross"/>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.448125668" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler">
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.576924327" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
@@ -93,6 +93,9 @@
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
 	<storageModule moduleId="refreshScope" versionNumber="2">
 		<configuration configurationName="Build on SRF06-CC26"/>
+		<configuration configurationName="Build on UD-CC26">
+			<resource resourceType="PROJECT" workspacePath="/Contiki UnwiredD"/>
+		</configuration>
 		<configuration configurationName="ud-button"/>
 		<configuration configurationName="Flash ud-rpl_root"/>
 		<configuration configurationName="rpl_root">
