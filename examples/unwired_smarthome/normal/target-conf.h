@@ -48,4 +48,6 @@
 #define NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE	 16 //in Hz, 2, 4, ->8, 16, 32...
 #define RPL_CONF_DIO_INTERVAL_MIN                8 // 12 def
 #define RPL_CONF_DIO_INTERVAL_DOUBLINGS          4 //8 def
+#define RPL_CONF_WITH_PROBING                    1
+#define RPL_CONF_PROBING_INTERVAL                (80 * CLOCK_SECOND) //120 def
 

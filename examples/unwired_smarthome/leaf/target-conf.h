@@ -42,6 +42,7 @@
 #define UIP_DS6_CONF_PERIOD                      (CLOCK_SECOND)
 #define UIP_CONF_TCP                             0
 #define RPL_CONF_LEAF_ONLY                       1
+#define RPL_CONF_WITH_PROBING                    1
 
 /* MAC tune option */
 #undef NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE
