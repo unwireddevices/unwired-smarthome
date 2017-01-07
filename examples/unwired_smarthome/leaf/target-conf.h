@@ -30,7 +30,7 @@
 /*---------------------------------------------------------------------------*/
 /**
  * \file
- *         Config file
+ *         Config file for leaf-mode devices(buttons on battery, etc)
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
@@ -43,6 +43,7 @@
 #define UIP_CONF_TCP                             0
 #define RPL_CONF_LEAF_ONLY                       1
 #define RPL_CONF_WITH_PROBING                    1
+//https://github.com/contiki-os/contiki/blob/master/platform/srf06-cc26xx/README.md#low-power-operation
 
 /* MAC tune option */
 #undef NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE
