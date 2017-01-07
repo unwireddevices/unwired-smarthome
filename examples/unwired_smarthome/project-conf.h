@@ -39,7 +39,7 @@
 /*---------------------------------------------------------------------------*/
 #ifndef PROJECT_CONF_H_
 #define PROJECT_CONF_H_
-#include "target-conf.h"
+
 /*---------------------------------------------------------------------------*/
 /* Disable button shutdown functionality */
 #define BUTTON_SENSOR_CONF_ENABLE_SHUTDOWN		0 //??????

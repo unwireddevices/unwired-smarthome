@@ -1,13 +1,13 @@
-all: ud-rpl_root ud-button
+all: ud-button ud-rpl_root
 
-ifndef VARIANT
-  ${info Not VARIANT defines! Set default: normal}
-  VARIANT = normal
-endif
+ud-button:
+	make -j5 TARGET=unwired -f Makefile.ud-button
 
-PROJECT_SOURCEFILES += ud-dag_node.c 
-DEFINES+=PROJECT_CONF_H=\"project-conf.h\"
-PROJECTDIRS += $(VARIANT)
-CONTIKI = ../..
-CONTIKI_WITH_IPV6 = 1
-include $(CONTIKI)/Makefile.include
+ud-rpl_root:
+	make -j5 TARGET=unwired -f Makefile.ud-rpl_root 
+	
+clean:
+	-rm -f *~ *core core *.srec *.lst *.map *.cprg *.data contiki*.a *.firmware core-labels.S *.ihex *.ini *.ce *.co *.unwired *.elf 	
+
+cleanall: clean
+	-rm -rf obj_unwired

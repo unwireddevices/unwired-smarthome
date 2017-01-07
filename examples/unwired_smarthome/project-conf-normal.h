@@ -30,24 +30,24 @@
 /*---------------------------------------------------------------------------*/
 /**
  * \file
- *         Config file for leaf-mode devices(buttons on battery, etc)
+ *         Config file for normal-mode devices(DC power modules)
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
 /*---------------------------------------------------------------------------*/
-
+#include "project-conf.h"
 
 /* LEAF mode */
 #define RF_BLE_CONF_ENABLED                      0
-#define UIP_DS6_CONF_PERIOD                      (CLOCK_SECOND)
+#define UIP_DS6_CONF_PERIOD                      (CLOCK_SECOND/10)
 #define UIP_CONF_TCP                             0
-#define RPL_CONF_LEAF_ONLY                       1
-#define RPL_CONF_WITH_PROBING                    1
-//https://github.com/contiki-os/contiki/blob/master/platform/srf06-cc26xx/README.md#low-power-operation
+#define RPL_CONF_LEAF_ONLY                       0
 
 /* MAC tune option */
 #undef NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE
-#define NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE	 2 //in Hz, 2, 4, ->8, 16, 32...
-#define RPL_CONF_DIO_INTERVAL_MIN                12 // 12 def
-#define RPL_CONF_DIO_INTERVAL_DOUBLINGS          8 //8 def
+#define NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE     16 //in Hz, 2, 4, ->8, 16, 32...
+#define RPL_CONF_DIO_INTERVAL_MIN                8 // 12 def
+#define RPL_CONF_DIO_INTERVAL_DOUBLINGS          4 //8 def
+#define RPL_CONF_WITH_PROBING                    1
+#define RPL_CONF_PROBING_INTERVAL                (80 * CLOCK_SECOND) //120 def
 
