@@ -156,8 +156,6 @@ PROCESS_THREAD(udp_button_process, ev, data)
 
   PROCESS_PAUSE();
   
-
-
   while(1) {
     PROCESS_YIELD();
     if(ev == sensors_event) {
@@ -166,35 +164,35 @@ PROCESS_THREAD(udp_button_process, ev, data)
         if(dag_active == 1) {
           send_button_status_packet(&root_addr, &udp_connection, 0x01);
         }
-        led_toggle(LED_A);
+        led_blink(LED_A);
       }
       if(data == &button_b_sensor) {
         PRINTF("Buttons control process: Button B\n");
         if(dag_active == 1) {
             send_button_status_packet(&root_addr, &udp_connection, 0x02);
         }
-        led_toggle(LED_A);
+        led_blink(LED_A);
       }
       if(data == &button_c_sensor) {
         PRINTF("Buttons control process: Button C\n");
         if(dag_active == 1) {
             send_button_status_packet(&root_addr, &udp_connection, 0x03);
         }
-        led_toggle(LED_A);
+        led_blink(LED_A);
       }
       if(data == &button_d_sensor) {
         PRINTF("Buttons control process: Button D\n");
         if(dag_active == 1) {
             send_button_status_packet(&root_addr, &udp_connection, 0x04);
         }
-        led_toggle(LED_A);
+        led_blink(LED_A);
       }
       if(data == &button_e_sensor) {
         PRINTF("Buttons control process: Button E\n");
         if(dag_active == 1) {
             send_button_status_packet(&root_addr, &udp_connection, 0x05);
         }
-        led_toggle(LED_A);
+        led_blink(LED_A);
       }
     }
   }
