@@ -31,29 +31,50 @@
 /*---------------------------------------------------------------------------*/
 /**
  * \file
- *         Header file
+ *         Defines file for Unwired Devices Binary Protocol(UDBP)
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
 /*---------------------------------------------------------------------------*/
-#ifndef UDP_BUTTON_H_
-#define UDP_BUTTON_H_
-/*---------------------------------------------------------------------------*/
-#include "contiki.h"
-#include "net/ip/uip.h"
-/*---------------------------------------------------------------------------*/
-#define CURRENT_DEVICE_SLEEP_TYPE             DEVICE_SLEEP_TYPE_LEAF
-#define CURRENT_DEVICE_TYPE                   DEVICE_TYPE_BUTTON
-#define CURRENT_DEVICE_VERSION                DEVICE_VERSION_V1
 
-PROCESS_NAME(udp_button_process);
+#define UDP_DATA_PORT                       4004
 
-void send_button_status_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *connection, char button_number);
+/* Inter-device protocol versions */
+#define PROTOCOL_VERSION_V1                 0x01
+#define DEVICE_VERSION_V1                   0x01
 
-const uint8_t device_ability_1;
-const uint8_t device_ability_2;
-const uint8_t device_ability_3;
-const uint8_t device_ability_4;
+/* Data types */
+#define DATA_TYPE_JOIN                      0x01
+#define DATA_TYPE_SENSOR_DATA               0x02
+#define DATA_TYPE_CONFIRM                   0x03
+#define DATA_TYPE_PING                      0x04
+#define DATA_TYPE_COMMAND                   0x05
 
-/*---------------------------------------------------------------------------*/
-#endif /* UDP_LEDS_H_ */
+/* Resarved data */
+#define DATA_RESERVED                       0xFF
+
+/* Devices types */
+#define DEVICE_TYPE_BUTTON                  0x01
+#define DEVICE_TYPE_TEMPERATURE             0x02
+#define DEVICE_TYPE_HUMIDITY                0x03
+#define DEVICE_TYPE_PRESSURE                0x04
+#define DEVICE_TYPE_LIGHT_SENSOR            0x05
+#define DEVICE_TYPE_NOISE_SENSOR            0x06
+#define DEVICE_TYPE_MOTION_SENSOR           0x07
+
+/* Devices sleep types */
+#define DEVICE_SLEEP_TYPE_NORMAL            0x01
+#define DEVICE_SLEEP_TYPE_LEAF              0x02
+
+/* Button events */
+#define DEVICE_BUTTON_EVENT_CLICK           0x01
+#define DEVICE_BUTTON_EVENT_LONG_CLICK      0x02
+#define DEVICE_BUTTON_EVENT_ON              0x03
+#define DEVICE_BUTTON_EVENT_OFF             0x04
+
+
+/* UART Binary data */
+#define UART_PROTOCOL_VERSION_V1            0x01
+#define UART_DATA_LENGTH                    42
+#define MAGIC_SEQUENCE_LENGTH               6
+

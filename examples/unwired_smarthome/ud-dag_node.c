@@ -51,18 +51,14 @@
 #include "ud-dag_node.h"
 
 #include "ti-lib.h"
+#include "ud_binary_protocol.h"
 
 /*---------------------------------------------------------------------------*/
 #define DEBUG 1
 #include "net/ip/uip-debug_UD.h"
 /*---------------------------------------------------------------------------*/
-
-#define UDP_DATA_PORT      4004
-#define PROTOCOL_VERSION   0x01 //protocol version 1
-#define DEVICE_VERSION     0x01 //device version 1
 #define MIN_INTERVAL       (5 * CLOCK_SECOND)
 #define MAX_INTERVAL       (50 * CLOCK_SECOND)
-
 /*---------------------------------------------------------------------------*/
 struct simple_udp_connection udp_connection; //struct for simple_udp_send
 uint8_t dag_active = 0; //set to 1, if rpl root found and answer to join packet
@@ -86,12 +82,17 @@ udp_receiver(struct simple_udp_connection *c,
   //printf("0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X \n",
   //       data[0], data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
 
-  if (data[0] == 0x01 && data[1] == 0x01) { //device and protocol version(0x01, 0x01)
-      if (data[2] == 0x03) { //data type(0x03 - Data received confirmation)
+    if (data[0] == PROTOCOL_VERSION_V1 && data[1] == DEVICE_VERSION_V1) {
+      switch ( data[2] ) {
+      case DATA_TYPE_CONFIRM:
           printf("DEBUG: DAG join packet confirmation received, DAG active\n");
-          led_on(LED_A);
+          led_off(LED_A);
           dag_active = 1;
           root_addr = *sender_addr;
+          break;
+      default:
+          printf("Incompatible data type!\n");
+          break;
       }
   }
   else  {
@@ -103,23 +104,17 @@ void
 send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *connection)
 {
     char buf[10];
-    //---header start---
-    buf[0] = PROTOCOL_VERSION;
-    buf[1] = DEVICE_VERSION;
-    buf[2] = 0x01; //data type(01 - net join packet + device profile)
-    //---header end---
-    //---data start---
-    buf[3] = device_type;
-    buf[4] = device_sleep_type;
+    buf[0] = PROTOCOL_VERSION_V1;
+    buf[1] = DEVICE_VERSION_V1;
+    buf[2] = DATA_TYPE_JOIN;
+    buf[3] = CURRENT_DEVICE_TYPE;
+    buf[4] = CURRENT_DEVICE_SLEEP_TYPE;
     buf[5] = device_ability_1;
     buf[6] = device_ability_2;
     buf[7] = device_ability_3;
     buf[8] = device_ability_4;
-    buf[9] = 0xFF; //reserved
-    //---data end---
+    buf[9] = DATA_RESERVED;
     simple_udp_sendto(connection, buf, strlen(buf) + 1, dest_addr);
-
-    //rpl_get_parent() - get parent
 }
 
 static void
@@ -129,11 +124,11 @@ dag_root_find(void)
     uip_ip6addr_t addr;
 
     uip_ds6_addr_t *addr_desc = uip_ds6_get_global(ADDR_PREFERRED);
-    if(addr_desc != NULL) {
+    if (addr_desc != NULL) {
         dag = rpl_get_any_dag();
-        if(dag) {
+        if (dag) {
             led_blink(LED_A);
-            if(dag->instance->def_route) {
+            if (dag->instance->def_route) {
                 if (dag_active == 0) {
                     uip_ip6addr_copy(&addr, &dag->instance->def_route->ipaddr);
                     PRINTF("RPL: default route destination: ");
@@ -163,6 +158,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
   simple_udp_register(&udp_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_receiver);
 
   printf("DAG Node: started\n");
+  led_on(LED_A);
 
   while(1) {
      if (dag_active == 0 && dag_interval != MIN_INTERVAL) {
@@ -172,7 +168,6 @@ PROCESS_THREAD(dag_node_process, ev, data)
      if (dag_active == 1 && dag_interval != MAX_INTERVAL) {
          dag_interval = MAX_INTERVAL;
          printf("DAG: Change timer to max interval\n");
-
      }
 
     etimer_set(&dag_timer, dag_interval);

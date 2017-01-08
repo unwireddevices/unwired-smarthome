@@ -25,9 +25,6 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * 
- *  
  */
 
  /*---------------------------------------------------------------------------*/
@@ -59,47 +56,100 @@
 #include "button-sensor.h"
 #include "board-peripherals.h"
 
-#define UDP_DATA_PORT      4004
-#define PROTOCOL_VERSION   0x01 //protocol version 1
-#define DEVICE_VERSION     0x01 //device version 1
+#include "ti-lib.h"
+#include "dev/cc26xx-uart.h"
+
+#include "ud_binary_protocol.h"
 
 #define DEBUG 1
 #include "net/ip/uip-debug_UD.h"
+//#include "../../core/contiki-net.h"
 
 static struct simple_udp_connection udp_connection;
-
-#include "ti-lib.h"
+static uint8_t uart_command_buf[UART_DATA_LENGTH];
+static uint8_t uart_iterator = 0;
+static uint8_t uart_magic_sequence[UART_DATA_LENGTH] =
+{0x54,0x54,0x54,0x54,0x54,0x54, //0x01,0x16,0x16,0x16,0x16,0x10,
+ 0x01,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+ 0x01,0x01,0x01,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
+ 0x54,0x54,0x54,0x54,0x54,0x54};
 
 SENSORS(&button_e_sensor);
 
 /*---------------------------------------------------------------------------*/
-PROCESS(rpl_root_process, "Unwired RPL root and udp data receiver");
+PROCESS(rpl_root_process,"Unwired RPL root and udp data receiver");
 AUTOSTART_PROCESSES(&rpl_root_process);
 /*---------------------------------------------------------------------------*/
-void
-send_confirmation_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *connection)
+void send_confirmation_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *connection)
 {
-    char buf[10];
+    int lenght = 10;
+    char buf[lenght];
     //---header start---
-    buf[0] = PROTOCOL_VERSION;
-    buf[1] = DEVICE_VERSION;
-    buf[2] = 0x03; //data type(0x03 - Data received confirmation)
+    buf[0] = PROTOCOL_VERSION_V1;
+    buf[1] = DEVICE_VERSION_V1;
+    buf[2] = DATA_TYPE_CONFIRM;
     //---header end---
     //---data start---
-    buf[3] = 0xFF; //reserved
-    buf[4] = 0xFF; //reserved
-    buf[5] = 0xFF; //reserved
-    buf[6] = 0xFF; //reserved
-    buf[7] = 0xFF; //reserved
-    buf[8] = 0xFF; //reserved
-    buf[9] = 0xFF; //reserved
+    buf[3] = DATA_RESERVED;
+    buf[4] = DATA_RESERVED;
+    buf[5] = DATA_RESERVED;
+    buf[6] = DATA_RESERVED;
+    buf[7] = DATA_RESERVED;
+    buf[8] = DATA_RESERVED;
+    buf[9] = DATA_RESERVED;
     //---data end---
     simple_udp_sendto(connection, buf, strlen(buf) + 1, dest_addr);
 }
 
+/*---------------------------------------------------------------------------*/
+void uart_packet_dump(uint8_t *uart_command_buf) {
+    printf("\nOk packet: ");
+    for(int i = 0; i <= UART_DATA_LENGTH - 1; i++)
+    {
+        printf("0x%02X ", uart_command_buf[i]);
+    }
+    printf("\n");
+}
 
-static void
-udp_data_receiver(struct simple_udp_connection *connection,
+/*---------------------------------------------------------------------------*/
+static int char_in(unsigned char c)
+{
+    led_blink(LED_A);
+    if ((uart_iterator >= 0                                        && uart_iterator <= MAGIC_SEQUENCE_LENGTH - 1) ||
+        (uart_iterator >= UART_DATA_LENGTH - MAGIC_SEQUENCE_LENGTH && uart_iterator <= UART_DATA_LENGTH - 1))
+    {
+        if (c != uart_magic_sequence[uart_iterator])
+        {
+            printf(": BAD. iterator=%u\n", uart_iterator);
+            uart_iterator = 0;
+            return 1;
+        }
+        else
+        {
+            printf(": OK. iterator=%u\n", uart_iterator);
+        }
+    }
+    uart_command_buf[uart_iterator] = c;
+
+    if (uart_iterator < UART_DATA_LENGTH-1)
+    {
+        uart_iterator++;
+    }
+    else
+    {
+        uart_iterator = 0;
+        if (uart_command_buf[7] == UART_PROTOCOL_VERSION_V1)
+        {
+
+        }
+        uart_packet_dump(uart_command_buf);
+    }
+
+    return 1;
+}
+
+/*---------------------------------------------------------------------------*/
+static void udp_data_receiver(struct simple_udp_connection *connection,
          const uip_ipaddr_t *sender_addr,
          uint16_t sender_port,
          const uip_ipaddr_t *receiver_addr,
@@ -112,41 +162,39 @@ udp_data_receiver(struct simple_udp_connection *connection,
   //printf(" on port %d: ", receiver_port);
   //printf("0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X \n",
   //       data[0], data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
+
+    led_on(LED_A);
     printf("DAGROOTRAW: ");
     uip_debug_ipaddr_print(sender_addr);
     printf(" 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X \n",
            data[0], data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
 
-  if (data[0] == 0x01 && data[1] == 0x01) {  //device and protocol version(0x01, 0x01)
+  if (data[0] == PROTOCOL_VERSION_V1 && data[1] == DEVICE_VERSION_V1) {
       switch ( data[2] ) {
-      case 0x01: //data type(0x01 - Join network packet)
+      case DATA_TYPE_JOIN:
+          send_confirmation_packet(sender_addr, connection);
           printf("DEBUG: DAG join packet from ");
           uip_debug_ipaddr_print(sender_addr);
-          printf(" received, confirmation packet sending\n");
-
-          send_confirmation_packet(sender_addr, connection);
+          printf(" received, confirmation packet send\n");
           break;
-      case 0x02: //data type(0x02 - data from sensors)
+      case DATA_TYPE_SENSOR_DATA: //data type(0x02 - data from sensors)
           printf("DEBUG: data sensor from ");
           uip_debug_ipaddr_print(sender_addr);
-          printf(" received, not confirmation send\n");
-          printf("DEBUG: type sensor: 0x%02X, type event: 0x%02X, number sensor: 0x%02X  \n", data[3], data[6], data[5]);
-
-
-          //send_confirmation_packet(sender_addr, connection);
+          printf(", type: 0x%02X, event: 0x%02X, sensor: 0x%02X\n", data[3], data[6], data[5]);
           break;
       default:
-        break;
+          printf("Incompatible data type!\n");
+          break;
       }
   }
   else
   {
       printf("Incompatible device or protocol version!\n");
   }
+  led_off(LED_A);
 }
 /*---------------------------------------------------------------------------*/
-static uip_ipaddr_t *
-set_global_address(void)
+static uip_ipaddr_t *set_global_address(void)
 {
   static uip_ipaddr_t ipaddr;
   int i;
@@ -170,8 +218,7 @@ set_global_address(void)
   return &ipaddr;
 }
 /*---------------------------------------------------------------------------*/
-static void
-create_rpl_dag(uip_ipaddr_t *ipaddr)
+static void create_rpl_dag(uip_ipaddr_t *ipaddr)
 {
   struct uip_ds6_addr *root_if;
   root_if = uip_ds6_addr_lookup(ipaddr);
@@ -201,7 +248,10 @@ PROCESS_THREAD(rpl_root_process, ev, data)
 
   simple_udp_register(&udp_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_data_receiver);
 
-  led_on(LED_A);
+  cc26xx_uart_set_input(&char_in);
+
+  led_blink(LED_A);
+  led_blink(LED_A);
 
   //ti_lib_ioc_pin_type_gpio_output(IOID_22);
   //ti_lib_gpio_set_dio(IOID_22);
