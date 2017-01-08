@@ -47,12 +47,13 @@
 #undef RPL_CONF_LEAF_ONLY
 #define RPL_CONF_LEAF_ONLY                       1
 //https://github.com/contiki-os/contiki/blob/master/platform/srf06-cc26xx/README.md#low-power-operation
+
 #undef NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE
 #define NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE     1 //in Hz, 2, 4, 8(default), 16, 32...
 #undef RPL_CONF_DIO_INTERVAL_MIN
-#define RPL_CONF_DIO_INTERVAL_MIN                14 //2^X ms, 12(2^12 = 4.096s) default. The DIO interval (n) represents
+#define RPL_CONF_DIO_INTERVAL_MIN                12 //2^X ms, 12(2^12 = 4.096s) default. The DIO interval (n) represents
 #undef RPL_CONF_DIO_INTERVAL_DOUBLINGS
-#define RPL_CONF_DIO_INTERVAL_DOUBLINGS          6 // RPL_CONF_DIO_INTERVAL_MIN + RPL_CONF_DIO_INTERVAL_DOUBLINGS <= 20
+#define RPL_CONF_DIO_INTERVAL_DOUBLINGS          8 // RPL_CONF_DIO_INTERVAL_MIN + RPL_CONF_DIO_INTERVAL_DOUBLINGS <= 20
 #undef RPL_CONF_WITH_PROBING
 #define RPL_CONF_WITH_PROBING                    1
 #undef RPL_CONF_PROBING_INTERVAL
