@@ -132,11 +132,15 @@ set_rf_params(void)
 
   /* also set the global node id */
   node_id = short_addr;
-  printf(" Node ID: %d\n", node_id);
+  printf(" Node ID: %u\n", node_id);
   printf(" PAN ID: 0x%04X\n", IEEE802154_PANID);
-  printf(" Security level: 0x%02X\n", NONCORESEC_CONF_SEC_LVL);
-  printf(" Leaf: %d\n", RPL_CONF_LEAF_ONLY);
-  printf(" RDC channel check rate: %d Hz\n", NETSTACK_RDC_CHANNEL_CHECK_RATE);
+  printf(" Security level: %u\n", NONCORESEC_CONF_SEC_LVL);
+  printf(" Leaf: %s\n", RPL_CONF_LEAF_ONLY == 1 ? "Yes" : "No");
+  printf(" RDC channel check rate: %u Hz\n", NETSTACK_RDC_CHANNEL_CHECK_RATE);
+  printf(" Min DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_MIN);
+  printf(" Max DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_DOUBLINGS+RPL_CONF_DIO_INTERVAL_MIN);
+  printf(" RPL probing interval: %u s\n", RPL_CONF_PROBING_INTERVAL/CLOCK_SECOND);
+
   //printf(" Debounce duration: %d\n", DEBOUNCE_DURATION);
 
 
