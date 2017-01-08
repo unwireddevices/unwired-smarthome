@@ -33,10 +33,10 @@ cleanall: clean
 	-rm -f *.hex
 	
 ud-button-flashb: ud-button-CLEAN
-	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v ud-button.hex
+	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v ud-button.hex ||  /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v ud-button.hex
 
 ud-rpl_root-flashb: ud-rpl_root-CLEAN
-	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v ud-rpl_root.hex
+	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v ud-rpl_root.hex ||  /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v ud-rpl_root.hex
 
 ud-button-flash: ud-button-CLEAN
 	/Applications/ti/Uniflash/flash_cc2650.sh ud-button.hex
