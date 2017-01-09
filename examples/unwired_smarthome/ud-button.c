@@ -103,6 +103,19 @@ void send_button_status_packet(const uip_ip6addr_t *dest_addr,
 {
     if(dag_active == 1 && dest_addr != NULL && connection != NULL)
     {
+        PRINTF("Buttons: send message to RPL root node\n");
+
+        struct sensor_packet button_sensor_packet;
+        button_sensor_packet.protocol_version = CURRENT_PROTOCOL_VERSION;
+        button_sensor_packet.device_version = CURRENT_DEVICE_VERSION;
+        button_sensor_packet.data_type = DATA_TYPE_SENSOR_DATA;
+        button_sensor_packet.number_ability = DEVICE_ABILITY_BUTTON;
+        button_sensor_packet.sensor_number = button_number;
+        if (duration > 60) //TODO: magic number!
+            button_sensor_packet.sensor_event = DEVICE_GROUP_BUTTON_EVENT_CLICK;
+        else
+            button_sensor_packet.sensor_event = DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK;
+        send_sensor_event(&button_sensor_packet, dest_addr, connection);
     }
 
     led_blink(LED_A);
@@ -121,23 +134,23 @@ PROCESS_THREAD(udp_button_process, ev, data)
     if(ev == sensors_event) {
       if(data == &button_a_sensor) {
         PRINTF("Buttons control process: Button A\n");
-        send_button_status_packet(&root_addr, &udp_connection, 0x01);
+        send_button_status_packet(&root_addr, &udp_connection, 'a', (&button_a_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
       }
       if(data == &button_b_sensor) {
         PRINTF("Buttons control process: Button B\n");
-        send_button_status_packet(&root_addr, &udp_connection, 0x02);
+        send_button_status_packet(&root_addr, &udp_connection, 'b', (&button_b_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
       }
       if(data == &button_c_sensor) {
         PRINTF("Buttons control process: Button C\n");
-        send_button_status_packet(&root_addr, &udp_connection, 0x03);
+        send_button_status_packet(&root_addr, &udp_connection, 'c', (&button_c_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
       }
       if(data == &button_d_sensor) {
         PRINTF("Buttons control process: Button D\n");
-        send_button_status_packet(&root_addr, &udp_connection, 0x04);
+        send_button_status_packet(&root_addr, &udp_connection, 'd', (&button_d_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
       }
       if(data == &button_e_sensor) {
         PRINTF("Buttons control process: Button E\n");
-        send_button_status_packet(&root_addr, &udp_connection, 0x05);
+        send_button_status_packet(&root_addr, &udp_connection, 'e', (&button_e_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
       }
     }
   }
