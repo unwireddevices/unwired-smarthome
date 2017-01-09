@@ -107,12 +107,12 @@ send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *c
     buf[0] = PROTOCOL_VERSION_V1;
     buf[1] = DEVICE_VERSION_V1;
     buf[2] = DATA_TYPE_JOIN;
-    buf[3] = CURRENT_DEVICE_TYPE;
+    buf[3] = CURRENT_DEVICE_GROUP;
     buf[4] = CURRENT_DEVICE_SLEEP_TYPE;
-    buf[5] = device_ability_1;
-    buf[6] = device_ability_2;
-    buf[7] = device_ability_3;
-    buf[8] = device_ability_4;
+    buf[5] = DEVICE_ABILITY_BUTTON; //TODO: заменить на нормальную схему со сдвигами
+    buf[6] = DEVICE_ABILITY_NONE;
+    buf[7] = DEVICE_ABILITY_NONE;
+    buf[8] = DEVICE_ABILITY_NONE;
     buf[9] = DATA_RESERVED;
     simple_udp_sendto(connection, buf, strlen(buf) + 1, dest_addr);
 }

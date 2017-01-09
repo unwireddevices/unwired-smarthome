@@ -43,17 +43,24 @@
 #include "net/ip/uip.h"
 /*---------------------------------------------------------------------------*/
 #define CURRENT_DEVICE_SLEEP_TYPE             DEVICE_SLEEP_TYPE_LEAF
-#define CURRENT_DEVICE_TYPE                   DEVICE_TYPE_BUTTON
+#define CURRENT_DEVICE_GROUP                  DEVICE_GROUP_BUTTON_SWITCH
 #define CURRENT_DEVICE_VERSION                DEVICE_VERSION_V1
+#define CURRENT_PROTOCOL_VERSION              PROTOCOL_VERSION_V1
 
 PROCESS_NAME(udp_button_process);
 
-void send_button_status_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *connection, char button_number);
+struct sensor_packet {
+uint8_t protocol_version;
+uint8_t device_version;
+uint8_t data_type;
+uint8_t number_ability;
+uint8_t sensor_number;
+uint8_t sensor_event;
+};
 
-const uint8_t device_ability_1;
-const uint8_t device_ability_2;
-const uint8_t device_ability_3;
-const uint8_t device_ability_4;
+void send_sensor_event(struct sensor_packet *packet,
+                 const uip_ip6addr_t *dest_addr,
+                 struct simple_udp_connection *connection);
 
 /*---------------------------------------------------------------------------*/
 #endif /* UDP_LEDS_H_ */

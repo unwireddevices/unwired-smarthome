@@ -66,6 +66,7 @@
 //#include "../../core/contiki-net.h"
 
 static struct simple_udp_connection udp_connection;
+uip_ip6addr_t destination_address;
 static uint8_t uart_command_buf[UART_DATA_LENGTH];
 static uint8_t uart_iterator = 0;
 static uint8_t uart_magic_sequence[UART_DATA_LENGTH] =
@@ -80,16 +81,14 @@ SENSORS(&button_e_sensor);
 PROCESS(rpl_root_process,"Unwired RPL root and udp data receiver");
 AUTOSTART_PROCESSES(&rpl_root_process);
 /*---------------------------------------------------------------------------*/
-void send_confirmation_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *connection)
+void send_confirmation_packet(const uip_ip6addr_t *dest_addr,
+                              struct simple_udp_connection *connection)
 {
     int lenght = 10;
     char buf[lenght];
-    //---header start---
     buf[0] = PROTOCOL_VERSION_V1;
     buf[1] = DEVICE_VERSION_V1;
     buf[2] = DATA_TYPE_CONFIRM;
-    //---header end---
-    //---data start---
     buf[3] = DATA_RESERVED;
     buf[4] = DATA_RESERVED;
     buf[5] = DATA_RESERVED;
@@ -97,14 +96,47 @@ void send_confirmation_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_
     buf[7] = DATA_RESERVED;
     buf[8] = DATA_RESERVED;
     buf[9] = DATA_RESERVED;
-    //---data end---
     simple_udp_sendto(connection, buf, strlen(buf) + 1, dest_addr);
+}
+/*---------------------------------------------------------------------------*/
+void send_command_packet(const uip_ip6addr_t *dest_addr,
+                          struct simple_udp_connection *connection,
+                          uint8_t target_ability,
+                          uint8_t number_ability,
+                          uint8_t data_to_ability)
+{
+    int lenght = 10;
+    char buf[lenght];
+    buf[0] = PROTOCOL_VERSION_V1;
+    buf[1] = DEVICE_VERSION_V1;
+    buf[2] = DATA_TYPE_COMMAND;
+    buf[3] = target_ability;
+    buf[4] = number_ability;
+    buf[5] = data_to_ability;
+    buf[6] = DATA_RESERVED;
+    buf[7] = DATA_RESERVED;
+    buf[8] = DATA_RESERVED;
+    buf[9] = DATA_RESERVED;
+    simple_udp_sendto(connection, buf, strlen(buf) + 1, dest_addr);
+}
+
+/*---------------------------------------------------------------------------*/
+void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data)
+{
+    printf("DAGROOTRAW1;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x"
+           ";%02X;%02X;%02X;%02X;%02X;%02X;%02X;%02X;%02X;%02X;RAWEND\n",
+           ((uint8_t *)addr)[0], ((uint8_t *)addr)[1], ((uint8_t *)addr)[2],
+           ((uint8_t *)addr)[3], ((uint8_t *)addr)[4], ((uint8_t *)addr)[5],
+           ((uint8_t *)addr)[6], ((uint8_t *)addr)[7], ((uint8_t *)addr)[8],
+           ((uint8_t *)addr)[9], ((uint8_t *)addr)[10], ((uint8_t *)addr)[11],
+           ((uint8_t *)addr)[12], ((uint8_t *)addr)[13], ((uint8_t *)addr)[14], ((uint8_t *)addr)[15],
+           data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
 }
 
 /*---------------------------------------------------------------------------*/
 void uart_packet_dump(uint8_t *uart_command_buf) {
     printf("\nOk packet: ");
-    for(int i = 0; i <= UART_DATA_LENGTH - 1; i++)
+    for (int i = 0; i < UART_DATA_LENGTH; i++)
     {
         printf("0x%02X ", uart_command_buf[i]);
     }
@@ -138,9 +170,19 @@ static int char_in(unsigned char c)
     else
     {
         uart_iterator = 0;
-        if (uart_command_buf[7] == UART_PROTOCOL_VERSION_V1)
+        if (uart_command_buf[7] == UART_PROTOCOL_VERSION_V1 || true)
         {
 
+            for (int i = 0; i <= 15; i++)
+            {
+               destination_address.u8[i] = uart_command_buf[i+8];
+            }
+            PRINT6ADDR(&destination_address);
+            send_command_packet(&destination_address, &udp_connection, uart_command_buf[22], uart_command_buf[23], uart_command_buf[24]);
+        }
+        else
+        {
+            printf("USER: Incompatible protocol version!\n");
         }
         uart_packet_dump(uart_command_buf);
     }
@@ -157,39 +199,31 @@ static void udp_data_receiver(struct simple_udp_connection *connection,
          const uint8_t *data,
          uint16_t datalen)
 {
-  //printf("DEBUG: DAG data received from ");
-  //uip_debug_ipaddr_print(sender_addr);
-  //printf(" on port %d: ", receiver_port);
-  //printf("0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X \n",
-  //       data[0], data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
-
     led_on(LED_A);
-    printf("DAGROOTRAW: ");
-    uip_debug_ipaddr_print(sender_addr);
-    printf(" 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X \n",
-           data[0], data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
+
+    dag_root_raw_print(sender_addr, data);
 
   if (data[0] == PROTOCOL_VERSION_V1 && data[1] == DEVICE_VERSION_V1) {
       switch ( data[2] ) {
       case DATA_TYPE_JOIN:
           send_confirmation_packet(sender_addr, connection);
-          printf("DEBUG: DAG join packet from ");
+          printf("USER: DAG join packet from ");
           uip_debug_ipaddr_print(sender_addr);
           printf(" received, confirmation packet send\n");
           break;
       case DATA_TYPE_SENSOR_DATA: //data type(0x02 - data from sensors)
-          printf("DEBUG: data sensor from ");
+          printf("USER: data sensor from ");
           uip_debug_ipaddr_print(sender_addr);
           printf(", type: 0x%02X, event: 0x%02X, sensor: 0x%02X\n", data[3], data[6], data[5]);
           break;
       default:
-          printf("Incompatible data type!\n");
+          printf("USER: Incompatible data type!\n");
           break;
       }
   }
   else
   {
-      printf("Incompatible device or protocol version!\n");
+      printf("USER: Incompatible device or protocol version!\n");
   }
   led_off(LED_A);
 }

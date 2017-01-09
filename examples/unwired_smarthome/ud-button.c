@@ -69,37 +69,40 @@
 #define DEBUG 1
 #include "net/ip/uip-debug_UD.h"
 /*---------------------------------------------------------------------------*/
-const uint8_t device_ability_1 = 0b10000001; //device ability(1 - buttons)
-const uint8_t device_ability_2 = 0b00000001; //device ability(none)
-const uint8_t device_ability_3 = 0b00000001; //device ability(none)
-const uint8_t device_ability_4 = 0b00000001; //device ability(none)
 
 SENSORS(&button_a_sensor, &button_b_sensor, &button_c_sensor, &button_d_sensor, &button_e_sensor); //register button sensors
 
 PROCESS(udp_button_process, "UDP Buttons control process"); //register main button process
 AUTOSTART_PROCESSES(&udp_button_process, &dag_node_process); //set autostart processes
 /*---------------------------------------------------------------------------*/
-void
-send_button_status_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *connection, char button_number)
+void send_sensor_event(struct sensor_packet *packet,
+                 const uip_ip6addr_t *dest_addr,
+                 struct simple_udp_connection *connection)
+{
+    uint8_t lenght = 10;
+    uint8_t udp_buffer[lenght];
+    udp_buffer[0] = packet->protocol_version;
+    udp_buffer[1] = packet->device_version;
+    udp_buffer[2] = packet->data_type;
+
+    udp_buffer[3] = packet->number_ability;
+    udp_buffer[4] = DATA_RESERVED;
+    udp_buffer[5] = packet->sensor_number;
+    udp_buffer[6] = packet->sensor_event;
+    udp_buffer[7] = DATA_RESERVED;
+    udp_buffer[8] = DATA_RESERVED;
+    udp_buffer[9] = DATA_RESERVED;
+    simple_udp_sendto(connection, udp_buffer, lenght + 1, dest_addr);
+}
+
+
+void send_button_status_packet(const uip_ip6addr_t *dest_addr,
+                          struct simple_udp_connection *connection,
+                          uint8_t button_number,
+                          int duration)
 {
     if(dag_active == 1 && dest_addr != NULL && connection != NULL)
     {
-        PRINTF("Buttons control process: send message to RPL root node on ");
-        PRINT6ADDR(dest_addr);
-        PRINTF("\n");
-
-        char buf[10];
-        buf[0] = PROTOCOL_VERSION_V1;
-        buf[1] = CURRENT_DEVICE_VERSION;
-        buf[2] = DATA_TYPE_SENSOR_DATA;
-        buf[3] = DEVICE_TYPE_BUTTON;
-        buf[4] = DATA_RESERVED;
-        buf[5] = button_number;
-        buf[6] = DEVICE_BUTTON_EVENT_CLICK;
-        buf[7] = DATA_RESERVED;
-        buf[8] = DATA_RESERVED;
-        buf[9] = DATA_RESERVED;
-        simple_udp_sendto(connection, buf, strlen(buf) + 1, dest_addr);
     }
 
     led_blink(LED_A);
