@@ -238,17 +238,6 @@ static uip_ipaddr_t *set_global_address(void)
   uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
   uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
 
-  printf("IPv6 addresses: ");
-  for(i = 0; i < UIP_DS6_ADDR_NB; i++) {
-    state = uip_ds6_if.addr_list[i].state;
-    if(uip_ds6_if.addr_list[i].isused &&
-       (state == ADDR_TENTATIVE || state == ADDR_PREFERRED)) {
-      uip_debug_ipaddr_print(&uip_ds6_if.addr_list[i].ipaddr);
-      printf(", ");
-    }
-  }
-  printf("\n");
-
   return &ipaddr;
 }
 /*---------------------------------------------------------------------------*/
@@ -295,7 +284,8 @@ PROCESS_THREAD(rpl_root_process, ev, data)
     PROCESS_WAIT_EVENT();
     if(ev == sensors_event) {
         if(data == &button_e_sensor) {
-            PRINTF("Buttons control process: Button E\n");
+            //PRINTF("Initiating global repair\n");
+            //rpl_repair_root(RPL_DEFAULT_INSTANCE);
         }
     }
   }
