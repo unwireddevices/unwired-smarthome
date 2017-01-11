@@ -67,14 +67,19 @@
 #define MAX_NON_ANSWERED_PINGS      5
 
 /*---------------------------------------------------------------------------*/
+
 struct simple_udp_connection udp_connection; //struct for simple_udp_send
 uint8_t dag_active = 0; //set to 1, if rpl root found and answer to join packet
 uint8_t non_answered_ping = 0;
 uip_ip6addr_t root_addr;
 clock_time_t dag_interval = MIN_INTERVAL;
+
 /*---------------------------------------------------------------------------*/
+
 PROCESS(dag_node_process, "DAG-node process");
+
 /*---------------------------------------------------------------------------*/
+
 static void
 udp_receiver(struct simple_udp_connection *c,
          const uip_ipaddr_t *sender_addr,
@@ -113,6 +118,9 @@ udp_receiver(struct simple_udp_connection *c,
   led_off(LED_A);
 }
 
+/*---------------------------------------------------------------------------*/
+
+
 void
 send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *connection)
 {
@@ -130,6 +138,8 @@ send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *c
     buf[9] = DATA_RESERVED;
     simple_udp_sendto(connection, buf, lenght + 1, dest_addr);
 }
+
+/*---------------------------------------------------------------------------*/
 
 static void
 dag_root_find(void)
