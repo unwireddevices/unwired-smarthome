@@ -42,6 +42,14 @@
 uint8_t dag_active;
 struct simple_udp_connection udp_connection;
 uip_ip6addr_t root_addr;
+
+struct command_data
+{
+    uint8_t ability_target;
+    uint8_t ability_number;
+    uint8_t ability_state;
+};
+
 PROCESS_NAME(dag_node_process);
 /*---------------------------------------------------------------------------*/
 

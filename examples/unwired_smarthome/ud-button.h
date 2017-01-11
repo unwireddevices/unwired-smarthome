@@ -51,7 +51,7 @@
 #define CURRENT_ABILITY_3BYTE                 0b00000000
 #define CURRENT_ABILITY_4BYTE                 0b00000000
 
-PROCESS_NAME(udp_button_process);
+PROCESS_NAME(main_process);
 
 struct sensor_packet {
 uint8_t protocol_version;

@@ -72,8 +72,8 @@
 
 SENSORS(&button_a_sensor, &button_b_sensor, &button_c_sensor, &button_d_sensor, &button_e_sensor); //register button sensors
 
-PROCESS(udp_button_process, "UDP Buttons control process"); //register main button process
-AUTOSTART_PROCESSES(&udp_button_process, &dag_node_process); //set autostart processes
+PROCESS(main_process, "UD Buttons control process"); //register main button process
+AUTOSTART_PROCESSES(&main_process, &dag_node_process); //set autostart processes
 /*---------------------------------------------------------------------------*/
 void send_sensor_event(struct sensor_packet *packet,
                  const uip_ip6addr_t *dest_addr,
@@ -122,7 +122,7 @@ void send_button_status_packet(const uip_ip6addr_t *dest_addr,
 }
 /*---------------------------------------------------------------------------*/
 
-PROCESS_THREAD(udp_button_process, ev, data)
+PROCESS_THREAD(main_process, ev, data)
 {
   PROCESS_BEGIN();
   PRINTF("Unwired buttons device. HELL-IN-CODE free. I hope.\n");

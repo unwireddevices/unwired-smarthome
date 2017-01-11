@@ -102,6 +102,14 @@ udp_receiver(struct simple_udp_connection *c,
           root_addr = *sender_addr;
           non_answered_ping = 0;
           break;
+      case DATA_TYPE_COMMAND:
+          printf("DEBUG: Command packet received\n");
+          static struct command_data message_for_main_process;
+          message_for_main_process.ability_target = data[3];
+          message_for_main_process.ability_number = data[4];
+          message_for_main_process.ability_state = data[5];
+          process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
+          break;
       default:
           printf("Incompatible data type!\n");
           break;
