@@ -65,28 +65,136 @@
 #include "ti-lib.h"
 #include "ud_binary_protocol.h"
 
+#define RELAY_1 IOID_17
+#define RELAY_2 IOID_16
+
 /*---------------------------------------------------------------------------*/
 #define DEBUG 1
 #include "net/ip/uip-debug_UD.h"
 /*---------------------------------------------------------------------------*/
+uint8_t relay_1_state = 0;
+uint8_t relay_2_state = 0;
+
 SENSORS(&button_e_sensor);
-PROCESS(ud_relay_process, "Relay control process"); //register main button process
-AUTOSTART_PROCESSES(&ud_relay_process, &dag_node_process); //set autostart processes
+PROCESS(main_process, "Relay control process"); //register main button process
+AUTOSTART_PROCESSES(&main_process, &dag_node_process); //set autostart processes
+/*---------------------------------------------------------------------------*/
+void change_DIO_state(uint8_t dio_number, uint8_t dio_state)
+{
+    if (dio_number == 1)
+    {
+        switch ( dio_state ) {
+        case DEVICE_ABILITY_RELAY_COMMAND_OFF:
+            ti_lib_gpio_clear_dio(RELAY_1);
+            printf("RELAY: Relay 1 set to OFF\n");
+            relay_1_state = 0;
+            break;
+        case DEVICE_ABILITY_RELAY_COMMAND_ON:
+            ti_lib_gpio_set_dio(RELAY_1);
+            printf("RELAY: Relay 1 set to ON\n");
+            relay_1_state = 1;
+            break;
+        case DEVICE_ABILITY_RELAY_COMMAND_TOGGLE:
+            if (relay_1_state == 1) {
+                ti_lib_gpio_clear_dio(RELAY_1);
+                printf("RELAY: Relay 1 set to OFF\n");
+                relay_1_state = 0;
+            }
+            else
+            {
+                ti_lib_gpio_set_dio(RELAY_1);
+                printf("RELAY: Relay 1 set to ON\n");
+                relay_1_state = 1;
+            }
+            break;
+        default:
+            printf("RELAY: Incompatible relay 1 state!\n");
+            break;
+        }
+    }
+    if (dio_number == 2)
+    {
+        switch ( dio_state ) {
+        case DEVICE_ABILITY_RELAY_COMMAND_OFF:
+            ti_lib_gpio_clear_dio(RELAY_2);
+            printf("RELAY: Relay 2 set to OFF\n");
+            relay_2_state = 0;
+            break;
+        case DEVICE_ABILITY_RELAY_COMMAND_ON:
+            ti_lib_gpio_set_dio(RELAY_2);
+            printf("RELAY: Relay 2 set to ON\n");
+            relay_2_state = 2;
+            break;
+        case DEVICE_ABILITY_RELAY_COMMAND_TOGGLE:
+            if (relay_2_state == 1) {
+                ti_lib_gpio_clear_dio(RELAY_2);
+                printf("RELAY: Relay 2 set to OFF\n");
+                relay_2_state = 0;
+            }
+            else
+            {
+                ti_lib_gpio_set_dio(RELAY_2);
+                printf("RELAY: Relay 2 set to ON\n");
+                relay_2_state = 1;
+            }
+            break;
+        default:
+            printf("RELAY: Incompatible relay 2 state!\n");
+            break;
+        }
+    }
+
+
+}
+
+void configure_DIO()
+{
+    ti_lib_ioc_pin_type_gpio_output(RELAY_1);
+    ti_lib_ioc_pin_type_gpio_output(RELAY_2);
+    ti_lib_gpio_clear_dio(RELAY_1);
+    ti_lib_gpio_clear_dio(RELAY_2);
+}
+
+
+void exe_relay_command(struct command_data *command_relay)
+{
+    printf("RELAY: new coomand, target: %02X state: %02X number: %02X \n", command_relay->ability_target, command_relay->ability_state, command_relay->ability_number);
+    uint8_t number_ability = command_relay->ability_number;
+    if (number_ability == 1 || number_ability == 2)
+    {
+        change_DIO_state(number_ability, command_relay->ability_state);
+    }
+    else
+    {
+        printf("Not support relay number\n");
+    }
+}
+
 /*---------------------------------------------------------------------------*/
 
-
-/*---------------------------------------------------------------------------*/
-
-PROCESS_THREAD(ud_relay_process, ev, data)
+PROCESS_THREAD(main_process, ev, data)
 {
   PROCESS_BEGIN();
   PRINTF("Unwired relay device. HELL-IN-CODE free. I hope.\n");
 
+  struct command_data *message_data;
+
   PROCESS_PAUSE();
   
-  while(1) {
-    PROCESS_YIELD();
+  configure_DIO();
 
+  while(1)
+  {
+    PROCESS_YIELD();
+    if(ev == PROCESS_EVENT_CONTINUE)
+    {
+      message_data = data;
+
+      if (message_data->ability_target == DEVICE_ABILITY_RELAY)
+      {
+          exe_relay_command(data);
+      }
+    }
   }
 
   PROCESS_END();
