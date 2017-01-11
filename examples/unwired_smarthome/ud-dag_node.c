@@ -147,11 +147,11 @@ dag_root_find(void)
             if (dag->instance->def_route) {
                 if (dag_active == 0) {
                     uip_ip6addr_copy(&addr, &dag->instance->def_route->ipaddr);
-                    PRINTF("RPL: default route destination: ");
-                    PRINT6ADDR(&addr);
-                    PRINTF("\n");
+                    printf("RPL: default route destination: ");
+                    uip_debug_ip6addr_print(&addr);
+                    printf("\n");
 
-                    PRINTF("DAG node: send join packet to root \n");
+                    printf("DAG node: send join packet to root \n");
                     send_join_packet(&addr, &udp_connection);
                     if (non_answered_ping < 100) {
                         non_answered_ping++;
@@ -194,7 +194,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
      }
     etimer_set(&dag_timer, dag_interval + (random_rand() % dag_interval));
     if (non_answered_ping > 0)
-        printf("DAG: Non answer ping count: %u\n", non_answered_ping);
+        printf("DAG: Non-answer ping count: %u\n", non_answered_ping);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&dag_timer));
     dag_root_find();
 

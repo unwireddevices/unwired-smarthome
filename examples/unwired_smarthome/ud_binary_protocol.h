@@ -50,7 +50,7 @@
 #define DATA_TYPE_PING                      0x04
 #define DATA_TYPE_COMMAND                   0x05
 
-/* Resarved data */
+/* Reserved data */
 #define DATA_RESERVED                       0xFF
 
 /* Devices groups */
