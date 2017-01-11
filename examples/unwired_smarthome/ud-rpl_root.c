@@ -61,9 +61,7 @@
 
 #include "ud_binary_protocol.h"
 
-//#define DEBUG 1
-//#include "net/ip/uip-debug_UD.h"
-//#include "../../core/contiki-net.h"
+/*---------------------------------------------------------------------------*/
 
 static struct simple_udp_connection udp_connection;
 uip_ip6addr_t destination_address;
@@ -75,12 +73,14 @@ static uint8_t uart_magic_sequence[UART_DATA_LENGTH] =
  0x01,0x01,0x01,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
  0x03,0x16,0x16,0x16,0x17,0x04};
 
-SENSORS(&button_e_sensor);
-
 /*---------------------------------------------------------------------------*/
+
+SENSORS(&button_e_sensor);
 PROCESS(rpl_root_process,"Unwired RPL root and udp data receiver");
 AUTOSTART_PROCESSES(&rpl_root_process);
+
 /*---------------------------------------------------------------------------*/
+
 void send_confirmation_packet(const uip_ip6addr_t *dest_addr,
                               struct simple_udp_connection *connection)
 {
@@ -98,7 +98,9 @@ void send_confirmation_packet(const uip_ip6addr_t *dest_addr,
     buf[9] = DATA_RESERVED;
     simple_udp_sendto(connection, buf, lenght + 1, dest_addr);
 }
+
 /*---------------------------------------------------------------------------*/
+
 void send_command_packet(const uip_ip6addr_t *dest_addr,
                           struct simple_udp_connection *connection,
                           uint8_t target_ability,
@@ -121,6 +123,7 @@ void send_command_packet(const uip_ip6addr_t *dest_addr,
 }
 
 /*---------------------------------------------------------------------------*/
+
 void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data)
 {
     printf("DAGROOTRAW1;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x"
@@ -133,7 +136,9 @@ void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data)
            ((uint8_t *)addr)[12], ((uint8_t *)addr)[13], ((uint8_t *)addr)[14], ((uint8_t *)addr)[15],
            data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
 }
+
 /*---------------------------------------------------------------------------*/
+
 void uart_packet_dump(uint8_t *uart_command_buf) {
     printf("\nOk packet: ");
     for (int i = 0; i < UART_DATA_LENGTH; i++)
@@ -144,6 +149,7 @@ void uart_packet_dump(uint8_t *uart_command_buf) {
 }
 
 /*---------------------------------------------------------------------------*/
+
 static int char_in(unsigned char c)
 {
     led_blink(LED_A);
@@ -191,6 +197,7 @@ static int char_in(unsigned char c)
 }
 
 /*---------------------------------------------------------------------------*/
+
 static void udp_data_receiver(struct simple_udp_connection *connection,
          const uip_ipaddr_t *sender_addr,
          uint16_t sender_port,
@@ -209,7 +216,9 @@ static void udp_data_receiver(struct simple_udp_connection *connection,
 
     led_off(LED_A);
 }
+
 /*---------------------------------------------------------------------------*/
+
 static uip_ipaddr_t *set_global_address(void)
 {
   static uip_ipaddr_t ipaddr;
@@ -220,7 +229,9 @@ static uip_ipaddr_t *set_global_address(void)
 
   return &ipaddr;
 }
+
 /*---------------------------------------------------------------------------*/
+
 static void create_rpl_dag(uip_ipaddr_t *ipaddr)
 {
   struct uip_ds6_addr *root_if;
@@ -239,6 +250,7 @@ static void create_rpl_dag(uip_ipaddr_t *ipaddr)
 }
 
 /*---------------------------------------------------------------------------*/
+
 PROCESS_THREAD(rpl_root_process, ev, data)
 {
   uip_ipaddr_t *ipaddr;
@@ -268,4 +280,3 @@ PROCESS_THREAD(rpl_root_process, ev, data)
   }
   PROCESS_END();
 }
-/*---------------------------------------------------------------------------*/

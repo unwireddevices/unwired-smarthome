@@ -56,7 +56,6 @@
 #include "button-sensor.h"
 #include "cc26xx/board.h"
 #include "board-peripherals.h"
-//#include "dev/watchdog.h"
 #include "simple-udp.h"
 
 #include "ud-relay.h"
@@ -69,17 +68,19 @@
 #define RELAY_2 IOID_16
 
 /*---------------------------------------------------------------------------*/
-//#define DEBUG 1
-//#include "net/ip/uip-debug_UD.h"
-/*---------------------------------------------------------------------------*/
+
 uint8_t relay_1_state = 0;
 uint8_t relay_2_state = 0;
+
+/*---------------------------------------------------------------------------*/
 
 SENSORS(&button_e_sensor);
 PROCESS(main_process, "Relay control process"); //register main button process
 AUTOSTART_PROCESSES(&main_process, &dag_node_process); //set autostart processes
+
 /*---------------------------------------------------------------------------*/
-void change_DIO_state(uint8_t dio_number, uint8_t dio_state) //TODO: куда кода дублируется, сделай с этим что-нибудь
+
+void change_DIO_state(uint8_t dio_number, uint8_t dio_state) //TODO: куча кода дублируется, сделай с этим что-нибудь
 {
     if (dio_number == 1)
     {
@@ -144,8 +145,9 @@ void change_DIO_state(uint8_t dio_number, uint8_t dio_state) //TODO: куда к
         }
     }
 
-
 }
+
+/*---------------------------------------------------------------------------*/
 
 void configure_DIO()
 {
@@ -155,6 +157,7 @@ void configure_DIO()
     ti_lib_gpio_clear_dio(RELAY_2);
 }
 
+/*---------------------------------------------------------------------------*/
 
 void exe_relay_command(struct command_data *command_relay)
 {
@@ -199,4 +202,3 @@ PROCESS_THREAD(main_process, ev, data)
 
   PROCESS_END();
 }
-/*---------------------------------------------------------------------------*/

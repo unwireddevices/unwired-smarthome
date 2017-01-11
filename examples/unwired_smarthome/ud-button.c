@@ -66,14 +66,11 @@
 #include "ud_binary_protocol.h"
 
 /*---------------------------------------------------------------------------*/
-//#define DEBUG 1
-//#include "net/ip/uip-debug_UD.h"
-/*---------------------------------------------------------------------------*/
 
 SENSORS(&button_a_sensor, &button_b_sensor, &button_c_sensor, &button_d_sensor, &button_e_sensor); //register button sensors
-
 PROCESS(main_process, "UD Buttons control process"); //register main button process
 AUTOSTART_PROCESSES(&main_process, &dag_node_process); //set autostart processes
+
 /*---------------------------------------------------------------------------*/
 void send_sensor_event(struct sensor_packet *packet,
                  const uip_ip6addr_t *dest_addr,
@@ -95,12 +92,15 @@ void send_sensor_event(struct sensor_packet *packet,
     simple_udp_sendto(connection, udp_buffer, lenght + 1, dest_addr);
 }
 
+/*---------------------------------------------------------------------------*/
 
 void send_button_status_packet(const uip_ip6addr_t *dest_addr,
                           struct simple_udp_connection *connection,
                           uint8_t button_number,
                           int duration)
 {
+
+
     if(dag_active == 1 && dest_addr != NULL && connection != NULL)
     {
         printf("Buttons: send message to RPL root node\n");
@@ -120,6 +120,7 @@ void send_button_status_packet(const uip_ip6addr_t *dest_addr,
 
     led_blink(LED_A);
 }
+
 /*---------------------------------------------------------------------------*/
 
 PROCESS_THREAD(main_process, ev, data)
@@ -157,4 +158,3 @@ PROCESS_THREAD(main_process, ev, data)
 
   PROCESS_END();
 }
-/*---------------------------------------------------------------------------*/

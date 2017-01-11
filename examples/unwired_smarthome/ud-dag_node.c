@@ -51,6 +51,7 @@
 
 #include "ti-lib.h"
 #include "ud_binary_protocol.h"
+#include "fake_headers.h"
 
 #ifdef IF_UD_BUTTON
     #include "ud-button.h"
@@ -60,14 +61,10 @@
     #include "ud-relay.h"
 #endif
 
-#include "fake_headers.h"
-/*---------------------------------------------------------------------------*/
-//#define DEBUG 1
-//#include "net/ip/uip-debug_UD.h"
-/*---------------------------------------------------------------------------*/
 #define MIN_INTERVAL                (5 * CLOCK_SECOND)
 #define MAX_INTERVAL                (50 * CLOCK_SECOND)
 #define MAX_NON_ANSWERED_PINGS      5
+
 /*---------------------------------------------------------------------------*/
 struct simple_udp_connection udp_connection; //struct for simple_udp_send
 uint8_t dag_active = 0; //set to 1, if rpl root found and answer to join packet
