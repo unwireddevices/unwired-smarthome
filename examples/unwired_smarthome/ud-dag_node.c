@@ -47,12 +47,20 @@
 #include <stdio.h>
 #include "simple-udp.h"
 
-#include "ud-button.h"
 #include "ud-dag_node.h"
 
 #include "ti-lib.h"
 #include "ud_binary_protocol.h"
 
+#ifdef IF_UD_BUTTON
+    #include "ud-button.h"
+#endif
+
+#ifdef IF_UD_RELAY
+    #include "ud-relay.h"
+#endif
+
+#include "fake_headers.h"
 /*---------------------------------------------------------------------------*/
 #define DEBUG 1
 #include "net/ip/uip-debug_UD.h"
@@ -109,14 +117,14 @@ send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *c
 {
     char buf[10];
     buf[0] = PROTOCOL_VERSION_V1;
-    buf[1] = DEVICE_VERSION_V1;
+    buf[1] = CURRENT_DEVICE_VERSION;
     buf[2] = DATA_TYPE_JOIN;
     buf[3] = CURRENT_DEVICE_GROUP;
     buf[4] = CURRENT_DEVICE_SLEEP_TYPE;
-    buf[5] = DEVICE_ABILITY_BUTTON; //TODO: заменить на нормальную схему со сдвигами
-    buf[6] = DEVICE_ABILITY_NONE;
-    buf[7] = DEVICE_ABILITY_NONE;
-    buf[8] = DEVICE_ABILITY_NONE;
+    buf[5] = CURRENT_ABILITY_1BYTE; //TODO: заменить на нормальную схему со сдвигами
+    buf[6] = CURRENT_ABILITY_2BYTE;
+    buf[7] = CURRENT_ABILITY_3BYTE;
+    buf[8] = CURRENT_ABILITY_4BYTE;
     buf[9] = DATA_RESERVED;
     simple_udp_sendto(connection, buf, strlen(buf) + 1, dest_addr);
 }

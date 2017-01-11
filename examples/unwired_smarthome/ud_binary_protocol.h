@@ -63,9 +63,9 @@
 #define DEVICE_GROUP_RELAY                  0x05
 #define DEVICE_GROUP_DIMMER                 0x06
 #define DEVICE_GROUP_LIGHT                  0x07
-#define DEVICE_GROUP_RGB_LIGHT              0x07
-#define DEVICE_GROUP_BRIDGE_CONVERTER       0x07
-#define DEVICE_GROUP_OTHER                  0x07
+#define DEVICE_GROUP_RGB_LIGHT              0x08
+#define DEVICE_GROUP_BRIDGE_CONVERTER       0x09
+#define DEVICE_GROUP_OTHER                  0xFF
 
 /* Devices ability's */
 /* Определяет наличие в устройстве конкретных возможностей */
@@ -108,26 +108,28 @@
 #define DEVICE_ABILITY_DALI_BRIGE              32
 
 /* Devices sleep types */
-#define DEVICE_SLEEP_TYPE_NORMAL               0x01
-#define DEVICE_SLEEP_TYPE_LEAF                 0x02
+#define DEVICE_SLEEP_TYPE_NORMAL                        0x01
+#define DEVICE_SLEEP_TYPE_LEAF                          0x02
 
 /* DEVICE_ABILITY_BUTTON events */
-#define DEVICE_ABILITY_BUTTON_EVENT_CLICK           0x01
-#define DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK      0x02
-#define DEVICE_ABILITY_BUTTON_EVENT_ON              0x03
-#define DEVICE_ABILITY_BUTTON_EVENT_OFF             0x04
+#define DEVICE_ABILITY_BUTTON_EVENT_CLICK               0x01
+#define DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK          0x02
+#define DEVICE_ABILITY_BUTTON_EVENT_ON                  0x03
+#define DEVICE_ABILITY_BUTTON_EVENT_OFF                 0x04
 
+/* DEVICE_ABILITY_LED commands */
+#define DEVICE_ABILITY_LED_COMMAND_OFF                  0x00
+#define DEVICE_ABILITY_LED_COMMAND_ON                   0x01
+#define DEVICE_ABILITY_LED_COMMAND_BLINK                0x02
 
-
-/* DEVICE_TYPE_LED commands */
-#define DEVICE_GROUP_BUTTON_EVENT_CLICK           0x01
-#define DEVICE_GROUP_BUTTON_EVENT_LONG_CLICK      0x02
-#define DEVICE_GROUP_BUTTON_EVENT_ON              0x03
-#define DEVICE_GROUP_BUTTON_EVENT_OFF             0x04
+/* DEVICE_ABILITY_RELAY commands */
+#define DEVICE_ABILITY_RELAY_COMMAND_OFF                0x00
+#define DEVICE_ABILITY_RELAY_COMMAND_ON                 0x01
+#define DEVICE_ABILITY_RELAY_COMMAND_TOGGLE             0x02
 
 
 /* UART Binary data */
-#define UART_PROTOCOL_VERSION_V1            0x01
-#define UART_DATA_LENGTH                    42
-#define MAGIC_SEQUENCE_LENGTH               6
+#define UART_PROTOCOL_VERSION_V1                        0x01
+#define UART_DATA_LENGTH                                42
+#define MAGIC_SEQUENCE_LENGTH                           6
 

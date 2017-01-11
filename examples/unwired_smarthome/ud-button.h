@@ -46,6 +46,10 @@
 #define CURRENT_DEVICE_GROUP                  DEVICE_GROUP_BUTTON_SWITCH
 #define CURRENT_DEVICE_VERSION                DEVICE_VERSION_V1
 #define CURRENT_PROTOCOL_VERSION              PROTOCOL_VERSION_V1
+#define CURRENT_ABILITY_1BYTE                 0b10000000
+#define CURRENT_ABILITY_2BYTE                 0b00000000
+#define CURRENT_ABILITY_3BYTE                 0b00000000
+#define CURRENT_ABILITY_4BYTE                 0b00000000
 
 PROCESS_NAME(udp_button_process);
 
