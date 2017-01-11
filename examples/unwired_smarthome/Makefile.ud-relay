@@ -2,6 +2,7 @@ all: ud-relay
 
 PROJECT_SOURCEFILES += ud-dag_node.c 
 DEFINES+=PROJECT_CONF_H=\"project-conf-normal.h\"
+DEFINES+=IF_UD_RELAY=1
 CONTIKI = ../..
 CONTIKI_WITH_IPV6 = 1
 include $(CONTIKI)/Makefile.include
