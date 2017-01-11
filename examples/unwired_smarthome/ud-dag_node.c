@@ -118,7 +118,8 @@ udp_receiver(struct simple_udp_connection *c,
 void
 send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *connection)
 {
-    char buf[10];
+    uint8_t lenght = 10;
+    uint8_t buf[lenght];
     buf[0] = PROTOCOL_VERSION_V1;
     buf[1] = CURRENT_DEVICE_VERSION;
     buf[2] = DATA_TYPE_JOIN;
@@ -129,7 +130,7 @@ send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *c
     buf[7] = CURRENT_ABILITY_3BYTE;
     buf[8] = CURRENT_ABILITY_4BYTE;
     buf[9] = DATA_RESERVED;
-    simple_udp_sendto(connection, buf, strlen(buf) + 1, dest_addr);
+    simple_udp_sendto(connection, buf, lenght + 1, dest_addr);
 }
 
 static void
