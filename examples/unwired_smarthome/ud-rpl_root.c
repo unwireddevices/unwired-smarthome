@@ -152,13 +152,13 @@ static int char_in(unsigned char c)
     {
         if (c != uart_magic_sequence[uart_iterator])
         {
-            printf(": BAD. iterator=%u\n", uart_iterator);
+            //printf(": BAD. iterator=%u\n", uart_iterator);
             uart_iterator = 0;
             return 1;
         }
         else
         {
-            printf(": OK. iterator=%u\n", uart_iterator);
+            //printf(": OK. iterator=%u\n", uart_iterator);
         }
     }
     uart_command_buf[uart_iterator] = c;
