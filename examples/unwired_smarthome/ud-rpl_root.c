@@ -176,10 +176,10 @@ static int char_in(unsigned char c)
 
             for (int i = 0; i <= 15; i++)
             {
-               destination_address.u8[i] = uart_command_buf[i+8];
+               destination_address.u8[i] = uart_command_buf[i+7];
             }
             PRINT6ADDR(&destination_address);
-            send_command_packet(&destination_address, &udp_connection, uart_command_buf[22], uart_command_buf[23], uart_command_buf[24]);
+            send_command_packet(&destination_address, &udp_connection, uart_command_buf[23], uart_command_buf[24], uart_command_buf[25]);
         }
         else
         {
