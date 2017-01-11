@@ -160,7 +160,7 @@ dag_root_find(void)
             }
             else
             {
-                //PRINTF("RPL: address destination: none \n");
+                //printf("RPL: address destination: none \n");
                 dag_active = 0;
             }
         }

@@ -103,7 +103,7 @@ void send_button_status_packet(const uip_ip6addr_t *dest_addr,
 {
     if(dag_active == 1 && dest_addr != NULL && connection != NULL)
     {
-        PRINTF("Buttons: send message to RPL root node\n");
+        printf("Buttons: send message to RPL root node\n");
 
         struct sensor_packet button_sensor_packet;
         button_sensor_packet.protocol_version = CURRENT_PROTOCOL_VERSION;
@@ -125,7 +125,7 @@ void send_button_status_packet(const uip_ip6addr_t *dest_addr,
 PROCESS_THREAD(main_process, ev, data)
 {
   PROCESS_BEGIN();
-  PRINTF("Unwired buttons device. HELL-IN-CODE free. I hope.\n");
+  printf("Unwired buttons device. HELL-IN-CODE free. I hope.\n");
 
   PROCESS_PAUSE();
   
@@ -133,23 +133,23 @@ PROCESS_THREAD(main_process, ev, data)
     PROCESS_YIELD();
     if(ev == sensors_event) {
       if(data == &button_a_sensor) {
-        PRINTF("Buttons control process: Button A\n");
+        printf("Buttons control process: Button A\n");
         send_button_status_packet(&root_addr, &udp_connection, 'a', (&button_a_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
       }
       if(data == &button_b_sensor) {
-        PRINTF("Buttons control process: Button B\n");
+        printf("Buttons control process: Button B\n");
         send_button_status_packet(&root_addr, &udp_connection, 'b', (&button_b_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
       }
       if(data == &button_c_sensor) {
-        PRINTF("Buttons control process: Button C\n");
+        printf("Buttons control process: Button C\n");
         send_button_status_packet(&root_addr, &udp_connection, 'c', (&button_c_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
       }
       if(data == &button_d_sensor) {
-        PRINTF("Buttons control process: Button D\n");
+        printf("Buttons control process: Button D\n");
         send_button_status_packet(&root_addr, &udp_connection, 'd', (&button_d_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
       }
       if(data == &button_e_sensor) {
-        PRINTF("Buttons control process: Button E\n");
+        printf("Buttons control process: Button E\n");
         send_button_status_packet(&root_addr, &udp_connection, 'e', (&button_e_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
       }
     }

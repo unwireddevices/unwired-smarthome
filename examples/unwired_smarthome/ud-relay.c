@@ -175,7 +175,7 @@ void exe_relay_command(struct command_data *command_relay)
 PROCESS_THREAD(main_process, ev, data)
 {
   PROCESS_BEGIN();
-  PRINTF("Unwired relay device. HELL-IN-CODE free. I hope.\n");
+  printf("Unwired relay device. HELL-IN-CODE free. I hope.\n");
 
   struct command_data *message_data;
 
