@@ -51,7 +51,6 @@
 
 #include "ti-lib.h"
 #include "ud_binary_protocol.h"
-#include "fake_headers.h"
 
 #ifdef IF_UD_BUTTON
     #include "ud-button.h"
@@ -60,6 +59,8 @@
 #ifdef IF_UD_RELAY
     #include "ud-relay.h"
 #endif
+
+#include "fake_headers.h" //no move up! not "krasivo"!
 
 #define MIN_INTERVAL                (5 * CLOCK_SECOND)
 #define MAX_INTERVAL                (50 * CLOCK_SECOND)
