@@ -70,10 +70,10 @@ uip_ip6addr_t destination_address;
 static uint8_t uart_command_buf[UART_DATA_LENGTH];
 static uint8_t uart_iterator = 0;
 static uint8_t uart_magic_sequence[UART_DATA_LENGTH] =
-{0x54,0x54,0x54,0x54,0x54,0x54, //0x01,0x16,0x16,0x16,0x16,0x10,
+{0x01,0x16,0x16,0x16,0x16,0x10,
  0x01,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
  0x01,0x01,0x01,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
- 0x54,0x54,0x54,0x54,0x54,0x54};
+ 0x03,0x16,0x16,0x16,0x17,0x04};
 
 SENSORS(&button_e_sensor);
 
@@ -124,7 +124,8 @@ void send_command_packet(const uip_ip6addr_t *dest_addr,
 void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data)
 {
     printf("DAGROOTRAW1;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x"
-           ";%02X;%02X;%02X;%02X;%02X;%02X;%02X;%02X;%02X;%02X;RAWEND\n",
+           ";%02X;%02X;%02X;%02X;%02X;%02X;%02X;%02X;%02X;%02X;RAWEND"
+            "   \n",
            ((uint8_t *)addr)[0], ((uint8_t *)addr)[1], ((uint8_t *)addr)[2],
            ((uint8_t *)addr)[3], ((uint8_t *)addr)[4], ((uint8_t *)addr)[5],
            ((uint8_t *)addr)[6], ((uint8_t *)addr)[7], ((uint8_t *)addr)[8],
