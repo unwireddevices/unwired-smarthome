@@ -61,8 +61,8 @@
 
 #include "ud_binary_protocol.h"
 
-#define DEBUG 1
-#include "net/ip/uip-debug_UD.h"
+//#define DEBUG 1
+//#include "net/ip/uip-debug_UD.h"
 //#include "../../core/contiki-net.h"
 
 static struct simple_udp_connection udp_connection;

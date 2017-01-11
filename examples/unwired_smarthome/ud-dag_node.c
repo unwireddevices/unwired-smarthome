@@ -62,8 +62,8 @@
 
 #include "fake_headers.h"
 /*---------------------------------------------------------------------------*/
-#define DEBUG 1
-#include "net/ip/uip-debug_UD.h"
+//#define DEBUG 1
+//#include "net/ip/uip-debug_UD.h"
 /*---------------------------------------------------------------------------*/
 #define MIN_INTERVAL                (5 * CLOCK_SECOND)
 #define MAX_INTERVAL                (50 * CLOCK_SECOND)

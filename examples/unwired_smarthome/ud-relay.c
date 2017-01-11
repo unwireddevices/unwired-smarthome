@@ -69,8 +69,8 @@
 #define RELAY_2 IOID_16
 
 /*---------------------------------------------------------------------------*/
-#define DEBUG 1
-#include "net/ip/uip-debug_UD.h"
+//#define DEBUG 1
+//#include "net/ip/uip-debug_UD.h"
 /*---------------------------------------------------------------------------*/
 uint8_t relay_1_state = 0;
 uint8_t relay_2_state = 0;

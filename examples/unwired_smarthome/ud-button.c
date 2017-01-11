@@ -66,8 +66,8 @@
 #include "ud_binary_protocol.h"
 
 /*---------------------------------------------------------------------------*/
-#define DEBUG 1
-#include "net/ip/uip-debug_UD.h"
+//#define DEBUG 1
+//#include "net/ip/uip-debug_UD.h"
 /*---------------------------------------------------------------------------*/
 
 SENSORS(&button_a_sensor, &button_b_sensor, &button_c_sensor, &button_d_sensor, &button_e_sensor); //register button sensors
