@@ -111,8 +111,8 @@ void send_button_status_packet(const uip_ip6addr_t *dest_addr,
         button_sensor_packet.data_type = DATA_TYPE_SENSOR_DATA;
         button_sensor_packet.number_ability = DEVICE_ABILITY_BUTTON;
         button_sensor_packet.sensor_number = button_number;
-        if (duration > 60) //TODO: magic number!
-            button_sensor_packet.sensor_event = DEVICE_GROUP_BUTTON_EVENT_CLICK;
+        if (duration < 60) //TODO: magic number!
+            button_sensor_packet.sensor_event = DEVICE_ABILITY_BUTTON_EVENT_CLICK;
         else
             button_sensor_packet.sensor_event = DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK;
         send_sensor_event(&button_sensor_packet, dest_addr, connection);
