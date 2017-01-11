@@ -63,3 +63,8 @@
 #ifndef CURRENT_ABILITY_4BYTE
 #define CURRENT_ABILITY_4BYTE
 #endif
+
+
+#ifndef RPL_CONF_LEAF_ONLY
+#define RPL_CONF_LEAF_ONLY
+#endif

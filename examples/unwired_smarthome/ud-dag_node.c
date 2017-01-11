@@ -180,7 +180,15 @@ PROCESS_THREAD(dag_node_process, ev, data)
   static struct etimer dag_timer;
   simple_udp_register(&udp_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_receiver);
 
-  printf("DAG Node: started\n");
+  PROCESS_PAUSE();
+
+  if (RPL_CONF_LEAF_ONLY == 1)
+      rpl_set_mode(RPL_MODE_LEAF);
+  else
+      rpl_set_mode(RPL_MODE_MESH);
+
+  printf("DAG Node: started, %s mode\n", rpl_get_mode() ==  RPL_MODE_LEAF ? "leaf" : "no-leaf");
+
   //led_on(LED_A);
 
   while(1) {
