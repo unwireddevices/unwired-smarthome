@@ -261,8 +261,8 @@ PROCESS_THREAD(rpl_root_process, ev, data)
     PROCESS_WAIT_EVENT();
     if(ev == sensors_event) {
         if(data == &button_e_sensor) {
-            //PRINTF("Initiating global repair\n");
-            //rpl_repair_root(RPL_DEFAULT_INSTANCE);
+            printf("Initiating global repair\n");
+            rpl_repair_root(RPL_DEFAULT_INSTANCE);
         }
     }
   }
