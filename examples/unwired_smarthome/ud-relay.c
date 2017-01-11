@@ -56,7 +56,7 @@
 #include "button-sensor.h"
 #include "cc26xx/board.h"
 #include "board-peripherals.h"
-#include "dev/watchdog.h"
+//#include "dev/watchdog.h"
 #include "simple-udp.h"
 
 #include "ud-relay.h"
@@ -79,7 +79,7 @@ SENSORS(&button_e_sensor);
 PROCESS(main_process, "Relay control process"); //register main button process
 AUTOSTART_PROCESSES(&main_process, &dag_node_process); //set autostart processes
 /*---------------------------------------------------------------------------*/
-void change_DIO_state(uint8_t dio_number, uint8_t dio_state)
+void change_DIO_state(uint8_t dio_number, uint8_t dio_state) //TODO: куда кода дублируется, сделай с этим что-нибудь
 {
     if (dio_number == 1)
     {
@@ -158,7 +158,7 @@ void configure_DIO()
 
 void exe_relay_command(struct command_data *command_relay)
 {
-    printf("RELAY: new coomand, target: %02X state: %02X number: %02X \n", command_relay->ability_target, command_relay->ability_state, command_relay->ability_number);
+    printf("RELAY: new command, target: %02X state: %02X number: %02X \n", command_relay->ability_target, command_relay->ability_state, command_relay->ability_number);
     uint8_t number_ability = command_relay->ability_number;
     if (number_ability == 1 || number_ability == 2)
     {
