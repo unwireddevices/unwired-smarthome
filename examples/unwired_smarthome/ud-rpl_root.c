@@ -96,7 +96,7 @@ void send_confirmation_packet(const uip_ip6addr_t *dest_addr,
     buf[7] = DATA_RESERVED;
     buf[8] = DATA_RESERVED;
     buf[9] = DATA_RESERVED;
-    simple_udp_sendto(connection, buf, strlen(buf) + 1, dest_addr);
+    simple_udp_sendto(connection, buf, lenght + 1, dest_addr);
 }
 /*---------------------------------------------------------------------------*/
 void send_command_packet(const uip_ip6addr_t *dest_addr,
@@ -117,7 +117,7 @@ void send_command_packet(const uip_ip6addr_t *dest_addr,
     buf[7] = DATA_RESERVED;
     buf[8] = DATA_RESERVED;
     buf[9] = DATA_RESERVED;
-    simple_udp_sendto(connection, buf, strlen(buf) + 1, dest_addr);
+    simple_udp_sendto(connection, buf, lenght + 1, dest_addr);
 }
 
 /*---------------------------------------------------------------------------*/
