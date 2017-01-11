@@ -133,7 +133,6 @@ void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data)
            ((uint8_t *)addr)[12], ((uint8_t *)addr)[13], ((uint8_t *)addr)[14], ((uint8_t *)addr)[15],
            data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
 }
-
 /*---------------------------------------------------------------------------*/
 void uart_packet_dump(uint8_t *uart_command_buf) {
     printf("\nOk packet: ");
@@ -204,36 +203,16 @@ static void udp_data_receiver(struct simple_udp_connection *connection,
 
     dag_root_raw_print(sender_addr, data);
 
-  if (data[0] == PROTOCOL_VERSION_V1 && data[1] == DEVICE_VERSION_V1) {
-      switch ( data[2] ) {
-      case DATA_TYPE_JOIN:
-          send_confirmation_packet(sender_addr, connection);
-          printf("USER: DAG join packet from ");
-          uip_debug_ipaddr_print(sender_addr);
-          printf(" received, confirmation packet send\n");
-          break;
-      case DATA_TYPE_SENSOR_DATA: //data type(0x02 - data from sensors)
-          printf("USER: data sensor from ");
-          uip_debug_ipaddr_print(sender_addr);
-          printf(", type: 0x%02X, event: 0x%02X, sensor: 0x%02X\n", data[3], data[6], data[5]);
-          break;
-      default:
-          printf("USER: Incompatible data type!\n");
-          break;
-      }
-  }
-  else
-  {
-      printf("USER: Incompatible device or protocol version!\n");
-  }
-  led_off(LED_A);
+    if (data[0] == PROTOCOL_VERSION_V1 && data[2] == DATA_TYPE_JOIN )
+      send_confirmation_packet(sender_addr, connection);
+
+
+    led_off(LED_A);
 }
 /*---------------------------------------------------------------------------*/
 static uip_ipaddr_t *set_global_address(void)
 {
   static uip_ipaddr_t ipaddr;
-  int i;
-  uint8_t state;
 
   uip_ip6addr(&ipaddr, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
   uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
@@ -277,9 +256,6 @@ PROCESS_THREAD(rpl_root_process, ev, data)
   led_blink(LED_A);
   led_blink(LED_A);
 
-  //ti_lib_ioc_pin_type_gpio_output(IOID_22);
-  //ti_lib_gpio_set_dio(IOID_22);
-  //ti_lib_gpio_set_output_enable_dio(IOID_3, GPIO_OUTPUT_ENABLE);
 
   while(1) {
     PROCESS_WAIT_EVENT();

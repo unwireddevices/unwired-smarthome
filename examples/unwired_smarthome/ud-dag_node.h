@@ -39,8 +39,8 @@
 
 #include "contiki.h"
 /*---------------------------------------------------------------------------*/
-uint8_t dag_active;
 struct simple_udp_connection udp_connection;
+uint8_t dag_active;
 uip_ip6addr_t root_addr;
 
 struct command_data

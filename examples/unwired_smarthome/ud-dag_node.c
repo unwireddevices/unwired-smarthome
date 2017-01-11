@@ -72,7 +72,6 @@
 struct simple_udp_connection udp_connection; //struct for simple_udp_send
 uint8_t dag_active = 0; //set to 1, if rpl root found and answer to join packet
 uint8_t non_answered_ping = 0;
-
 uip_ip6addr_t root_addr;
 clock_time_t dag_interval = MIN_INTERVAL;
 /*---------------------------------------------------------------------------*/
@@ -87,13 +86,8 @@ udp_receiver(struct simple_udp_connection *c,
          const uint8_t *data,
          uint16_t datalen)
 {
-  //printf("DEBUG: DAG data received from ");
-  //uip_debug_ipaddr_print(sender_addr);
-  //printf(" on port %d: ", receiver_port);
-  //printf("0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X 0x%02X \n",
-  //       data[0], data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
-
-    if (data[0] == PROTOCOL_VERSION_V1 && data[1] == DEVICE_VERSION_V1) {
+    led_on(LED_A);
+    if (data[0] == PROTOCOL_VERSION_V1 && data[1] == CURRENT_DEVICE_VERSION) {
       switch ( data[2] ) {
       case DATA_TYPE_CONFIRM:
           printf("DEBUG: DAG join packet confirmation received, DAG active\n");
@@ -118,6 +112,7 @@ udp_receiver(struct simple_udp_connection *c,
   else  {
       printf("DEBUG: Incompatible device or protocol version!\n");
   }
+  led_off(LED_A);
 }
 
 void
@@ -164,7 +159,7 @@ dag_root_find(void)
             }
             else
             {
-                PRINTF("RPL: address destination: none \n");
+                //PRINTF("RPL: address destination: none \n");
                 dag_active = 0;
             }
         }
@@ -185,19 +180,20 @@ PROCESS_THREAD(dag_node_process, ev, data)
   simple_udp_register(&udp_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_receiver);
 
   printf("DAG Node: started\n");
-  led_on(LED_A);
+  //led_on(LED_A);
 
   while(1) {
      if (dag_active == 0 && dag_interval != MIN_INTERVAL && non_answered_ping < 10) {
          dag_interval = MIN_INTERVAL;
-         printf("DAG: Change timer to short interval\n");
+         printf("DAG: Change timer to SHORT interval\n");
      }
      if ((dag_active == 1 && dag_interval != MAX_INTERVAL) || non_answered_ping > 10) {
          dag_interval = MAX_INTERVAL;
-         printf("DAG: Change timer to long interval\n");
+         printf("DAG: Change timer to LONG interval\n");
      }
     etimer_set(&dag_timer, dag_interval + (random_rand() % dag_interval));
-    printf("DAG: non_answered_ping: %u\n", non_answered_ping);
+    if (non_answered_ping > 0)
+        printf("DAG: Non answer ping count: %u\n", non_answered_ping);
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&dag_timer));
     dag_root_find();
 
