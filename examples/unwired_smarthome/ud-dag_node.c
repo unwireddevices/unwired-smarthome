@@ -55,6 +55,7 @@
 
 #include "ud-dag_node.h"
 #include "net/link-stats.h"
+
 #include "xxf_types_helper.h"
 
 #include "ti-lib.h"
@@ -110,14 +111,14 @@ udp_receiver(struct simple_udp_connection *c,
     if (data[0] == PROTOCOL_VERSION_V1 && data[1] == CURRENT_DEVICE_VERSION) {
       switch ( data[2] ) {
       case DATA_TYPE_CONFIRM:
-          printf("DEBUG: DAG join packet confirmation received, DAG active\n");
+          printf("DAG NODE: DAG join packet confirmation received, DAG active\n");
           led_off(LED_A);
           dag_active = 1;
           root_addr = *sender_addr;
           non_answered_ping = 0;
           break;
       case DATA_TYPE_COMMAND:
-          printf("DEBUG: Command packet received\n");
+          printf("DAG NODE: Command packet received\n");
           static struct command_data message_for_main_process;
           message_for_main_process.ability_target = data[3];
           message_for_main_process.ability_number = data[4];
@@ -125,58 +126,115 @@ udp_receiver(struct simple_udp_connection *c,
           process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
           break;
       default:
-          printf("Incompatible data type(%02x)!\n", data[2]);
+          printf("DAG NODE: Incompatible data type(%02x)!\n", data[2]);
           break;
       }
   }
   else  {
-      printf("DEBUG: Incompatible device or protocol version!\n");
+      printf("DAG NODE: Incompatible device or protocol version!\n");
   }
+
   led_off(LED_A);
 }
 /*---------------------------------------------------------------------------*/
 
 
 void
-print_debug_rpl_data(void)
+print_debug_data(void)
 {
+    printf("\n");
+    uint32_t secs_now = clock_seconds();
+    printf("SYSTEM: uptime: %" PRIo32 " s\n", secs_now);
+
     rpl_dag_t *dag = rpl_get_any_dag();
 
-    uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
-    printf("RPL: parent ip address: ");
-    uip_debug_ipaddr_print(ipaddr_parent);
-    printf("\n");
+    if (dag) {
+        uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
+        printf("RPL: parent ip address: ");
+        uip_debug_ipaddr_print(ipaddr_parent);
+        printf("\n");
 
-    uip_ipaddr_t dag_id_addr = dag->dag_id;
-    printf("RPL: dag ip address: ");
-    uip_debug_ipaddr_print(&dag_id_addr);
-    printf("\n");
+        uip_ipaddr_t dag_id_addr = dag->dag_id;
+        printf("RPL: dag root ip address: ");
+        uip_debug_ipaddr_print(&dag_id_addr);
+        printf("\n");
 
-    struct link_stats *stat_parent = rpl_get_parent_link_stats(dag->preferred_parent);
-    printf("RPL: parent last tx: %" PRIo32 "\n", stat_parent->last_tx_time);
+        struct link_stats *stat_parent = rpl_get_parent_link_stats(dag->preferred_parent);
+        printf("RPL: parent last tx: %u sec ago\n", (unsigned)((clock_time() - stat_parent->last_tx_time) / (CLOCK_SECOND)));
 
-    printf("RPL: parent fresh stat: %" PRIo8 "\n", stat_parent->freshness);
+        printf("RPL: parent rssi: %" PRId16 "\n", stat_parent->rssi);
 
-    printf("RPL: parent rssi: %" PRId16 "\n", stat_parent->rssi);
+        int parent_is_reachable = rpl_parent_is_reachable(dag->preferred_parent);
+        printf("RPL: parent is reachable: %" PRId16 "\n", parent_is_reachable);
 
-    int parent_is_fresh = rpl_parent_is_fresh(dag->preferred_parent);
-    printf("RPL: parent is fresh: %" PRId16 "\n", parent_is_fresh);
+        int16_t rssi_parent = stat_parent->rssi;
+        uint8_t *uptime_uint8_t = (uint8_t *)&secs_now;
+        uint8_t *rssi_parent_uint8_t = (uint8_t *)&rssi_parent;
+        uint8_t uptime_uint8_t_1 = *uptime_uint8_t++;
+        uint8_t uptime_uint8_t_2 = *uptime_uint8_t++;
+        uint8_t uptime_uint8_t_3 = *uptime_uint8_t++;
+        uint8_t uptime_uint8_t_4 = *uptime_uint8_t++;
 
-    int parent_is_reachable = rpl_parent_is_reachable(dag->preferred_parent);
-    printf("RPL: parent is reachable: %" PRId16 "\n", parent_is_reachable);
+        uint8_t rssi_parent_uint8_t_1 = *rssi_parent_uint8_t++;
+        uint8_t rssi_parent_uint8_t_2 = *rssi_parent_uint8_t++;
 
+        printf("RPL: uptime_uint8_t: %" PRIXX8 "%" PRIXX8 "%" PRIXX8 "%" PRIXX8 "\n",
+               uptime_uint8_t_1, uptime_uint8_t_2, uptime_uint8_t_3, uptime_uint8_t_4);
+        printf("RPL: rssi_parent_uint8_t: %" PRIXX8 "%" PRIXX8 "\n",
+               rssi_parent_uint8_t_1, rssi_parent_uint8_t_2);
 
-    printf("\n");
+    }
+
 }
 
 /*---------------------------------------------------------------------------*/
 
+void
+send_status_packet(const uip_ip6addr_t *dest_addr,
+                   struct simple_udp_connection *connection,
+                   uip_ipaddr_t *parent_addr,
+                   uint32_t uptime,
+                   int16_t rssi_parent)
+{
+    uint8_t *uptime_uint8_t = (uint8_t *)&uptime;
+    uint8_t *rssi_parent_uint8_t = (uint8_t *)&rssi_parent;
+
+    uint8_t length = 23;
+    uint8_t buf[length];
+    buf[0] = PROTOCOL_VERSION_V1;
+    buf[1] = CURRENT_DEVICE_VERSION;
+    buf[2] = DATA_TYPE_STATUS;
+    buf[3] = ((uint8_t *)parent_addr)[8];
+    buf[4] = ((uint8_t *)parent_addr)[9];
+    buf[5] = ((uint8_t *)parent_addr)[10];
+    buf[6] = ((uint8_t *)parent_addr)[11];
+    buf[7] = ((uint8_t *)parent_addr)[12];
+    buf[8] = ((uint8_t *)parent_addr)[13];
+    buf[9] = ((uint8_t *)parent_addr)[14];
+    buf[10] = ((uint8_t *)parent_addr)[15];
+    buf[11] = *uptime_uint8_t++;
+    buf[12] = *uptime_uint8_t++;
+    buf[13] = *uptime_uint8_t++;
+    buf[14] = *uptime_uint8_t++;
+    buf[15] = *rssi_parent_uint8_t++;
+    buf[16] = *rssi_parent_uint8_t++;
+    buf[17] = DATA_RESERVED;
+    buf[18] = DATA_RESERVED;
+    buf[19] = DATA_RESERVED;
+    buf[20] = DATA_RESERVED;
+    buf[21] = DATA_RESERVED;
+    buf[22] = DATA_RESERVED;
+
+    simple_udp_sendto(connection, buf, length + 1, dest_addr);
+}
+
+/*---------------------------------------------------------------------------*/
 
 void
 send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *connection)
 {
-    uint8_t lenght = 10;
-    uint8_t buf[lenght];
+    uint8_t length = 10;
+    uint8_t buf[length];
     buf[0] = PROTOCOL_VERSION_V1;
     buf[1] = CURRENT_DEVICE_VERSION;
     buf[2] = DATA_TYPE_JOIN;
@@ -187,7 +245,7 @@ send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *c
     buf[7] = CURRENT_ABILITY_3BYTE;
     buf[8] = CURRENT_ABILITY_4BYTE;
     buf[9] = DATA_RESERVED;
-    simple_udp_sendto(connection, buf, lenght + 1, dest_addr);
+    simple_udp_sendto(connection, buf, length + 1, dest_addr);
 }
 
 /*---------------------------------------------------------------------------*/
