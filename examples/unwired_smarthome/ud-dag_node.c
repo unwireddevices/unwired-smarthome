@@ -48,6 +48,8 @@
 #include "simple-udp.h"
 
 #include "ud-dag_node.h"
+#include "net/link-stats.h"
+#include "xxf_types_helper.h"
 
 #include "ti-lib.h"
 #include "ud_binary_protocol.h"
@@ -90,6 +92,10 @@ udp_receiver(struct simple_udp_connection *c,
          uint16_t datalen)
 {
     led_on(LED_A);
+    printf("DEBUG: UDP packer: %02x,%02x,%02x from ", data[0],data[1],data[2]);
+    uip_debug_ipaddr_print(sender_addr);
+    printf("\n");
+
     if (data[0] == PROTOCOL_VERSION_V1 && data[1] == CURRENT_DEVICE_VERSION) {
       switch ( data[2] ) {
       case DATA_TYPE_CONFIRM:
@@ -108,7 +114,7 @@ udp_receiver(struct simple_udp_connection *c,
           process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
           break;
       default:
-          printf("Incompatible data type!\n");
+          printf("Incompatible data type(%02x)!\n", data[2]);
           break;
       }
   }
@@ -116,6 +122,35 @@ udp_receiver(struct simple_udp_connection *c,
       printf("DEBUG: Incompatible device or protocol version!\n");
   }
   led_off(LED_A);
+}
+/*---------------------------------------------------------------------------*/
+
+
+void
+print_parent_data(void)
+{
+    rpl_dag_t *dag = rpl_get_any_dag();
+
+    uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
+    printf("RPL: parent ip address: ");
+    uip_debug_ipaddr_print(ipaddr_parent);
+    printf("\n");
+
+    struct link_stats *stat_parent = rpl_get_parent_link_stats(dag->preferred_parent);
+    printf("RPL: parent last tx: %" PRIo32 "\n", stat_parent->last_tx_time);
+
+    printf("RPL: parent fresh stat: %" PRIo8 "\n", stat_parent->freshness);
+
+    printf("RPL: parent rssi: %" PRId16 "\n", stat_parent->rssi);
+
+    int parent_is_fresh = rpl_parent_is_fresh(dag->preferred_parent);
+    printf("RPL: parent is fresh: %" PRId16 "\n", parent_is_fresh);
+
+    int parent_is_reachable = rpl_parent_is_reachable(dag->preferred_parent);
+    printf("RPL: parent is reachable: %" PRId16 "\n", parent_is_reachable);
+
+
+    printf("\n");
 }
 
 /*---------------------------------------------------------------------------*/
