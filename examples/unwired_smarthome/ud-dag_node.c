@@ -72,8 +72,9 @@
 
 #include "fake_headers.h" //no move up! not "krasivo"!
 
-#define MIN_INTERVAL                (5 * CLOCK_SECOND)
-#define MAX_INTERVAL                (50 * CLOCK_SECOND)
+#define DAG_ROOT_FIND_INTERVAL             (5 * CLOCK_SECOND)
+#define SHORT_PING_INTERVAL                (5 * CLOCK_SECOND)
+#define LONG_PING_INTERVAL                (50 * CLOCK_SECOND)
 #define MAX_NON_ANSWERED_PINGS      5
 
 /*---------------------------------------------------------------------------*/
@@ -82,7 +83,8 @@ struct simple_udp_connection udp_connection; //struct for simple_udp_send
 uint8_t dag_active = 0; //set to 1, if rpl root found and answer to join packet
 uint8_t non_answered_ping = 0;
 uip_ip6addr_t root_addr;
-clock_time_t dag_interval = MIN_INTERVAL;
+clock_time_t dag_root_find_interval = DAG_ROOT_FIND_INTERVAL;
+clock_time_t ping_interval = SHORT_PING_INTERVAL;
 
 /*---------------------------------------------------------------------------*/
 
@@ -261,7 +263,6 @@ dag_root_find(void)
         dag = rpl_get_any_dag();
         if (dag) {
             led_blink(LED_A);
-            print_debug_rpl_data();
             if (&dag->dag_id) {
                 if (dag_active == 0) {
                     uip_ip6addr_copy(&addr, &dag->dag_id);
@@ -372,29 +373,16 @@ PROCESS_THREAD(dag_node_process, ev, data)
 
   printf("DAG Node: started, %s mode\n", rpl_get_mode() ==  RPL_MODE_LEAF ? "leaf" : "no-leaf");
 
-  //led_on(LED_A);
+  process_start(&dag_node_button_process, NULL);
+  process_start(&root_ping_process, NULL);
+
+  led_on(LED_A);
 
   while(1) {
-     if (dag_active == 0 && dag_interval != MIN_INTERVAL && non_answered_ping < 20) {
-         dag_interval = MIN_INTERVAL;
-         printf("DAG: Change timer to SHORT interval\n");
-     }
-     if ((dag_active == 1 && dag_interval != MAX_INTERVAL) || non_answered_ping > 20) {
-         dag_interval = MAX_INTERVAL;
-         printf("DAG: Change timer to LONG interval\n");
-     }
-
-     if (non_answered_ping > 30) {
-         printf("DAG: Change timer to LONG interval\n");
-         watchdog_reboot();
-     }
-
-
-    etimer_set(&dag_timer, dag_interval + (random_rand() % dag_interval));
-    if (non_answered_ping > 0)
-        printf("DAG: Non-answer ping count: %u\n", non_answered_ping);
+    etimer_set(&dag_timer, dag_root_find_interval + (random_rand() % dag_root_find_interval));
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&dag_timer));
-    dag_root_find();
+
+    print_debug_data();
 
   }
 
