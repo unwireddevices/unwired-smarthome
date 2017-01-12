@@ -188,7 +188,7 @@ dag_root_find(void)
         dag = rpl_get_any_dag();
         if (dag) {
             led_blink(LED_A);
-            if (dag->instance->def_route) {
+            if (&dag->dag_id) {
                 if (dag_active == 0) {
                     uip_ip6addr_copy(&addr, &dag->instance->def_route->ipaddr);
                     printf("RPL: default route destination: ");
