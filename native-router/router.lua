@@ -172,6 +172,14 @@ function string.tohex(str)
     end))
 end
 
+function led(state)
+	if (state == "on") then
+		os.execute("echo 1 > /sys/devices/platform/leds-gpio/leds/unwone\:green\:eth1_rxtx/brightness")
+	elseif (state == "off") then
+		os.execute("echo 0 > /sys/devices/platform/leds-gpio/leds/unwone\:green\:eth1_rxtx/brightness")
+	end
+end
+
 function ipv6_adress_parse(ipv6_adress)
 	local adress_capturing = "(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w)"
 	local _
@@ -227,8 +235,10 @@ function send_relay_command(ipv6_adress, relay_number, state)
 		ability_number = tostring("02")
 	end
 
+
+	
 	if (ability_state ~= nil) then
-		send_command_to_ability("fe80:0000:0000:0000:0212:4b00:0c47:4886", DEVICE_ABILITY_RELAY, ability_number, ability_state)
+		send_command_to_ability(ipv6_adress, DEVICE_ABILITY_RELAY, ability_number, ability_state)
 	else
 		print("Non-valid ability state!")
 	end
@@ -247,9 +257,11 @@ function sensor_data_processing(ipv6_adress, data)
 	print("SDPM: Sensor type: "..sensor_name)
 	if (number_ability == DEVICE_ABILITY_BUTTON) then
 		button_name = string.upper(tostring(sensor_number):fromhex())
-		print("SDPM: Button name: "..button_name)
-		print("SDPM: Button event: "..device_button_events[sensor_event])
+		print("ВDPM: Button name: "..button_name)
+		print("ВDPM: Button event: "..device_button_events[sensor_event])
 
+
+		ipv6_adress = "fe80:0000:0000:0000:0212:4b00:0c47:4886"
 		if (button_name == "B") then
 			send_relay_command(ipv6_adress, 1, "toggle")
 		end
@@ -370,9 +382,11 @@ while true do
 				local err, data_read, size = p:read(85)
 				assert(e == rs232.RS232_ERR_NOERROR)
 				if (data_read ~= nil) then
+					led("on")
 					console_print("\n/------------------------------------------------------/\n")
 					console_print("DAGROOTRAW1"..data_read.."\n")
 					packet_parse("DAGROOTRAW1"..data_read)
+					led("off")
 				end
 			else
 				console_print(data_read)
