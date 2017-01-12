@@ -136,6 +136,9 @@
 #define PRIX8   "X"
 //uppercase hexadecimal printf format for uint8_t
 
+#define PRIXX8   "02X"
+//uppercase hexadecimal printf format for uint8_t
+
 #define PRIxFAST16   "x"
 //hexadecimal printf format for uint_fast16_t
 
