@@ -59,7 +59,7 @@
                                  IOC_INT_ENABLE   | IOC_IOMODE_NORMAL | \
                                  IOC_NO_WAKE_UP   | IOC_INPUT_ENABLE)
 /*---------------------------------------------------------------------------*/
-//#define DEBOUNCE_DURATION (CLOCK_SECOND >> 5)
+#define DEBOUNCE_DURATION (CLOCK_SECOND >> 10)
 
 struct btn_timer {
   struct timer debounce;
