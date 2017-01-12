@@ -74,7 +74,6 @@ uint8_t relay_2_state = 0;
 
 /*---------------------------------------------------------------------------*/
 
-SENSORS(&button_e_sensor);
 PROCESS(main_process, "Relay control process"); //register main button process
 AUTOSTART_PROCESSES(&main_process, &dag_node_process); //set autostart processes
 

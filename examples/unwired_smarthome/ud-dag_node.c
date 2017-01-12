@@ -38,8 +38,14 @@
 #include "contiki-lib.h"
 #include "contiki-net.h"
 #include "net/rpl/rpl.h"
+#include "net/rpl/rpl-private.h"
 #include "net/ip/uip.h"
+#include "net/ipv6/uip-ds6.h"
+
 #include "dev/leds.h"
+#include "sys/clock.h"
+#include "button-sensor.h"
+#include "board-peripherals.h"
 #include "cc26xx/board.h"
 #include "net/ip/uip-debug.h"
 
@@ -79,7 +85,11 @@ clock_time_t dag_interval = MIN_INTERVAL;
 
 /*---------------------------------------------------------------------------*/
 
+SENSORS(&button_a_sensor, &button_b_sensor, &button_c_sensor, &button_d_sensor, &button_e_sensor); //register button sensors
 PROCESS(dag_node_process, "DAG-node process");
+PROCESS(dag_node_button_process, "DAG-node button process");
+PROCESS(root_ping_process, "DAG-node button process");
+
 
 /*---------------------------------------------------------------------------*/
 
@@ -218,6 +228,72 @@ dag_root_find(void)
     if (non_answered_ping > MAX_NON_ANSWERED_PINGS) {
         dag_active = 0;
     }
+}
+
+
+/*---------------------------------------------------------------------------*/
+
+PROCESS_THREAD(dag_node_button_process, ev, data)
+{
+  PROCESS_BEGIN();
+
+  PROCESS_PAUSE();
+  while(1) {
+    PROCESS_YIELD();
+    if(ev == sensors_event) {
+        if(data == &button_e_sensor) {
+            printf("Local repair activated\n");
+            rpl_dag_t *dag = rpl_get_any_dag();
+            rpl_local_repair(dag->instance);
+
+
+
+        }
+    }
+  }
+  PROCESS_END();
+}
+
+/*---------------------------------------------------------------------------*/
+
+PROCESS_THREAD(root_ping_process, ev, data)
+{
+  PROCESS_BEGIN();
+
+  static struct etimer ping_timer;
+  PROCESS_PAUSE();
+
+  while(1) {
+
+      etimer_set(&ping_timer, ping_interval + (random_rand() % ping_interval));
+      PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&ping_timer));
+
+      dag_root_find();
+
+      if (dag_active == 0 && ping_interval != SHORT_PING_INTERVAL && non_answered_ping < 20) {
+          ping_interval = SHORT_PING_INTERVAL;
+          uip_ds_6_interval_set(CLOCK_SECOND/5);
+          printf("DS6 new interval: %" PRIu32 " system tick\n", uip_ds_6_interval_get());
+          printf("DAG: Change timer to SHORT interval\n");
+      }
+
+      if ((dag_active == 1 && ping_interval != LONG_PING_INTERVAL) || non_answered_ping > 20) {
+          ping_interval = LONG_PING_INTERVAL;
+          uip_ds_6_interval_set(CLOCK_SECOND);
+          printf("DS6 new interval: %" PRIu32 " system tick\n", uip_ds_6_interval_get());
+          printf("DAG: Change timer to LONG interval\n");
+      }
+
+      if (non_answered_ping > 30) {
+          printf("DAG: Not answer root, reboot\n");
+          watchdog_reboot();
+      }
+
+      if (non_answered_ping > 1)
+          printf("DAG: Non-answer ping count: %u\n", non_answered_ping);
+  }
+
+  PROCESS_END();
 }
 
 /*---------------------------------------------------------------------------*/

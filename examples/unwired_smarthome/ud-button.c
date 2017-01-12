@@ -69,7 +69,6 @@
 
 /*---------------------------------------------------------------------------*/
 
-SENSORS(&button_a_sensor, &button_b_sensor, &button_c_sensor, &button_d_sensor, &button_e_sensor); //register button sensors
 PROCESS(main_process, "UD Buttons control process"); //register main button process
 AUTOSTART_PROCESSES(&main_process, &dag_node_process); //set autostart processes
 
@@ -152,10 +151,9 @@ PROCESS_THREAD(main_process, ev, data)
         send_button_status_packet(&root_addr, &udp_connection, 'd', (&button_d_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
       }
       if(data == &button_e_sensor) {
-        printf("Buttons control process: Button E\n");
+        //printf("Buttons control process: Button E\n");
         //send_button_status_packet(&root_addr, &udp_connection, 'e', (&button_e_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
-        rpl_dag_t *dag = rpl_get_any_dag();
-        rpl_local_repair(dag->instance);
+
       }
     }
   }
