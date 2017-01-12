@@ -281,6 +281,10 @@ extern struct etimer uip_ds6_timer_rs;
 /** \brief Initialize data structures */
 void uip_ds6_init(void);
 
+void uip_ds_6_interval_set(clock_time_t interval);
+
+clock_time_t uip_ds_6_interval_get(void);
+
 /** \brief Periodic processing of data structures */
 void uip_ds6_periodic(void);
 

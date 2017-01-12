@@ -140,6 +140,7 @@ set_rf_params(void)
   printf(" Min DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_MIN);
   printf(" Max DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_DOUBLINGS+RPL_CONF_DIO_INTERVAL_MIN);
   printf(" RPL probing interval: %u s\n", RPL_CONF_PROBING_INTERVAL/CLOCK_SECOND);
+  printf(" DS6 interval(system ticks): %" PRIu32 "\n", uip_ds_6_interval_get());
 
   //printf(" Debounce duration: %d\n", DEBOUNCE_DURATION);
 

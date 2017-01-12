@@ -88,6 +88,19 @@ static uip_ds6_maddr_t *locmaddr;
 static uip_ds6_aaddr_t *locaaddr;
 #endif /* UIP_DS6_AADDR_NB */
 static uip_ds6_prefix_t *locprefix;
+static clock_time_t uip_ds_6_interval = UIP_DS6_PERIOD;
+/*---------------------------------------------------------------------------*/
+void
+uip_ds_6_interval_set(clock_time_t interval)
+{
+    uip_ds_6_interval = interval;
+}
+
+clock_time_t
+uip_ds_6_interval_get(void)
+{
+    return uip_ds_6_interval;
+}
 
 /*---------------------------------------------------------------------------*/
 void
@@ -137,7 +150,7 @@ uip_ds6_init(void)
              random_rand() % (UIP_ND6_MAX_RTR_SOLICITATION_DELAY *
                               CLOCK_SECOND));
 #endif /* UIP_CONF_ROUTER */
-  etimer_set(&uip_ds6_timer_periodic, UIP_DS6_PERIOD);
+  etimer_set(&uip_ds6_timer_periodic, uip_ds_6_interval);
 
   return;
 }
