@@ -65,6 +65,8 @@
 #include "ti-lib.h"
 #include "ud_binary_protocol.h"
 
+#include "net/rpl/rpl-private.h"
+
 /*---------------------------------------------------------------------------*/
 
 SENSORS(&button_a_sensor, &button_b_sensor, &button_c_sensor, &button_d_sensor, &button_e_sensor); //register button sensors
@@ -101,7 +103,7 @@ void send_button_status_packet(const uip_ip6addr_t *dest_addr,
 {
 
 
-    if(dag_active == 1 && dest_addr != NULL && connection != NULL)
+    if(dest_addr != NULL && connection != NULL)//(dag_active == 1 && dest_addr != NULL && connection != NULL)
     {
         printf("Buttons: send message to RPL root node\n");
 
@@ -151,7 +153,9 @@ PROCESS_THREAD(main_process, ev, data)
       }
       if(data == &button_e_sensor) {
         printf("Buttons control process: Button E\n");
-        send_button_status_packet(&root_addr, &udp_connection, 'e', (&button_e_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
+        //send_button_status_packet(&root_addr, &udp_connection, 'e', (&button_e_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
+        rpl_dag_t *dag = rpl_get_any_dag();
+        rpl_local_repair(dag->instance);
       }
     }
   }
