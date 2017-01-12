@@ -2,18 +2,40 @@ local rs232 = require("luars232")
 local socket = require("socket")
 port_name = "/dev/ttyATH0"
 
-
+device_group = {}
 DEVICE_GROUP_BUTTON_SWITCH     =     "00"
+device_group[DEVICE_GROUP_BUTTON_SWITCH]				   =     "Button/switch"
+
 DEVICE_GROUP_SENSORS           =     "01"
+device_group[DEVICE_GROUP_SENSORS]				   =     "Sensor"
+
 DEVICE_GROUP_MOTION_SENSOR     =     "02"
+device_group[DEVICE_GROUP_MOTION_SENSOR]				   =     "Motion sensor"
+
 DEVICE_GROUP_OPEN_SENSORS      =     "03"
+device_group[DEVICE_GROUP_OPEN_SENSORS]				   =     "Door open sensor"
+
 DEVICE_GROUP_METERS            =     "04"
+device_group[DEVICE_GROUP_METERS]				   =     "Meter"
+
 DEVICE_GROUP_RELAY             =     "05"
+device_group[DEVICE_GROUP_RELAY]				   =     "Relay"
+
 DEVICE_GROUP_DIMMER            =     "06"
+device_group[DEVICE_GROUP_DIMMER]				   =     "Dimmer"
+
 DEVICE_GROUP_LIGHT             =     "07"
+device_group[DEVICE_GROUP_LIGHT]				   =     "Light"
+
 DEVICE_GROUP_RGB_LIGHT         =     "08"
+device_group[DEVICE_GROUP_RGB_LIGHT]				   =     "RGB light"
+
 DEVICE_GROUP_BRIDGE_CONVERTER  =     "09"
+device_group[DEVICE_GROUP_BRIDGE_CONVERTER]				   =     "Bridge/Converter"
+
 DEVICE_GROUP_OTHER             =     "FF"
+device_group[DEVICE_GROUP_OTHER]				   =     "Other device"
+
 -----------------------------------------------------------------------------------
 
 
@@ -110,11 +132,11 @@ device_relay_commands[DEVICE_ABILITY_RELAY_COMMAND_TOGGLE] = "toggle"
 
 device_sleep_type = {}
 
-device_sleep_type[DEVICE_SLEEP_TYPE_NORMAL] = "Non-sleep"
 DEVICE_SLEEP_TYPE_NORMAL             =           "01"
+device_sleep_type[DEVICE_SLEEP_TYPE_NORMAL] = "Non-sleep"
 
-device_sleep_type[DEVICE_SLEEP_TYPE_LEAF] = "Leaf mode"
 DEVICE_SLEEP_TYPE_LEAF               =           "02"
+device_sleep_type[DEVICE_SLEEP_TYPE_LEAF] = "Leaf mode"
 -----------------------------------------------------------------------------------
 
 
@@ -184,7 +206,6 @@ function send_command_to_ability(ipv6_adress, ability_target, ability_number, ab
 	socket.sleep(0.01)
 	p:write(UART_PV1_STOP_MQ:fromhex())
 	socket.sleep(0.01)
-	print(err, len_written)
 	--print(raw_data:tohex())
 end
 
@@ -243,16 +264,16 @@ end
 
 function join_data_processing(ipv6_adress, data)
 	--print("Join data processing module")
-	local device_group = data.b1 or "no device_group"
-	local slee_type = data.b2 or "no slee_type"
+	local current_device_group = data.b1 or "no device_group"
+	local current_sleep_type = data.b2 or "no sleep_type"
 	local ability_1 = data.b3 or "no ability_1"
 	local ability_2 = data.b4 or "no ability_2"
 	local ability_3 = data.b5 or "no ability_3"
 	local ability_4 = data.b6 or "no ability_4"
 
-	local device_group_name = device_ability[device_group]
-
-
+	local device_group_name = device_group[current_device_group] or current_device_group
+	local device_sleep_name = device_sleep_type[current_sleep_type] or current_sleep_type
+	print("JDPM: Join packet from "..ipv6_adress..", device group: "..device_group_name..", sleep type: "..device_sleep_name)
 end
 
 
@@ -261,7 +282,7 @@ function packet_processing(a, data)
 	local ipv6_adress = a[1]..a[2]..":"..a[3]..a[4]..":"..a[5]..a[6]..":"..a[7]..a[8]..":"..a[9]..a[10]..":"..a[11]..a[12]..":"..a[13]..a[14]..":"..a[15]..a[16]
 	if (data.p_version == PROTOCOL_VERSION_V1 and data.dev_version == DEVICE_VERSION_V1) then
 		if data.d_type == DATA_TYPE_JOIN then
-		 	print("PPM: Join packet from "..ipv6_adress)
+		 	--print("PPM: Join packet from "..ipv6_adress)
 		 	join_data_processing(ipv6_adress, data)
 
 		elseif data.d_type == DATA_TYPE_SENSOR_DATA then
@@ -316,14 +337,11 @@ end
 
 
 
-
-
-
 ------------------------------------------------------
-local version = "0.1"
+local version = "0.15"
 local uart_version = UART_PROTOCOL_VERSION_V1
 
-print("RPL-router version "..version.." uart protocol version: "..uart_version.."\n")
+print("RPL-router version "..version..", uart protocol version: "..uart_version.."\n")
 
 e, p = rs232.open(port_name)
 if e ~= rs232.RS232_ERR_NOERROR then
