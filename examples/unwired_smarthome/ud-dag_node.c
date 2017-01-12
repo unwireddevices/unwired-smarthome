@@ -128,13 +128,18 @@ udp_receiver(struct simple_udp_connection *c,
 
 
 void
-print_parent_data(void)
+print_debug_rpl_data(void)
 {
     rpl_dag_t *dag = rpl_get_any_dag();
 
     uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
     printf("RPL: parent ip address: ");
     uip_debug_ipaddr_print(ipaddr_parent);
+    printf("\n");
+
+    uip_ipaddr_t dag_id_addr = dag->dag_id;
+    printf("RPL: dag ip address: ");
+    uip_debug_ipaddr_print(&dag_id_addr);
     printf("\n");
 
     struct link_stats *stat_parent = rpl_get_parent_link_stats(dag->preferred_parent);
@@ -188,14 +193,14 @@ dag_root_find(void)
         dag = rpl_get_any_dag();
         if (dag) {
             led_blink(LED_A);
+            print_debug_rpl_data();
             if (&dag->dag_id) {
                 if (dag_active == 0) {
-                    uip_ip6addr_copy(&addr, &dag->instance->def_route->ipaddr);
-                    printf("RPL: default route destination: ");
+                    uip_ip6addr_copy(&addr, &dag->dag_id);
+
+                    printf("DAG node: send join packet to rpl root ");
                     uip_debug_ip6addr_print(&addr);
                     printf("\n");
-
-                    printf("DAG node: send join packet to root \n");
                     send_join_packet(&addr, &udp_connection);
                     if (non_answered_ping < 100) {
                         non_answered_ping++;
