@@ -60,6 +60,7 @@
 #include "dev/cc26xx-uart.h"
 
 #include "ud_binary_protocol.h"
+#include "xxf_types_helper.h"
 
 #include "fake_headers.h" //no move up! not "krasivo"!
 /*---------------------------------------------------------------------------*/
@@ -85,8 +86,8 @@ AUTOSTART_PROCESSES(&rpl_root_process);
 void send_confirmation_packet(const uip_ip6addr_t *dest_addr,
                               struct simple_udp_connection *connection)
 {
-    int lenght = 10;
-    char buf[lenght];
+    int length = 10;
+    char buf[length];
     buf[0] = PROTOCOL_VERSION_V1;
     buf[1] = DEVICE_VERSION_V1;
     buf[2] = DATA_TYPE_CONFIRM;
@@ -97,7 +98,7 @@ void send_confirmation_packet(const uip_ip6addr_t *dest_addr,
     buf[7] = DATA_RESERVED;
     buf[8] = DATA_RESERVED;
     buf[9] = DATA_RESERVED;
-    simple_udp_sendto(connection, buf, lenght + 1, dest_addr);
+    simple_udp_sendto(connection, buf, length + 1, dest_addr);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -108,8 +109,8 @@ void send_command_packet(const uip_ip6addr_t *dest_addr,
                           uint8_t number_ability,
                           uint8_t data_to_ability)
 {
-    int lenght = 10;
-    char buf[lenght];
+    int length = 10;
+    char buf[length];
     buf[0] = PROTOCOL_VERSION_V1;
     buf[1] = DEVICE_VERSION_V1;
     buf[2] = DATA_TYPE_COMMAND;
@@ -120,28 +121,47 @@ void send_command_packet(const uip_ip6addr_t *dest_addr,
     buf[7] = DATA_RESERVED;
     buf[8] = DATA_RESERVED;
     buf[9] = DATA_RESERVED;
-    simple_udp_sendto(connection, buf, lenght + 1, dest_addr);
+    simple_udp_sendto(connection, buf, length + 1, dest_addr);
 }
 
 /*---------------------------------------------------------------------------*/
 
-void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data)
+void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const uint16_t length)
 {
-    printf("DAGROOTRAW1;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x;%02x"
-           ";%02X;%02X;%02X;%02X;%02X;%02X;%02X;%02X;%02X;%02X;RAWEND"
-            "   \n",
+
+    if (length != 11 && length != 24) {
+        printf("DAG NODE: Incompatible data length(%" PRIu16 ")!\n", length);
+        return;
+    }
+    printf("DAGROOTRAW1");
+    printf("%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
            ((uint8_t *)addr)[0], ((uint8_t *)addr)[1], ((uint8_t *)addr)[2],
            ((uint8_t *)addr)[3], ((uint8_t *)addr)[4], ((uint8_t *)addr)[5],
            ((uint8_t *)addr)[6], ((uint8_t *)addr)[7], ((uint8_t *)addr)[8],
            ((uint8_t *)addr)[9], ((uint8_t *)addr)[10], ((uint8_t *)addr)[11],
-           ((uint8_t *)addr)[12], ((uint8_t *)addr)[13], ((uint8_t *)addr)[14], ((uint8_t *)addr)[15],
-           data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
+           ((uint8_t *)addr)[12], ((uint8_t *)addr)[13], ((uint8_t *)addr)[14],
+           ((uint8_t *)addr)[15]);
+
+    if (length == 11) {
+        printf("%02X%02X%02X%02X%02X%02X%02X%02X%02X%02XFFFFFFFFFFFFFFFFFFFFFFFFFF",
+               data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
+    }
+
+    if (length == 24) {
+        printf("%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
+               data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9],
+               data[10],data[11],data[12],data[13],data[14],data[15],data[16],data[17],data[18],data[19],
+               data[20],data[21],data[22]);
+    }
+
+    printf("RAWEND   \n");
+
 }
 
 /*---------------------------------------------------------------------------*/
 
 void uart_packet_dump(uint8_t *uart_command_buf) {
-    printf("\nCorrent packet: ");
+    printf("\nUART->6LP: ");
     for (int i = 0; i < UART_DATA_LENGTH; i++)
     {
         printf("%02X", uart_command_buf[i]);
@@ -208,11 +228,12 @@ static void udp_data_receiver(struct simple_udp_connection *connection,
 {
     led_on(LED_A);
 
-    dag_root_raw_print(sender_addr, data);
+    dag_root_raw_print(sender_addr, data, datalen);
 
     if (data[0] == PROTOCOL_VERSION_V1 && data[2] == DATA_TYPE_JOIN )
-      send_confirmation_packet(sender_addr, connection);
-
+    {
+        send_confirmation_packet(sender_addr, connection);
+    }
 
     led_off(LED_A);
 }

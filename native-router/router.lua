@@ -157,6 +157,8 @@ DATA_TYPE_SENSOR_DATA          =     "02"
 DATA_TYPE_CONFIRM              =     "03"
 DATA_TYPE_PING                 =     "04"
 DATA_TYPE_COMMAND              =     "05"
+DATA_TYPE_STATUS              =     "06"
+
 
 
 function string.fromhex(str)
@@ -257,8 +259,8 @@ function sensor_data_processing(ipv6_adress, data)
 	print("SDPM: Sensor type: "..sensor_name)
 	if (number_ability == DEVICE_ABILITY_BUTTON) then
 		button_name = string.upper(tostring(sensor_number):fromhex())
-		print("ВDPM: Button name: "..button_name)
-		print("ВDPM: Button event: "..device_button_events[sensor_event])
+		print(" BDPM: Button name: "..button_name)
+		print(" BDPM: Button event: "..device_button_events[sensor_event])
 
 
 		ipv6_adress = "fe80:0000:0000:0000:0212:4b00:0c47:4886"
@@ -298,17 +300,20 @@ function packet_processing(a, data)
 		 	join_data_processing(ipv6_adress, data)
 
 		elseif data.d_type == DATA_TYPE_SENSOR_DATA then
-			print("PPM: Data from sensor")
+			--print("PPM: Data from sensor")
 			sensor_data_processing(ipv6_adress, data)
 
 		elseif data.d_type == DATA_TYPE_CONFIRM then
-			print("PPM: Data type: DATA_TYPE_CONFIRM")
+			print("PPM: Data type: DATA_TYPE_CONFIRM from "..ipv6_adress)
 
 		elseif data.d_type == DATA_TYPE_PING then
-			print("PPM: Data type: DATA_TYPE_PING")
+			print("PPM: Data type: DATA_TYPE_PING from "..ipv6_adress)
 
 		elseif data.d_type == DATA_TYPE_COMMAND then
-			print("PPM: Data type: DATA_TYPE_COMMAND")
+			print("PPM: Data type: DATA_TYPE_COMMAND from "..ipv6_adress)
+
+		elseif data.d_type == DATA_TYPE_STATUS then
+			print("PPM: Data type: DATA_TYPE_STATUS from "..ipv6_adress)
 
 		end
 	else
@@ -319,15 +324,19 @@ end
 
 
 function packet_parse(packet)
-	local _, _, adress, raw_data = string.find(packet, "DAGROOTRAW1;(%w%w;%w%w;%w%w;%w%w;%w%w;%w%w;%w%w;%w%w;%w%w;%w%w;%w%w;%w%w;%w%w;%w%w;%w%w;%w%w);(%w%w;%w%w;%w%w;%w%w;%w%w;%w%w;%w%w;%w%w;%w%w;%w%w);RAWEND")
+	--print("Packet parse module")
+	local adress_capturing_all = "(%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w)"
+	local data_capturing_all = "(%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w)"
+	local _, _, adress, raw_data = string.find(packet, "DAGROOTRAW1"..adress_capturing_all..data_capturing_all.."RAWEND")
 	if (adress ~= nil and raw_data ~= nil) then
 		local _ = {}
 		local a = {}
 		local d = {}
-		local adress_capturing = "(%w%w);(%w%w);(%w%w);(%w%w);(%w%w);(%w%w);(%w%w);(%w%w);(%w%w);(%w%w);(%w%w);(%w%w);(%w%w);(%w%w);(%w%w);(%w%w)"
-		local data_capturing = "(%w%w);(%w%w);(%w%w);(%w%w);(%w%w);(%w%w);(%w%w);(%w%w);(%w%w);(%w%w)"
+		local adress_capturing = "(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)"
+		local data_capturing = "(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)"
+		
 		_, end_1, a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15],a[16]  = string.find(adress, adress_capturing)
-		_, end_2, d.p_version,d.dev_version,d.d_type,d.b1,d.b2,d.b3,d.b4,d.b5,d.b6,d.b7  = string.find(raw_data, data_capturing)
+		_, end_2, d.p_version,d.dev_version,d.d_type,d.b1,d.b2,d.b3,d.b4,d.b5,d.b6,d.b7,d.b8,d.b9,d.b10,d.b11,d.b12,d.b13,d.b14,d.b15,d.b16,d.b17,d.b18,d.b19,d.b20 = string.find(raw_data, data_capturing)
 		if (end_1 ~= nil and end_2 ~= nil) then
 			packet_processing(a, d)
 		else
@@ -338,6 +347,8 @@ function packet_parse(packet)
 			print(raw_data)
 			print(data_capturing)
 		end
+	else
+		print("Not parse packet: "..packet)
 	end
 end
 
@@ -350,7 +361,7 @@ end
 
 
 ------------------------------------------------------
-local version = "0.15"
+local version = "0.20"
 local uart_version = UART_PROTOCOL_VERSION_V1
 
 print("RPL-router version "..version..", uart protocol version: "..uart_version.."\n")
@@ -379,7 +390,7 @@ while true do
 			assert(e == rs232.RS232_ERR_NOERROR)
 			if (data_read == "AGROOTRAW1") then
 				socket.sleep(0.1) 
-				local err, data_read, size = p:read(85)
+				local err, data_read, size = p:read(95-10-1)
 				assert(e == rs232.RS232_ERR_NOERROR)
 				if (data_read ~= nil) then
 					led("on")
@@ -395,6 +406,6 @@ while true do
 
 	end
 end
-
+ 
 
 

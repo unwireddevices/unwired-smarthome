@@ -49,6 +49,7 @@
 #define DATA_TYPE_CONFIRM                   0x03
 #define DATA_TYPE_PING                      0x04
 #define DATA_TYPE_COMMAND                   0x05
+#define DATA_TYPE_STATUS                    0x06
 
 /* Reserved data */
 #define DATA_RESERVED                       0xFF
