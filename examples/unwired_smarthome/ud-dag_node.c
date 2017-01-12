@@ -53,6 +53,7 @@
 
 #include "ti-lib.h"
 #include "ud_binary_protocol.h"
+#include "dev/watchdog.h"
 
 #ifdef IF_UD_BUTTON
     #include "ud-button.h"
@@ -235,14 +236,21 @@ PROCESS_THREAD(dag_node_process, ev, data)
   //led_on(LED_A);
 
   while(1) {
-     if (dag_active == 0 && dag_interval != MIN_INTERVAL && non_answered_ping < 10) {
+     if (dag_active == 0 && dag_interval != MIN_INTERVAL && non_answered_ping < 20) {
          dag_interval = MIN_INTERVAL;
          printf("DAG: Change timer to SHORT interval\n");
      }
-     if ((dag_active == 1 && dag_interval != MAX_INTERVAL) || non_answered_ping > 10) {
+     if ((dag_active == 1 && dag_interval != MAX_INTERVAL) || non_answered_ping > 20) {
          dag_interval = MAX_INTERVAL;
          printf("DAG: Change timer to LONG interval\n");
      }
+
+     if (non_answered_ping > 30) {
+         printf("DAG: Change timer to LONG interval\n");
+         watchdog_reboot();
+     }
+
+
     etimer_set(&dag_timer, dag_interval + (random_rand() % dag_interval));
     if (non_answered_ping > 0)
         printf("DAG: Non-answer ping count: %u\n", non_answered_ping);
