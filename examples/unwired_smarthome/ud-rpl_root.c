@@ -61,6 +61,7 @@
 
 #include "ud_binary_protocol.h"
 
+#include "fake_headers.h" //no move up! not "krasivo"!
 /*---------------------------------------------------------------------------*/
 
 static struct simple_udp_connection udp_connection;
@@ -140,17 +141,17 @@ void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data)
 /*---------------------------------------------------------------------------*/
 
 void uart_packet_dump(uint8_t *uart_command_buf) {
-    printf("\nOk packet: ");
+    printf("\nCorrent packet: ");
     for (int i = 0; i < UART_DATA_LENGTH; i++)
     {
-        printf("0x%02X ", uart_command_buf[i]);
+        printf("%02X", uart_command_buf[i]);
     }
     printf("\n");
 }
 
 /*---------------------------------------------------------------------------*/
 
-static int char_in(unsigned char c)
+static int uart_data_receiver(unsigned char c)
 {
     led_blink(LED_A);
     if ((uart_iterator >= 0                                        && uart_iterator <= MAGIC_SEQUENCE_LENGTH - 1) ||
@@ -158,13 +159,13 @@ static int char_in(unsigned char c)
     {
         if (c != uart_magic_sequence[uart_iterator])
         {
-            //printf(": BAD. iterator=%u\n", uart_iterator);
+            //printf(":BAD char, current iterator=%u\n", uart_iterator);
             uart_iterator = 0;
             return 1;
         }
         else
         {
-            //printf(": OK. iterator=%u\n", uart_iterator);
+            //printf(":OK, current iterator=%u\n", uart_iterator);
         }
     }
     uart_command_buf[uart_iterator] = c;
@@ -178,7 +179,6 @@ static int char_in(unsigned char c)
         uart_iterator = 0;
         if (uart_command_buf[7] == UART_PROTOCOL_VERSION_V1 || true)
         {
-
             for (int i = 0; i <= 15; i++)
             {
                destination_address.u8[i] = uart_command_buf[i+7];
@@ -256,18 +256,25 @@ PROCESS_THREAD(rpl_root_process, ev, data)
   uip_ipaddr_t *ipaddr;
 
   PROCESS_BEGIN();
-  printf("Unwired RLP root and UDP data receiver. HELL-IN-CODE free. I hope.\n");
 
-  ipaddr = set_global_address();
-  create_rpl_dag(ipaddr);
+  /* if you do not execute "cleanall" target, rpl-root can build in "leaf" configuration. Diagnostic message */
+  printf("Unwired RLP root and UDP data receiver. HELL-IN-CODE free. I hope.  %s \n",
+         RPL_CONF_LEAF_ONLY ==  1 ? "\nWARNING: leaf mode on rpl-root!\n" : " ");
 
+  rpl_set_mode(RPL_MODE_MESH); //Set MESH-mode for dc-power rpl-root(not leaf-mode)
+
+  ipaddr = set_global_address(); //set local adress
+  create_rpl_dag(ipaddr); //make local adress as rpl-root
+
+  /* register udp-connection, set incoming upd-data handler(udp_data_receiver) */
   simple_udp_register(&udp_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_data_receiver);
 
-  cc26xx_uart_set_input(&char_in);
+  /* set incoming uart-data handler(uart_data_receiver) */
+  cc26xx_uart_set_input(&uart_data_receiver);
 
+  /* blink-blink LED */
   led_blink(LED_A);
   led_blink(LED_A);
-
 
   while(1) {
     PROCESS_WAIT_EVENT();
