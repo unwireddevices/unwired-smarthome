@@ -61,6 +61,7 @@
 #define NETSTACK_CONF_FRAMER					    framer_802154 //framer_nullmac
 
 /* Encryption */
+/*
 #undef LLSEC802154_CONF_ENABLED
 #define LLSEC802154_CONF_ENABLED				    1
 #undef NETSTACK_CONF_FRAMER
@@ -73,6 +74,10 @@
 #define LLSEC802154_CONF_SECURITY_LEVEL			0x05
 #undef NONCORESEC_CONF_KEY
 #define NONCORESEC_CONF_KEY						{0xF3,0x01,0x02,0x03,0x04,0x05,0x07,0x07,0x06,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F}
+*/
+
+#undef NONCORESEC_CONF_SEC_LVL
+#define NONCORESEC_CONF_SEC_LVL         FRAME802154_SECURITY_LEVEL_NONE
 
 /* Bootloader */
 #define SET_CCFG_BL_CONFIG_BOOTLOADER_ENABLE	    0xC5 // 0xC5 - Enable ROM boot loader, 0x00 disable
