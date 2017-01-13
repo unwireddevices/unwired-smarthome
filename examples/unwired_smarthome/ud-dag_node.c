@@ -75,7 +75,10 @@
 #define DAG_ROOT_FIND_INTERVAL             (5 * CLOCK_SECOND)
 #define SHORT_PING_INTERVAL                (5 * CLOCK_SECOND)
 #define LONG_PING_INTERVAL                (50 * CLOCK_SECOND)
-#define MAX_NON_ANSWERED_PINGS      5
+#define STATUS_SEND_INTERVAL           (30*60 * CLOCK_SECOND)
+//#define STATUS_SEND_INTERVAL           (5 * CLOCK_SECOND)
+
+#define MAX_NON_ANSWERED_PINGS              5
 
 /*---------------------------------------------------------------------------*/
 
@@ -85,13 +88,16 @@ uint8_t non_answered_ping = 0;
 uip_ip6addr_t root_addr;
 clock_time_t dag_root_find_interval = DAG_ROOT_FIND_INTERVAL;
 clock_time_t ping_interval = SHORT_PING_INTERVAL;
+clock_time_t status_send_interval = SHORT_PING_INTERVAL;
+
 
 /*---------------------------------------------------------------------------*/
 
 SENSORS(&button_a_sensor, &button_b_sensor, &button_c_sensor, &button_d_sensor, &button_e_sensor); //register button sensors
 PROCESS(dag_node_process, "DAG-node process");
 PROCESS(dag_node_button_process, "DAG-node button process");
-PROCESS(root_ping_process, "DAG-node button process");
+PROCESS(root_ping_process, "Root ping process");
+PROCESS(status_send_process, "Status send process");
 
 
 /*---------------------------------------------------------------------------*/
@@ -161,7 +167,7 @@ print_debug_data(void)
         uip_debug_ipaddr_print(&dag_id_addr);
         printf("\n");
 
-        struct link_stats *stat_parent = rpl_get_parent_link_stats(dag->preferred_parent);
+        const struct link_stats *stat_parent = rpl_get_parent_link_stats(dag->preferred_parent);
         printf("RPL: parent last tx: %u sec ago\n", (unsigned)((clock_time() - stat_parent->last_tx_time) / (CLOCK_SECOND)));
 
         printf("RPL: parent rssi: %" PRId16 "\n", stat_parent->rssi);
@@ -169,13 +175,18 @@ print_debug_data(void)
         int parent_is_reachable = rpl_parent_is_reachable(dag->preferred_parent);
         printf("RPL: parent is reachable: %" PRId16 "\n", parent_is_reachable);
 
+
         int16_t rssi_parent = stat_parent->rssi;
         uint8_t *uptime_uint8_t = (uint8_t *)&secs_now;
         uint8_t *rssi_parent_uint8_t = (uint8_t *)&rssi_parent;
-        uint8_t uptime_uint8_t_1 = *uptime_uint8_t++;
-        uint8_t uptime_uint8_t_2 = *uptime_uint8_t++;
-        uint8_t uptime_uint8_t_3 = *uptime_uint8_t++;
-        uint8_t uptime_uint8_t_4 = *uptime_uint8_t++;
+        //uint8_t uptime_uint8_t_1 = *uptime_uint8_t++;
+        //uint8_t uptime_uint8_t_2 = *uptime_uint8_t++;
+        //uint8_t uptime_uint8_t_3 = *uptime_uint8_t++;
+        //uint8_t uptime_uint8_t_4 = *uptime_uint8_t++;
+        uint8_t uptime_uint8_t_1 = 0x85;
+        uint8_t uptime_uint8_t_2 = 0x07;
+        uint8_t uptime_uint8_t_3 = 0x00;
+        uint8_t uptime_uint8_t_4 = 0x00;
 
         uint8_t rssi_parent_uint8_t_1 = *rssi_parent_uint8_t++;
         uint8_t rssi_parent_uint8_t_2 = *rssi_parent_uint8_t++;
@@ -194,7 +205,7 @@ print_debug_data(void)
 void
 send_status_packet(const uip_ip6addr_t *dest_addr,
                    struct simple_udp_connection *connection,
-                   uip_ipaddr_t *parent_addr,
+                   const uip_ipaddr_t *parent_addr,
                    uint32_t uptime,
                    int16_t rssi_parent)
 {
@@ -255,7 +266,7 @@ send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *c
 static void
 dag_root_find(void)
 {
-    rpl_dag_t *dag;
+    rpl_dag_t *dag = NULL;
     uip_ip6addr_t addr;
 
     uip_ds6_addr_t *addr_desc = uip_ds6_get_global(ADDR_PREFERRED);
@@ -309,6 +320,29 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
 
         }
     }
+  }
+  PROCESS_END();
+}
+
+/*---------------------------------------------------------------------------*/
+
+PROCESS_THREAD(status_send_process, ev, data)
+{
+  PROCESS_BEGIN();
+  static struct etimer status_send_timer;
+  PROCESS_PAUSE();
+
+  while(1) {
+      etimer_set(&status_send_timer, status_send_interval + (random_rand() % status_send_interval));
+      PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&status_send_timer));
+
+      const rpl_dag_t *dag = rpl_get_any_dag();
+
+      if (dag) {
+          const uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
+          const struct link_stats *stat_parent = rpl_get_parent_link_stats(dag->preferred_parent);
+          send_status_packet(&root_addr, &udp_connection, ipaddr_parent, clock_seconds(), stat_parent->rssi);
+      }
   }
   PROCESS_END();
 }
@@ -375,6 +409,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
 
   process_start(&dag_node_button_process, NULL);
   process_start(&root_ping_process, NULL);
+  process_start(&status_send_process, NULL);
 
   led_on(LED_A);
 

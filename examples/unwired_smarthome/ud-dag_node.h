@@ -53,6 +53,7 @@ struct command_data
 PROCESS_NAME(dag_node_process);
 PROCESS_NAME(dag_node_button_process);
 PROCESS_NAME(root_ping_process);
+PROCESS_NAME(status_send_process);
 
 
 /*---------------------------------------------------------------------------*/

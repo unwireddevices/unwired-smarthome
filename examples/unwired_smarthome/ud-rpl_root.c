@@ -219,7 +219,7 @@ static int uart_data_receiver(unsigned char c)
 /*---------------------------------------------------------------------------*/
 
 static void udp_data_receiver(struct simple_udp_connection *connection,
-         const uip_ipaddr_t *sender_addr,
+         const uip_ipaddr_t *sender_addr, //TODO: fd00 or fe80?
          uint16_t sender_port,
          const uip_ipaddr_t *receiver_addr,
          uint16_t receiver_port,
