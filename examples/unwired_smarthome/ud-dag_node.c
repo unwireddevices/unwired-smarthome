@@ -152,7 +152,8 @@ print_debug_data(void)
 {
     printf("\n");
     uint32_t secs_now = clock_seconds();
-    printf("SYSTEM: uptime: %" PRIo32 " s\n", secs_now);
+
+    printf("SYSTEM: uptime: %" PRIu32 " s\n", secs_now);
 
     rpl_dag_t *dag = rpl_get_any_dag();
 

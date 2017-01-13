@@ -58,35 +58,6 @@
 #define PRIiPTR   PRIi16
 //integer printf format for intptr_t
 
-#define PRIo16   "o"
-//octal printf format for uint16_t
-
-#define PRIo32   "lo"
-//octal printf format for uint32_t
-
-#define PRIo8   "o"
-//octal printf format for uint8_t
-
-#define PRIoFAST16   "o"
-//octal printf format for uint_fast16_t
-
-#define PRIoFAST32   "lo"
-//octal printf format for uint_fast32_t
-
-#define PRIoFAST8   "o"
-//octal printf format for uint_fast8_t
-
-#define PRIoLEAST16   "o"
-//octal printf format for uint_least16_t
-
-#define PRIoLEAST32   "lo"
-//octal printf format for uint_least32_t
-
-#define PRIoLEAST8   "o"
-//octal printf format for uint_least8_t
-
-#define PRIoPTR   PRIo16
-//octal printf format for uintptr_t
 
 #define PRIu16   "u"
 //decimal printf format for uint16_t
@@ -241,35 +212,6 @@
 #define SCNiPTR   SCNi16
 //generic-integer scanf format for intptr_t
 
-#define SCNo16   "o"
-//octal scanf format for uint16_t
-
-#define SCNo32   "lo"
-//octal scanf format for uint32_t
-
-#define SCNo8   "hho"
-//octal scanf format for uint8_t
-
-#define SCNoFAST16   "o"
-//octal scanf format for uint_fast16_t
-
-#define SCNoFAST32   "lo"
-//octal scanf format for uint_fast32_t
-
-#define SCNoFAST8   "hho"
-//octal scanf format for uint_fast8_t
-
-#define SCNoLEAST16   "o"
-//octal scanf format for uint_least16_t
-
-#define SCNoLEAST32   "lo"
-//octal scanf format for uint_least32_t
-
-#define SCNoLEAST8   "hho"
-//octal scanf format for uint_least8_t
-
-#define SCNoPTR   SCNo16
-//octal scanf format for uintptr_t
 
 #define SCNu16   "u"
 //decimal scanf format for uint16_t
