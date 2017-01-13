@@ -1,5 +1,8 @@
 local rs232 = require("luars232")
 local socket = require("socket")
+local socket = require "socket"
+local bindechex = require("bindechex")
+
 port_name = "/dev/ttyATH0"
 
 device_group = {}
@@ -157,8 +160,11 @@ DATA_TYPE_SENSOR_DATA          =     "02"
 DATA_TYPE_CONFIRM              =     "03"
 DATA_TYPE_PING                 =     "04"
 DATA_TYPE_COMMAND              =     "05"
-DATA_TYPE_STATUS              =     "06"
+DATA_TYPE_STATUS               =     "06"
 
+
+
+local start_time = 0
 
 
 function string.fromhex(str)
@@ -199,28 +205,32 @@ end
 function send_command_to_ability(ipv6_adress, ability_target, ability_number, ability_state)
 	local adress = ipv6_adress_parse(ipv6_adress)
 	p:write(UART_NONE_DATA:fromhex())
-	socket.sleep(0.01)
+	socket.sleep(0.001)
 	p:write(UART_PV1_START_MQ:fromhex())
-	socket.sleep(0.01)
+	socket.sleep(0.001)
 	p:write(PROTOCOL_VERSION_V1:fromhex())
-	socket.sleep(0.01)
+	socket.sleep(0.001)
 	p:write(adress:fromhex())
-	socket.sleep(0.01)
+	socket.sleep(0.001)
 	p:write(ability_target:fromhex())
-	socket.sleep(0.01)
+	socket.sleep(0.001)
 	p:write(ability_number:fromhex())
-	socket.sleep(0.01)
+	socket.sleep(0.001)
 	p:write(ability_state:fromhex())
-	socket.sleep(0.01)
+	socket.sleep(0.001)
 	p:write(UART_NONE_DATA:fromhex())
-	socket.sleep(0.01)
+	socket.sleep(0.001)
 	p:write(UART_PV1_STOP_MQ:fromhex())
-	socket.sleep(0.01)
+	socket.sleep(0.001)
+
+	
+	print("Processing time "..(math.ceil(socket.gettime()*1000 - start_time)).." ms")
 	--print(raw_data:tohex())
 end
 
 
 function send_relay_command(ipv6_adress, relay_number, state)
+	--print("Relay command processing start: +"..(socket.gettime()*1000 - start_time).." ms")
 	local ability_state, ability
 
 	if (state == device_relay_commands[DEVICE_ABILITY_RELAY_COMMAND_ON]) then
@@ -249,6 +259,7 @@ end
 
 function sensor_data_processing(ipv6_adress, data)
 	--print("Sensor data processing module")
+	--print("Sensor data processing start: +"..(socket.gettime()*1000 - start_time).." ms")
 	local number_ability = data.b1 or "no number_ability"
 	local sensor_number = data.b3 or "no sensor_number"
 	local sensor_event = data.b4 or "no sensor_event"
@@ -290,9 +301,35 @@ function join_data_processing(ipv6_adress, data)
 	print("JDPM: Join packet from "..ipv6_adress..", device group: "..device_group_name..", sleep type: "..device_sleep_name)
 end
 
+function status_data_processing(ipv6_adress, data)
+	--print("Join status processing module")
+	local ipv6_adress_parent_short = data.b1..data.b2..":"..data.b3..data.b4..":"..data.b5..data.b6..":"..data.b7..data.b8
+	local uptime_hex = data.b9..data.b10..data.b11..data.b12 or "00"
+	--local uptime_hex = ..data.b11..data.b10..data.b9 or "00"
+	--local parent_rssi_hex = data.b14..data.b13 or "00"
+	--local parent_rssi_hex = data.b13..data.b14 or "00"
+	--local parent_rssi = bindechex.Hex2Dec(parent_rssi_hex)
+	--local uptime = bindechex.Hex2Dec(uptime_hex)
+
+	--RPL: uptime_uint8_t: 85 07 00 00
+	--SYSTEM: converted uptime: 3605 s
+
+	--print(bindechex.Hex2Dec("00")*2^24+bindechex.Hex2Dec("00")*2^16+bindechex.Hex2Dec("07")*2^8+bindechex.Hex2Dec("85"))
+	--print(0x00*2^24+0x00*2^16+0x07*2^8+0x85)
+	--python -c "print 0x00<<24|0x00<<16|0x07<<8|0x85"
+
+	--print(parent_rssi_hex)
+
+	--local parent_rssi_processed = string.format("%d, %i, %u", parent_rssi, parent_rssi, parent_rssi)  or "no rssi"
+	--print(parent_rssi_processed)
+
+	--print("SDPM: Status packet from "..ipv6_adress..", parent adress: "..ipv6_adress_parent_short..", uptime: "..uptime..", uptime: "..parent_rssi_processed)
+end
+
 
 function packet_processing(a, data)
 	--print("Packet processing module")
+	--print("Packet processing start: +"..(socket.gettime()*1000 - start_time).." ms")
 	local ipv6_adress = a[1]..a[2]..":"..a[3]..a[4]..":"..a[5]..a[6]..":"..a[7]..a[8]..":"..a[9]..a[10]..":"..a[11]..a[12]..":"..a[13]..a[14]..":"..a[15]..a[16]
 	if (data.p_version == PROTOCOL_VERSION_V1 and data.dev_version == DEVICE_VERSION_V1) then
 		if data.d_type == DATA_TYPE_JOIN then
@@ -313,7 +350,8 @@ function packet_processing(a, data)
 			print("PPM: Data type: DATA_TYPE_COMMAND from "..ipv6_adress)
 
 		elseif data.d_type == DATA_TYPE_STATUS then
-			print("PPM: Data type: DATA_TYPE_STATUS from "..ipv6_adress)
+			--print("PPM: Data type: DATA_TYPE_STATUS from "..ipv6_adress)
+			status_data_processing(ipv6_adress, data)
 
 		end
 	else
@@ -325,6 +363,7 @@ end
 
 function packet_parse(packet)
 	--print("Packet parse module")
+	--print("Packet parse start: +"..(socket.gettime()*1000 - start_time).." ms")
 	local adress_capturing_all = "(%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w)"
 	local data_capturing_all = "(%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w)"
 	local _, _, adress, raw_data = string.find(packet, "DAGROOTRAW1"..adress_capturing_all..data_capturing_all.."RAWEND")
@@ -389,7 +428,9 @@ while true do
 			local err, data_read, size = p:read(10)
 			assert(e == rs232.RS232_ERR_NOERROR)
 			if (data_read == "AGROOTRAW1") then
-				socket.sleep(0.1) 
+				start_time = socket.gettime()*1000
+				print(start_time)
+				socket.sleep(0.01) 
 				local err, data_read, size = p:read(95-10-1)
 				assert(e == rs232.RS232_ERR_NOERROR)
 				if (data_read ~= nil) then
