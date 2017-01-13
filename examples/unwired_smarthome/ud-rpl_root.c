@@ -174,8 +174,8 @@ void uart_packet_dump(uint8_t *uart_command_buf) {
 static int uart_data_receiver(unsigned char c)
 {
     led_blink(LED_A);
-    if ((uart_iterator >= 0                                        && uart_iterator <= MAGIC_SEQUENCE_LENGTH - 1) ||
-        (uart_iterator >= UART_DATA_LENGTH - MAGIC_SEQUENCE_LENGTH && uart_iterator <= UART_DATA_LENGTH - 1))
+    if ((uart_iterator <= MAGIC_SEQUENCE_LENGTH - 1) ||
+            (uart_iterator >= UART_DATA_LENGTH - MAGIC_SEQUENCE_LENGTH && uart_iterator <= UART_DATA_LENGTH - 1))
     {
         if (c != uart_magic_sequence[uart_iterator])
         {
@@ -278,9 +278,11 @@ PROCESS_THREAD(rpl_root_process, ev, data)
 
   PROCESS_BEGIN();
 
+  printf("Unwired RLP root and UDP data receiver. HELL-IN-CODE free. I hope. \n")
   /* if you do not execute "cleanall" target, rpl-root can build in "leaf" configuration. Diagnostic message */
-  printf("Unwired RLP root and UDP data receiver. HELL-IN-CODE free. I hope.  %s \n",
-         RPL_CONF_LEAF_ONLY ==  1 ? "\nWARNING: leaf mode on rpl-root!\n" : " ");
+  if (RPL_CONF_LEAF_ONLY == 1) {
+      printf("\nWARNING: leaf mode on rpl-root!\n")
+  }
 
   rpl_set_mode(RPL_MODE_MESH); //Set MESH-mode for dc-power rpl-root(not leaf-mode)
 
