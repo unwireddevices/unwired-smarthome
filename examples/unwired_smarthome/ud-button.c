@@ -98,9 +98,8 @@ void send_sensor_event(struct sensor_packet *packet,
 void send_button_status_packet(const uip_ip6addr_t *dest_addr,
                           struct simple_udp_connection *connection,
                           uint8_t button_number,
-                          int duration)
+                          int click_type)
 {
-
 
     if(dest_addr != NULL && connection != NULL)//(dag_active == 1 && dest_addr != NULL && connection != NULL)
     {
@@ -112,10 +111,7 @@ void send_button_status_packet(const uip_ip6addr_t *dest_addr,
         button_sensor_packet.data_type = DATA_TYPE_SENSOR_DATA;
         button_sensor_packet.number_ability = DEVICE_ABILITY_BUTTON;
         button_sensor_packet.sensor_number = button_number;
-        if (duration < 60) //TODO: magic number!
-            button_sensor_packet.sensor_event = DEVICE_ABILITY_BUTTON_EVENT_CLICK;
-        else
-            button_sensor_packet.sensor_event = DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK;
+        button_sensor_packet.sensor_event = click_type;
         send_sensor_event(&button_sensor_packet, dest_addr, connection);
     }
 
@@ -134,27 +130,39 @@ PROCESS_THREAD(main_process, ev, data)
   while(1) {
     PROCESS_YIELD();
     if(ev == sensors_event) {
-      if(data == &button_a_sensor) {
-        printf("Buttons control process: Button A\n");
-        send_button_status_packet(&root_addr, &udp_connection, 'a', (&button_a_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
+      if(data == &button_a_sensor_click) {
+        printf("Buttons control process: Button A click\n");
+        send_button_status_packet(&root_addr, &udp_connection, 'a', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
       }
-      if(data == &button_b_sensor) {
-        printf("Buttons control process: Button B\n");
-        send_button_status_packet(&root_addr, &udp_connection, 'b', (&button_b_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
+      if(data == &button_a_sensor_long_click) {
+        printf("Buttons control process: Button A long click\n");
+        send_button_status_packet(&root_addr, &udp_connection, 'a', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
       }
-      if(data == &button_c_sensor) {
-        printf("Buttons control process: Button C\n");
-        send_button_status_packet(&root_addr, &udp_connection, 'c', (&button_c_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
+      if(data == &button_b_sensor_click) {
+        printf("Buttons control process: Button B click\n");
+        send_button_status_packet(&root_addr, &udp_connection, 'b', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
       }
-      if(data == &button_d_sensor) {
-        printf("Buttons control process: Button D\n");
-        send_button_status_packet(&root_addr, &udp_connection, 'd', (&button_d_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
+      if(data == &button_b_sensor_long_click) {
+        printf("Buttons control process: Button B long click\n");
+        send_button_status_packet(&root_addr, &udp_connection, 'b', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
       }
-      if(data == &button_e_sensor) {
-        //printf("Buttons control process: Button E\n");
-        //send_button_status_packet(&root_addr, &udp_connection, 'e', (&button_e_sensor)->value(BUTTON_SENSOR_VALUE_DURATION));
+      if(data == &button_c_sensor_click) {
+        printf("Buttons control process: Button C click\n");
+        send_button_status_packet(&root_addr, &udp_connection, 'c', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
+      }
+      if(data == &button_c_sensor_long_click) {
+        printf("Buttons control process: Button C long click\n");
+        send_button_status_packet(&root_addr, &udp_connection, 'c', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
+      }
+      if(data == &button_d_sensor_click) {
+        printf("Buttons control process: Button D click\n");
+        send_button_status_packet(&root_addr, &udp_connection, 'd', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
+      }
+      if(data == &button_d_sensor_long_click) {
+        printf("Buttons control process: Button D long click\n");
+        send_button_status_packet(&root_addr, &udp_connection, 'd', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
+      }
 
-      }
     }
   }
 

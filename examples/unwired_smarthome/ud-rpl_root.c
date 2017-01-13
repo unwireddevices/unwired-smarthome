@@ -77,7 +77,8 @@ static uint8_t uart_magic_sequence[UART_DATA_LENGTH] =
 
 /*---------------------------------------------------------------------------*/
 
-SENSORS(&button_e_sensor);
+SENSORS(&button_e_sensor_click, &button_e_sensor_long_click);
+
 PROCESS(rpl_root_process,"Unwired RPL root and udp data receiver");
 AUTOSTART_PROCESSES(&rpl_root_process);
 
@@ -302,7 +303,7 @@ PROCESS_THREAD(rpl_root_process, ev, data)
   while(1) {
     PROCESS_WAIT_EVENT();
     if(ev == sensors_event) {
-        if(data == &button_e_sensor) {
+        if(data == &button_e_sensor_click) {
             printf("Initiating global repair\n");
             rpl_repair_root(RPL_DEFAULT_INSTANCE);
         }

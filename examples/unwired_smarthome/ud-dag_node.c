@@ -93,7 +93,12 @@ clock_time_t status_send_interval = SHORT_PING_INTERVAL;
 
 /*---------------------------------------------------------------------------*/
 
-SENSORS(&button_a_sensor, &button_b_sensor, &button_c_sensor, &button_d_sensor, &button_e_sensor); //register button sensors
+SENSORS(&button_a_sensor_click, &button_a_sensor_long_click,
+        &button_b_sensor_click, &button_b_sensor_long_click,
+        &button_c_sensor_click, &button_c_sensor_long_click,
+        &button_d_sensor_click, &button_d_sensor_long_click,
+        &button_e_sensor_click, &button_e_sensor_long_click); //register button sensors
+
 PROCESS(dag_node_process, "DAG-node process");
 PROCESS(dag_node_button_process, "DAG-node button process");
 PROCESS(root_ping_process, "Root ping process");
