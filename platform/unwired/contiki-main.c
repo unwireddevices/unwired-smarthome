@@ -203,6 +203,7 @@ main(void)
   printf("Starting " CONTIKI_VERSION_STRING "\n");
   printf("With DriverLib v%u.%u\n", DRIVERLIB_RELEASE_GROUP,
          DRIVERLIB_RELEASE_BUILD);
+  printf("Version: %s\n", VERSION);
   printf(BOARD_STRING "\n");
   printf("IEEE 802.15.4: %s, CC13xx: %s\n",
          ti_lib_chipinfo_supports_ieee_802_15_4() == true ? "Yes" : "No",

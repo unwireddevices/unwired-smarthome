@@ -64,3 +64,5 @@ serial:
 	
 minicom:
 	minicom -D /dev/tty.usbserial-*
+	
+

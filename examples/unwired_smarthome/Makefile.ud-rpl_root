@@ -2,6 +2,8 @@ all: ud-rpl_root
 
 PROJECT_SOURCEFILES += 
 DEFINES+=PROJECT_CONF_H=\"project-conf-normal.h\"
+GIT_VERSION := $(shell git describe --dirty --always --tags)
+DEFINES+=VERSION=\"$(GIT_VERSION)\"
 PROJECTDIRS += $(VARIANT)
 CONTIKI = ../..
 CONTIKI_WITH_IPV6 = 1
