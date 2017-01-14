@@ -320,7 +320,7 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
   while(1) {
     PROCESS_YIELD();
     if(ev == sensors_event) {
-        if(data == &button_e_sensor) {
+        if(data == &button_e_sensor_click) {
             printf("Local repair activated\n");
             rpl_dag_t *dag = rpl_get_any_dag();
             rpl_local_repair(dag->instance);
