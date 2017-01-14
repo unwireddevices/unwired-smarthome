@@ -328,6 +328,9 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
 
 
         }
+        if(data == &button_e_sensor_long_click) {
+            watchdog_reboot();
+        }
     }
   }
   PROCESS_END();
