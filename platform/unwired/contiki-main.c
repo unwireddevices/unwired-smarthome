@@ -200,11 +200,11 @@ main(void)
 
   serial_line_init();
 
-  printf("Starting " CONTIKI_VERSION_STRING "\n");
+  printf("Starting Contiki 3.x\n");
   printf("With DriverLib v%u.%u\n", DRIVERLIB_RELEASE_GROUP,
          DRIVERLIB_RELEASE_BUILD);
-  printf("Version: %s\n", VERSION);
-  printf(BOARD_STRING "\n");
+  printf("\n");
+  printf(BOARD_STRING ", version: %s\n", LOCAL_VERSION);
   printf("IEEE 802.15.4: %s, CC13xx: %s\n",
          ti_lib_chipinfo_supports_ieee_802_15_4() == true ? "Yes" : "No",
          ti_lib_chipinfo_chip_family_is_cc13xx() == true ? "Yes" : "No");
