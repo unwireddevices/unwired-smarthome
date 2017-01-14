@@ -67,24 +67,15 @@
 /*---------------------------------------------------------------------------*/
 #define SHORT_INTERVAL 10 //as timers tick(1 tick ~ 8ms)
 #define LONG_INTERVAL 90 //as timers tick(1 tick ~ 8ms)
-#define DEBOUNSE_SHORT_TIME 2
 
-uint32_t button_a_last_activated = 0;
 uint32_t button_a_last_low = 0;
-
-uint32_t button_b_last_activated = 0;
 uint32_t button_b_last_low = 0;
-
-uint32_t button_c_last_activated = 0;
 uint32_t button_c_last_low = 0;
-
-uint32_t button_d_last_activated = 0;
 uint32_t button_d_last_low = 0;
-
-uint32_t button_e_last_activated = 0;
 uint32_t button_e_last_low = 0;
 
-uint8_t current_button;
+uint8_t current_button_short;
+uint8_t current_button_long;
 
 static struct etimer button_short_timer;
 static struct etimer button_long_timer;
@@ -96,9 +87,13 @@ PROCESS_THREAD(button_sensor_short_process, ev, data)
 {
     PROCESS_BEGIN();
 
-    switch ( *(uint8_t *)data ) {
+    current_button_short = *(uint8_t *)data;
+    uint32_t current_button_state = ti_lib_gpio_read_dio(current_button_short);
+    uint32_t current_time = clock_time();
+
+    switch ( current_button_short ) {
           case BOARD_IOID_KEY_A:
-              if (clock_time() - button_a_last_low < LONG_INTERVAL && ti_lib_gpio_read_dio(BOARD_IOID_KEY_A) == 1)
+              if (current_time - button_a_last_low < LONG_INTERVAL && current_button_state == 1)
                   sensors_changed(&button_a_sensor_click);
               etimer_set(&button_short_timer, SHORT_INTERVAL);
               PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&button_short_timer));
@@ -109,7 +104,7 @@ PROCESS_THREAD(button_sensor_short_process, ev, data)
               break;
 
           case BOARD_IOID_KEY_B:
-              if (clock_time() - button_b_last_low < LONG_INTERVAL && ti_lib_gpio_read_dio(BOARD_IOID_KEY_B) == 1)
+              if (current_time - button_b_last_low < LONG_INTERVAL && current_button_state == 1)
                   sensors_changed(&button_b_sensor_click);
               etimer_set(&button_short_timer, SHORT_INTERVAL);
               PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&button_short_timer));
@@ -120,7 +115,7 @@ PROCESS_THREAD(button_sensor_short_process, ev, data)
               break;
 
           case BOARD_IOID_KEY_C:
-              if (clock_time() - button_c_last_low < LONG_INTERVAL && ti_lib_gpio_read_dio(BOARD_IOID_KEY_C) == 1)
+              if (current_time - button_c_last_low < LONG_INTERVAL && current_button_state == 1)
                   sensors_changed(&button_c_sensor_click);
               etimer_set(&button_short_timer, SHORT_INTERVAL);
               PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&button_short_timer));
@@ -131,7 +126,7 @@ PROCESS_THREAD(button_sensor_short_process, ev, data)
               break;
 
           case BOARD_IOID_KEY_D:
-              if (clock_time() - button_d_last_low < LONG_INTERVAL && ti_lib_gpio_read_dio(BOARD_IOID_KEY_D) == 1)
+              if (current_time - button_d_last_low < LONG_INTERVAL && current_button_state == 1)
                   sensors_changed(&button_d_sensor_click);
               etimer_set(&button_short_timer, SHORT_INTERVAL);
               PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&button_short_timer));
@@ -142,7 +137,7 @@ PROCESS_THREAD(button_sensor_short_process, ev, data)
               break;
 
           case BOARD_IOID_KEY_E:
-              if (clock_time() - button_e_last_low < LONG_INTERVAL && ti_lib_gpio_read_dio(BOARD_IOID_KEY_E) == 1)
+              if (current_time - button_e_last_low < LONG_INTERVAL && current_button_state == 1)
                   sensors_changed(&button_e_sensor_click);
               etimer_set(&button_short_timer, SHORT_INTERVAL);
               PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&button_short_timer));
@@ -165,12 +160,12 @@ PROCESS(button_sensor_long_process, "Button sensor long process");
 PROCESS_THREAD(button_sensor_long_process, ev, data)
 {
   PROCESS_BEGIN();
-  current_button = *(uint8_t *)data;
+  current_button_long = *(uint8_t *)data;
   etimer_reset(&button_long_timer);
   etimer_set(&button_long_timer, LONG_INTERVAL);
   PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&button_long_timer));
 
-  switch ( current_button ) {
+  switch ( current_button_long ) {
         case BOARD_IOID_KEY_A:
             if (ti_lib_gpio_read_dio(BOARD_IOID_KEY_A) == 0)
                 sensors_changed(&button_a_sensor_long_click);
@@ -205,72 +200,61 @@ PROCESS_THREAD(button_sensor_long_process, ev, data)
 }
 /*---------------------------------------------------------------------------*/
 
+
+void button_start_process(struct process *p, uint32_t data) {
+    if (process_is_running(p) != 0) {
+        process_exit(p);
+    }
+    process_start(p, (void *)&data);
+}
+
 static void
 button_press_handler(uint8_t ioid)
 {
-    //printf("SENSOR: button state: %"PRIu32" on %"PRIu32" tick\n", ti_lib_gpio_read_dio(BOARD_IOID_KEY_E), clock_time());
-    uint8_t current_button_ioid;
-
+    uint8_t current_button_ioid = ioid;
+    uint32_t current_button_state = ti_lib_gpio_read_dio(ioid);
+    uint32_t current_time = clock_time();
+    printf("SENSOR: button %"PRIu8" change state to %"PRIu32" on %"PRIu32" tick\n", current_button_ioid, current_button_state, current_time);
 
     if(ioid == BOARD_IOID_KEY_A) {
-        current_button_ioid = BOARD_IOID_KEY_A;
-        if (clock_time() - button_a_last_activated < DEBOUNSE_SHORT_TIME)
-            return;
-        button_a_last_activated = clock_time();
-        if (ti_lib_gpio_read_dio(BOARD_IOID_KEY_A) == 0) {
-            process_start(&button_sensor_short_process, (void *)&current_button_ioid);
-            process_start(&button_sensor_long_process, (void *)&current_button_ioid);
-            button_a_last_low = clock_time();
+        button_start_process(&button_sensor_short_process, current_button_ioid);
+        if (current_button_state == 0) {
+            button_a_last_low = current_time;
+            button_start_process(&button_sensor_long_process, current_button_ioid);
         } else {
-            process_start(&button_sensor_short_process, (void *)&current_button_ioid);
             if (process_is_running(&button_sensor_long_process) != 0)
                 process_exit(&button_sensor_long_process);
         }
     }
 
     if(ioid == BOARD_IOID_KEY_B) {
-        current_button_ioid = BOARD_IOID_KEY_B;
-        if (clock_time() - button_b_last_activated < DEBOUNSE_SHORT_TIME)
-            return;
-        button_b_last_activated = clock_time();
-        if (ti_lib_gpio_read_dio(BOARD_IOID_KEY_B) == 0) {
-            process_start(&button_sensor_short_process, (void *)&current_button_ioid);
-            process_start(&button_sensor_long_process, (void *)&current_button_ioid);
-            button_b_last_low = clock_time();
+        button_start_process(&button_sensor_short_process, current_button_ioid);
+        if (current_button_state == 0) {
+            button_b_last_low = current_time;
+            button_start_process(&button_sensor_long_process, current_button_ioid);
         } else {
-            process_start(&button_sensor_short_process, (void *)&current_button_ioid);
             if (process_is_running(&button_sensor_long_process) != 0)
                 process_exit(&button_sensor_long_process);
         }
     }
 
     if(ioid == BOARD_IOID_KEY_C) {
-        current_button_ioid = BOARD_IOID_KEY_C;
-        if (clock_time() - button_c_last_activated < DEBOUNSE_SHORT_TIME)
-            return;
-        button_c_last_activated = clock_time();
-        if (ti_lib_gpio_read_dio(BOARD_IOID_KEY_C) == 0) {
-            process_start(&button_sensor_short_process, (void *)&current_button_ioid);
-            process_start(&button_sensor_long_process, (void *)&current_button_ioid);
-            button_c_last_low = clock_time();
+        button_start_process(&button_sensor_short_process, current_button_ioid);
+        if (current_button_state == 0) {
+            button_c_last_low = current_time;
+            button_start_process(&button_sensor_long_process, current_button_ioid);
         } else {
-            process_start(&button_sensor_short_process, (void *)&current_button_ioid);
             if (process_is_running(&button_sensor_long_process) != 0)
                 process_exit(&button_sensor_long_process);
         }
     }
 
     if(ioid == BOARD_IOID_KEY_D) {
-        current_button_ioid = BOARD_IOID_KEY_D;
-        if (clock_time() - button_d_last_activated < DEBOUNSE_SHORT_TIME)
-            return;
-        button_d_last_activated = clock_time();
-        if (ti_lib_gpio_read_dio(BOARD_IOID_KEY_D) == 0) {
-            process_start(&button_sensor_short_process, (void *)&current_button_ioid);
-            process_start(&button_sensor_long_process, (void *)&current_button_ioid);
-            button_d_last_low = clock_time();
+        button_start_process(&button_sensor_short_process, current_button_ioid);
+        if (current_button_state == 0) {
+            button_d_last_low = current_time;
+            button_start_process(&button_sensor_long_process, current_button_ioid);
         } else {
-            process_start(&button_sensor_short_process, (void *)&current_button_ioid);
             if (process_is_running(&button_sensor_long_process) != 0)
                 process_exit(&button_sensor_long_process);
         }
@@ -278,16 +262,11 @@ button_press_handler(uint8_t ioid)
 
 
     if(ioid == BOARD_IOID_KEY_E) {
-        current_button_ioid = BOARD_IOID_KEY_E;
-        if (clock_time() - button_e_last_activated < DEBOUNSE_SHORT_TIME)
-            return;
-        button_e_last_activated = clock_time();
-        if (ti_lib_gpio_read_dio(current_button_ioid) == 0) {
-            process_start(&button_sensor_short_process, (void *)&current_button_ioid);
-            process_start(&button_sensor_long_process, (void *)&current_button_ioid);
-            button_e_last_low = clock_time();
+        button_start_process(&button_sensor_short_process, current_button_ioid);
+        if (current_button_state == 0) {
+            button_e_last_low = current_time;
+            button_start_process(&button_sensor_long_process, current_button_ioid);
         } else {
-            process_start(&button_sensor_short_process, (void *)&current_button_ioid);
             if (process_is_running(&button_sensor_long_process) != 0)
                 process_exit(&button_sensor_long_process);
         }
