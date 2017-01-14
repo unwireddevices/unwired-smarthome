@@ -73,11 +73,10 @@
 
 #include "fake_headers.h" //no move up! not "krasivo"!
 
-#define DAG_ROOT_FIND_INTERVAL             (5 * CLOCK_SECOND)
+#define DEBUG_INTERVAL                    (60 * CLOCK_SECOND)
 #define SHORT_PING_INTERVAL                (5 * CLOCK_SECOND)
 #define LONG_PING_INTERVAL                (50 * CLOCK_SECOND)
-#define STATUS_SEND_INTERVAL           (30*60 * CLOCK_SECOND)
-//#define STATUS_SEND_INTERVAL           (5 * CLOCK_SECOND)
+#define STATUS_SEND_INTERVAL           (10*60 * CLOCK_SECOND)
 
 #define MAX_NON_ANSWERED_PINGS              5
 
@@ -87,10 +86,9 @@ struct simple_udp_connection udp_connection; //struct for simple_udp_send
 uint8_t dag_active = 0; //set to 1, if rpl root found and answer to join packet
 uint8_t non_answered_ping = 0;
 uip_ip6addr_t root_addr;
-clock_time_t dag_root_find_interval = DAG_ROOT_FIND_INTERVAL;
+clock_time_t debug_interval = DEBUG_INTERVAL;
 clock_time_t ping_interval = SHORT_PING_INTERVAL;
-clock_time_t status_send_interval = SHORT_PING_INTERVAL;
-
+clock_time_t status_send_interval = STATUS_SEND_INTERVAL;
 
 /*---------------------------------------------------------------------------*/
 
@@ -99,8 +97,6 @@ SENSORS(&button_a_sensor_click, &button_a_sensor_long_click,
         &button_c_sensor_click, &button_c_sensor_long_click,
         &button_d_sensor_click, &button_d_sensor_long_click,
         &button_e_sensor_click, &button_e_sensor_long_click); //register button sensors
-
-
 
 PROCESS(dag_node_process, "DAG-node process");
 PROCESS(dag_node_button_process, "DAG-node button process");
@@ -126,14 +122,14 @@ udp_receiver(struct simple_udp_connection *c,
     if (data[0] == PROTOCOL_VERSION_V1 && data[1] == CURRENT_DEVICE_VERSION) {
       switch ( data[2] ) {
       case DATA_TYPE_CONFIRM:
-          printf("DAG NODE: DAG join packet confirmation received, DAG active\n");
+          printf("DAG Node: DAG join packet confirmation received, DAG active\n");
           led_off(LED_A);
           dag_active = 1;
           root_addr = *sender_addr;
           non_answered_ping = 0;
           break;
       case DATA_TYPE_COMMAND:
-          printf("DAG NODE: Command packet received\n");
+          printf("DAG Node: Command packet received\n");
           static struct command_data message_for_main_process;
           message_for_main_process.ability_target = data[3];
           message_for_main_process.ability_number = data[4];
@@ -159,9 +155,8 @@ print_debug_data(void)
 {
     printf("\n");
     uint32_t secs_now = clock_seconds();
-
     printf("SYSTEM: uptime: %" PRIu32 " s\n", secs_now);
-
+ /*
     rpl_dag_t *dag = rpl_get_any_dag();
 
     if (dag) {
@@ -183,28 +178,7 @@ print_debug_data(void)
         int parent_is_reachable = rpl_parent_is_reachable(dag->preferred_parent);
         printf("RPL: parent is reachable: %" PRId16 "\n", parent_is_reachable);
 
-
-        int16_t rssi_parent = stat_parent->rssi;
-        uint8_t *uptime_uint8_t = (uint8_t *)&secs_now;
-        uint8_t *rssi_parent_uint8_t = (uint8_t *)&rssi_parent;
-        //uint8_t uptime_uint8_t_1 = *uptime_uint8_t++;
-        //uint8_t uptime_uint8_t_2 = *uptime_uint8_t++;
-        //uint8_t uptime_uint8_t_3 = *uptime_uint8_t++;
-        //uint8_t uptime_uint8_t_4 = *uptime_uint8_t++;
-        uint8_t uptime_uint8_t_1 = 0x85;
-        uint8_t uptime_uint8_t_2 = 0x07;
-        uint8_t uptime_uint8_t_3 = 0x00;
-        uint8_t uptime_uint8_t_4 = 0x00;
-
-        uint8_t rssi_parent_uint8_t_1 = *rssi_parent_uint8_t++;
-        uint8_t rssi_parent_uint8_t_2 = *rssi_parent_uint8_t++;
-
-        printf("RPL: uptime_uint8_t: %" PRIXX8 "%" PRIXX8 "%" PRIXX8 "%" PRIXX8 "\n",
-               uptime_uint8_t_1, uptime_uint8_t_2, uptime_uint8_t_3, uptime_uint8_t_4);
-        printf("RPL: rssi_parent_uint8_t: %" PRIXX8 "%" PRIXX8 "\n",
-               rssi_parent_uint8_t_1, rssi_parent_uint8_t_2);
     }
-
 }
 
 /*---------------------------------------------------------------------------*/
@@ -287,7 +261,7 @@ dag_root_find(void)
                 if (dag_active == 0) {
                     uip_ip6addr_copy(&addr, &dag->dag_id);
 
-                    printf("DAG node: send join packet to rpl root ");
+                    printf("DAG node: send join packet to rpl root");
                     uip_debug_ip6addr_print(&addr);
                     printf("\n");
                     send_join_packet(&addr, &udp_connection);
@@ -321,7 +295,7 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
     PROCESS_YIELD();
     if(ev == sensors_event) {
         if(data == &button_e_sensor_click) {
-            printf("Local repair activated\n");
+            printf("DAG Node: Local repair activated\n");
             rpl_dag_t *dag = rpl_get_any_dag();
             rpl_local_repair(dag->instance);
         }
@@ -377,24 +351,22 @@ PROCESS_THREAD(root_ping_process, ev, data)
       if (dag_active == 0 && ping_interval != SHORT_PING_INTERVAL && non_answered_ping < 20) {
           ping_interval = SHORT_PING_INTERVAL;
           uip_ds_6_interval_set(CLOCK_SECOND/5);
-          printf("DS6 new interval: %" PRIu32 " system tick\n", uip_ds_6_interval_get());
-          printf("DAG: Change timer to SHORT interval\n");
+          printf("DAG Node: Change timer to SHORT interval, DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get());
       }
 
       if ((dag_active == 1 && ping_interval != LONG_PING_INTERVAL) || non_answered_ping > 20) {
           ping_interval = LONG_PING_INTERVAL;
           uip_ds_6_interval_set(CLOCK_SECOND);
-          printf("DS6 new interval: %" PRIu32 " system tick\n", uip_ds_6_interval_get());
-          printf("DAG: Change timer to LONG interval\n");
+          printf("DAG Node: Change timer to LONG interval, DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get());
       }
 
       if (non_answered_ping > 30) {
-          printf("DAG: Not answer root, reboot\n");
+          printf("DAG Node: Not answer root, reboot\n");
           watchdog_reboot();
       }
 
       if (non_answered_ping > 1)
-          printf("DAG: Non-answer ping count: %u\n", non_answered_ping);
+          printf("DAG Node: Non-answer ping count: %u\n", non_answered_ping);
   }
 
   PROCESS_END();
