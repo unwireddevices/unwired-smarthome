@@ -31,19 +31,6 @@
 /** \addtogroup cc26xx-srf-tag
  * @{
  *
- * \defgroup srf06-cc26xx-peripherals Peripherals for the SmartRF06EB + CC26xxEM
- *
- * Defines related to the SmartRF06 Evaluation Board with a CC26xxEM
- *
- * This file provides connectivity information on LEDs, Buttons, UART and
- * other peripherals
- *
- * This file can be used as the basis to configure other boards using the
- * CC13xx/CC26xx code as their basis.
- *
- * This file is not meant to be modified by the user.
- * @{
- *
  * \file
  * Header file with definitions related to the I/O connections on the TI
  * SmartRF06 Evaluation Board with a CC26xxEM
@@ -60,8 +47,6 @@
 /**
  * \name LED configurations
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 /* Some files include leds.h before us, so we need to get rid of defaults in
  * leds.h before we provide correct definitions */
@@ -86,9 +71,7 @@
 /*---------------------------------------------------------------------------*/
 /**
  * \name LED IOID mappings
- *
- * Those values are not meant to be modified by the user
- * @{
+
  */
 #define BOARD_IOID_LED_A          IOID_22 //led on radio-board
 #define BOARD_IOID_LED_B          IOID_25 //on UMDK-BUTTON
@@ -114,8 +97,6 @@
 /**
  * \name UART IOID mapping
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 //#define BOARD_IOID_UART_RX        IOID_26 //UMDK generic UART
 //#define BOARD_IOID_UART_TX        IOID_25 //UMDK generic UART
@@ -132,8 +113,6 @@
 /**
  * \name Button IOID mapping
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 #define BOARD_IOID_KEY_A            IOID_4 //on UMDK-BUTTON
 #define BOARD_IOID_KEY_B            IOID_5 //on UMDK-BUTTON
@@ -150,8 +129,6 @@
 /**
  * \name 3.3V domain IOID mapping
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 #define BOARD_IOID_3V3_EN         IOID_13
 #define BOARD_3V3_EN              (1 << BOARD_IOID_3V3_EN)
@@ -160,8 +137,6 @@
 /**
  * \name SPI IOID mapping
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 #define BOARD_IOID_SPI_SCK        IOID_UNUSED
 #define BOARD_IOID_SPI_MOSI       IOID_UNUSED
@@ -174,8 +149,6 @@
 /**
  * \brief I2C IOID mappings
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 #define BOARD_IOID_SDA            IOID_29 /**< Interface 0 SDA: All sensors bar MPU */
 #define BOARD_IOID_SCL            IOID_30 /**< Interface 0 SCL: All sensors bar MPU */
@@ -186,8 +159,6 @@
 /**
  * \name LCD IOID mapping
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 #define BOARD_IOID_LCD_MODE       IOID_UNUSED
 #define BOARD_IOID_LCD_RST        IOID_UNUSED
@@ -204,8 +175,6 @@
 /**
  * \name SD Card IOID mapping
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 #define BOARD_IOID_SDCARD_CS      IOID_UNUSED
 #define BOARD_SDCARD_CS           (1 << BOARD_IOID_SDCARD_CS)
@@ -220,8 +189,6 @@
 /**
  * \name ALS IOID mapping
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 #define BOARD_IOID_ALS_PWR        IOID_UNUSED
 #define BOARD_IOID_ALS_OUT        IOID_UNUSED
@@ -232,8 +199,6 @@
 /**
  * \name ACC IOID mapping
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 #define BOARD_IOID_ACC_PWR        IOID_UNUSED
 #define BOARD_IOID_ACC_INT        IOID_UNUSED

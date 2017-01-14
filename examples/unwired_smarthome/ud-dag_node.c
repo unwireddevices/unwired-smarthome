@@ -100,11 +100,12 @@ SENSORS(&button_a_sensor_click, &button_a_sensor_long_click,
         &button_d_sensor_click, &button_d_sensor_long_click,
         &button_e_sensor_click, &button_e_sensor_long_click); //register button sensors
 
+
+
 PROCESS(dag_node_process, "DAG-node process");
 PROCESS(dag_node_button_process, "DAG-node button process");
 PROCESS(root_ping_process, "Root ping process");
 PROCESS(status_send_process, "Status send process");
-
 
 /*---------------------------------------------------------------------------*/
 
@@ -202,7 +203,6 @@ print_debug_data(void)
                uptime_uint8_t_1, uptime_uint8_t_2, uptime_uint8_t_3, uptime_uint8_t_4);
         printf("RPL: rssi_parent_uint8_t: %" PRIXX8 "%" PRIXX8 "\n",
                rssi_parent_uint8_t_1, rssi_parent_uint8_t_2);
-
     }
 
 }
@@ -315,8 +315,8 @@ dag_root_find(void)
 PROCESS_THREAD(dag_node_button_process, ev, data)
 {
   PROCESS_BEGIN();
-
   PROCESS_PAUSE();
+
   while(1) {
     PROCESS_YIELD();
     if(ev == sensors_event) {
@@ -324,9 +324,6 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
             printf("Local repair activated\n");
             rpl_dag_t *dag = rpl_get_any_dag();
             rpl_local_repair(dag->instance);
-
-
-
         }
         if(data == &button_e_sensor_long_click) {
             watchdog_reboot();
@@ -432,9 +429,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
   while(1) {
     etimer_set(&dag_timer, dag_root_find_interval + (random_rand() % dag_root_find_interval));
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&dag_timer));
-
     print_debug_data();
-
   }
 
   PROCESS_END();
