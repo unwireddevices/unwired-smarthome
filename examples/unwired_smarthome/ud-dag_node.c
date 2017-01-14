@@ -127,6 +127,9 @@ udp_receiver(struct simple_udp_connection *c,
           dag_active = 1;
           root_addr = *sender_addr;
           non_answered_ping = 0;
+          if (process_is_running(&status_send_process) == 0)
+              process_start(&status_send_process, NULL);
+
           break;
       case DATA_TYPE_COMMAND:
           printf("DAG Node: Command packet received\n");
@@ -318,13 +321,11 @@ PROCESS_THREAD(status_send_process, ev, data)
 {
   PROCESS_BEGIN();
   static struct etimer status_send_timer;
+  const rpl_dag_t *dag = NULL;
   PROCESS_PAUSE();
 
   while(1) {
-      etimer_set(&status_send_timer, status_send_interval + (random_rand() % status_send_interval));
-      PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&status_send_timer));
-
-      const rpl_dag_t *dag = rpl_get_any_dag();
+      rpl_dag_t *dag = rpl_get_any_dag();
 
       if (dag) {
           const uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
@@ -333,6 +334,9 @@ PROCESS_THREAD(status_send_process, ev, data)
           uint8_t voltage = ((batmon_sensor.value(BATMON_SENSOR_TYPE_VOLT) * 125) >> 5)/VOLTAGE_PRESCALER;
           send_status_packet(&root_addr, &udp_connection, ipaddr_parent, clock_seconds(), stat_parent->rssi, temp, voltage);
       }
+
+      etimer_set(&status_send_timer, status_send_interval + (random_rand() % status_send_interval));
+      PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&status_send_timer));
   }
   PROCESS_END();
 }
@@ -397,7 +401,6 @@ PROCESS_THREAD(dag_node_process, ev, data)
 
   process_start(&dag_node_button_process, NULL);
   process_start(&root_ping_process, NULL);
-  process_start(&status_send_process, NULL);
 
   SENSORS_ACTIVATE(batmon_sensor);
 
