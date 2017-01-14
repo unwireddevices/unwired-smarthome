@@ -102,6 +102,13 @@
 #define BOARD_LED_E               (1 << BOARD_IOID_LED_E)
 #define BOARD_LED_ALL             (BOARD_LED_A | BOARD_LED_B | BOARD_LED_C | \
                                    BOARD_LED_D | BOARD_LED_E)
+
+/*---------------------------------------------------------------------------*/
+/**
+ * \name Relay IOID mappings
+ */
+#define BOARD_IOID_RELAY_1        IOID_17
+#define BOARD_IOID_RELAY_2        IOID_16
 /** @} */
 /*---------------------------------------------------------------------------*/
 /**

@@ -64,9 +64,6 @@
 #include "ti-lib.h"
 #include "ud_binary_protocol.h"
 
-#define RELAY_1 IOID_17
-#define RELAY_2 IOID_16
-
 /*---------------------------------------------------------------------------*/
 
 uint8_t relay_1_state = 0;
@@ -85,24 +82,24 @@ void change_DIO_state(uint8_t dio_number, uint8_t dio_state) //TODO: куча к
     {
         switch ( dio_state ) {
         case DEVICE_ABILITY_RELAY_COMMAND_OFF:
-            ti_lib_gpio_clear_dio(RELAY_1);
+            ti_lib_gpio_clear_dio(BOARD_IOID_RELAY_1);
             printf("RELAY: Relay 1 set to OFF\n");
             relay_1_state = 0;
             break;
         case DEVICE_ABILITY_RELAY_COMMAND_ON:
-            ti_lib_gpio_set_dio(RELAY_1);
+            ti_lib_gpio_set_dio(BOARD_IOID_RELAY_1);
             printf("RELAY: Relay 1 set to ON\n");
             relay_1_state = 1;
             break;
         case DEVICE_ABILITY_RELAY_COMMAND_TOGGLE:
             if (relay_1_state == 1) {
-                ti_lib_gpio_clear_dio(RELAY_1);
+                ti_lib_gpio_clear_dio(BOARD_IOID_RELAY_1);
                 printf("RELAY: Relay 1 set to OFF\n");
                 relay_1_state = 0;
             }
             else
             {
-                ti_lib_gpio_set_dio(RELAY_1);
+                ti_lib_gpio_set_dio(BOARD_IOID_RELAY_1);
                 printf("RELAY: Relay 1 set to ON\n");
                 relay_1_state = 1;
             }
@@ -116,24 +113,24 @@ void change_DIO_state(uint8_t dio_number, uint8_t dio_state) //TODO: куча к
     {
         switch ( dio_state ) {
         case DEVICE_ABILITY_RELAY_COMMAND_OFF:
-            ti_lib_gpio_clear_dio(RELAY_2);
+            ti_lib_gpio_clear_dio(BOARD_IOID_RELAY_2);
             printf("RELAY: Relay 2 set to OFF\n");
             relay_2_state = 0;
             break;
         case DEVICE_ABILITY_RELAY_COMMAND_ON:
-            ti_lib_gpio_set_dio(RELAY_2);
+            ti_lib_gpio_set_dio(BOARD_IOID_RELAY_2);
             printf("RELAY: Relay 2 set to ON\n");
             relay_2_state = 2;
             break;
         case DEVICE_ABILITY_RELAY_COMMAND_TOGGLE:
             if (relay_2_state == 1) {
-                ti_lib_gpio_clear_dio(RELAY_2);
+                ti_lib_gpio_clear_dio(BOARD_IOID_RELAY_2);
                 printf("RELAY: Relay 2 set to OFF\n");
                 relay_2_state = 0;
             }
             else
             {
-                ti_lib_gpio_set_dio(RELAY_2);
+                ti_lib_gpio_set_dio(BOARD_IOID_RELAY_2);
                 printf("RELAY: Relay 2 set to ON\n");
                 relay_2_state = 1;
             }
@@ -150,10 +147,10 @@ void change_DIO_state(uint8_t dio_number, uint8_t dio_state) //TODO: куча к
 
 void configure_DIO()
 {
-    ti_lib_ioc_pin_type_gpio_output(RELAY_1);
-    ti_lib_ioc_pin_type_gpio_output(RELAY_2);
-    ti_lib_gpio_clear_dio(RELAY_1);
-    ti_lib_gpio_clear_dio(RELAY_2);
+    ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_RELAY_1);
+    ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_RELAY_2);
+    ti_lib_gpio_clear_dio(BOARD_IOID_RELAY_1);
+    ti_lib_gpio_clear_dio(BOARD_IOID_RELAY_2);
 }
 
 /*---------------------------------------------------------------------------*/
