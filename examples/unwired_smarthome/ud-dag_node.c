@@ -45,6 +45,7 @@
 #include "dev/leds.h"
 #include "sys/clock.h"
 #include "button-sensor.h"
+#include "batmon-sensor.h"
 #include "board-peripherals.h"
 #include "cc26xx/board.h"
 #include "net/ip/uip-debug.h"
@@ -213,10 +214,12 @@ send_status_packet(const uip_ip6addr_t *dest_addr,
                    struct simple_udp_connection *connection,
                    const uip_ipaddr_t *parent_addr,
                    uint32_t uptime,
-                   int16_t rssi_parent)
+                   int16_t rssi_parent,
+                   uint8_t temp,
+                   uint8_t voltage)
 {
     uint8_t *uptime_uint8_t = (uint8_t *)&uptime;
-    uint8_t *rssi_parent_uint8_t = (uint8_t *)&rssi_parent;
+    uint8_t *rssi_parent_uint8_t = (int8_t *)&rssi_parent;
 
     uint8_t length = 23;
     uint8_t buf[length];
@@ -237,8 +240,8 @@ send_status_packet(const uip_ip6addr_t *dest_addr,
     buf[14] = *uptime_uint8_t++;
     buf[15] = *rssi_parent_uint8_t++;
     buf[16] = *rssi_parent_uint8_t++;
-    buf[17] = DATA_RESERVED;
-    buf[18] = DATA_RESERVED;
+    buf[17] = temp;
+    buf[18] = voltage;
     buf[19] = DATA_RESERVED;
     buf[20] = DATA_RESERVED;
     buf[21] = DATA_RESERVED;
@@ -347,7 +350,9 @@ PROCESS_THREAD(status_send_process, ev, data)
       if (dag) {
           const uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
           const struct link_stats *stat_parent = rpl_get_parent_link_stats(dag->preferred_parent);
-          send_status_packet(&root_addr, &udp_connection, ipaddr_parent, clock_seconds(), stat_parent->rssi);
+          uint8_t temp = batmon_sensor.value(BATMON_SENSOR_TYPE_TEMP);
+          uint8_t voltage = ((batmon_sensor.value(BATMON_SENSOR_TYPE_VOLT) * 125) >> 5)/VOLTAGE_PRESCALER;
+          send_status_packet(&root_addr, &udp_connection, ipaddr_parent, clock_seconds(), stat_parent->rssi, temp, voltage);
       }
   }
   PROCESS_END();
@@ -416,6 +421,8 @@ PROCESS_THREAD(dag_node_process, ev, data)
   process_start(&dag_node_button_process, NULL);
   process_start(&root_ping_process, NULL);
   process_start(&status_send_process, NULL);
+
+  SENSORS_ACTIVATE(batmon_sensor);
 
   led_on(LED_A);
 

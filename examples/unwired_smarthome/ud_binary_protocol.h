@@ -134,3 +134,6 @@
 #define UART_DATA_LENGTH                                42
 #define MAGIC_SEQUENCE_LENGTH                           6
 
+
+
+#define VOLTAGE_PRESCALER                               16

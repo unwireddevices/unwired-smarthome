@@ -153,6 +153,7 @@ UART_PV1_START_MQ = "011616161610"
 UART_PV1_STOP_MQ = "031616161704"
 UART_NONE_DATA = "FFFFFFFFFFFFFFFFFFFF"
 
+VOLTAGE_PRESCALER = 16
 
 -----------------------------------------------------------------------------------
 DATA_TYPE_JOIN                 =     "01"
@@ -301,19 +302,32 @@ function join_data_processing(ipv6_adress, data)
 	print("JDPM: Join packet from "..ipv6_adress..", device group: "..device_group_name..", sleep type: "..device_sleep_name)
 end
 
+function getu16(data, pos) -- reads a 16 bit value of the string data at position pos
+	local high, low = string.byte(data, pos, pos+1)
+	local val = high*256 + low -- no bit fiddling in lua since everything is a double internally
+	return val
+end
+
 function status_data_processing(ipv6_adress, data)
 	--print("Join status processing module")
 	local ipv6_adress_parent_short = data.b1..data.b2..":"..data.b3..data.b4..":"..data.b5..data.b6..":"..data.b7..data.b8
 
+	local uptime = tonumber(bindechex.Hex2Dec((data.b12 or 00)..(data.b11 or 00)..(data.b10 or 00)..(data.b9 or 00)))
+	local voltage = (bindechex.Hex2Dec(data.b16 or 00)*VOLTAGE_PRESCALER/1000)
+	local temp = bindechex.Hex2Dec(data.b15 or 00)
+	local parent_rssi_raw = tonumber(bindechex.Hex2Dec((data.b14 or 00)..(data.b13 or 00)))
+	if parent_rssi_raw > 32768 then
+		parent_rssi_raw = parent_rssi_raw - 65536
+	end
 
-	local uptime = bindechex.Hex2Dec(data.b9 or 00)*2^24+bindechex.Hex2Dec(data.b10 or 00)*2^16+bindechex.Hex2Dec(data.b11 or 00)*2^8+bindechex.Hex2Dec(data.b12 or 00)
-	local parent_rssi_raw = bindechex.Hex2Dec(data.b14 or 00)*2^8+bindechex.Hex2Dec(data.b13 or 00)
-
-
-	
-	parent_rssi = string.format("%d, %i, %u", parent_rssi, parent_rssi, parent_rssi) or "no rssi"
-
-	print("SDPM: Status packet from "..ipv6_adress..", parent adress: "..ipv6_adress_parent_short..", uptime: "..uptime..", rssi: "..parent_rssi_processed)
+	parent_rssi = string.format("%d, %i, %u", parent_rssi_raw, parent_rssi_raw, parent_rssi_raw) or "no rssi"
+	parent_rssi = parent_rssi_raw
+	print("SDPM: Status packet from "..ipv6_adress..":")
+	print(" Parent adress: "..ipv6_adress_parent_short)
+	print(" Uptime: "..uptime.."s")
+	print(" Parent RSSI: "..parent_rssi.."db")
+	print(" Temp: "..temp.."C")
+	print(" Voltage: "..voltage.." v")
 end
 
 
@@ -437,5 +451,8 @@ while true do
 	end
 end
  
+
+
+
 
 
