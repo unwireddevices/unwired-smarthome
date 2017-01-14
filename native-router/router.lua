@@ -304,26 +304,16 @@ end
 function status_data_processing(ipv6_adress, data)
 	--print("Join status processing module")
 	local ipv6_adress_parent_short = data.b1..data.b2..":"..data.b3..data.b4..":"..data.b5..data.b6..":"..data.b7..data.b8
-	local uptime_hex = data.b9..data.b10..data.b11..data.b12 or "00"
-	--local uptime_hex = ..data.b11..data.b10..data.b9 or "00"
-	--local parent_rssi_hex = data.b14..data.b13 or "00"
-	--local parent_rssi_hex = data.b13..data.b14 or "00"
-	--local parent_rssi = bindechex.Hex2Dec(parent_rssi_hex)
-	--local uptime = bindechex.Hex2Dec(uptime_hex)
 
-	--RPL: uptime_uint8_t: 85 07 00 00
-	--SYSTEM: converted uptime: 3605 s
 
-	--print(bindechex.Hex2Dec("00")*2^24+bindechex.Hex2Dec("00")*2^16+bindechex.Hex2Dec("07")*2^8+bindechex.Hex2Dec("85"))
-	--print(0x00*2^24+0x00*2^16+0x07*2^8+0x85)
-	--python -c "print 0x00<<24|0x00<<16|0x07<<8|0x85"
+	local uptime = bindechex.Hex2Dec(data.b9 or 00)*2^24+bindechex.Hex2Dec(data.b10 or 00)*2^16+bindechex.Hex2Dec(data.b11 or 00)*2^8+bindechex.Hex2Dec(data.b12 or 00)
+	local parent_rssi_raw = bindechex.Hex2Dec(data.b14 or 00)*2^8+bindechex.Hex2Dec(data.b13 or 00)
 
-	--print(parent_rssi_hex)
 
-	--local parent_rssi_processed = string.format("%d, %i, %u", parent_rssi, parent_rssi, parent_rssi)  or "no rssi"
-	--print(parent_rssi_processed)
+	
+	parent_rssi = string.format("%d, %i, %u", parent_rssi, parent_rssi, parent_rssi) or "no rssi"
 
-	--print("SDPM: Status packet from "..ipv6_adress..", parent adress: "..ipv6_adress_parent_short..", uptime: "..uptime..", uptime: "..parent_rssi_processed)
+	print("SDPM: Status packet from "..ipv6_adress..", parent adress: "..ipv6_adress_parent_short..", uptime: "..uptime..", rssi: "..parent_rssi_processed)
 end
 
 
@@ -429,7 +419,6 @@ while true do
 			assert(e == rs232.RS232_ERR_NOERROR)
 			if (data_read == "AGROOTRAW1") then
 				start_time = socket.gettime()*1000
-				print(start_time)
 				socket.sleep(0.01) 
 				local err, data_read, size = p:read(95-10-1)
 				assert(e == rs232.RS232_ERR_NOERROR)
