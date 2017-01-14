@@ -178,7 +178,10 @@ print_debug_data(void)
         int parent_is_reachable = rpl_parent_is_reachable(dag->preferred_parent);
         printf("RPL: parent is reachable: %" PRId16 "\n", parent_is_reachable);
 
+        uint8_t temp = batmon_sensor.value(BATMON_SENSOR_TYPE_TEMP);
+        printf("SYSTEM: temp: %"PRIu8"C, voltage: %"PRId16"mv\n", temp, ((batmon_sensor.value(BATMON_SENSOR_TYPE_VOLT) * 125) >> 5));
     }
+*/
 }
 
 /*---------------------------------------------------------------------------*/
@@ -300,6 +303,8 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
             rpl_local_repair(dag->instance);
         }
         if(data == &button_e_sensor_long_click) {
+            led_on(LED_A);
+            printf("SYSTEM: Button E long click, reboot\n");
             watchdog_reboot();
         }
     }
@@ -378,7 +383,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
 {
   PROCESS_BEGIN();
 
-  static struct etimer dag_timer;
+  static struct etimer debug_timer;
   simple_udp_register(&udp_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_receiver);
 
   PROCESS_PAUSE();
@@ -398,11 +403,13 @@ PROCESS_THREAD(dag_node_process, ev, data)
 
   led_on(LED_A);
 
+
   while(1) {
-    etimer_set(&dag_timer, dag_root_find_interval + (random_rand() % dag_root_find_interval));
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&dag_timer));
+    etimer_set(&debug_timer, debug_interval + (random_rand() % debug_interval));
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&debug_timer));
     print_debug_data();
   }
+
 
   PROCESS_END();
 }
