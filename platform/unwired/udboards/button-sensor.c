@@ -214,7 +214,7 @@ button_press_handler(uint8_t ioid)
     uint8_t current_button_ioid = ioid;
     uint32_t current_button_state = ti_lib_gpio_read_dio(ioid);
     uint32_t current_time = clock_time();
-    printf("SENSOR: button %"PRIu8" change state to %"PRIu32" on %"PRIu32" tick\n", current_button_ioid, current_button_state, current_time);
+    //printf("SENSOR: button %"PRIu8" change state to %"PRIu32" on %"PRIu32" tick\n", current_button_ioid, current_button_state, current_time);
 
     if(ioid == BOARD_IOID_KEY_A) {
         button_start_process(&button_sensor_short_process, current_button_ioid);
