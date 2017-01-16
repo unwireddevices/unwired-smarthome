@@ -131,3 +131,5 @@ platform/galileo/bsp/grub/bin/
 *.galileo.dll
 *.galileo.efi
 LOG_OPENOCD
+/.project
+/.settings/com.googlecode.cppcheclipse.core.prefs
