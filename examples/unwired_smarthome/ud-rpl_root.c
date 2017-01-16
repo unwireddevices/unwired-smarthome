@@ -87,6 +87,15 @@ AUTOSTART_PROCESSES(&rpl_root_process);
 void send_confirmation_packet(const uip_ip6addr_t *dest_addr,
                               struct simple_udp_connection *connection)
 {
+    if (dest_addr == NULL) {
+        printf("ERROR: dest_addr in send_confirmation_packet null");
+        return;
+    }
+    if (connection == NULL) {
+        printf("ERROR: connection in send_confirmation_packet null");
+        return;
+    }
+
     int length = 10;
     char buf[length];
     buf[0] = PROTOCOL_VERSION_V1;
@@ -110,6 +119,20 @@ void send_command_packet(const uip_ip6addr_t *dest_addr,
                           uint8_t number_ability,
                           uint8_t data_to_ability)
 {
+    if (dest_addr == NULL) {
+        printf("ERROR: dest_addr null");
+        return;
+    }
+    if (connection == NULL) {
+        printf("ERROR: connection null");
+        return;
+    }
+    if (connection->udp_conn == NULL) {
+        printf("ERROR: udp connection null");
+        return;
+    }
+
+
     int length = 10;
     char buf[length];
     buf[0] = PROTOCOL_VERSION_V1;
@@ -122,13 +145,24 @@ void send_command_packet(const uip_ip6addr_t *dest_addr,
     buf[7] = DATA_RESERVED;
     buf[8] = DATA_RESERVED;
     buf[9] = DATA_RESERVED;
+
     simple_udp_sendto(connection, buf, length + 1, dest_addr);
+
 }
 
 /*---------------------------------------------------------------------------*/
 
 void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const uint16_t length)
 {
+    if (addr == NULL) {
+        printf("ERROR: addr in dag_root_raw_print null");
+        return;
+    }
+    if (data == NULL) {
+        printf("ERROR: data in dag_root_raw_print null");
+        return;
+    }
+
 
     if (length != 11 && length != 24) {
         printf("DAG NODE: Incompatible data length(%" PRIu16 ")!\n", length);
@@ -162,6 +196,11 @@ void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const ui
 /*---------------------------------------------------------------------------*/
 
 void uart_packet_dump(uint8_t *uart_command_buf) {
+    if (uart_command_buf == NULL) {
+        printf("ERROR: uart_command_buf in uart_packet_dump null");
+        return;
+    }
+
     printf("\nUART->6LP: ");
     for (int i = 0; i < UART_DATA_LENGTH; i++)
     {
@@ -256,10 +295,14 @@ static uip_ipaddr_t *set_global_address(void)
 
 static void create_rpl_dag(uip_ipaddr_t *ipaddr)
 {
-  struct uip_ds6_addr *root_if;
+    if (ipaddr == NULL) {
+        printf("ERROR: ipaddr in create_rpl_dag null");
+        return;
+    }
+  struct uip_ds6_addr *root_if = NULL;
   root_if = uip_ds6_addr_lookup(ipaddr);
   if(root_if != NULL) {
-    rpl_dag_t *dag;
+    rpl_dag_t *dag = NULL;
     uip_ipaddr_t prefix;
     rpl_set_root(RPL_DEFAULT_INSTANCE, ipaddr);
     dag = rpl_get_any_dag();
@@ -275,14 +318,14 @@ static void create_rpl_dag(uip_ipaddr_t *ipaddr)
 
 PROCESS_THREAD(rpl_root_process, ev, data)
 {
-  uip_ipaddr_t *ipaddr;
+  uip_ipaddr_t *ipaddr = NULL;
 
   PROCESS_BEGIN();
 
-  printf("Unwired RLP root and UDP data receiver. HELL-IN-CODE free. I hope. \n")
+  printf("Unwired RLP root and UDP data receiver. HELL-IN-CODE free. I hope. \n");
   /* if you do not execute "cleanall" target, rpl-root can build in "leaf" configuration. Diagnostic message */
   if (RPL_CONF_LEAF_ONLY == 1) {
-      printf("\nWARNING: leaf mode on rpl-root!\n")
+      printf("\nWARNING: leaf mode on rpl-root!\n");
   }
 
   rpl_set_mode(RPL_MODE_MESH); //Set MESH-mode for dc-power rpl-root(not leaf-mode)
