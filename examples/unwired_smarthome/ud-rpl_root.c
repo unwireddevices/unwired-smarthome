@@ -65,7 +65,16 @@
 #include "fake_headers.h" //no move up! not "krasivo"!
 /*---------------------------------------------------------------------------*/
 
+struct command_data
+{
+    uint8_t ability_target;
+    uint8_t ability_number;
+    uint8_t ability_state;
+};
+
 static struct simple_udp_connection udp_connection;
+struct command_data send_command_process_message_data;
+
 uip_ip6addr_t destination_address;
 static uint8_t uart_command_buf[UART_DATA_LENGTH];
 static uint8_t uart_iterator = 0;
@@ -80,6 +89,8 @@ static uint8_t uart_magic_sequence[UART_DATA_LENGTH] =
 SENSORS(&button_e_sensor_click, &button_e_sensor_long_click);
 
 PROCESS(rpl_root_process,"Unwired RPL root and udp data receiver");
+PROCESS(send_command_process,"UDP command sender");
+
 AUTOSTART_PROCESSES(&rpl_root_process);
 
 /*---------------------------------------------------------------------------*/
@@ -244,8 +255,11 @@ static int uart_data_receiver(unsigned char c)
             {
                destination_address.u8[i] = uart_command_buf[i+7];
             }
-            PRINT6ADDR(&destination_address);
-            send_command_packet(&destination_address, &udp_connection, uart_command_buf[23], uart_command_buf[24], uart_command_buf[25]);
+            send_command_process_message_data.ability_number = uart_command_buf[24];
+            send_command_process_message_data.ability_state = uart_command_buf[25];
+            send_command_process_message_data.ability_target = uart_command_buf[23];
+            if (process_is_running(&send_command_process) == 0)
+                process_start(&send_command_process, NULL);
         }
         else
         {
@@ -314,6 +328,26 @@ static void create_rpl_dag(uip_ipaddr_t *ipaddr)
     printf("Failed to create a new RPL DAG :(\n");
   }
 }
+
+/*---------------------------------------------------------------------------*/
+
+PROCESS_THREAD(send_command_process, ev, data)
+{
+  PROCESS_BEGIN();
+
+  send_command_packet(&destination_address,
+                      &udp_connection,
+                      send_command_process_message_data.ability_target,
+                      send_command_process_message_data.ability_number,
+                      send_command_process_message_data.ability_state);
+
+  static struct etimer send_command_process_timer;
+  etimer_set(&send_command_process_timer, 12);
+  PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_command_process_timer));
+
+  PROCESS_END();
+}
+
 
 /*---------------------------------------------------------------------------*/
 
