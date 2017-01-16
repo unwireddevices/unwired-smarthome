@@ -237,7 +237,8 @@ static int uart_data_receiver(unsigned char c)
     else
     {
         uart_iterator = 0;
-        if (uart_command_buf[7] == UART_PROTOCOL_VERSION_V1 || true)
+
+        if (uart_command_buf[6] == UART_PROTOCOL_VERSION_V1)
         {
             for (int i = 0; i <= 15; i++)
             {
