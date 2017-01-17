@@ -7,16 +7,16 @@ port_name = "/dev/ttyATH0"
 
 device_group = {}
 DEVICE_GROUP_BUTTON_SWITCH     =     "00"
-device_group[DEVICE_GROUP_BUTTON_SWITCH]				   =     "Button/switch"
+device_group[DEVICE_GROUP_BUTTON_SWITCH]		   =     "Button/switch"
 
 DEVICE_GROUP_SENSORS           =     "01"
 device_group[DEVICE_GROUP_SENSORS]				   =     "Sensor"
 
 DEVICE_GROUP_MOTION_SENSOR     =     "02"
-device_group[DEVICE_GROUP_MOTION_SENSOR]				   =     "Motion sensor"
+device_group[DEVICE_GROUP_MOTION_SENSOR]		   =     "Motion sensor"
 
 DEVICE_GROUP_OPEN_SENSORS      =     "03"
-device_group[DEVICE_GROUP_OPEN_SENSORS]				   =     "Door open sensor"
+device_group[DEVICE_GROUP_OPEN_SENSORS]			   =     "Door open sensor"
 
 DEVICE_GROUP_METERS            =     "04"
 device_group[DEVICE_GROUP_METERS]				   =     "Meter"
@@ -31,10 +31,10 @@ DEVICE_GROUP_LIGHT             =     "07"
 device_group[DEVICE_GROUP_LIGHT]				   =     "Light"
 
 DEVICE_GROUP_RGB_LIGHT         =     "08"
-device_group[DEVICE_GROUP_RGB_LIGHT]				   =     "RGB light"
+device_group[DEVICE_GROUP_RGB_LIGHT]			   =     "RGB light"
 
 DEVICE_GROUP_BRIDGE_CONVERTER  =     "09"
-device_group[DEVICE_GROUP_BRIDGE_CONVERTER]				   =     "Bridge/Converter"
+device_group[DEVICE_GROUP_BRIDGE_CONVERTER]		   =     "Bridge/Converter"
 
 DEVICE_GROUP_OTHER             =     "FF"
 device_group[DEVICE_GROUP_OTHER]				   =     "Other device"
@@ -325,7 +325,7 @@ function status_data_processing(ipv6_adress, data)
 	print("SDPM: Status packet from "..ipv6_adress..":")
 	print(" Parent adress: "..ipv6_adress_parent_short)
 	print(" Uptime: "..uptime.."s")
-	print(" Parent RSSI: "..parent_rssi.."db")
+	print(" Parent RSSI: "..parent_rssi.."dbm")
 	print(" Temp: "..temp.."C")
 	print(" Voltage: "..voltage.." v")
 end
@@ -433,7 +433,7 @@ while true do
 			assert(e == rs232.RS232_ERR_NOERROR)
 			if (data_read == "AGROOTRAW1") then
 				start_time = socket.gettime()*1000
-				socket.sleep(0.01) 
+				socket.sleep(0.05) 
 				local err, data_read, size = p:read(95-10-1)
 				assert(e == rs232.RS232_ERR_NOERROR)
 				if (data_read ~= nil) then
