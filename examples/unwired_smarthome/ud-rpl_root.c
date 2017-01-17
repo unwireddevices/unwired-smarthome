@@ -103,11 +103,11 @@ void send_confirmation_packet(const uip_ip6addr_t *dest_addr,
                               struct simple_udp_connection *connection)
 {
     if (dest_addr == NULL) {
-        printf("ERROR: dest_addr in send_confirmation_packet null");
+        printf("ERROR: dest_addr in send_confirmation_packet null\n");
         return;
     }
     if (connection == NULL) {
-        printf("ERROR: connection in send_confirmation_packet null");
+        printf("ERROR: connection in send_confirmation_packet null\n");
         return;
     }
 
@@ -130,37 +130,30 @@ void send_confirmation_packet(const uip_ip6addr_t *dest_addr,
 
 void send_command_packet(const uip_ip6addr_t *dest_addr,
                           struct simple_udp_connection *connection,
-                          uint8_t target_ability,
-                          uint8_t number_ability,
-                          uint8_t data_to_ability)
+                          uint8_t ability_target,
+                          uint8_t ability_number,
+                          uint8_t ability_state)
 {
     if (dest_addr == NULL) {
-        printf("ERROR: dest_addr null");
+        printf("ERROR: dest_addr in send_command_packet null\n");
         return;
     }
-    if (connection == NULL) {
-        printf("ERROR: connection null");
+    if (connection == NULL || connection->udp_conn == NULL) {
+        printf("ERROR: connection in send_command_packet null\n");
         return;
     }
-    if (connection->udp_conn == NULL) {
-        printf("ERROR: udp connection null");
-        return;
-    }
-
-
     int length = 10;
     char buf[length];
     buf[0] = PROTOCOL_VERSION_V1;
     buf[1] = DEVICE_VERSION_V1;
     buf[2] = DATA_TYPE_COMMAND;
-    buf[3] = target_ability;
-    buf[4] = number_ability;
-    buf[5] = data_to_ability;
+    buf[3] = ability_target;
+    buf[4] = ability_number;
+    buf[5] = ability_state;
     buf[6] = DATA_RESERVED;
     buf[7] = DATA_RESERVED;
     buf[8] = DATA_RESERVED;
     buf[9] = DATA_RESERVED;
-
     simple_udp_sendto(connection, buf, length + 1, dest_addr);
 
 }
@@ -170,14 +163,13 @@ void send_command_packet(const uip_ip6addr_t *dest_addr,
 void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const uint16_t length)
 {
     if (addr == NULL) {
-        printf("ERROR: addr in dag_root_raw_print null");
+        printf("ERROR: addr in dag_root_raw_print null\n");
         return;
     }
     if (data == NULL) {
-        printf("ERROR: data in dag_root_raw_print null");
+        printf("ERROR: data in dag_root_raw_print null\n");
         return;
     }
-
 
     if (length != 11 && length != 24) {
         printf("DAG NODE: Incompatible data length(%" PRIu16 ")!\n", length);
@@ -205,14 +197,13 @@ void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const ui
     }
 
     printf("RAWEND   \n");
-
 }
 
 /*---------------------------------------------------------------------------*/
 
 void uart_packet_dump(uint8_t *uart_command_buf) {
     if (uart_command_buf == NULL) {
-        printf("ERROR: uart_command_buf in uart_packet_dump null");
+        printf("ERROR: uart_command_buf in uart_packet_dump null\n");
         return;
     }
 
@@ -314,7 +305,7 @@ static uip_ipaddr_t *set_global_address(void)
 static void create_rpl_dag(uip_ipaddr_t *ipaddr)
 {
     if (ipaddr == NULL) {
-        printf("ERROR: ipaddr in create_rpl_dag null");
+        printf("ERROR: ipaddr in create_rpl_dag null\n");
         return;
     }
   struct uip_ds6_addr *root_if = NULL;
@@ -372,15 +363,20 @@ PROCESS_THREAD(rpl_root_process, ev, data)
   PROCESS_BEGIN();
 
   printf("Unwired RLP root and UDP data receiver. HELL-IN-CODE free. I hope. \n");
+
   /* if you do not execute "cleanall" target, rpl-root can build in "leaf" configuration. Diagnostic message */
   if (RPL_CONF_LEAF_ONLY == 1) {
       printf("\nWARNING: leaf mode on rpl-root!\n");
   }
 
-  rpl_set_mode(RPL_MODE_MESH); //Set MESH-mode for dc-power rpl-root(not leaf-mode)
+  /* Set MESH-mode for dc-power rpl-root(not leaf-mode) */
+  rpl_set_mode(RPL_MODE_MESH);
 
-  ipaddr = set_global_address(); //set local adress
-  create_rpl_dag(ipaddr); //make local adress as rpl-root
+  /* set local address */
+  ipaddr = set_global_address();
+
+  /* make local address as rpl-root */
+  create_rpl_dag(ipaddr);
 
   /* register udp-connection, set incoming upd-data handler(udp_data_receiver) */
   simple_udp_register(&udp_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_data_receiver);
