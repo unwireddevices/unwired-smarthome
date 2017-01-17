@@ -74,17 +74,19 @@ struct command_data
     uint8_t ability_state;
 };
 
-static struct simple_udp_connection udp_connection;
-struct command_data send_command_process_message_data;
-
-uip_ip6addr_t destination_address;
-static uint8_t uart_command_buf[UART_DATA_LENGTH];
-static uint8_t uart_iterator = 0;
+volatile static uint8_t udp_message_ready = 0;
+volatile static struct command_data send_command_process_message_data;
+volatile static uint8_t uart_command_buf[UART_DATA_LENGTH];
+volatile static uint8_t uart_iterator = 0;
 static uint8_t uart_magic_sequence[UART_DATA_LENGTH] =
 {0x01,0x16,0x16,0x16,0x16,0x10,
  0x01,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
  0x01,0x01,0x01,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
  0x03,0x16,0x16,0x16,0x17,0x04};
+
+static struct simple_udp_connection udp_connection;
+uip_ip6addr_t destination_address;
+static uint16_t packet_counter;
 
 /*---------------------------------------------------------------------------*/
 
