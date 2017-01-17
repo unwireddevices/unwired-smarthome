@@ -116,7 +116,7 @@ accessible(void)
   return true;
 }
 /*---------------------------------------------------------------------------*/
-static void
+void
 disable_interrupts(void)
 {
   /* Acknowledge UART interrupts */
@@ -129,7 +129,7 @@ disable_interrupts(void)
   ti_lib_uart_int_clear(UART0_BASE, CC26XX_UART_INTERRUPT_ALL);
 }
 /*---------------------------------------------------------------------------*/
-static void
+void
 enable_interrupts(void)
 {
   /* Clear all UART interrupts */

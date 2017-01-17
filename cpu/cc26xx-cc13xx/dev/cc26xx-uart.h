@@ -48,6 +48,9 @@
  * @{
  */
 
+void disable_interrupts();
+void enable_interrupts();
+
 /**
  * \brief Initialises the UART controller, configures I/O control
  * and interrupts
