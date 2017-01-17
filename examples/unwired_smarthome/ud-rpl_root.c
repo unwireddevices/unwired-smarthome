@@ -221,7 +221,7 @@ static int uart_data_receiver(unsigned char c)
 {
     led_blink(LED_A);
     if ((uart_iterator <= MAGIC_SEQUENCE_LENGTH - 1) ||
-            (uart_iterator >= UART_DATA_LENGTH - MAGIC_SEQUENCE_LENGTH && uart_iterator <= UART_DATA_LENGTH - 1))
+            ((uart_iterator >= UART_DATA_LENGTH - MAGIC_SEQUENCE_LENGTH) && (uart_iterator <= UART_DATA_LENGTH - 1)))
     {
         if (c != uart_magic_sequence[uart_iterator])
         {
@@ -259,7 +259,7 @@ static int uart_data_receiver(unsigned char c)
         {
             printf("USER: Incompatible protocol version!\n");
         }
-        uart_packet_dump(uart_command_buf);
+        //uart_packet_dump(uart_command_buf);
     }
 
     return 1;
@@ -395,8 +395,28 @@ PROCESS_THREAD(rpl_root_process, ev, data)
     PROCESS_WAIT_EVENT();
     if(ev == sensors_event) {
         if(data == &button_e_sensor_click) {
-            printf("Initiating global repair\n");
-            rpl_repair_root(RPL_DEFAULT_INSTANCE);
+            destination_address.u8[0] = 0xFE;
+            destination_address.u8[1] = 0x80;
+            destination_address.u8[2] = 0x00;
+            destination_address.u8[3] = 0x00;
+            destination_address.u8[4] = 0x00;
+            destination_address.u8[5] = 0x00;
+            destination_address.u8[6] = 0x00;
+            destination_address.u8[7] = 0x00;
+            destination_address.u8[8] = 0x02;
+            destination_address.u8[9] = 0x12;
+            destination_address.u8[10] = 0x4b;
+            destination_address.u8[11] = 0x00;
+            destination_address.u8[12] = 0x0C;
+            destination_address.u8[13] = 0x47;
+            destination_address.u8[14] = 0x48;
+            destination_address.u8[15] = 0x86;
+            send_command_process_message_data.ability_target = 0x11;
+            send_command_process_message_data.ability_number = 0x01;
+            send_command_process_message_data.ability_state = 0x02;
+            udp_message_ready = 1;
+            //printf("Initiating global repair\n");
+            //rpl_repair_root(RPL_DEFAULT_INSTANCE);
         }
     }
   }
