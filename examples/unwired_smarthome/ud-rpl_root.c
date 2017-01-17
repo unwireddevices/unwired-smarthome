@@ -98,6 +98,11 @@ PROCESS(send_command_process,"UDP command sender");
 AUTOSTART_PROCESSES(&rpl_root_process);
 
 /*---------------------------------------------------------------------------*/
+static inline void * rd_stack_ptr(void){
+  void * result=NULL;
+  __asm("MRS %0, msp\n\t" : "=r" (result) );
+  return result;
+}
 
 void send_confirmation_packet(const uip_ip6addr_t *dest_addr,
                               struct simple_udp_connection *connection)
@@ -346,6 +351,10 @@ PROCESS_THREAD(send_command_process, ev, data)
                                 send_command_process_message_data.ability_number,
                                 send_command_process_message_data.ability_state);
             udp_message_ready = 0;
+
+            printf("SYSTEM: uptime: %" PRIu32 " s\n", clock_seconds());
+            printf("SYSTEM: MPS: 0x%" PRIxPTR "\n", rd_stack_ptr());
+
             enable_interrupts();
       }
   }
