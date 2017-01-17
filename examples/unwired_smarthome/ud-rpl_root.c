@@ -63,6 +63,8 @@
 #include "xxf_types_helper.h"
 
 #include "fake_headers.h" //no move up! not "krasivo"!
+
+#define UART_DATA_POLL_INTERVAL 5 //main timet ticks, one tick ~8ms
 /*---------------------------------------------------------------------------*/
 
 struct command_data
@@ -251,15 +253,14 @@ static int uart_data_receiver(unsigned char c)
 
         if (uart_command_buf[6] == UART_PROTOCOL_VERSION_V1)
         {
-            for (int i = 0; i <= 15; i++)
-            {
-               destination_address.u8[i] = uart_command_buf[i+7];
-            }
-            send_command_process_message_data.ability_number = uart_command_buf[24];
-            send_command_process_message_data.ability_state = uart_command_buf[25];
-            send_command_process_message_data.ability_target = uart_command_buf[23];
-            if (process_is_running(&send_command_process) == 0)
-                process_start(&send_command_process, NULL);
+                for (int i = 0; i <= 15; i++)
+                {
+                   destination_address.u8[i] = uart_command_buf[i+7];
+                }
+                send_command_process_message_data.ability_number = uart_command_buf[24];
+                send_command_process_message_data.ability_state = uart_command_buf[25];
+                send_command_process_message_data.ability_target = uart_command_buf[23];
+                udp_message_ready = 1;
         }
         else
         {
@@ -335,15 +336,26 @@ PROCESS_THREAD(send_command_process, ev, data)
 {
   PROCESS_BEGIN();
 
-  send_command_packet(&destination_address,
-                      &udp_connection,
-                      send_command_process_message_data.ability_target,
-                      send_command_process_message_data.ability_number,
-                      send_command_process_message_data.ability_state);
-
   static struct etimer send_command_process_timer;
-  etimer_set(&send_command_process_timer, 12);
-  PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_command_process_timer));
+  PROCESS_PAUSE();
+
+  while(1) {
+      etimer_set(&send_command_process_timer, UART_DATA_POLL_INTERVAL);
+      PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_command_process_timer));
+      if (udp_message_ready == 1)
+      {
+            disable_interrupts();
+            packet_counter++;
+            printf("Send packet %"PRIu16"\n", packet_counter);
+            send_command_packet(&destination_address,
+                                &udp_connection,
+                                send_command_process_message_data.ability_target,
+                                send_command_process_message_data.ability_number,
+                                send_command_process_message_data.ability_state);
+            udp_message_ready = 0;
+            enable_interrupts();
+      }
+  }
 
   PROCESS_END();
 }
@@ -377,6 +389,9 @@ PROCESS_THREAD(rpl_root_process, ev, data)
   /* blink-blink LED */
   led_blink(LED_A);
   led_blink(LED_A);
+
+  /* start flag "data for udp ready" poller process */
+  process_start(&send_command_process, NULL);
 
   while(1) {
     PROCESS_WAIT_EVENT();
