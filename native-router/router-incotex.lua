@@ -276,18 +276,39 @@ function sensor_data_processing(ipv6_adress, data)
 		print(" BDPM: Button event: "..device_button_events[sensor_event])
 
 
-		ipv6_adress = "fe80:0000:0000:0000:0212:4b00:0c47:4886"
-		if (button_name == "1") then
+		
+		if (button_name == "A") then
+			ipv6_adress = "fe80:0000:0000:0000:0212:4b00:0939:301f"
 			send_relay_command(ipv6_adress, 1, "toggle")
 		end
 		if (button_name == "B") then
+			ipv6_adress = "fe80:0000:0000:0000:0212:4b00:0939:3661"
 			send_relay_command(ipv6_adress, 1, "toggle")
 		end
 		if (button_name == "C") then
-			send_relay_command(ipv6_adress, 1, "on")
+			ipv6_adress = "fe80:0000:0000:0000:0212:4b00:0a8b:5142"
+			send_relay_command(ipv6_adress, 1, "toggle")
 		end
 		if (button_name == "D") then
-			send_relay_command(ipv6_adress, 1, "off")
+			if (device_button_events[sensor_event] == "click") then
+				ipv6_adress = "fe80:0000:0000:0000:0212:4b00:0939:301f"
+				send_relay_command(ipv6_adress, 1, "on")
+				socket.sleep(0.1) 
+				ipv6_adress = "fe80:0000:0000:0000:0212:4b00:0939:3661"
+				send_relay_command(ipv6_adress, 1, "on")
+				socket.sleep(0.1) 
+				ipv6_adress = "fe80:0000:0000:0000:0212:4b00:0a8b:5142"
+				send_relay_command(ipv6_adress, 1, "on")
+			elseif (device_button_events[sensor_event] == "longclick") then
+				ipv6_adress = "fe80:0000:0000:0000:0212:4b00:0939:301f"
+				send_relay_command(ipv6_adress, 1, "off")
+				socket.sleep(0.1) 
+				ipv6_adress = "fe80:0000:0000:0000:0212:4b00:0939:3661"
+				send_relay_command(ipv6_adress, 1, "off")
+				socket.sleep(0.1) 
+				ipv6_adress = "fe80:0000:0000:0000:0212:4b00:0a8b:5142"
+				send_relay_command(ipv6_adress, 1, "off")
+			end
 		end
 	end
 end
