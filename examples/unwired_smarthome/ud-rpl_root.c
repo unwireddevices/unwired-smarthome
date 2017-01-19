@@ -64,7 +64,7 @@
 
 #include "fake_headers.h" //no move up! not "krasivo"!
 
-#define UART_DATA_POLL_INTERVAL 5 //main timet ticks, one tick ~8ms
+#define UART_DATA_POLL_INTERVAL 5 //main timer ticks, one tick ~8ms
 /*---------------------------------------------------------------------------*/
 
 struct command_data
