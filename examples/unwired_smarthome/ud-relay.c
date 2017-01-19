@@ -61,6 +61,8 @@
 #include "ud-relay.h"
 #include "ud-dag_node.h"
 
+#include "xxf_types_helper.h"
+
 #include "ti-lib.h"
 #include "ud_binary_protocol.h"
 
@@ -176,11 +178,13 @@ PROCESS_THREAD(main_process, ev, data)
   PROCESS_BEGIN();
   printf("Unwired relay device. HELL-IN-CODE free. I hope.\n");
 
-  struct command_data *message_data;
+  struct command_data *message_data = NULL;
 
   PROCESS_PAUSE();
   
   configure_DIO();
+  change_DIO_state(1, DEVICE_ABILITY_RELAY_COMMAND_ON);
+  change_DIO_state(2, DEVICE_ABILITY_RELAY_COMMAND_ON);
 
   while(1)
   {
