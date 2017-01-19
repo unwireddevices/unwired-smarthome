@@ -54,7 +54,7 @@
 #include <ctype.h>
 
 #include "button-sensor.h"
-#include "cc26xx/board.h"
+#include "cc13xx/board.h"
 #include "board-peripherals.h"
 #include "dev/watchdog.h"
 #include "simple-udp.h"

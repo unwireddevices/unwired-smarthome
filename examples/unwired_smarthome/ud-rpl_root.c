@@ -42,7 +42,7 @@
 #include "sys/etimer.h"
 
 #include "dev/leds.h"
-#include "cc26xx/board.h"
+#include "cc13xx/board.h"
 
 #include "net/ip/uip.h"
 #include "net/ipv6/uip-ds6.h"

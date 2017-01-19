@@ -92,27 +92,34 @@
  * Those values are not meant to be modified by the user
  * @{
  */
-#define BOARD_IOID_LED_1          IOID_22
-#define BOARD_IOID_LED_2          IOID_27
-#define BOARD_IOID_LED_3          IOID_28
-#define BOARD_IOID_LED_4          IOID_4
+#define BOARD_IOID_LED_1          BOARD_IOID_LED_A
+#define BOARD_IOID_LED_2          BOARD_IOID_LED_B
+#define BOARD_IOID_LED_3          BOARD_IOID_LED_C
+#define BOARD_IOID_LED_4          BOARD_IOID_LED_D
 #define BOARD_LED_1               (1 << BOARD_IOID_LED_1)
 #define BOARD_LED_2               (1 << BOARD_IOID_LED_2)
 #define BOARD_LED_3               (1 << BOARD_IOID_LED_3)
 #define BOARD_LED_4               (1 << BOARD_IOID_LED_4)
-#define BOARD_LED_ALL             (BOARD_LED_1 | BOARD_LED_2 | BOARD_LED_3 | \
-                                   BOARD_LED_4)
 
-#define BOARD_IOID_LED_A          IOID_22
-#define BOARD_IOID_LED_B          IOID_27
-#define BOARD_IOID_LED_C          IOID_28
-#define BOARD_IOID_LED_D          IOID_4
+
+#define BOARD_IOID_LED_A          IOID_22 //led on radio-board
+#define BOARD_IOID_LED_B          IOID_UNUSED//IOID_25 //on UMDK-BUTTON
+#define BOARD_IOID_LED_C          IOID_UNUSED//IOID_26 //on UMDK-BUTTON
+#define BOARD_IOID_LED_D          IOID_UNUSED//IOID_27 //on UMDK-BUTTON
+#define BOARD_IOID_LED_E          IOID_UNUSED//IOID_28 //on UMDK-BUTTON
 #define BOARD_LED_A               (1 << BOARD_IOID_LED_A)
 #define BOARD_LED_B               (1 << BOARD_IOID_LED_B)
 #define BOARD_LED_C               (1 << BOARD_IOID_LED_C)
 #define BOARD_LED_D               (1 << BOARD_IOID_LED_D)
 #define BOARD_LED_ALL             (BOARD_LED_A | BOARD_LED_B | BOARD_LED_C | \
                                    BOARD_LED_D)
+
+/*---------------------------------------------------------------------------*/
+/**
+ * \name Relay IOID mappings
+ */
+#define BOARD_IOID_RELAY_1        IOID_17
+#define BOARD_IOID_RELAY_2        IOID_16
 /** @} */
 /*---------------------------------------------------------------------------*/
 /**
@@ -121,8 +128,8 @@
  * Those values are not meant to be modified by the user
  * @{
  */
-#define BOARD_IOID_UART_RX        IOID_6//26//28//26IOID_UNUSED
-#define BOARD_IOID_UART_TX        IOID_5//25//29//25
+#define BOARD_IOID_UART_RX        IOID_2
+#define BOARD_IOID_UART_TX        IOID_3
 #define BOARD_IOID_UART_CTS       IOID_UNUSED
 #define BOARD_IOID_UART_RTS       IOID_UNUSED
 #define BOARD_UART_RX             (1 << BOARD_IOID_UART_RX)
@@ -148,11 +155,11 @@
 #define BOARD_KEY_DOWN            (1 << BOARD_IOID_KEY_DOWN)
 #define BOARD_KEY_SELECT          (1 << BOARD_IOID_KEY_SELECT)
 
-#define BOARD_IOID_KEY_A            IOID_7
-#define BOARD_IOID_KEY_B            IOID_6
-#define BOARD_IOID_KEY_C            IOID_2
-#define BOARD_IOID_KEY_D            IOID_3
-#define BOARD_IOID_KEY_E            IOID_8
+#define BOARD_IOID_KEY_A            IOID_4 //on UMDK-BUTTON
+#define BOARD_IOID_KEY_B            IOID_5 //on UMDK-BUTTON
+#define BOARD_IOID_KEY_C            IOID_6 //on UMDK-BUTTON
+#define BOARD_IOID_KEY_D            IOID_7 //on UMDK-BUTTON
+#define BOARD_IOID_KEY_E            IOID_1 //generic connect/prog
 #define BOARD_KEY_A                 (1 << BOARD_IOID_KEY_A)
 #define BOARD_KEY_B                 (1 << BOARD_IOID_KEY_B)
 #define BOARD_KEY_C                 (1 << BOARD_IOID_KEY_C)

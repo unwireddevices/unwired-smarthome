@@ -47,7 +47,7 @@
 #include "button-sensor.h"
 #include "batmon-sensor.h"
 #include "board-peripherals.h"
-#include "cc26xx/board.h"
+#include "cc13xx/board.h"
 #include "net/ip/uip-debug.h"
 #include "dev/cc26xx-uart.h"
 
