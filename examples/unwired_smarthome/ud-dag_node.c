@@ -138,8 +138,6 @@ udp_receiver(struct simple_udp_connection *c,
 						process_start(&status_send_process, NULL);
 					}
 
-					process_start(&main_process, NULL);
-
 					break;
 				case DATA_TYPE_COMMAND:
 					printf("DAG Node: Command packet received\n");

@@ -183,8 +183,6 @@ PROCESS_THREAD(main_process, ev, data)
   PROCESS_PAUSE();
   
   configure_DIO();
-  change_DIO_state(1, DEVICE_ABILITY_RELAY_COMMAND_ON);
-  change_DIO_state(2, DEVICE_ABILITY_RELAY_COMMAND_ON);
 
   while(1)
   {
