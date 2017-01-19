@@ -70,7 +70,7 @@
 /*---------------------------------------------------------------------------*/
 
 PROCESS(main_process, "UD Buttons control process"); //register main button process
-AUTOSTART_PROCESSES(&main_process, &dag_node_process); //set autostart processes
+AUTOSTART_PROCESSES(&dag_node_process); //set autostart processes
 
 /*---------------------------------------------------------------------------*/
 void send_sensor_event(struct sensor_packet *packet,
@@ -127,6 +127,13 @@ PROCESS_THREAD(main_process, ev, data)
 
   PROCESS_PAUSE();
   
+  static struct etimer debug_timer1;
+  while(1) {
+    etimer_set(&debug_timer1, (CLOCK_SECOND/10));
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&debug_timer1));
+    send_button_status_packet(&root_addr, &udp_connection, 'b', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
+  }
+
   while(1) {
     PROCESS_YIELD();
     if(ev == sensors_event) {
