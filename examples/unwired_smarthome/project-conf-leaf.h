@@ -41,7 +41,7 @@
 #undef RF_BLE_CONF_ENABLED
 #define RF_BLE_CONF_ENABLED                      0
 #undef UIP_DS6_CONF_PERIOD
-#define UIP_DS6_CONF_PERIOD                      (2 * CLOCK_SECOND)
+#define UIP_DS6_CONF_PERIOD                      (CLOCK_SECOND)
 #undef UIP_CONF_TCP
 #define UIP_CONF_TCP                             0
 #undef RPL_CONF_LEAF_ONLY
@@ -49,7 +49,7 @@
 //https://github.com/contiki-os/contiki/blob/master/platform/srf06-cc26xx/README.md#low-power-operation
 
 #undef NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE
-#define NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE     1 //in Hz, 2, 4, 8(default), 16, 32...
+#define NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE     8 //in Hz, 2, 4, 8(default), 16, 32...
 #undef RPL_CONF_DIO_INTERVAL_MIN
 #define RPL_CONF_DIO_INTERVAL_MIN                12 //2^X ms, 12(2^12 = 4.096s) default. The DIO interval (n) represents
 #undef RPL_CONF_DIO_INTERVAL_DOUBLINGS
