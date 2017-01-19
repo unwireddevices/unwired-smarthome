@@ -133,3 +133,5 @@ platform/galileo/bsp/grub/bin/
 LOG_OPENOCD
 /.project
 /.settings/com.googlecode.cppcheclipse.core.prefs
+/.tags
+/.tags1
