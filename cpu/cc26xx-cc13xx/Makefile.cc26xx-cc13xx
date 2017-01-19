@@ -25,6 +25,7 @@ TI_XXWARE_STARTUP_SRCS = ccfg.c startup_gcc.c
 ### them earlier to prevent filename clashes with Contiki core files
 CFLAGS += -I$(TI_XXWARE) -I$(CONTIKI)/$(TI_XXWARE_SRC)
 CFLAGS += -I$(TI_XXWARE)/inc
+
 MODULES += $(TI_XXWARE_SRC)
 
 LDSCRIPT = $(CONTIKI_CPU)/cc26xx.ld
@@ -47,10 +48,12 @@ endif
 
 ### Are we building with code size optimisations?
 ifeq ($(SMALL),1)
-  CFLAGS += -Os
+ CFLAGS += -Os
 else
-  CFLAGS += -O2
+ CFLAGS += -O2
 endif
+#CFLAGS += -g3 ##	DEBUG1111!1!!!!!
+
 
 ### If the user-specified a Node ID, pass a define
 ifdef NODEID
