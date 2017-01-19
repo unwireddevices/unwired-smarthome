@@ -64,7 +64,7 @@
 
 #include "fake_headers.h" //no move up! not "krasivo"!
 
-#define UART_DATA_POLL_INTERVAL 5 //in main timer ticks, one tick ~8ms
+#define UART_DATA_POLL_INTERVAL 5 //main timet ticks, one tick ~8ms
 /*---------------------------------------------------------------------------*/
 
 struct command_data
@@ -98,6 +98,12 @@ PROCESS(send_command_process,"UDP command sender");
 AUTOSTART_PROCESSES(&rpl_root_process);
 
 /*---------------------------------------------------------------------------*/
+static inline void * rd_stack_ptr(void){
+  void * result=NULL;
+  __asm("MRS %0, msp\n\t" : "=r" (result) );
+  return result;
+}
+
 void send_confirmation_packet(const uip_ip6addr_t *dest_addr,
                               struct simple_udp_connection *connection)
 {
@@ -224,8 +230,13 @@ static int uart_data_receiver(unsigned char c)
     {
         if (c != uart_magic_sequence[uart_iterator])
         {
+            //printf(":BAD char, current iterator=%u\n", uart_iterator);
             uart_iterator = 0;
             return 1;
+        }
+        else
+        {
+            //printf(":OK, current iterator=%u\n", uart_iterator);
         }
     }
     uart_command_buf[uart_iterator] = c;
@@ -253,6 +264,7 @@ static int uart_data_receiver(unsigned char c)
         {
             printf("USER: Incompatible protocol version!\n");
         }
+        //uart_packet_dump(uart_command_buf);
     }
 
     return 1;
@@ -339,6 +351,10 @@ PROCESS_THREAD(send_command_process, ev, data)
                                 send_command_process_message_data.ability_number,
                                 send_command_process_message_data.ability_state);
             udp_message_ready = 0;
+
+            printf("SYSTEM: uptime: %" PRIu32 " s\n", clock_seconds());
+            printf("SYSTEM: MPS: 0x%" PRIxPTR "\n", rd_stack_ptr());
+
             enable_interrupts();
       }
   }
@@ -388,8 +404,28 @@ PROCESS_THREAD(rpl_root_process, ev, data)
     PROCESS_WAIT_EVENT();
     if(ev == sensors_event) {
         if(data == &button_e_sensor_click) {
-            printf("Initiating global repair\n");
-            rpl_repair_root(RPL_DEFAULT_INSTANCE);
+            destination_address.u8[0] = 0xFE;
+            destination_address.u8[1] = 0x80;
+            destination_address.u8[2] = 0x00;
+            destination_address.u8[3] = 0x00;
+            destination_address.u8[4] = 0x00;
+            destination_address.u8[5] = 0x00;
+            destination_address.u8[6] = 0x00;
+            destination_address.u8[7] = 0x00;
+            destination_address.u8[8] = 0x02;
+            destination_address.u8[9] = 0x12;
+            destination_address.u8[10] = 0x4b;
+            destination_address.u8[11] = 0x00;
+            destination_address.u8[12] = 0x0C;
+            destination_address.u8[13] = 0x47;
+            destination_address.u8[14] = 0x48;
+            destination_address.u8[15] = 0x86;
+            send_command_process_message_data.ability_target = 0x11;
+            send_command_process_message_data.ability_number = 0x01;
+            send_command_process_message_data.ability_state = 0x02;
+            udp_message_ready = 1;
+            //printf("Initiating global repair\n");
+            //rpl_repair_root(RPL_DEFAULT_INSTANCE);
         }
     }
   }
