@@ -1,9 +1,8 @@
 local rs232 = require("luars232")
 local socket = require("socket")
-local socket = require "socket"
 local bindechex = require("bindechex")
+local posix = require("posix")
 
-port_name = "/dev/ttyATH0"
 
 device_group = {}
 DEVICE_GROUP_BUTTON_SWITCH     =     "00"
@@ -164,7 +163,11 @@ DATA_TYPE_COMMAND              =     "05"
 DATA_TYPE_STATUS               =     "06"
 
 
-
+local version = "0.22"
+local uart_version = UART_PROTOCOL_VERSION_V1
+local pid_file = "/tmp/run/unwired_router.pid"
+local port_name = "/dev/ttyATH0"
+local pid = posix.getpid()
 local start_time = 0
 
 
@@ -404,8 +407,16 @@ end
 
 
 ------------------------------------------------------
-local version = "0.20"
-local uart_version = UART_PROTOCOL_VERSION_V1
+
+
+--io.popen("rm "..pid_file)
+local f,err = io.open(pid_file,"w")
+if not f then
+	print(err, f)
+else
+	f:write(pid)
+	f:close()
+end
 
 print("RPL-router version "..version..", uart protocol version: "..uart_version.."\n")
 
