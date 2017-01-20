@@ -60,9 +60,9 @@ ud-relay-flash: ud-relay-CLEAN
 	/Applications/ti/Uniflash/flash_cc2650.sh ud-relay.hex
 
 serial:
-	../../tools/sky/serialdump-macos -b115200 /dev/tty.usbserial-*
+	../../tools/sky/serialdump-macos -b115200 /dev/tty.usbserial-* || ../../tools/sky/serialdump-macos -b115200 /dev/tty.SLAB_USBtoUART
 	
 minicom:
-	minicom -D /dev/tty.usbserial-*
+	minicom -D /dev/tty.usbserial-* ||  minicom -D /dev/tty.SLAB_USBtoUART
 	
 
