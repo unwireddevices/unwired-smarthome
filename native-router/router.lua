@@ -409,7 +409,6 @@ end
 ------------------------------------------------------
 
 
---io.popen("rm "..pid_file)
 local f,err = io.open(pid_file,"w")
 if not f then
 	print(err, f)
