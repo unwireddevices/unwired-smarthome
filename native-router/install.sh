@@ -1,1 +1,0 @@
-fw_setenv silent 1
