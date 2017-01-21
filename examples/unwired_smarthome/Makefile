@@ -65,4 +65,6 @@ serial:
 minicom:
 	minicom -D /dev/tty.usbserial-* ||  minicom -D /dev/tty.SLAB_USBtoUART
 	
+cppcheck:
+	cppcheck -q -f --enable=all -I ../../*  ./ 2>&1 |grep unwired_smarthome
 
