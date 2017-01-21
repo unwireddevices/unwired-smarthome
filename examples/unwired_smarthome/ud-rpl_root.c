@@ -302,13 +302,11 @@ static void create_rpl_dag(uip_ipaddr_t *ipaddr)
         printf("ERROR: ipaddr in create_rpl_dag null\n");
         return;
     }
-  struct uip_ds6_addr *root_if = NULL;
-  root_if = uip_ds6_addr_lookup(ipaddr);
+  struct uip_ds6_addr *root_if = uip_ds6_addr_lookup(ipaddr);
   if(root_if != NULL) {
-    rpl_dag_t *dag = NULL;
     uip_ipaddr_t prefix;
     rpl_set_root(RPL_DEFAULT_INSTANCE, ipaddr);
-    dag = rpl_get_any_dag();
+    rpl_dag_t *dag = rpl_get_any_dag();
     uip_ip6addr(&prefix, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
     rpl_set_prefix(dag, &prefix, 64);
     printf("Created a new RPL DAG, i'm root!\n");
