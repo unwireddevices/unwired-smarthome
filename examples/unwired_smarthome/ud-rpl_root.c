@@ -340,10 +340,6 @@ PROCESS_THREAD(send_command_process, ev, data)
                                 command_message.ability_number,
                                 command_message.ability_state);
             udp_message_ready = 0;
-
-            printf("SYSTEM: uptime: %" PRIu32 " s\n", clock_seconds());
-            printf("SYSTEM: MPS: 0x%" PRIxPTR "\n", rd_stack_ptr());
-
             enable_interrupts();
       }
   }
