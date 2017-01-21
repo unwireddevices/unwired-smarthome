@@ -244,9 +244,9 @@ static int uart_data_receiver(unsigned char c)
                 {
                    destination_address.u8[i] = uart_command_buf[i+7];
                 }
-                send_command_process_message_data.ability_number = uart_command_buf[24];
-                send_command_process_message_data.ability_state = uart_command_buf[25];
-                send_command_process_message_data.ability_target = uart_command_buf[23];
+                command_message.ability_number = uart_command_buf[24];
+                command_message.ability_state = uart_command_buf[25];
+                command_message.ability_target = uart_command_buf[23];
                 udp_message_ready = 1;
         }
         else
@@ -336,9 +336,9 @@ PROCESS_THREAD(send_command_process, ev, data)
             printf("Send packet %"PRIu16"\n", packet_counter);
             send_command_packet(&destination_address,
                                 &udp_connection,
-                                send_command_process_message_data.ability_target,
-                                send_command_process_message_data.ability_number,
-                                send_command_process_message_data.ability_state);
+                                command_message.ability_target,
+                                command_message.ability_number,
+                                command_message.ability_state);
             udp_message_ready = 0;
 
             printf("SYSTEM: uptime: %" PRIu32 " s\n", clock_seconds());
@@ -409,9 +409,9 @@ PROCESS_THREAD(rpl_root_process, ev, data)
             destination_address.u8[13] = 0x47;
             destination_address.u8[14] = 0x48;
             destination_address.u8[15] = 0x86;
-            send_command_process_message_data.ability_target = 0x11;
-            send_command_process_message_data.ability_number = 0x01;
-            send_command_process_message_data.ability_state = 0x02;
+            command_message.ability_target = 0x11;
+            command_message.ability_number = 0x01;
+            command_message.ability_state = 0x02;
             udp_message_ready = 1;
             //printf("Initiating global repair\n");
             //rpl_repair_root(RPL_DEFAULT_INSTANCE);
