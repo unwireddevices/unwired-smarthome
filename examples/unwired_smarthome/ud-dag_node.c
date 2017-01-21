@@ -120,9 +120,9 @@ udp_receiver(struct simple_udp_connection *c,
              uint16_t datalen)
 {
 	led_on(LED_A);
-	printf("DEBUG: UDP packer: %02x,%02x,%02x from ", data[0],data[1],data[2]);
-	uip_debug_ipaddr_print(sender_addr);
-	printf("\n");
+	//printf("DEBUG: UDP packer: %02x,%02x,%02x from ", data[0],data[1],data[2]);
+	//uip_debug_ipaddr_print(sender_addr);
+	//printf("\n");
 
 	if (data[0] == PROTOCOL_VERSION_V1 && data[1] == CURRENT_DEVICE_VERSION)
 	{
@@ -269,7 +269,7 @@ send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *c
 static void
 dag_root_find(void)
 {
-	rpl_dag_t *dag = NULL;
+	rpl_dag_t *dag = NULL; //тоже вынести!
 	uip_ip6addr_t addr;
 
 	uip_ds6_addr_t *addr_desc = uip_ds6_get_global(ADDR_PREFERRED);
@@ -284,7 +284,6 @@ dag_root_find(void)
 				if (dag_active == 0)
 				{
 					uip_ip6addr_copy(&addr, &dag->dag_id);
-
 					printf("DAG node: send join packet to rpl root");
 					uip_debug_ip6addr_print(&addr);
 					printf("\n");
