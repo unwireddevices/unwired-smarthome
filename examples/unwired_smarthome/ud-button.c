@@ -70,7 +70,7 @@
 /*---------------------------------------------------------------------------*/
 
 PROCESS(main_process, "UD Buttons control process"); //register main button process
-AUTOSTART_PROCESSES(&dag_node_process); //set autostart processes
+AUTOSTART_PROCESSES(&dag_node_process, &main_process); //set autostart processes
 
 /*---------------------------------------------------------------------------*/
 void send_sensor_event(struct sensor_packet *packet,
