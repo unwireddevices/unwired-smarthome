@@ -89,7 +89,7 @@
 struct simple_udp_connection udp_connection; //struct for simple_udp_send
 volatile uint8_t dag_active = 0; //set to 1, if rpl root found and answer to join packet
 volatile uint8_t non_answered_ping = 0;
-uip_ip6addr_t root_addr;
+volatile uip_ip6addr_t *root_addr;
 static struct command_data message_for_main_process;
 volatile clock_time_t debug_interval = DEBUG_INTERVAL;
 volatile clock_time_t ping_interval = SHORT_PING_INTERVAL;

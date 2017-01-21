@@ -75,7 +75,7 @@ struct command_data
 };
 
 volatile static uint8_t udp_message_ready = 0;
-volatile static struct command_data send_command_process_message_data;
+volatile static struct command_data command_message;
 volatile static uint8_t uart_command_buf[UART_DATA_LENGTH];
 volatile static uint8_t uart_iterator = 0;
 static uint8_t uart_magic_sequence[UART_DATA_LENGTH] =
