@@ -82,6 +82,9 @@
 
 #define MAX_NON_ANSWERED_PINGS              5
 
+#define DPRINT  printf(">>%s:%"PRIu16"\n", __FILE__, __LINE__);
+
+
 /*---------------------------------------------------------------------------*/
 
 unsigned char uart_char;
@@ -118,46 +121,53 @@ udp_receiver(struct simple_udp_connection *c,
              const uint8_t *data,
              uint16_t datalen)
 {
-	led_on(LED_A);
-	printf("DEBUG: UDP packer: %02x,%02x,%02x from ", data[0],data[1],data[2]);
-	uip_debug_ipaddr_print(sender_addr);
-	printf("\n");
+    DPRINT
+	led_on(LED_A); DPRINT
+	printf("DEBUG: UDP packer: %02x,%02x,%02x from ", data[0],data[1],data[2]); DPRINT
+	uip_debug_ipaddr_print(sender_addr); DPRINT
+	printf("\n"); DPRINT
 
 	if (data[0] == PROTOCOL_VERSION_V1 && data[1] == CURRENT_DEVICE_VERSION)
 	{
+	    DPRINT
 		switch ( data[2] )
 		{
 				case DATA_TYPE_CONFIRM:
+				    DPRINT
 					printf("DAG Node: DAG join packet confirmation received, DAG active\n");
-					led_off(LED_A);
-					dag_active = 1;
-					root_addr = *sender_addr;
-					non_answered_ping = 0;
+					led_off(LED_A); DPRINT
+					dag_active = 1; DPRINT
+					root_addr = *sender_addr; DPRINT
+					non_answered_ping = 0; DPRINT
 					if (process_is_running(&status_send_process) == 0)
 					{
-						process_start(&status_send_process, NULL);
+					    DPRINT
+						process_start(&status_send_process, NULL); DPRINT
 					}
 
 					break;
 				case DATA_TYPE_COMMAND:
-					printf("DAG Node: Command packet received\n");
-					static struct command_data message_for_main_process;
-					message_for_main_process.ability_target = data[3];
-					message_for_main_process.ability_number = data[4];
-					message_for_main_process.ability_state = data[5];
-					process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
+					printf("DAG Node: Command packet received\n"); DPRINT
+					static struct command_data message_for_main_process; DPRINT
+					message_for_main_process.ability_target = data[3]; DPRINT
+					message_for_main_process.ability_number = data[4]; DPRINT
+					message_for_main_process.ability_state = data[5]; DPRINT
+					process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process); DPRINT
 					break;
 				default:
-					printf("DAG NODE: Incompatible data type(%02x)!\n", data[2]);
+				    DPRINT
+					printf("DAG NODE: Incompatible data type(%02x)!\n", data[2]); DPRINT
 					break;
 		} /* switch */
+	    DPRINT
 	}
 	else
 	{
-		printf("DAG NODE: Incompatible device or protocol version!\n");
+	    DPRINT
+		printf("DAG NODE: Incompatible device or protocol version!\n"); DPRINT
 	}
 
-	led_off(LED_A);
+	led_off(LED_A); DPRINT
 }
 
 /*---------------------------------------------------------------------------*/
@@ -165,8 +175,9 @@ udp_receiver(struct simple_udp_connection *c,
 void
 print_debug_data(void)
 {
+    DPRINT
 	printf("\n");
-	printf( "SYSTEM: uptime: %" PRIu32 " s\n", clock_seconds() );
+	printf( "SYSTEM: uptime: %" PRIu32 " s\n", clock_seconds() ); DPRINT
 	/*
 	   rpl_dag_t *dag = rpl_get_any_dag();
 
@@ -207,11 +218,12 @@ send_status_packet(const uip_ip6addr_t *dest_addr,
                    uint8_t temp,
                    uint8_t voltage)
 {
-	uint8_t *uptime_uint8_t = (uint8_t *)&uptime;
-	uint8_t *rssi_parent_uint8_t = (int8_t *)&rssi_parent;
+    DPRINT
+	uint8_t *uptime_uint8_t = (uint8_t *)&uptime; DPRINT
+	uint8_t *rssi_parent_uint8_t = (int8_t *)&rssi_parent; DPRINT
 
-	uint8_t length = 23;
-	uint8_t buf[length];
+	uint8_t length = 23; DPRINT
+	uint8_t buf[length]; DPRINT
 	buf[0] = PROTOCOL_VERSION_V1;
 	buf[1] = CURRENT_DEVICE_VERSION;
 	buf[2] = DATA_TYPE_STATUS;
@@ -234,9 +246,9 @@ send_status_packet(const uip_ip6addr_t *dest_addr,
 	buf[19] = DATA_RESERVED;
 	buf[20] = DATA_RESERVED;
 	buf[21] = DATA_RESERVED;
-	buf[22] = DATA_RESERVED;
+	buf[22] = DATA_RESERVED; DPRINT
 
-	simple_udp_sendto(connection, buf, length + 1, dest_addr);
+	simple_udp_sendto(connection, buf, length + 1, dest_addr); DPRINT
 }
 
 
@@ -245,8 +257,9 @@ send_status_packet(const uip_ip6addr_t *dest_addr,
 void
 send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *connection)
 {
-	uint8_t length = 10;
-	uint8_t buf[length];
+    DPRINT
+	uint8_t length = 10; DPRINT
+	uint8_t buf[length]; DPRINT
 	buf[0] = PROTOCOL_VERSION_V1;
 	buf[1] = CURRENT_DEVICE_VERSION;
 	buf[2] = DATA_TYPE_JOIN;
@@ -256,8 +269,8 @@ send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *c
 	buf[6] = CURRENT_ABILITY_2BYTE;
 	buf[7] = CURRENT_ABILITY_3BYTE;
 	buf[8] = CURRENT_ABILITY_4BYTE;
-	buf[9] = DATA_RESERVED;
-	simple_udp_sendto(connection, buf, length + 1, dest_addr);
+	buf[9] = DATA_RESERVED; DPRINT
+	simple_udp_sendto(connection, buf, length + 1, dest_addr); DPRINT
 }
 
 
@@ -266,43 +279,49 @@ send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *c
 static void
 dag_root_find(void)
 {
-	rpl_dag_t *dag = NULL;
-	uip_ip6addr_t addr;
+	rpl_dag_t *dag = NULL; DPRINT
+	uip_ip6addr_t addr; DPRINT
 
-	uip_ds6_addr_t *addr_desc = uip_ds6_get_global(ADDR_PREFERRED);
+	uip_ds6_addr_t *addr_desc = uip_ds6_get_global(ADDR_PREFERRED); DPRINT
 	if (addr_desc != NULL)
 	{
-		dag = rpl_get_any_dag();
+	    DPRINT
+		dag = rpl_get_any_dag(); DPRINT
 		if (dag)
 		{
-			led_blink(LED_A);
+		    DPRINT
+			led_blink(LED_A); DPRINT
 			if (&dag->dag_id)
 			{
+			    DPRINT
 				if (dag_active == 0)
 				{
-					uip_ip6addr_copy(&addr, &dag->dag_id);
+					uip_ip6addr_copy(&addr, &dag->dag_id); DPRINT
 
-					printf("DAG node: send join packet to rpl root");
-					uip_debug_ip6addr_print(&addr);
-					printf("\n");
-					send_join_packet(&addr, &udp_connection);
+					printf("DAG node: send join packet to rpl root"); DPRINT
+					uip_debug_ip6addr_print(&addr); DPRINT
+					printf("\n"); DPRINT
+					send_join_packet(&addr, &udp_connection); DPRINT
 					if (non_answered_ping < 100)
 					{
-						non_answered_ping++;
+					    DPRINT
+						non_answered_ping++; DPRINT
 					}
 				}
 			}
 			else
 			{
+			    DPRINT
 				//printf("RPL: address destination: none \n");
-				dag_active = 0;
+				dag_active = 0; DPRINT
 			}
 		}
 	}
 
 	if (non_answered_ping > MAX_NON_ANSWERED_PINGS)
 	{
-		dag_active = 0;
+	    DPRINT
+		dag_active = 0; DPRINT
 	}
 }
 
@@ -312,26 +331,32 @@ dag_root_find(void)
 PROCESS_THREAD(dag_node_button_process, ev, data)
 {
 	PROCESS_BEGIN();
+	DPRINT
 	PROCESS_PAUSE();
-
+	DPRINT
 	while (1)
 	{
-		PROCESS_YIELD();
+	    DPRINT
+		PROCESS_YIELD(); DPRINT
 
 		if (ev == sensors_event)
 		{
+		    DPRINT
 			if (data == &button_e_sensor_click)
 			{
-				printf("DAG Node: Local repair activated\n");
-				rpl_dag_t *dag = rpl_get_any_dag();
-				rpl_local_repair(dag->instance);
+			    DPRINT
+				//printf("DAG Node: Local repair activated\n"); DPRINT
+				//rpl_dag_t *dag = rpl_get_any_dag(); DPRINT
+				//rpl_local_repair(dag->instance); DPRINT
+			    process_start(&dag_node_process, NULL); DPRINT
 			}
 
 			if (data == &button_e_sensor_long_click)
 			{
-				led_on(LED_A);
-				printf("SYSTEM: Button E long click, reboot\n");
-				watchdog_reboot();
+			    DPRINT
+				led_on(LED_A); DPRINT
+				printf("SYSTEM: Button E long click, reboot\n"); DPRINT
+				watchdog_reboot(); DPRINT
 			}
 		}
 	}
@@ -343,28 +368,30 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
 
 PROCESS_THREAD(status_send_process, ev, data)
 {
-	PROCESS_BEGIN();
-	static struct etimer status_send_timer;
-	const rpl_dag_t *dag = NULL;
-	PROCESS_PAUSE();
+	PROCESS_BEGIN(); DPRINT
+	static struct etimer status_send_timer; DPRINT
+	const rpl_dag_t *dag = NULL; DPRINT
+	PROCESS_PAUSE(); DPRINT
 
 	while (1)
 	{
-		dag = rpl_get_any_dag();
+	    DPRINT
+		dag = rpl_get_any_dag();DPRINT
 
 		if (dag)
 		{
-			const uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
-			const struct link_stats *stat_parent = rpl_get_parent_link_stats(dag->preferred_parent);
-			uint8_t temp = batmon_sensor.value(BATMON_SENSOR_TYPE_TEMP);
-			uint8_t voltage = ( (batmon_sensor.value(BATMON_SENSOR_TYPE_VOLT) * 125) >> 5 ) / VOLTAGE_PRESCALER;
-			send_status_packet(&root_addr, &udp_connection, ipaddr_parent, clock_seconds(), stat_parent->rssi, temp, voltage);
+		    DPRINT
+			const uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent); DPRINT
+			const struct link_stats *stat_parent = rpl_get_parent_link_stats(dag->preferred_parent); DPRINT
+			uint8_t temp = batmon_sensor.value(BATMON_SENSOR_TYPE_TEMP); DPRINT
+			uint8_t voltage = ( (batmon_sensor.value(BATMON_SENSOR_TYPE_VOLT) * 125) >> 5 ) / VOLTAGE_PRESCALER; DPRINT
+			send_status_packet(&root_addr, &udp_connection, ipaddr_parent, clock_seconds(), stat_parent->rssi, temp, voltage); DPRINT
 		}
-
-		etimer_set( &status_send_timer, status_send_interval + (random_rand() % status_send_interval) );
-		PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&status_send_timer) );
+		DPRINT
+		etimer_set( &status_send_timer, status_send_interval + (random_rand() % status_send_interval) ); DPRINT
+		PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&status_send_timer) ); DPRINT
 	}
-
+	DPRINT
 	PROCESS_END();
 }
 
@@ -372,44 +399,49 @@ PROCESS_THREAD(status_send_process, ev, data)
 
 PROCESS_THREAD(root_ping_process, ev, data)
 {
-	PROCESS_BEGIN();
+	PROCESS_BEGIN(); DPRINT
 
-	static struct etimer ping_timer;
-	PROCESS_PAUSE();
+	static struct etimer ping_timer; DPRINT
+	PROCESS_PAUSE(); DPRINT
 
 	while (1)
 	{
-		etimer_set( &ping_timer, ping_interval + (random_rand() % ping_interval) );
-		PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&ping_timer) );
+	    DPRINT
+		etimer_set( &ping_timer, ping_interval + (random_rand() % ping_interval) ); DPRINT
+		PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&ping_timer) ); DPRINT
 
-		dag_root_find();
+		dag_root_find(); DPRINT
 
 		if (dag_active == 0 && ping_interval != SHORT_PING_INTERVAL && non_answered_ping < 20)
 		{
-			ping_interval = SHORT_PING_INTERVAL;
-			uip_ds_6_interval_set(CLOCK_SECOND / 5);
-			printf( "DAG Node: Change timer to SHORT interval, DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
+		    DPRINT
+			ping_interval = SHORT_PING_INTERVAL; DPRINT
+			uip_ds_6_interval_set(CLOCK_SECOND / 5); DPRINT
+			printf( "DAG Node: Change timer to SHORT interval, DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() ); DPRINT
 		}
-
+		DPRINT
 		if ( (dag_active == 1 && ping_interval != LONG_PING_INTERVAL) || non_answered_ping > 20 )
 		{
-			ping_interval = LONG_PING_INTERVAL;
-			uip_ds_6_interval_set(CLOCK_SECOND);
-			printf( "DAG Node: Change timer to LONG interval, DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
+		    DPRINT
+			ping_interval = LONG_PING_INTERVAL; DPRINT
+			uip_ds_6_interval_set(CLOCK_SECOND); DPRINT
+			printf( "DAG Node: Change timer to LONG interval, DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() ); DPRINT
 		}
-
+		DPRINT
 		if (non_answered_ping > 30)
 		{
-			printf("DAG Node: Not answer root, reboot\n");
-			watchdog_reboot();
+		    DPRINT
+			printf("DAG Node: Not answer root, reboot\n"); DPRINT
+			watchdog_reboot(); DPRINT
 		}
-
+		DPRINT
 		if (non_answered_ping > 1)
 		{
-			printf("DAG Node: Non-answer ping count: %u\n", non_answered_ping);
+		    DPRINT
+			printf("DAG Node: Non-answer ping count: %u\n", non_answered_ping); DPRINT
 		}
 	}
-
+	DPRINT
 	PROCESS_END();
 }
 
@@ -417,37 +449,39 @@ PROCESS_THREAD(root_ping_process, ev, data)
 
 PROCESS_THREAD(dag_node_process, ev, data)
 {
-	PROCESS_BEGIN();
+	PROCESS_BEGIN(); DPRINT
+	static struct etimer debug_timer; DPRINT
+	simple_udp_register(&udp_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_receiver); DPRINT
 
-	static struct etimer debug_timer;
-	simple_udp_register(&udp_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_receiver);
-
-	PROCESS_PAUSE();
+	PROCESS_PAUSE(); DPRINT
 
 	if (RPL_CONF_LEAF_ONLY == 1)
 	{
-		rpl_set_mode(RPL_MODE_LEAF);
+	    DPRINT
+		rpl_set_mode(RPL_MODE_LEAF); DPRINT
 	}
 	else
 	{
-		rpl_set_mode(RPL_MODE_MESH);
+	    DPRINT
+		rpl_set_mode(RPL_MODE_MESH); DPRINT
 	}
 
-	printf("DAG Node: started, %s mode\n", rpl_get_mode() == RPL_MODE_LEAF ? "leaf" : "no-leaf");
+	printf("DAG Node: started, %s mode\n", rpl_get_mode() == RPL_MODE_LEAF ? "leaf" : "no-leaf"); DPRINT
 
-	process_start(&dag_node_button_process, NULL);
-	process_start(&root_ping_process, NULL);
+	//process_start(&dag_node_button_process, NULL); DPRINT
+	process_start(&root_ping_process, NULL); DPRINT
 
-	SENSORS_ACTIVATE(batmon_sensor);
+	SENSORS_ACTIVATE(batmon_sensor); DPRINT
 
-	led_on(LED_A);
+	led_on(LED_A); DPRINT
 
 	while (1)
 	{
-		etimer_set( &debug_timer, debug_interval + (random_rand() % debug_interval) );
-		PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&debug_timer) );
-		print_debug_data();
+	    DPRINT
+		etimer_set( &debug_timer, debug_interval + (random_rand() % debug_interval) ); DPRINT
+		PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&debug_timer) ); DPRINT
+		print_debug_data(); DPRINT
 	}
-
+	DPRINT
 	PROCESS_END();
 }

@@ -66,6 +66,9 @@
 #include "ti-lib.h"
 #include "ud_binary_protocol.h"
 
+#define DPRINT  printf(">>%s:%"PRIu16"\n", __FILE__, __LINE__);
+
+
 /*---------------------------------------------------------------------------*/
 
 uint8_t relay_1_state = 0;
@@ -74,12 +77,13 @@ uint8_t relay_2_state = 0;
 /*---------------------------------------------------------------------------*/
 
 PROCESS(main_process, "Relay control process"); //register main button process
-AUTOSTART_PROCESSES(&main_process, &dag_node_process); //set autostart processes
+AUTOSTART_PROCESSES(&main_process, &dag_node_button_process); //set autostart processes
 
 /*---------------------------------------------------------------------------*/
 
 void change_DIO_state(uint8_t dio_number, uint8_t dio_state) //TODO: куча кода дублируется, сделай с этим что-нибудь
 {
+    DPRINT
     if (dio_number == 1)
     {
         switch ( dio_state ) {
@@ -149,25 +153,29 @@ void change_DIO_state(uint8_t dio_number, uint8_t dio_state) //TODO: куча к
 
 void configure_DIO()
 {
-    ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_RELAY_1);
-    ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_RELAY_2);
-    ti_lib_gpio_clear_dio(BOARD_IOID_RELAY_1);
-    ti_lib_gpio_clear_dio(BOARD_IOID_RELAY_2);
+    DPRINT
+    ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_RELAY_1); DPRINT
+    ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_RELAY_2); DPRINT
+    ti_lib_gpio_clear_dio(BOARD_IOID_RELAY_1); DPRINT
+    ti_lib_gpio_clear_dio(BOARD_IOID_RELAY_2); DPRINT
 }
 
 /*---------------------------------------------------------------------------*/
 
 void exe_relay_command(struct command_data *command_relay)
 {
+    DPRINT
     printf("RELAY: new command, target: %02X state: %02X number: %02X \n", command_relay->ability_target, command_relay->ability_state, command_relay->ability_number);
-    uint8_t number_ability = command_relay->ability_number;
+    uint8_t number_ability = command_relay->ability_number; DPRINT
     if (number_ability == 1 || number_ability == 2)
     {
-        change_DIO_state(number_ability, command_relay->ability_state);
+        DPRINT
+        change_DIO_state(number_ability, command_relay->ability_state); DPRINT
     }
     else
     {
-        printf("Not support relay number\n");
+        DPRINT
+        printf("Not support relay number\n"); DPRINT
     }
 }
 
@@ -175,28 +183,33 @@ void exe_relay_command(struct command_data *command_relay)
 
 PROCESS_THREAD(main_process, ev, data)
 {
-  PROCESS_BEGIN();
-  printf("Unwired relay device. HELL-IN-CODE free. I hope.\n");
+  PROCESS_BEGIN();   DPRINT
+  printf("Unwired relay device. HELL-IN-CODE free. I hope.\n"); DPRINT
 
-  struct command_data *message_data = NULL;
+  struct command_data *message_data = NULL; DPRINT
 
-  PROCESS_PAUSE();
+  PROCESS_PAUSE(); DPRINT
   
-  configure_DIO();
+  configure_DIO(); DPRINT
 
   while(1)
   {
-    PROCESS_YIELD();
+    DPRINT
+    PROCESS_YIELD(); DPRINT
     if(ev == PROCESS_EVENT_CONTINUE)
     {
-      message_data = data;
+      DPRINT
+      message_data = data; DPRINT
 
       if (message_data->ability_target == DEVICE_ABILITY_RELAY)
       {
-          exe_relay_command(data);
+          DPRINT
+          exe_relay_command(data); DPRINT
       }
+      DPRINT
     }
+    DPRINT
   }
-
+  DPRINT
   PROCESS_END();
 }
