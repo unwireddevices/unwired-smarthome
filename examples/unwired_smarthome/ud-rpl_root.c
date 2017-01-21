@@ -75,7 +75,7 @@ struct command_data
 };
 
 volatile static uint8_t udp_message_ready = 0;
-volatile static struct command_data send_command_process_message_data;
+volatile static struct command_data command_message;
 volatile static uint8_t uart_command_buf[UART_DATA_LENGTH];
 volatile static uint8_t uart_iterator = 0;
 static uint8_t uart_magic_sequence[UART_DATA_LENGTH] =
@@ -244,9 +244,9 @@ static int uart_data_receiver(unsigned char c)
                 {
                    destination_address.u8[i] = uart_command_buf[i+7];
                 }
-                send_command_process_message_data.ability_number = uart_command_buf[24];
-                send_command_process_message_data.ability_state = uart_command_buf[25];
-                send_command_process_message_data.ability_target = uart_command_buf[23];
+                command_message.ability_number = uart_command_buf[24];
+                command_message.ability_state = uart_command_buf[25];
+                command_message.ability_target = uart_command_buf[23];
                 udp_message_ready = 1;
         }
         else
@@ -333,9 +333,9 @@ PROCESS_THREAD(send_command_process, ev, data)
             printf("Send packet %"PRIu16"\n", packet_counter);
             send_command_packet(&destination_address,
                                 &udp_connection,
-                                send_command_process_message_data.ability_target,
-                                send_command_process_message_data.ability_number,
-                                send_command_process_message_data.ability_state);
+                                command_message.ability_target,
+                                command_message.ability_number,
+                                command_message.ability_state);
             udp_message_ready = 0;
             enable_interrupts();
       }
