@@ -132,7 +132,7 @@ udp_receiver(struct simple_udp_connection *c,
 					printf("DAG Node: DAG join packet confirmation received, DAG active\n");
 					led_off(LED_A);
 					dag_active = 1;
-					root_addr = *sender_addr;
+					uip_ip6addr_copy(root_addr, sender_addr);
 					non_answered_ping = 0;
 					if (process_is_running(&status_send_process) == 0)
 					{
@@ -200,17 +200,16 @@ print_debug_data(void)
 /*---------------------------------------------------------------------------*/
 
 void
-send_status_packet(const uip_ip6addr_t *dest_addr,
-                   struct simple_udp_connection *connection,
-                   const uip_ipaddr_t *parent_addr,
+send_status_packet(const uip_ipaddr_t *parent_addr,
                    uint32_t uptime,
                    int16_t rssi_parent,
                    uint8_t temp,
                    uint8_t voltage)
 {
 	uint8_t *uptime_uint8_t = (uint8_t *)&uptime;
-	uint8_t *rssi_parent_uint8_t = (int8_t *)&rssi_parent;
-
+	int8_t *rssi_parent_uint8_t = (int8_t *)&rssi_parent;
+	uip_ip6addr_t addr;
+	uip_ip6addr_copy(&addr, root_addr);
 	uint8_t length = 23;
 	uint8_t buf[length];
 	buf[0] = PROTOCOL_VERSION_V1;
@@ -237,14 +236,14 @@ send_status_packet(const uip_ip6addr_t *dest_addr,
 	buf[21] = DATA_RESERVED;
 	buf[22] = DATA_RESERVED;
 
-	simple_udp_sendto(connection, buf, length + 1, dest_addr);
+	simple_udp_sendto(&udp_connection, buf, length + 1, &addr);
 }
 
 
 /*---------------------------------------------------------------------------*/
 
 void
-send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *connection)
+send_join_packet(const uip_ip6addr_t *dest_addr)
 {
 	uint8_t length = 10;
 	uint8_t buf[length];
@@ -258,7 +257,7 @@ send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *c
 	buf[7] = CURRENT_ABILITY_3BYTE;
 	buf[8] = CURRENT_ABILITY_4BYTE;
 	buf[9] = DATA_RESERVED;
-	simple_udp_sendto(connection, buf, length + 1, dest_addr);
+	simple_udp_sendto(&udp_connection, buf, length + 1, dest_addr);
 }
 
 
@@ -285,7 +284,7 @@ dag_root_find(void)
 					printf("DAG node: send join packet to rpl root");
 					uip_debug_ip6addr_print(&addr);
 					printf("\n");
-					send_join_packet(&addr, &udp_connection);
+					send_join_packet(&addr);
 					if (non_answered_ping < 100)
 					{
 						non_answered_ping++;
@@ -358,7 +357,7 @@ PROCESS_THREAD(status_send_process, ev, data)
 			const struct link_stats *stat_parent = rpl_get_parent_link_stats(dag->preferred_parent);
 			uint8_t temp = batmon_sensor.value(BATMON_SENSOR_TYPE_TEMP);
 			uint8_t voltage = ( (batmon_sensor.value(BATMON_SENSOR_TYPE_VOLT) * 125) >> 5 ) / VOLTAGE_PRESCALER;
-			send_status_packet(&root_addr, &udp_connection, ipaddr_parent, clock_seconds(), stat_parent->rssi, temp, voltage);
+			send_status_packet(ipaddr_parent, clock_seconds(), stat_parent->rssi, temp, voltage);
 		}
 
 		etimer_set( &status_send_timer, status_send_interval + (random_rand() % status_send_interval) );

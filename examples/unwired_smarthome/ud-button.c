@@ -73,9 +73,7 @@ PROCESS(main_process, "UD Buttons control process"); //register main button proc
 AUTOSTART_PROCESSES(&dag_node_process, &main_process); //set autostart processes
 
 /*---------------------------------------------------------------------------*/
-void send_sensor_event(struct sensor_packet *packet,
-                 const uip_ip6addr_t *dest_addr,
-                 struct simple_udp_connection *connection)
+void send_sensor_event(struct sensor_packet *packet)
 {
     uint8_t lenght = 10;
     uint8_t udp_buffer[lenght];
@@ -90,29 +88,28 @@ void send_sensor_event(struct sensor_packet *packet,
     udp_buffer[7] = DATA_RESERVED;
     udp_buffer[8] = DATA_RESERVED;
     udp_buffer[9] = DATA_RESERVED;
-    simple_udp_sendto(connection, udp_buffer, lenght + 1, dest_addr);
+    simple_udp_sendto(&udp_connection, udp_buffer, lenght + 1, &packet->dest_addr);
 }
 
 /*---------------------------------------------------------------------------*/
 
-void send_button_status_packet(const uip_ip6addr_t *dest_addr,
-                          struct simple_udp_connection *connection,
-                          uint8_t button_number,
-                          int click_type)
+void send_button_status_packet(uint8_t button_number,
+                               int click_type)
 {
 
-    if(dest_addr != NULL && connection != NULL)//(dag_active == 1 && dest_addr != NULL && connection != NULL)
+    if(root_addr != NULL)//(dag_active == 1 && dest_addr != NULL && connection != NULL)
     {
         printf("Buttons: send message to RPL root node\n");
 
         struct sensor_packet button_sensor_packet;
+        uip_ip6addr_copy(&button_sensor_packet.dest_addr, root_addr);
         button_sensor_packet.protocol_version = CURRENT_PROTOCOL_VERSION;
         button_sensor_packet.device_version = CURRENT_DEVICE_VERSION;
         button_sensor_packet.data_type = DATA_TYPE_SENSOR_DATA;
         button_sensor_packet.number_ability = DEVICE_ABILITY_BUTTON;
         button_sensor_packet.sensor_number = button_number;
         button_sensor_packet.sensor_event = click_type;
-        send_sensor_event(&button_sensor_packet, dest_addr, connection);
+        send_sensor_event(&button_sensor_packet);
     }
 
     led_blink(LED_A);
@@ -141,35 +138,35 @@ PROCESS_THREAD(main_process, ev, data)
     if(ev == sensors_event) {
       if(data == &button_a_sensor_click) {
         printf("Buttons control process: Button A click\n");
-        send_button_status_packet(&root_addr, &udp_connection, 'a', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
+        send_button_status_packet('a', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
       }
       if(data == &button_a_sensor_long_click) {
         printf("Buttons control process: Button A long click\n");
-        send_button_status_packet(&root_addr, &udp_connection, 'a', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
+        send_button_status_packet('a', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
       }
       if(data == &button_b_sensor_click) {
         printf("Buttons control process: Button B click\n");
-        send_button_status_packet(&root_addr, &udp_connection, 'b', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
+        send_button_status_packet('b', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
       }
       if(data == &button_b_sensor_long_click) {
         printf("Buttons control process: Button B long click\n");
-        send_button_status_packet(&root_addr, &udp_connection, 'b', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
+        send_button_status_packet('b', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
       }
       if(data == &button_c_sensor_click) {
         printf("Buttons control process: Button C click\n");
-        send_button_status_packet(&root_addr, &udp_connection, 'c', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
+        send_button_status_packet('c', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
       }
       if(data == &button_c_sensor_long_click) {
         printf("Buttons control process: Button C long click\n");
-        send_button_status_packet(&root_addr, &udp_connection, 'c', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
+        send_button_status_packet('c', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
       }
       if(data == &button_d_sensor_click) {
         printf("Buttons control process: Button D click\n");
-        send_button_status_packet(&root_addr, &udp_connection, 'd', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
+        send_button_status_packet('d', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
       }
       if(data == &button_d_sensor_long_click) {
         printf("Buttons control process: Button D long click\n");
-        send_button_status_packet(&root_addr, &udp_connection, 'd', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
+        send_button_status_packet('d', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
       }
 
     }
