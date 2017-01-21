@@ -98,12 +98,6 @@ PROCESS(send_command_process,"UDP command sender");
 AUTOSTART_PROCESSES(&rpl_root_process);
 
 /*---------------------------------------------------------------------------*/
-static inline void * rd_stack_ptr(void){
-  void * result=NULL;
-  __asm("MRS %0, msp\n\t" : "=r" (result) );
-  return result;
-}
-
 void send_confirmation_packet(const uip_ip6addr_t *dest_addr,
                               struct simple_udp_connection *connection)
 {
@@ -205,7 +199,7 @@ void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const ui
 }
 
 /*---------------------------------------------------------------------------*/
-
+/*
 void uart_packet_dump(uint8_t *uart_command_buf) {
     if (uart_command_buf == NULL) {
         printf("ERROR: uart_command_buf in uart_packet_dump null\n");
@@ -219,7 +213,7 @@ void uart_packet_dump(uint8_t *uart_command_buf) {
     }
     printf("\n");
 }
-
+*/
 /*---------------------------------------------------------------------------*/
 
 static int uart_data_receiver(unsigned char c)
@@ -230,13 +224,8 @@ static int uart_data_receiver(unsigned char c)
     {
         if (c != uart_magic_sequence[uart_iterator])
         {
-            //printf(":BAD char, current iterator=%u\n", uart_iterator);
             uart_iterator = 0;
             return 1;
-        }
-        else
-        {
-            //printf(":OK, current iterator=%u\n", uart_iterator);
         }
     }
     uart_command_buf[uart_iterator] = c;
