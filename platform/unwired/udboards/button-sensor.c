@@ -68,17 +68,17 @@
 #define SHORT_INTERVAL 10 //as timers tick(1 tick ~ 8ms)
 #define LONG_INTERVAL 90 //as timers tick(1 tick ~ 8ms)
 
-uint32_t button_a_last_low = 0;
-uint32_t button_b_last_low = 0;
-uint32_t button_c_last_low = 0;
-uint32_t button_d_last_low = 0;
-uint32_t button_e_last_low = 0;
+volatile uint32_t button_a_last_low = 0;
+volatile uint32_t button_b_last_low = 0;
+volatile uint32_t button_c_last_low = 0;
+volatile uint32_t button_d_last_low = 0;
+volatile uint32_t button_e_last_low = 0;
 
-uint8_t current_button_short;
-uint8_t current_button_long;
+volatile uint8_t current_button_short;
+volatile uint8_t current_button_long;
 
-static struct etimer button_short_timer;
-static struct etimer button_long_timer;
+volatile static struct etimer button_short_timer;
+volatile static struct etimer button_long_timer;
 
 /*---------------------------------------------------------------------------*/
 
@@ -87,9 +87,9 @@ PROCESS_THREAD(button_sensor_short_process, ev, data)
 {
     PROCESS_BEGIN();
 
-    current_button_short = *(uint8_t *)data;
-    uint32_t current_button_state = ti_lib_gpio_read_dio(current_button_short);
-    uint32_t current_time = clock_time();
+    volatile current_button_short = *(uint8_t *)data;
+    volatile uint32_t current_button_state = ti_lib_gpio_read_dio(current_button_short);
+    volatile uint32_t current_time = clock_time();
 
     switch ( current_button_short ) {
           case BOARD_IOID_KEY_A:
@@ -160,7 +160,7 @@ PROCESS(button_sensor_long_process, "Button sensor long process");
 PROCESS_THREAD(button_sensor_long_process, ev, data)
 {
   PROCESS_BEGIN();
-  current_button_long = *(uint8_t *)data;
+  volatile current_button_long = *(uint8_t *)data;
   etimer_reset(&button_long_timer);
   etimer_set(&button_long_timer, LONG_INTERVAL);
   PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&button_long_timer));
@@ -211,9 +211,9 @@ void button_start_process(struct process *p, uint32_t data) {
 static void
 button_press_handler(uint8_t ioid)
 {
-    uint8_t current_button_ioid = ioid;
-    uint32_t current_button_state = ti_lib_gpio_read_dio(ioid);
-    uint32_t current_time = clock_time();
+    volatile uint8_t current_button_ioid = ioid;
+    volatile uint32_t current_button_state = ti_lib_gpio_read_dio(ioid);
+    volatile uint32_t current_time = clock_time();
     //printf("SENSOR: button %"PRIu8" change state to %"PRIu32" on %"PRIu32" tick\n", current_button_ioid, current_button_state, current_time);
 
     if(ioid == BOARD_IOID_KEY_A) {
