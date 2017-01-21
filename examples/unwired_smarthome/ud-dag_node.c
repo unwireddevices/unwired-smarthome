@@ -126,7 +126,7 @@ udp_receiver(struct simple_udp_connection *c,
 	printf("DEBUG: UDP packer: %02x,%02x,%02x from ", data[0],data[1],data[2]); DPRINT
 	uip_debug_ipaddr_print(sender_addr); DPRINT
 	printf("\n"); DPRINT
-
+	DPRINT
 	if (data[0] == PROTOCOL_VERSION_V1 && data[1] == CURRENT_DEVICE_VERSION)
 	{
 	    DPRINT
@@ -135,7 +135,8 @@ udp_receiver(struct simple_udp_connection *c,
 				case DATA_TYPE_CONFIRM:
 				    DPRINT
 					printf("DAG Node: DAG join packet confirmation received, DAG active\n");
-					led_off(LED_A); DPRINT
+					//led_off(LED_A); DPRINT
+					led_on(LED_A); DPRINT
 					dag_active = 1; DPRINT
 					root_addr = *sender_addr; DPRINT
 					non_answered_ping = 0; DPRINT
@@ -144,7 +145,7 @@ udp_receiver(struct simple_udp_connection *c,
 					    DPRINT
 						process_start(&status_send_process, NULL); DPRINT
 					}
-
+					DPRINT
 					break;
 				case DATA_TYPE_COMMAND:
 					printf("DAG Node: Command packet received\n"); DPRINT
@@ -166,7 +167,7 @@ udp_receiver(struct simple_udp_connection *c,
 	    DPRINT
 		printf("DAG NODE: Incompatible device or protocol version!\n"); DPRINT
 	}
-
+	DPRINT
 	led_off(LED_A); DPRINT
 }
 
@@ -176,7 +177,7 @@ void
 print_debug_data(void)
 {
     DPRINT
-	printf("\n");
+	printf("\n");DPRINT
 	printf( "SYSTEM: uptime: %" PRIu32 " s\n", clock_seconds() ); DPRINT
 	/*
 	   rpl_dag_t *dag = rpl_get_any_dag();
@@ -473,7 +474,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
 
 	SENSORS_ACTIVATE(batmon_sensor); DPRINT
 
-	led_on(LED_A); DPRINT
+	//led_on(LED_A); DPRINT
 
 	while (1)
 	{
