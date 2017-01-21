@@ -84,15 +84,15 @@
 
 /*---------------------------------------------------------------------------*/
 
-unsigned char uart_char;
-int start = 0;
+//unsigned char uart_char;
+//int start = 0;
 struct simple_udp_connection udp_connection; //struct for simple_udp_send
-uint8_t dag_active = 0; //set to 1, if rpl root found and answer to join packet
-uint8_t non_answered_ping = 0;
+volatile uint8_t dag_active = 0; //set to 1, if rpl root found and answer to join packet
+volatile uint8_t non_answered_ping = 0;
 uip_ip6addr_t root_addr;
-clock_time_t debug_interval = DEBUG_INTERVAL;
-clock_time_t ping_interval = SHORT_PING_INTERVAL;
-clock_time_t status_send_interval = STATUS_SEND_INTERVAL;
+volatile clock_time_t debug_interval = DEBUG_INTERVAL;
+volatile clock_time_t ping_interval = SHORT_PING_INTERVAL;
+volatile clock_time_t status_send_interval = STATUS_SEND_INTERVAL;
 
 /*---------------------------------------------------------------------------*/
 

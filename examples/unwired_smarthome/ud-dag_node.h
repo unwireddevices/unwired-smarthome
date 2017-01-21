@@ -40,14 +40,14 @@
 #include "contiki.h"
 /*---------------------------------------------------------------------------*/
 struct simple_udp_connection udp_connection;
-uint8_t dag_active;
+volatile uint8_t dag_active;
 uip_ip6addr_t root_addr;
 
 struct command_data
 {
-    uint8_t ability_target;
-    uint8_t ability_number;
-    uint8_t ability_state;
+    volatile uint8_t ability_target;
+    volatile uint8_t ability_number;
+    volatile uint8_t ability_state;
 };
 
 PROCESS_NAME(dag_node_process);
