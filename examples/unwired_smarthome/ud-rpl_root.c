@@ -141,19 +141,20 @@ void send_command_packet(const uip_ip6addr_t *dest_addr,
         printf("ERROR: connection in send_command_packet null\n");
         return;
     }
+
     int length = 10;
-    char buf[length];
-    buf[0] = PROTOCOL_VERSION_V1;
-    buf[1] = DEVICE_VERSION_V1;
-    buf[2] = DATA_TYPE_COMMAND;
-    buf[3] = ability_target;
-    buf[4] = ability_number;
-    buf[5] = ability_state;
-    buf[6] = DATA_RESERVED;
-    buf[7] = DATA_RESERVED;
-    buf[8] = DATA_RESERVED;
-    buf[9] = DATA_RESERVED;
-    simple_udp_sendto(connection, buf, length + 1, dest_addr);
+    char udp_buffer[length];
+    udp_buffer[0] = PROTOCOL_VERSION_V1;
+    udp_buffer[1] = DEVICE_VERSION_V1;
+    udp_buffer[2] = DATA_TYPE_COMMAND;
+    udp_buffer[3] = ability_target;
+    udp_buffer[4] = ability_number;
+    udp_buffer[5] = ability_state;
+    udp_buffer[6] = DATA_RESERVED;
+    udp_buffer[7] = DATA_RESERVED;
+    udp_buffer[8] = DATA_RESERVED;
+    udp_buffer[9] = DATA_RESERVED;
+    simple_udp_sendto(connection, udp_buffer, length + 1, dest_addr);
 
 }
 
@@ -303,14 +304,17 @@ static void create_rpl_dag(uip_ipaddr_t *ipaddr)
         return;
     }
   struct uip_ds6_addr *root_if = uip_ds6_addr_lookup(ipaddr);
-  if(root_if != NULL) {
+  if(root_if != NULL)
+  {
     uip_ipaddr_t prefix;
     rpl_set_root(RPL_DEFAULT_INSTANCE, ipaddr);
     rpl_dag_t *dag = rpl_get_any_dag();
     uip_ip6addr(&prefix, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
     rpl_set_prefix(dag, &prefix, 64);
     printf("Created a new RPL DAG, i'm root!\n");
-  } else {
+  }
+  else
+  {
     printf("Failed to create a new RPL DAG :(\n");
   }
 }
@@ -357,7 +361,8 @@ PROCESS_THREAD(rpl_root_process, ev, data)
   printf("Unwired RLP root and UDP data receiver. HELL-IN-CODE free. I hope. \n");
 
   /* if you do not execute "cleanall" target, rpl-root can build in "leaf" configuration. Diagnostic message */
-  if (RPL_CONF_LEAF_ONLY == 1) {
+  if (RPL_CONF_LEAF_ONLY == 1)
+  {
       printf("\nWARNING: leaf mode on rpl-root!\n");
   }
 

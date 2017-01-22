@@ -120,9 +120,7 @@ udp_receiver(struct simple_udp_connection *c,
              uint16_t datalen)
 {
 	led_on(LED_A);
-	//printf("DEBUG: UDP packer: %02x,%02x,%02x from ", data[0],data[1],data[2]);
-	//uip_debug_ipaddr_print(sender_addr);
-	//printf("\n");
+
 
 	if (data[0] == PROTOCOL_VERSION_V1 && data[1] == CURRENT_DEVICE_VERSION)
 	{
@@ -138,7 +136,6 @@ udp_receiver(struct simple_udp_connection *c,
 					{
 						process_start(&status_send_process, NULL);
 					}
-
 					break;
 				case DATA_TYPE_COMMAND:
 					printf("DAG Node: Command packet received\n");
@@ -149,13 +146,17 @@ udp_receiver(struct simple_udp_connection *c,
 					process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
 					break;
 				default:
-					printf("DAG NODE: Incompatible data type(%02x)!\n", data[2]);
+				    printf("DAG Node: Incompatible data type UDP packer from");
+				    uip_debug_ip6addr_print(sender_addr);
+				    printf("(%02x%02x%02x)\n", data[0],data[1],data[2]);
 					break;
 		} /* switch */
 	}
 	else
 	{
-		printf("DAG NODE: Incompatible device or protocol version!\n");
+	    printf("DAG Node: Incompatible device or protocol version UDP packer from");
+        uip_debug_ip6addr_print(sender_addr);
+        printf("(%02x%02x%02x)\n", data[0],data[1],data[2]);
 	}
 
 	led_off(LED_A);

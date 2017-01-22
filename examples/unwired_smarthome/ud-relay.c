@@ -159,7 +159,10 @@ void configure_DIO()
 
 void exe_relay_command(struct command_data *command_relay)
 {
-    printf("RELAY: new command, target: %02X state: %02X number: %02X \n", command_relay->ability_target, command_relay->ability_state, command_relay->ability_number);
+    printf("RELAY: new command, target: %02X state: %02X number: %02X \n",
+           command_relay->ability_target,
+           command_relay->ability_state,
+           command_relay->ability_number);
     uint8_t number_ability = command_relay->ability_number;
     if (number_ability == 1 || number_ability == 2)
     {

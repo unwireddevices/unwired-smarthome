@@ -137,35 +137,35 @@ PROCESS_THREAD(main_process, ev, data)
     PROCESS_YIELD();
     if(ev == sensors_event) {
       if(data == &button_a_sensor_click) {
-        printf("Buttons control process: Button A click\n");
+        printf("BCP: Button A click\n");
         send_button_status_packet('a', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
       }
       if(data == &button_a_sensor_long_click) {
-        printf("Buttons control process: Button A long click\n");
+        printf("BCP: Button A long click\n");
         send_button_status_packet('a', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
       }
       if(data == &button_b_sensor_click) {
-        printf("Buttons control process: Button B click\n");
+        printf("BCP: Button B click\n");
         send_button_status_packet('b', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
       }
       if(data == &button_b_sensor_long_click) {
-        printf("Buttons control process: Button B long click\n");
+        printf("BCP: Button B long click\n");
         send_button_status_packet('b', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
       }
       if(data == &button_c_sensor_click) {
-        printf("Buttons control process: Button C click\n");
+        printf("BCP: Button C click\n");
         send_button_status_packet('c', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
       }
       if(data == &button_c_sensor_long_click) {
-        printf("Buttons control process: Button C long click\n");
+        printf("BCP: Button C long click\n");
         send_button_status_packet('c', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
       }
       if(data == &button_d_sensor_click) {
-        printf("Buttons control process: Button D click\n");
+        printf("BCP: Button D click\n");
         send_button_status_packet('d', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
       }
       if(data == &button_d_sensor_long_click) {
-        printf("Buttons control process: Button D long click\n");
+        printf("BCP: Button D long click\n");
         send_button_status_packet('d', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
       }
 
