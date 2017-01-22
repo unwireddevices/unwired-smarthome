@@ -117,7 +117,7 @@ udp_receiver(struct simple_udp_connection *c,
              const uint8_t *data,
              uint16_t datalen)
 {
-	led_on(LED_A);
+    led_toggle(LED_A);
 
 
 	if (data[0] == PROTOCOL_VERSION_V1 && data[1] == CURRENT_DEVICE_VERSION)
@@ -157,7 +157,7 @@ udp_receiver(struct simple_udp_connection *c,
         printf("(%02x%02x%02x)\n", data[0],data[1],data[2]);
 	}
 
-	led_off(LED_A);
+	led_toggle(LED_A);
 }
 
 /*---------------------------------------------------------------------------*/
