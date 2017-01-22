@@ -84,8 +84,6 @@
 
 /*---------------------------------------------------------------------------*/
 
-//unsigned char uart_char;
-//int start = 0;
 struct simple_udp_connection udp_connection; //struct for simple_udp_send
 volatile uint8_t dag_active = 0; //set to 1, if rpl root found and answer to join packet
 volatile uint8_t non_answered_ping = 0;
