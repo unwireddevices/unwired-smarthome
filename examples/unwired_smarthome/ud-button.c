@@ -73,25 +73,6 @@ PROCESS(main_process, "UD Buttons control process"); //register main button proc
 AUTOSTART_PROCESSES(&dag_node_process, &main_process); //set autostart processes
 
 /*---------------------------------------------------------------------------*/
-void send_sensor_event(struct sensor_packet *packet)
-{
-    uint8_t lenght = 10;
-    uint8_t udp_buffer[lenght];
-    udp_buffer[0] = packet->protocol_version;
-    udp_buffer[1] = packet->device_version;
-    udp_buffer[2] = packet->data_type;
-
-    udp_buffer[3] = packet->number_ability;
-    udp_buffer[4] = DATA_RESERVED;
-    udp_buffer[5] = packet->sensor_number;
-    udp_buffer[6] = packet->sensor_event;
-    udp_buffer[7] = DATA_RESERVED;
-    udp_buffer[8] = DATA_RESERVED;
-    udp_buffer[9] = DATA_RESERVED;
-    simple_udp_sendto(&udp_connection, udp_buffer, lenght + 1, &packet->dest_addr);
-}
-
-/*---------------------------------------------------------------------------*/
 
 void send_button_status_packet(uint8_t button_number,
                                int click_type)

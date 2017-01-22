@@ -198,6 +198,34 @@ print_debug_data(void)
 
 /*---------------------------------------------------------------------------*/
 
+void send_sensor_event(struct sensor_packet *packet)
+{
+
+    uip_ip6addr_t addr;
+    uip_ip6addr_copy(&addr, &root_addr);
+
+    printf("DAG node: send sensor-event message to DAG-root node:");
+    uip_debug_ip6addr_print(&addr);
+    printf("\n");
+
+    uint8_t lenght = 10;
+    uint8_t udp_buffer[lenght];
+    udp_buffer[0] = packet->protocol_version;
+    udp_buffer[1] = packet->device_version;
+    udp_buffer[2] = packet->data_type;
+
+    udp_buffer[3] = packet->number_ability;
+    udp_buffer[4] = DATA_RESERVED;
+    udp_buffer[5] = packet->sensor_number;
+    udp_buffer[6] = packet->sensor_event;
+    udp_buffer[7] = DATA_RESERVED;
+    udp_buffer[8] = DATA_RESERVED;
+    udp_buffer[9] = DATA_RESERVED;
+    simple_udp_sendto(&udp_connection, udp_buffer, lenght + 1, &addr);
+}
+
+/*---------------------------------------------------------------------------*/
+
 void
 send_status_packet(const uip_ipaddr_t *parent_addr,
                    uint32_t uptime,

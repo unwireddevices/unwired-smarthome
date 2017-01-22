@@ -53,17 +53,5 @@
 
 PROCESS_NAME(main_process);
 
-struct sensor_packet {
-uip_ip6addr_t dest_addr;
-uint8_t protocol_version;
-uint8_t device_version;
-uint8_t data_type;
-uint8_t number_ability;
-uint8_t sensor_number;
-uint8_t sensor_event;
-};
-
-void send_sensor_event(struct sensor_packet *packet);
-
 /*---------------------------------------------------------------------------*/
 #endif /* UDP_LEDS_H_ */
