@@ -87,7 +87,7 @@
 struct simple_udp_connection udp_connection; //struct for simple_udp_send
 volatile uint8_t dag_active = 0; //set to 1, if rpl root found and answer to join packet
 volatile uint8_t non_answered_ping = 0;
-volatile uip_ip6addr_t *root_addr;
+volatile uip_ip6addr_t root_addr;
 static struct command_data message_for_main_process;
 volatile clock_time_t debug_interval = DEBUG_INTERVAL;
 volatile clock_time_t ping_interval = SHORT_PING_INTERVAL;
@@ -128,7 +128,7 @@ udp_receiver(struct simple_udp_connection *c,
 					printf("DAG Node: DAG join packet confirmation received, DAG active\n");
 					led_off(LED_A);
 					dag_active = 1;
-					uip_ip6addr_copy(root_addr, sender_addr);
+					uip_ipaddr_copy(&root_addr, sender_addr);
 					non_answered_ping = 0;
 					if (process_is_running(&status_send_process) == 0)
 					{
@@ -236,7 +236,12 @@ send_status_packet(const uip_ipaddr_t *parent_addr,
 	uint8_t *uptime_uint8_t = (uint8_t *)&uptime;
 	int8_t *rssi_parent_uint8_t = (int8_t *)&rssi_parent;
 	uip_ip6addr_t addr;
-	uip_ip6addr_copy(&addr, root_addr);
+	uip_ip6addr_copy(&addr, &root_addr);
+
+
+    printf("DAG node: Send status packet to DAG-root node:");
+    uip_debug_ip6addr_print(&addr);
+    printf("\n");
 
     uint8_t length = 23;
     uint8_t udp_buffer[length];
@@ -273,7 +278,14 @@ send_status_packet(const uip_ipaddr_t *parent_addr,
 void
 send_join_packet(const uip_ip6addr_t *dest_addr)
 {
-	simple_udp_sendto(&udp_connection, buf, length + 1, dest_addr);
+
+    uip_ip6addr_t addr;
+    uip_ip6addr_copy(&addr, dest_addr);
+
+	printf("DAG node: Send join packet to DAG-root node:");
+    uip_debug_ip6addr_print(&addr);
+    printf("\n");
+
     uint8_t length = 10;
     uint8_t udp_buffer[length];
 	udp_buffer[0] = PROTOCOL_VERSION_V1;
@@ -286,6 +298,7 @@ send_join_packet(const uip_ip6addr_t *dest_addr)
 	udp_buffer[7] = CURRENT_ABILITY_3BYTE;
 	udp_buffer[8] = CURRENT_ABILITY_4BYTE;
 	udp_buffer[9] = DATA_RESERVED;
+	simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
 }
 
 
@@ -294,43 +307,38 @@ send_join_packet(const uip_ip6addr_t *dest_addr)
 static void
 dag_root_find(void)
 {
-	rpl_dag_t *dag = NULL; //тоже вынести!
-	uip_ip6addr_t addr;
+	rpl_dag_t *dag = NULL;
+	led_on(LED_A);
 
-	uip_ds6_addr_t *addr_desc = uip_ds6_get_global(ADDR_PREFERRED);
-	if (addr_desc != NULL)
+	if (uip_ds6_get_global(ADDR_PREFERRED) != NULL)
 	{
 		dag = rpl_get_any_dag();
-		if (dag)
-		{
-			led_blink(LED_A);
-			if (&dag->dag_id)
-			{
-				if (dag_active == 0)
-				{
-					uip_ip6addr_copy(&addr, &dag->dag_id);
-					printf("DAG node: send join packet to rpl root");
-					uip_debug_ip6addr_print(&addr);
-					printf("\n");
-					send_join_packet(&addr);
-					if (non_answered_ping < 100)
-					{
-						non_answered_ping++;
-					}
-				}
-			}
-			else
-			{
-				//printf("RPL: address destination: none \n");
-				dag_active = 0;
-			}
-		}
+        if (dag != NULL && &dag->dag_id)
+        {
+            if (dag_active == 0)
+            {
+                send_join_packet(&dag->dag_id);
+                non_answered_ping++;
+            }
+        }
+        else
+        {
+            dag_active = 0;
+        }
+
+        if (dag != NULL && rpl_parent_is_reachable(dag->preferred_parent) == 0)
+        {
+            dag_active = 0;
+        }
 	}
 
 	if (non_answered_ping > MAX_NON_ANSWERED_PINGS)
 	{
 		dag_active = 0;
 	}
+
+
+	led_off(LED_A);
 }
 
 
@@ -349,9 +357,9 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
 		{
 			if (data == &button_e_sensor_click)
 			{
-				printf("DAG Node: Local repair activated\n");
-				rpl_dag_t *dag = rpl_get_any_dag();
-				rpl_local_repair(dag->instance);
+				//printf("DAG Node: Local repair activated\n");
+				//rpl_dag_t *dag = rpl_get_any_dag();
+				//rpl_local_repair(dag->instance);
 			}
 
 			if (data == &button_e_sensor_long_click)

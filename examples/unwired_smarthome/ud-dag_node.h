@@ -41,7 +41,7 @@
 /*---------------------------------------------------------------------------*/
 struct simple_udp_connection udp_connection;
 volatile uint8_t dag_active;
-volatile uip_ip6addr_t *root_addr;
+volatile uip_ip6addr_t root_addr;
 
 struct command_data
 {

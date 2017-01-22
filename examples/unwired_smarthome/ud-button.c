@@ -75,13 +75,12 @@ AUTOSTART_PROCESSES(&dag_node_process, &main_process); //set autostart processes
 /*---------------------------------------------------------------------------*/
 
 void send_button_status_packet(uint8_t button_number,
-                               int click_type)
+                               uint8_t click_type)
 {
 
-    if(root_addr != NULL)//(dag_active == 1 && dest_addr != NULL && connection != NULL)
+    if(dag_active == 1)
     {
         struct sensor_packet button_sensor_packet;
-        uip_ip6addr_copy(&button_sensor_packet.dest_addr, root_addr);
         button_sensor_packet.protocol_version = CURRENT_PROTOCOL_VERSION;
         button_sensor_packet.device_version = CURRENT_DEVICE_VERSION;
         button_sensor_packet.data_type = DATA_TYPE_SENSOR_DATA;
@@ -137,6 +136,10 @@ PROCESS_THREAD(main_process, ev, data)
       if(data == &button_d_sensor_long_click) {
         printf("BCP: Button D long click\n");
         send_button_status_packet('d', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
+      }
+      if(data == &button_e_sensor_click) {
+        printf("BCP: Button E click\n");
+        send_button_status_packet('e', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
       }
 
     }
