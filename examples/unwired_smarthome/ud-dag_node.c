@@ -237,33 +237,34 @@ send_status_packet(const uip_ipaddr_t *parent_addr,
 	int8_t *rssi_parent_uint8_t = (int8_t *)&rssi_parent;
 	uip_ip6addr_t addr;
 	uip_ip6addr_copy(&addr, root_addr);
-	uint8_t length = 23;
-	uint8_t buf[length];
-	buf[0] = PROTOCOL_VERSION_V1;
-	buf[1] = CURRENT_DEVICE_VERSION;
-	buf[2] = DATA_TYPE_STATUS;
-	buf[3] = ( (uint8_t *)parent_addr )[8];
-	buf[4] = ( (uint8_t *)parent_addr )[9];
-	buf[5] = ( (uint8_t *)parent_addr )[10];
-	buf[6] = ( (uint8_t *)parent_addr )[11];
-	buf[7] = ( (uint8_t *)parent_addr )[12];
-	buf[8] = ( (uint8_t *)parent_addr )[13];
-	buf[9] = ( (uint8_t *)parent_addr )[14];
-	buf[10] = ( (uint8_t *)parent_addr )[15];
-	buf[11] = *uptime_uint8_t++;
-	buf[12] = *uptime_uint8_t++;
-	buf[13] = *uptime_uint8_t++;
-	buf[14] = *uptime_uint8_t++;
-	buf[15] = *rssi_parent_uint8_t++;
-	buf[16] = *rssi_parent_uint8_t++;
-	buf[17] = temp;
-	buf[18] = voltage;
-	buf[19] = DATA_RESERVED;
-	buf[20] = DATA_RESERVED;
-	buf[21] = DATA_RESERVED;
-	buf[22] = DATA_RESERVED;
 
-	simple_udp_sendto(&udp_connection, buf, length + 1, &addr);
+    uint8_t length = 23;
+    uint8_t udp_buffer[length];
+    udp_buffer[0] = PROTOCOL_VERSION_V1;
+    udp_buffer[1] = CURRENT_DEVICE_VERSION;
+    udp_buffer[2] = DATA_TYPE_STATUS;
+    udp_buffer[3] = ( (uint8_t *)parent_addr )[8];
+	udp_buffer[4] = ( (uint8_t *)parent_addr )[9];
+	udp_buffer[5] = ( (uint8_t *)parent_addr )[10];
+	udp_buffer[6] = ( (uint8_t *)parent_addr )[11];
+	udp_buffer[7] = ( (uint8_t *)parent_addr )[12];
+	udp_buffer[8] = ( (uint8_t *)parent_addr )[13];
+	udp_buffer[9] = ( (uint8_t *)parent_addr )[14];
+	udp_buffer[10] = ( (uint8_t *)parent_addr )[15];
+	udp_buffer[11] = *uptime_uint8_t++;
+	udp_buffer[12] = *uptime_uint8_t++;
+	udp_buffer[13] = *uptime_uint8_t++;
+	udp_buffer[14] = *uptime_uint8_t++;
+	udp_buffer[15] = *rssi_parent_uint8_t++;
+	udp_buffer[16] = *rssi_parent_uint8_t++;
+	udp_buffer[17] = temp;
+	udp_buffer[18] = voltage;
+	udp_buffer[19] = DATA_RESERVED;
+	udp_buffer[20] = DATA_RESERVED;
+	udp_buffer[21] = DATA_RESERVED;
+	udp_buffer[22] = DATA_RESERVED;
+
+	simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
 }
 
 
@@ -272,19 +273,19 @@ send_status_packet(const uip_ipaddr_t *parent_addr,
 void
 send_join_packet(const uip_ip6addr_t *dest_addr)
 {
-	uint8_t length = 10;
-	uint8_t buf[length];
-	buf[0] = PROTOCOL_VERSION_V1;
-	buf[1] = CURRENT_DEVICE_VERSION;
-	buf[2] = DATA_TYPE_JOIN;
-	buf[3] = CURRENT_DEVICE_GROUP;
-	buf[4] = CURRENT_DEVICE_SLEEP_TYPE;
-	buf[5] = CURRENT_ABILITY_1BYTE;       //TODO: заменить на нормальную схему со сдвигами
-	buf[6] = CURRENT_ABILITY_2BYTE;
-	buf[7] = CURRENT_ABILITY_3BYTE;
-	buf[8] = CURRENT_ABILITY_4BYTE;
-	buf[9] = DATA_RESERVED;
 	simple_udp_sendto(&udp_connection, buf, length + 1, dest_addr);
+    uint8_t length = 10;
+    uint8_t udp_buffer[length];
+	udp_buffer[0] = PROTOCOL_VERSION_V1;
+	udp_buffer[1] = CURRENT_DEVICE_VERSION;
+	udp_buffer[2] = DATA_TYPE_JOIN;
+	udp_buffer[3] = CURRENT_DEVICE_GROUP;
+	udp_buffer[4] = CURRENT_DEVICE_SLEEP_TYPE;
+	udp_buffer[5] = CURRENT_ABILITY_1BYTE;       //TODO: заменить на нормальную схему со сдвигами
+	udp_buffer[6] = CURRENT_ABILITY_2BYTE;
+	udp_buffer[7] = CURRENT_ABILITY_3BYTE;
+	udp_buffer[8] = CURRENT_ABILITY_4BYTE;
+	udp_buffer[9] = DATA_RESERVED;
 }
 
 
@@ -414,14 +415,14 @@ PROCESS_THREAD(root_ping_process, ev, data)
 		{
 			ping_interval = SHORT_PING_INTERVAL;
 			uip_ds_6_interval_set(CLOCK_SECOND / 5);
-			printf( "DAG Node: Change timer to SHORT interval, DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
+			printf( "DAG Node: Change timer to SHORT interval, new DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
 		}
 
 		if ( (dag_active == 1 && ping_interval != LONG_PING_INTERVAL) || non_answered_ping > 20 )
 		{
 			ping_interval = LONG_PING_INTERVAL;
 			uip_ds_6_interval_set(CLOCK_SECOND);
-			printf( "DAG Node: Change timer to LONG interval, DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
+			printf( "DAG Node: Change timer to LONG interval, new DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
 		}
 
 		if (non_answered_ping > 30)

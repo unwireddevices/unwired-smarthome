@@ -80,8 +80,6 @@ void send_button_status_packet(uint8_t button_number,
 
     if(root_addr != NULL)//(dag_active == 1 && dest_addr != NULL && connection != NULL)
     {
-        printf("Buttons: send message to RPL root node\n");
-
         struct sensor_packet button_sensor_packet;
         uip_ip6addr_copy(&button_sensor_packet.dest_addr, root_addr);
         button_sensor_packet.protocol_version = CURRENT_PROTOCOL_VERSION;
@@ -104,15 +102,6 @@ PROCESS_THREAD(main_process, ev, data)
   printf("Unwired buttons device. HELL-IN-CODE free. I hope.\n");
 
   PROCESS_PAUSE();
-  
-   /*
-  static struct etimer debug_timer1;
-  while(1) {
-    etimer_set(&debug_timer1, (CLOCK_SECOND/10));
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&debug_timer1));
-    send_button_status_packet(&root_addr, &udp_connection, 'b', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
-  }
-  */
 
   while(1) {
     PROCESS_YIELD();
