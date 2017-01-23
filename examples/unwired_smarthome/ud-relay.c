@@ -73,8 +73,11 @@ uint8_t relay_2_state = 0;
 
 /*---------------------------------------------------------------------------*/
 
-PROCESS(main_process, "Relay control process"); //register main button process
-AUTOSTART_PROCESSES(&main_process, &dag_node_process); //set autostart processes
+/* register main button process */
+PROCESS(main_process, "Relay control process");
+
+/* set autostart processes */
+AUTOSTART_PROCESSES(&dag_node_process, &main_process);
 
 /*---------------------------------------------------------------------------*/
 
