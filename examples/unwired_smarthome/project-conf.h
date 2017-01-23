@@ -85,10 +85,6 @@
 #define SET_CCFG_BL_CONFIG_BL_PIN_NUMBER		    0x01 // DIO number 1 for boot loader backdoor
 #define SET_CCFG_BL_CONFIG_BL_ENABLE			    0xC5 // 0xC5 - Enabled boot loader backdoor, 0xFF disable
 
-//#undef DEBOUNCE_DURATION
-#define DEBOUNCE_DURATION						(CLOCK_SECOND >> 10) //tune debounce
-
-
 /*---------------------------------------------------------------------------*/
 
 #endif /* PROJECT_CONF_H_ */
