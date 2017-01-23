@@ -62,6 +62,7 @@
 #include "ud_binary_protocol.h"
 #include "xxf_types_helper.h"
 
+
 #include "fake_headers.h" //no move up! not "krasivo"!
 
 #define UART_DATA_POLL_INTERVAL 5 //in main timer ticks, one tick ~8ms
@@ -76,20 +77,28 @@ struct command_data
 
 volatile static uint8_t udp_message_ready = 0;
 volatile static struct command_data command_message;
+/* Received data via UART */
+
+/* UART-buffer for raw command */
 volatile static uint8_t uart_command_buf[UART_DATA_LENGTH];
+
+/* UART char iterator */
 volatile static uint8_t uart_iterator = 0;
+
+/* The sequence of start and end command */
 static uint8_t uart_magic_sequence[UART_DATA_LENGTH] =
 {0x01,0x16,0x16,0x16,0x16,0x10,
  0x01,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
  0x01,0x01,0x01,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
  0x03,0x16,0x16,0x16,0x17,0x04};
 
+/* UPD connection structure */
 static struct simple_udp_connection udp_connection;
 uip_ip6addr_t destination_address;
 static uint16_t packet_counter;
 
 /*---------------------------------------------------------------------------*/
-
+/* Buttons on DIO 1 */
 SENSORS(&button_e_sensor_click, &button_e_sensor_long_click);
 
 PROCESS(rpl_root_process,"Unwired RPL root and udp data receiver");
@@ -288,8 +297,13 @@ static uip_ipaddr_t *set_global_address(void)
 {
   static uip_ipaddr_t ipaddr;
 
+  /* Fill in the address with zeros and the local prefix */
   uip_ip6addr(&ipaddr, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
+
+  /* Generate an address based on the chip ID */
   uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
+
+  /* Adding autoconfigured address as the device address */
   uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
 
   return &ipaddr;

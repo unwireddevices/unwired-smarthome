@@ -84,22 +84,28 @@
 
 /*---------------------------------------------------------------------------*/
 
-struct simple_udp_connection udp_connection; //struct for simple_udp_send
-volatile uint8_t dag_active = 0; //set to 1, if rpl root found and answer to join packet
+/* struct for simple_udp_send */
+struct simple_udp_connection udp_connection;
+
+/* set to 1, if rpl root found and answer to join packet */
+volatile uint8_t dag_active = 0;
+
 volatile uint8_t non_answered_ping = 0;
 volatile uip_ip6addr_t root_addr;
 static struct command_data message_for_main_process;
+
 volatile clock_time_t debug_interval = DEBUG_INTERVAL;
 volatile clock_time_t ping_interval = SHORT_PING_INTERVAL;
 volatile clock_time_t status_send_interval = STATUS_SEND_INTERVAL;
 
 /*---------------------------------------------------------------------------*/
 
+/* Register button sensors */
 SENSORS(&button_a_sensor_click, &button_a_sensor_long_click,
         &button_b_sensor_click, &button_b_sensor_long_click,
         &button_c_sensor_click, &button_c_sensor_long_click,
         &button_d_sensor_click, &button_d_sensor_long_click,
-        &button_e_sensor_click, &button_e_sensor_long_click); //register button sensors
+        &button_e_sensor_click, &button_e_sensor_long_click);
 
 PROCESS(dag_node_process, "DAG-node process");
 PROCESS(dag_node_button_process, "DAG-node button process");
@@ -114,7 +120,7 @@ udp_receiver(struct simple_udp_connection *c,
              uint16_t sender_port,
              const uip_ipaddr_t *receiver_addr,
              uint16_t receiver_port,
-             const uint8_t *data,
+             const uint8_t *data, //TODO: make "parse" function(data[0] -> data.protocol_version)
              uint16_t datalen)
 {
     led_toggle(LED_A);

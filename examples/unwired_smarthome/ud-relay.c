@@ -79,6 +79,7 @@ AUTOSTART_PROCESSES(&main_process, &dag_node_process); //set autostart processes
 /*---------------------------------------------------------------------------*/
 
 void change_DIO_state(uint8_t dio_number, uint8_t dio_state) //TODO: куча кода дублируется, сделай с этим что-нибудь
+                                                            //TODO: и убери switch-case!
 {
     if (dio_number == 1)
     {
@@ -195,7 +196,6 @@ PROCESS_THREAD(main_process, ev, data)
     if(ev == PROCESS_EVENT_CONTINUE)
     {
       message_data = data;
-
       if (message_data->ability_target == DEVICE_ABILITY_RELAY)
       {
           exe_relay_command(data);

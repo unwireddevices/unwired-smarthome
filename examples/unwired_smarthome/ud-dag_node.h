@@ -62,7 +62,6 @@ struct sensor_packet
 
 void send_sensor_event(struct sensor_packet *packet);
 
-
 PROCESS_NAME(dag_node_process);
 PROCESS_NAME(dag_node_button_process);
 PROCESS_NAME(root_ping_process);
