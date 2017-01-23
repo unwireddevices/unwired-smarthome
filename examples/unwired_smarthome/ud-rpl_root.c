@@ -61,6 +61,7 @@
 
 #include "ud_binary_protocol.h"
 #include "xxf_types_helper.h"
+#include "dev/watchdog.h"
 
 
 #include "fake_headers.h" //no move up! not "krasivo"!
@@ -70,14 +71,15 @@
 
 struct command_data
 {
-    uint8_t ability_target;
-    uint8_t ability_number;
-    uint8_t ability_state;
+    volatile uip_ip6addr_t destination_address;
+    volatile uint8_t ability_target;
+    volatile uint8_t ability_number;
+    volatile uint8_t ability_state;
+    volatile uint8_t ready_to_send;
 };
 
-volatile static uint8_t udp_message_ready = 0;
-volatile static struct command_data command_message;
 /* Received data via UART */
+static struct command_data command_message;
 
 /* UART-buffer for raw command */
 volatile static uint8_t uart_command_buf[UART_DATA_LENGTH];
@@ -94,8 +96,6 @@ static uint8_t uart_magic_sequence[UART_DATA_LENGTH] =
 
 /* UPD connection structure */
 static struct simple_udp_connection udp_connection;
-uip_ip6addr_t destination_address;
-static uint16_t packet_counter;
 
 /*---------------------------------------------------------------------------*/
 /* Buttons on DIO 1 */
@@ -107,15 +107,10 @@ PROCESS(send_command_process,"UDP command sender");
 AUTOSTART_PROCESSES(&rpl_root_process);
 
 /*---------------------------------------------------------------------------*/
-void send_confirmation_packet(const uip_ip6addr_t *dest_addr,
-                              struct simple_udp_connection *connection)
+void send_confirmation_packet(const uip_ip6addr_t *dest_addr)
 {
     if (dest_addr == NULL) {
         printf("ERROR: dest_addr in send_confirmation_packet null\n");
-        return;
-    }
-    if (connection == NULL) {
-        printf("ERROR: connection in send_confirmation_packet null\n");
         return;
     }
 
@@ -131,39 +126,38 @@ void send_confirmation_packet(const uip_ip6addr_t *dest_addr,
     buf[7] = DATA_RESERVED;
     buf[8] = DATA_RESERVED;
     buf[9] = DATA_RESERVED;
-    simple_udp_sendto(connection, buf, length + 1, dest_addr);
+    simple_udp_sendto(&udp_connection, buf, length + 1, dest_addr);
 }
 
 /*---------------------------------------------------------------------------*/
 
-void send_command_packet(const uip_ip6addr_t *dest_addr,
-                          struct simple_udp_connection *connection,
-                          uint8_t ability_target,
-                          uint8_t ability_number,
-                          uint8_t ability_state)
+void send_command_packet(struct command_data *command_message)
 {
-    if (dest_addr == NULL) {
+    if (&command_message->destination_address == NULL) {
         printf("ERROR: dest_addr in send_command_packet null\n");
         return;
     }
-    if (connection == NULL || connection->udp_conn == NULL) {
+    if (&udp_connection.udp_conn == NULL) { //указатель на что?
         printf("ERROR: connection in send_command_packet null\n");
         return;
     }
+
+    uip_ip6addr_t addr;
+    uip_ip6addr_copy(&addr, &command_message->destination_address);
 
     int length = 10;
     char udp_buffer[length];
     udp_buffer[0] = PROTOCOL_VERSION_V1;
     udp_buffer[1] = DEVICE_VERSION_V1;
     udp_buffer[2] = DATA_TYPE_COMMAND;
-    udp_buffer[3] = ability_target;
-    udp_buffer[4] = ability_number;
-    udp_buffer[5] = ability_state;
+    udp_buffer[3] = command_message->ability_target;
+    udp_buffer[4] = command_message->ability_number;
+    udp_buffer[5] = command_message->ability_state;
     udp_buffer[6] = DATA_RESERVED;
     udp_buffer[7] = DATA_RESERVED;
     udp_buffer[8] = DATA_RESERVED;
     udp_buffer[9] = DATA_RESERVED;
-    simple_udp_sendto(connection, udp_buffer, length + 1, dest_addr);
+    simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
 
 }
 
@@ -252,12 +246,12 @@ static int uart_data_receiver(unsigned char c)
         {
                 for (int i = 0; i <= 15; i++)
                 {
-                   destination_address.u8[i] = uart_command_buf[i+7];
+                   command_message.destination_address.u8[i] = uart_command_buf[i+7];
                 }
                 command_message.ability_number = uart_command_buf[24];
                 command_message.ability_state = uart_command_buf[25];
                 command_message.ability_target = uart_command_buf[23];
-                udp_message_ready = 1;
+                command_message.ready_to_send = 1;
         }
         else
         {
@@ -285,7 +279,7 @@ static void udp_data_receiver(struct simple_udp_connection *connection,
 
     if (data[0] == PROTOCOL_VERSION_V1 && data[2] == DATA_TYPE_JOIN )
     {
-        send_confirmation_packet(sender_addr, connection);
+        send_confirmation_packet(sender_addr);
     }
 
     led_off(LED_A);
@@ -345,17 +339,11 @@ PROCESS_THREAD(send_command_process, ev, data)
   while(1) {
       etimer_set(&send_command_process_timer, UART_DATA_POLL_INTERVAL);
       PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_command_process_timer));
-      if (udp_message_ready == 1)
+      if (command_message.ready_to_send == 1)
       {
-            disable_interrupts();
-            packet_counter++;
-            printf("Send packet %"PRIu16"\n", packet_counter);
-            send_command_packet(&destination_address,
-                                &udp_connection,
-                                command_message.ability_target,
-                                command_message.ability_number,
-                                command_message.ability_state);
-            udp_message_ready = 0;
+            disable_interrupts(); //надо ли запрещать прерывания? надо ли очищать буфер uart-а при запрете/разрешения прерывания?
+            send_command_packet(&command_message);
+            command_message.ready_to_send = 0;
             enable_interrupts();
       }
   }
@@ -406,28 +394,14 @@ PROCESS_THREAD(rpl_root_process, ev, data)
     PROCESS_WAIT_EVENT();
     if(ev == sensors_event) {
         if(data == &button_e_sensor_click) {
-            destination_address.u8[0] = 0xFE;
-            destination_address.u8[1] = 0x80;
-            destination_address.u8[2] = 0x00;
-            destination_address.u8[3] = 0x00;
-            destination_address.u8[4] = 0x00;
-            destination_address.u8[5] = 0x00;
-            destination_address.u8[6] = 0x00;
-            destination_address.u8[7] = 0x00;
-            destination_address.u8[8] = 0x02;
-            destination_address.u8[9] = 0x12;
-            destination_address.u8[10] = 0x4b;
-            destination_address.u8[11] = 0x00;
-            destination_address.u8[12] = 0x0C;
-            destination_address.u8[13] = 0x47;
-            destination_address.u8[14] = 0x48;
-            destination_address.u8[15] = 0x86;
-            command_message.ability_target = 0x11;
-            command_message.ability_number = 0x01;
-            command_message.ability_state = 0x02;
-            udp_message_ready = 1;
-            //printf("Initiating global repair\n");
-            //rpl_repair_root(RPL_DEFAULT_INSTANCE);
+            printf("Initiating global repair\n");
+            rpl_repair_root(RPL_DEFAULT_INSTANCE);
+        }
+        if (data == &button_e_sensor_long_click)
+        {
+            led_on(LED_A);
+            printf("SYSTEM: Button E long click, reboot\n");
+            watchdog_reboot();
         }
     }
   }

@@ -164,10 +164,10 @@ void exe_relay_command(struct command_data *command_relay)
            command_relay->ability_target,
            command_relay->ability_state,
            command_relay->ability_number);
-    uint8_t number_ability = command_relay->ability_number;
-    if (number_ability == 1 || number_ability == 2)
+
+    if (command_relay->ability_number == 1 || command_relay->ability_number == 2)
     {
-        change_DIO_state(number_ability, command_relay->ability_state);
+        change_DIO_state(command_relay->ability_number, command_relay->ability_state);
     }
     else
     {
@@ -198,7 +198,7 @@ PROCESS_THREAD(main_process, ev, data)
       message_data = data;
       if (message_data->ability_target == DEVICE_ABILITY_RELAY)
       {
-          exe_relay_command(data);
+          exe_relay_command(message_data);
       }
     }
   }
