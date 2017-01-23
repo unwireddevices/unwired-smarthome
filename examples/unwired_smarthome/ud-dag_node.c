@@ -122,33 +122,35 @@ udp_receiver(struct simple_udp_connection *c,
 
 	if (data[0] == PROTOCOL_VERSION_V1 && data[1] == CURRENT_DEVICE_VERSION)
 	{
-		switch ( data[2] )
-		{
-				case DATA_TYPE_CONFIRM:
-					printf("DAG Node: DAG join packet confirmation received, DAG active\n");
-					led_off(LED_A);
-					dag_active = 1;
-					uip_ipaddr_copy(&root_addr, sender_addr);
-					non_answered_ping = 0;
-					if (process_is_running(&status_send_process) == 0)
-					{
-						process_start(&status_send_process, NULL);
-					}
-					break;
-				case DATA_TYPE_COMMAND:
-					printf("DAG Node: Command packet received\n");
+	    if (data[2] == DATA_TYPE_CONFIRM)
+	    {
+            printf("DAG Node: DAG join packet confirmation received, DAG active\n");
+            led_off(LED_A);
+            dag_active = 1;
+            uip_ipaddr_copy(&root_addr, sender_addr);
+            non_answered_ping = 0;
+            if (process_is_running(&status_send_process) == 0)
+            {
+                process_start(&status_send_process, NULL);
+            }
+	    }
 
-					message_for_main_process.ability_target = data[3];
-					message_for_main_process.ability_number = data[4];
-					message_for_main_process.ability_state = data[5];
-					process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
-					break;
-				default:
-				    printf("DAG Node: Incompatible data type UDP packer from");
-				    uip_debug_ip6addr_print(sender_addr);
-				    printf("(%02x%02x%02x)\n", data[0],data[1],data[2]);
-					break;
-		} /* switch */
+        if (data[2] == DATA_TYPE_COMMAND)
+        {
+            printf("DAG Node: Command packet received\n");
+            message_for_main_process.ability_target = data[3];
+            message_for_main_process.ability_number = data[4];
+            message_for_main_process.ability_state = data[5];
+            process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
+        }
+
+        if (data[2] != DATA_TYPE_COMMAND && data[2] == DATA_TYPE_CONFIRM)
+        {
+            printf("DAG Node: Incompatible data type UDP packer from");
+            uip_debug_ip6addr_print(sender_addr);
+            printf("(%02x%02x%02x)\n", data[0],data[1],data[2]);
+        }
+
 	}
 	else
 	{
