@@ -65,8 +65,11 @@
                                  IOC_INT_ENABLE   | IOC_IOMODE_NORMAL | \
                                  IOC_NO_WAKE_UP   | IOC_INPUT_ENABLE)
 /*---------------------------------------------------------------------------*/
-#define SHORT_INTERVAL 10 //as timers tick(1 tick ~ 8ms)
-#define LONG_INTERVAL 90 //as timers tick(1 tick ~ 8ms)
+#define SHORT_INTERVAL_MS 120
+#define LONG_INTERVAL_MS 720
+
+#define SHORT_INTERVAL SHORT_INTERVAL_MS*CLOCK_SECOND/1000
+#define LONG_INTERVAL LONG_INTERVAL_MS*CLOCK_SECOND/1000
 
 volatile uint32_t button_a_last_low = 0;
 volatile uint32_t button_b_last_low = 0;
@@ -87,9 +90,13 @@ PROCESS_THREAD(button_sensor_short_process, ev, data)
 {
     PROCESS_BEGIN();
 
-    static current_button_short = *(uint8_t *)data;
-    static uint32_t current_button_state = ti_lib_gpio_read_dio(current_button_short);
-    static uint32_t current_time = clock_time();
+    if (ev == PROCESS_EVENT_EXIT) {
+        return 1;
+    }
+
+    current_button_short = *(uint8_t *)data;
+    uint32_t current_button_state = ti_lib_gpio_read_dio(current_button_short);
+    uint32_t current_time = clock_time();
 
     if (current_button_short == BOARD_IOID_KEY_A)
     {
@@ -101,6 +108,7 @@ PROCESS_THREAD(button_sensor_short_process, ev, data)
             sensors_changed(&button_a_sensor_change_off);
         else
             sensors_changed(&button_a_sensor_change_on);
+        return 1;
     }
 
     if (current_button_short == BOARD_IOID_KEY_B)
@@ -113,6 +121,7 @@ PROCESS_THREAD(button_sensor_short_process, ev, data)
             sensors_changed(&button_b_sensor_change_off);
         else
             sensors_changed(&button_b_sensor_change_on);
+        return 1;
     }
 
     if (current_button_short == BOARD_IOID_KEY_C)
@@ -125,6 +134,7 @@ PROCESS_THREAD(button_sensor_short_process, ev, data)
             sensors_changed(&button_c_sensor_change_off);
         else
             sensors_changed(&button_c_sensor_change_on);
+        return 1;
     }
 
     if (current_button_short == BOARD_IOID_KEY_D)
@@ -137,6 +147,7 @@ PROCESS_THREAD(button_sensor_short_process, ev, data)
             sensors_changed(&button_d_sensor_change_off);
         else
             sensors_changed(&button_d_sensor_change_on);
+        return 1;
     }
 
     if (current_button_short == BOARD_IOID_KEY_E)
@@ -149,6 +160,7 @@ PROCESS_THREAD(button_sensor_short_process, ev, data)
             sensors_changed(&button_e_sensor_change_off);
         else
             sensors_changed(&button_e_sensor_change_on);
+        return 1;
     }
 
     PROCESS_END();
@@ -160,7 +172,12 @@ PROCESS(button_sensor_long_process, "Button sensor long process");
 PROCESS_THREAD(button_sensor_long_process, ev, data)
 {
   PROCESS_BEGIN();
-  static current_button_long = *(uint8_t *)data;
+
+  if (ev == PROCESS_EVENT_EXIT) {
+      return 1;
+  }
+
+  current_button_long = *(uint8_t *)data;
   etimer_reset(&button_long_timer);
   etimer_set(&button_long_timer, LONG_INTERVAL);
   PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&button_long_timer));
@@ -178,8 +195,6 @@ PROCESS_THREAD(button_sensor_long_process, ev, data)
         sensors_changed(&button_e_sensor_long_click);
   }
 
-  etimer_set(&button_short_timer, SHORT_INTERVAL);
-  PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&button_short_timer));
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
@@ -195,9 +210,9 @@ void button_start_process(struct process *p, uint32_t data) {
 static void
 button_press_handler(uint8_t ioid)
 {
-    static uint8_t current_button_ioid = ioid;
-    static uint32_t current_button_state = ti_lib_gpio_read_dio(ioid);
-    static uint32_t current_time = clock_time();
+    uint8_t current_button_ioid = ioid;
+    uint32_t current_button_state = ti_lib_gpio_read_dio(ioid);
+    uint32_t current_time = clock_time();
     //printf("SENSOR: button %"PRIu8" change state to %"PRIu32" on %"PRIu32" tick\n", current_button_ioid, current_button_state, current_time);
 
     if(ioid == BOARD_IOID_KEY_A) {
@@ -243,7 +258,6 @@ button_press_handler(uint8_t ioid)
                 process_exit(&button_sensor_long_process);
         }
     }
-
 
     if(ioid == BOARD_IOID_KEY_E) {
         button_start_process(&button_sensor_short_process, current_button_ioid);
