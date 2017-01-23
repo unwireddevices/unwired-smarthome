@@ -354,7 +354,7 @@ PROCESS_THREAD(send_command_process, ev, data)
 
 PROCESS_THREAD(rpl_root_process, ev, data)
 {
-  uip_ipaddr_t *ipaddr = NULL;
+  static uip_ipaddr_t *ipaddr = NULL;
 
   PROCESS_BEGIN();
 

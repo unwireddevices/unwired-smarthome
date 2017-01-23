@@ -181,7 +181,7 @@ PROCESS_THREAD(main_process, ev, data)
   PROCESS_BEGIN();
   printf("Unwired relay device. HELL-IN-CODE free. I hope.\n");
 
-  struct command_data *message_data = NULL;
+  static struct command_data *message_data = NULL;
 
   PROCESS_PAUSE();
   
