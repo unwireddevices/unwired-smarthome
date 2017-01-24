@@ -123,7 +123,7 @@ udp_receiver(struct simple_udp_connection *c,
              const uint8_t *data, //TODO: make "parse" function(data[0] -> data.protocol_version)
              uint16_t datalen)
 {
-    led_on(LED_A);
+    led_toggle(LED_A);
 
 
 	if (data[0] == PROTOCOL_VERSION_V1 && data[1] == CURRENT_DEVICE_VERSION)
@@ -150,7 +150,7 @@ udp_receiver(struct simple_udp_connection *c,
             process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
         }
 
-        if (data[2] != DATA_TYPE_COMMAND && data[2] != DATA_TYPE_CONFIRM)
+        if (data[2] != DATA_TYPE_COMMAND && data[2] == DATA_TYPE_CONFIRM)
         {
             printf("DAG Node: Incompatible data type UDP packer from");
             uip_debug_ip6addr_print(sender_addr);
@@ -165,7 +165,7 @@ udp_receiver(struct simple_udp_connection *c,
         printf("(%02x%02x%02x)\n", data[0],data[1],data[2]);
 	}
 
-	led_off(LED_A);
+	led_toggle(LED_A);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -316,7 +316,7 @@ static void
 dag_root_find(void)
 {
 	rpl_dag_t *dag = NULL;
-
+	led_on(LED_A);
 
 	if (uip_ds6_get_global(ADDR_PREFERRED) != NULL)
 	{
@@ -345,6 +345,8 @@ dag_root_find(void)
 		dag_active = 0;
 	}
 
+
+	led_off(LED_A);
 }
 
 
@@ -363,9 +365,9 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
 		{
 			if (data == &button_e_sensor_click)
 			{
-				printf("DAG Node: Local repair activated\n");
-				rpl_dag_t *dag = rpl_get_any_dag();
-				rpl_local_repair(dag->instance);
+				//printf("DAG Node: Local repair activated\n");
+				//rpl_dag_t *dag = rpl_get_any_dag();
+				//rpl_local_repair(dag->instance);
 			}
 
 			if (data == &button_e_sensor_long_click)

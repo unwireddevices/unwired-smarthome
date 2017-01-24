@@ -69,17 +69,15 @@
 
 /*---------------------------------------------------------------------------*/
 
-/* register main button process */
-PROCESS(main_process, "UD Buttons control process");
-
-/* set autostart processes */
-AUTOSTART_PROCESSES(&dag_node_process, &main_process);
+PROCESS(main_process, "UD Buttons control process"); //register main button process
+AUTOSTART_PROCESSES(&dag_node_process, &main_process); //set autostart processes
 
 /*---------------------------------------------------------------------------*/
 
 void send_button_status_packet(uint8_t button_number,
                                uint8_t click_type)
 {
+
     if(dag_active == 1)
     {
         struct sensor_packet button_sensor_packet;
