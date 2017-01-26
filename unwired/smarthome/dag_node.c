@@ -475,6 +475,8 @@ PROCESS_THREAD(dag_node_process, ev, data)
 	}
 
 	printf("DAG Node: started, %s mode\n", rpl_get_mode() == RPL_MODE_LEAF ? "leaf" : "no-leaf");
+    printf("DAG Node: DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
+    printf("DAG Node: RDC check rate: %" PRIu8 " Hz\n", get_rdc_channel_check_rate() );
 
 	process_start(&dag_node_button_process, NULL);
 	process_start(&root_ping_process, NULL);
