@@ -220,6 +220,8 @@ PROCESS_THREAD(button_sensor_long_process, ev, data)
         sensors_changed(&button_e_sensor_long_click);
   }
 
+  printf_log("SENSOR: exit from long_process on %"PRIu32" tick\n", clock_time());
+
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
@@ -228,6 +230,7 @@ PROCESS_THREAD(button_sensor_long_process, ev, data)
 void button_start_process(struct process *p, uint32_t data) {
     if (process_is_running(p) != 0) {
         process_exit(p);
+        printf_log("SENSOR: process exit on %"PRIu32" tick\n", clock_time());
     }
     process_start(p, (void *)&data);
 }
@@ -238,9 +241,17 @@ button_press_handler(uint8_t ioid)
     uint8_t current_button_ioid = ioid;
     uint32_t current_button_state = ti_lib_gpio_read_dio(ioid);
     uint32_t current_time = clock_time();
-    //printf("SENSOR: button %"PRIu8" change state to %"PRIu32" on %"PRIu32" tick\n", current_button_ioid, current_button_state, current_time);
+    printf_log("SENSOR: button %"PRIu8" change state to %"PRIu32" on %"PRIu32" tick\n", current_button_ioid, current_button_state, current_time);
+
+
+
 
     if(ioid == BOARD_IOID_KEY_A) {
+        if (current_time - button_a_last_low < DEBOUNCE_INTERVAL_TICS && current_button_state == 1)
+        {
+            printf_log("SENSOR: button A handler: last low %"PRIu32" tick ago, real time %"PRIu32", last low %"PRIu32"\n", current_time-button_a_last_low, clock_time(), button_a_last_low);
+            return;
+        }
         button_start_process(&button_sensor_short_process, current_button_ioid);
         if (current_button_state == 0) {
             button_a_last_low = current_time;
@@ -252,6 +263,11 @@ button_press_handler(uint8_t ioid)
     }
 
     if(ioid == BOARD_IOID_KEY_B) {
+        if (current_time - button_b_last_low < DEBOUNCE_INTERVAL_TICS && current_button_state == 1)
+        {
+            printf_log("SENSOR: button B handler: last low %"PRIu32" tick ago, real time %"PRIu32", last low %"PRIu32"\n", current_time-button_b_last_low, clock_time(), button_b_last_low);
+            return;
+        }
         button_start_process(&button_sensor_short_process, current_button_ioid);
         if (current_button_state == 0) {
             button_b_last_low = current_time;
@@ -263,6 +279,11 @@ button_press_handler(uint8_t ioid)
     }
 
     if(ioid == BOARD_IOID_KEY_C) {
+        if (current_time - button_c_last_low < DEBOUNCE_INTERVAL_TICS && current_button_state == 1)
+        {
+            printf_log("SENSOR: button C handler: last low %"PRIu32" tick ago, real time %"PRIu32", last low %"PRIu32"\n", current_time-button_c_last_low, clock_time(), button_c_last_low);
+            return;
+        }
         button_start_process(&button_sensor_short_process, current_button_ioid);
         if (current_button_state == 0) {
             button_c_last_low = current_time;
@@ -274,6 +295,11 @@ button_press_handler(uint8_t ioid)
     }
 
     if(ioid == BOARD_IOID_KEY_D) {
+        if (current_time - button_d_last_low < DEBOUNCE_INTERVAL_TICS && current_button_state == 1)
+        {
+            printf_log("SENSOR: button D handler: last low %"PRIu32" tick ago, real time %"PRIu32", last low %"PRIu32"\n", current_time-button_d_last_low, clock_time(), button_d_last_low);
+            return;
+        }
         button_start_process(&button_sensor_short_process, current_button_ioid);
         if (current_button_state == 0) {
             button_d_last_low = current_time;
@@ -285,6 +311,11 @@ button_press_handler(uint8_t ioid)
     }
 
     if(ioid == BOARD_IOID_KEY_E) {
+        if (current_time - button_e_last_low < DEBOUNCE_INTERVAL_TICS && current_button_state == 1)
+        {
+            printf_log("SENSOR: button E handler: last low %"PRIu32" tick ago, real time %"PRIu32", last low %"PRIu32"\n", current_time-button_e_last_low, clock_time(), button_e_last_low);
+            return;
+        }
         button_start_process(&button_sensor_short_process, current_button_ioid);
         if (current_button_state == 0) {
             button_e_last_low = current_time;
