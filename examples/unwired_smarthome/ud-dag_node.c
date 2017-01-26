@@ -84,24 +84,28 @@
 
 /*---------------------------------------------------------------------------*/
 
-//unsigned char uart_char;
-//int start = 0;
-struct simple_udp_connection udp_connection; //struct for simple_udp_send
-volatile uint8_t dag_active = 0; //set to 1, if rpl root found and answer to join packet
+/* struct for simple_udp_send */
+struct simple_udp_connection udp_connection;
+
+/* set to 1, if rpl root found and answer to join packet */
+volatile uint8_t dag_active = 0;
+
 volatile uint8_t non_answered_ping = 0;
-uip_ip6addr_t root_addr;
+volatile uip_ip6addr_t root_addr;
 static struct command_data message_for_main_process;
+
 volatile clock_time_t debug_interval = DEBUG_INTERVAL;
 volatile clock_time_t ping_interval = SHORT_PING_INTERVAL;
 volatile clock_time_t status_send_interval = STATUS_SEND_INTERVAL;
 
 /*---------------------------------------------------------------------------*/
 
+/* Register button sensors */
 SENSORS(&button_a_sensor_click, &button_a_sensor_long_click,
         &button_b_sensor_click, &button_b_sensor_long_click,
         &button_c_sensor_click, &button_c_sensor_long_click,
         &button_d_sensor_click, &button_d_sensor_long_click,
-        &button_e_sensor_click, &button_e_sensor_long_click); //register button sensors
+        &button_e_sensor_click, &button_e_sensor_long_click);
 
 PROCESS(dag_node_process, "DAG-node process");
 PROCESS(dag_node_button_process, "DAG-node button process");
@@ -116,46 +120,49 @@ udp_receiver(struct simple_udp_connection *c,
              uint16_t sender_port,
              const uip_ipaddr_t *receiver_addr,
              uint16_t receiver_port,
-             const uint8_t *data,
+             const uint8_t *data, //TODO: make "parse" function(data[0] -> data.protocol_version)
              uint16_t datalen)
 {
-	led_on(LED_A);
-	printf("DEBUG: UDP packer: %02x,%02x,%02x from ", data[0],data[1],data[2]);
-	uip_debug_ipaddr_print(sender_addr);
-	printf("\n");
+    led_on(LED_A);
+
 
 	if (data[0] == PROTOCOL_VERSION_V1 && data[1] == CURRENT_DEVICE_VERSION)
 	{
-		switch ( data[2] )
-		{
-				case DATA_TYPE_CONFIRM:
-					printf("DAG Node: DAG join packet confirmation received, DAG active\n");
-					led_off(LED_A);
-					dag_active = 1;
-					root_addr = *sender_addr;
-					non_answered_ping = 0;
-					if (process_is_running(&status_send_process) == 0)
-					{
-						process_start(&status_send_process, NULL);
-					}
+	    if (data[2] == DATA_TYPE_CONFIRM)
+	    {
+            printf("DAG Node: DAG join packet confirmation received, DAG active\n");
+            led_off(LED_A);
+            dag_active = 1;
+            uip_ipaddr_copy(&root_addr, sender_addr);
+            non_answered_ping = 0;
+            if (process_is_running(&status_send_process) == 0)
+            {
+                process_start(&status_send_process, NULL);
+            }
+	    }
 
-					break;
-				case DATA_TYPE_COMMAND:
-					printf("DAG Node: Command packet received\n");
+        if (data[2] == DATA_TYPE_COMMAND)
+        {
+            printf("DAG Node: Command packet received\n");
+            message_for_main_process.ability_target = data[3];
+            message_for_main_process.ability_number = data[4];
+            message_for_main_process.ability_state = data[5];
+            process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
+        }
 
-					message_for_main_process.ability_target = data[3];
-					message_for_main_process.ability_number = data[4];
-					message_for_main_process.ability_state = data[5];
-					process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
-					break;
-				default:
-					printf("DAG NODE: Incompatible data type(%02x)!\n", data[2]);
-					break;
-		} /* switch */
+        if (data[2] != DATA_TYPE_COMMAND && data[2] != DATA_TYPE_CONFIRM)
+        {
+            printf("DAG Node: Incompatible data type UDP packer from");
+            uip_debug_ip6addr_print(sender_addr);
+            printf("(%02x%02x%02x)\n", data[0],data[1],data[2]);
+        }
+
 	}
 	else
 	{
-		printf("DAG NODE: Incompatible device or protocol version!\n");
+	    printf("DAG Node: Incompatible device or protocol version UDP packer from");
+        uip_debug_ip6addr_print(sender_addr);
+        printf("(%02x%02x%02x)\n", data[0],data[1],data[2]);
 	}
 
 	led_off(LED_A);
@@ -199,66 +206,107 @@ print_debug_data(void)
 
 /*---------------------------------------------------------------------------*/
 
+void send_sensor_event(struct sensor_packet *packet)
+{
+
+    uip_ip6addr_t addr;
+    uip_ip6addr_copy(&addr, &root_addr);
+
+    printf("DAG node: send sensor-event message to DAG-root node:");
+    uip_debug_ip6addr_print(&addr);
+    printf("\n");
+
+    uint8_t lenght = 10;
+    uint8_t udp_buffer[lenght];
+    udp_buffer[0] = packet->protocol_version;
+    udp_buffer[1] = packet->device_version;
+    udp_buffer[2] = packet->data_type;
+
+    udp_buffer[3] = packet->number_ability;
+    udp_buffer[4] = DATA_RESERVED;
+    udp_buffer[5] = packet->sensor_number;
+    udp_buffer[6] = packet->sensor_event;
+    udp_buffer[7] = DATA_RESERVED;
+    udp_buffer[8] = DATA_RESERVED;
+    udp_buffer[9] = DATA_RESERVED;
+    simple_udp_sendto(&udp_connection, udp_buffer, lenght + 1, &addr);
+}
+
+/*---------------------------------------------------------------------------*/
+
 void
-send_status_packet(const uip_ip6addr_t *dest_addr,
-                   struct simple_udp_connection *connection,
-                   const uip_ipaddr_t *parent_addr,
+send_status_packet(const uip_ipaddr_t *parent_addr,
                    uint32_t uptime,
                    int16_t rssi_parent,
                    uint8_t temp,
                    uint8_t voltage)
 {
 	uint8_t *uptime_uint8_t = (uint8_t *)&uptime;
-	uint8_t *rssi_parent_uint8_t = (int8_t *)&rssi_parent;
+	int8_t *rssi_parent_uint8_t = (int8_t *)&rssi_parent;
+	uip_ip6addr_t addr;
+	uip_ip6addr_copy(&addr, &root_addr);
 
-	uint8_t length = 23;
-	uint8_t buf[length];
-	buf[0] = PROTOCOL_VERSION_V1;
-	buf[1] = CURRENT_DEVICE_VERSION;
-	buf[2] = DATA_TYPE_STATUS;
-	buf[3] = ( (uint8_t *)parent_addr )[8];
-	buf[4] = ( (uint8_t *)parent_addr )[9];
-	buf[5] = ( (uint8_t *)parent_addr )[10];
-	buf[6] = ( (uint8_t *)parent_addr )[11];
-	buf[7] = ( (uint8_t *)parent_addr )[12];
-	buf[8] = ( (uint8_t *)parent_addr )[13];
-	buf[9] = ( (uint8_t *)parent_addr )[14];
-	buf[10] = ( (uint8_t *)parent_addr )[15];
-	buf[11] = *uptime_uint8_t++;
-	buf[12] = *uptime_uint8_t++;
-	buf[13] = *uptime_uint8_t++;
-	buf[14] = *uptime_uint8_t++;
-	buf[15] = *rssi_parent_uint8_t++;
-	buf[16] = *rssi_parent_uint8_t++;
-	buf[17] = temp;
-	buf[18] = voltage;
-	buf[19] = DATA_RESERVED;
-	buf[20] = DATA_RESERVED;
-	buf[21] = DATA_RESERVED;
-	buf[22] = DATA_RESERVED;
 
-	simple_udp_sendto(connection, buf, length + 1, dest_addr);
+    printf("DAG node: Send status packet to DAG-root node:");
+    uip_debug_ip6addr_print(&addr);
+    printf("\n");
+
+    uint8_t length = 23;
+    uint8_t udp_buffer[length];
+    udp_buffer[0] = PROTOCOL_VERSION_V1;
+    udp_buffer[1] = CURRENT_DEVICE_VERSION;
+    udp_buffer[2] = DATA_TYPE_STATUS;
+    udp_buffer[3] = ( (uint8_t *)parent_addr )[8];
+	udp_buffer[4] = ( (uint8_t *)parent_addr )[9];
+	udp_buffer[5] = ( (uint8_t *)parent_addr )[10];
+	udp_buffer[6] = ( (uint8_t *)parent_addr )[11];
+	udp_buffer[7] = ( (uint8_t *)parent_addr )[12];
+	udp_buffer[8] = ( (uint8_t *)parent_addr )[13];
+	udp_buffer[9] = ( (uint8_t *)parent_addr )[14];
+	udp_buffer[10] = ( (uint8_t *)parent_addr )[15];
+	udp_buffer[11] = *uptime_uint8_t++;
+	udp_buffer[12] = *uptime_uint8_t++;
+	udp_buffer[13] = *uptime_uint8_t++;
+	udp_buffer[14] = *uptime_uint8_t++;
+	udp_buffer[15] = *rssi_parent_uint8_t++;
+	udp_buffer[16] = *rssi_parent_uint8_t++;
+	udp_buffer[17] = temp;
+	udp_buffer[18] = voltage;
+	udp_buffer[19] = DATA_RESERVED;
+	udp_buffer[20] = DATA_RESERVED;
+	udp_buffer[21] = DATA_RESERVED;
+	udp_buffer[22] = DATA_RESERVED;
+
+	simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
 }
 
 
 /*---------------------------------------------------------------------------*/
 
 void
-send_join_packet(const uip_ip6addr_t *dest_addr, struct simple_udp_connection *connection)
+send_join_packet(const uip_ip6addr_t *dest_addr)
 {
-	uint8_t length = 10;
-	uint8_t buf[length];
-	buf[0] = PROTOCOL_VERSION_V1;
-	buf[1] = CURRENT_DEVICE_VERSION;
-	buf[2] = DATA_TYPE_JOIN;
-	buf[3] = CURRENT_DEVICE_GROUP;
-	buf[4] = CURRENT_DEVICE_SLEEP_TYPE;
-	buf[5] = CURRENT_ABILITY_1BYTE;       //TODO: заменить на нормальную схему со сдвигами
-	buf[6] = CURRENT_ABILITY_2BYTE;
-	buf[7] = CURRENT_ABILITY_3BYTE;
-	buf[8] = CURRENT_ABILITY_4BYTE;
-	buf[9] = DATA_RESERVED;
-	simple_udp_sendto(connection, buf, length + 1, dest_addr);
+
+    uip_ip6addr_t addr;
+    uip_ip6addr_copy(&addr, dest_addr);
+
+	printf("DAG node: Send join packet to DAG-root node:");
+    uip_debug_ip6addr_print(&addr);
+    printf("\n");
+
+    uint8_t length = 10;
+    uint8_t udp_buffer[length];
+	udp_buffer[0] = PROTOCOL_VERSION_V1;
+	udp_buffer[1] = CURRENT_DEVICE_VERSION;
+	udp_buffer[2] = DATA_TYPE_JOIN;
+	udp_buffer[3] = CURRENT_DEVICE_GROUP;
+	udp_buffer[4] = CURRENT_DEVICE_SLEEP_TYPE;
+	udp_buffer[5] = CURRENT_ABILITY_1BYTE;       //TODO: заменить на нормальную схему со сдвигами
+	udp_buffer[6] = CURRENT_ABILITY_2BYTE;
+	udp_buffer[7] = CURRENT_ABILITY_3BYTE;
+	udp_buffer[8] = CURRENT_ABILITY_4BYTE;
+	udp_buffer[9] = DATA_RESERVED;
+	simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
 }
 
 
@@ -268,43 +316,35 @@ static void
 dag_root_find(void)
 {
 	rpl_dag_t *dag = NULL;
-	uip_ip6addr_t addr;
 
-	uip_ds6_addr_t *addr_desc = uip_ds6_get_global(ADDR_PREFERRED);
-	if (addr_desc != NULL)
+
+	if (uip_ds6_get_global(ADDR_PREFERRED) != NULL)
 	{
 		dag = rpl_get_any_dag();
-		if (dag)
-		{
-			led_blink(LED_A);
-			if (&dag->dag_id)
-			{
-				if (dag_active == 0)
-				{
-					uip_ip6addr_copy(&addr, &dag->dag_id);
+        if (dag != NULL && &dag->dag_id)
+        {
+            if (dag_active == 0)
+            {
+                send_join_packet(&dag->dag_id);
+                non_answered_ping++;
+            }
+        }
+        else
+        {
+            dag_active = 0;
+        }
 
-					printf("DAG node: send join packet to rpl root");
-					uip_debug_ip6addr_print(&addr);
-					printf("\n");
-					send_join_packet(&addr, &udp_connection);
-					if (non_answered_ping < 100)
-					{
-						non_answered_ping++;
-					}
-				}
-			}
-			else
-			{
-				//printf("RPL: address destination: none \n");
-				dag_active = 0;
-			}
-		}
+        if (dag != NULL && rpl_parent_is_reachable(dag->preferred_parent) == 0)
+        {
+            dag_active = 0;
+        }
 	}
 
 	if (non_answered_ping > MAX_NON_ANSWERED_PINGS)
 	{
 		dag_active = 0;
 	}
+
 }
 
 
@@ -359,7 +399,7 @@ PROCESS_THREAD(status_send_process, ev, data)
 			const struct link_stats *stat_parent = rpl_get_parent_link_stats(dag->preferred_parent);
 			uint8_t temp = batmon_sensor.value(BATMON_SENSOR_TYPE_TEMP);
 			uint8_t voltage = ( (batmon_sensor.value(BATMON_SENSOR_TYPE_VOLT) * 125) >> 5 ) / VOLTAGE_PRESCALER;
-			send_status_packet(&root_addr, &udp_connection, ipaddr_parent, clock_seconds(), stat_parent->rssi, temp, voltage);
+			send_status_packet(ipaddr_parent, clock_seconds(), stat_parent->rssi, temp, voltage);
 		}
 
 		etimer_set( &status_send_timer, status_send_interval + (random_rand() % status_send_interval) );
@@ -389,14 +429,14 @@ PROCESS_THREAD(root_ping_process, ev, data)
 		{
 			ping_interval = SHORT_PING_INTERVAL;
 			uip_ds_6_interval_set(CLOCK_SECOND / 5);
-			printf( "DAG Node: Change timer to SHORT interval, DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
+			printf( "DAG Node: Change timer to SHORT interval, new DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
 		}
 
 		if ( (dag_active == 1 && ping_interval != LONG_PING_INTERVAL) || non_answered_ping > 20 )
 		{
 			ping_interval = LONG_PING_INTERVAL;
 			uip_ds_6_interval_set(CLOCK_SECOND);
-			printf( "DAG Node: Change timer to LONG interval, DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
+			printf( "DAG Node: Change timer to LONG interval, new DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
 		}
 
 		if (non_answered_ping > 30)

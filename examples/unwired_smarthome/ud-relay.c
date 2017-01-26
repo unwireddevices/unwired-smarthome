@@ -73,12 +73,16 @@ uint8_t relay_2_state = 0;
 
 /*---------------------------------------------------------------------------*/
 
-PROCESS(main_process, "Relay control process"); //register main button process
-AUTOSTART_PROCESSES(&main_process, &dag_node_process); //set autostart processes
+/* register main button process */
+PROCESS(main_process, "Relay control process");
+
+/* set autostart processes */
+AUTOSTART_PROCESSES(&dag_node_process, &main_process);
 
 /*---------------------------------------------------------------------------*/
 
 void change_DIO_state(uint8_t dio_number, uint8_t dio_state) //TODO: куча кода дублируется, сделай с этим что-нибудь
+                                                            //TODO: и убери switch-case!
 {
     if (dio_number == 1)
     {
@@ -159,11 +163,14 @@ void configure_DIO()
 
 void exe_relay_command(struct command_data *command_relay)
 {
-    printf("RELAY: new command, target: %02X state: %02X number: %02X \n", command_relay->ability_target, command_relay->ability_state, command_relay->ability_number);
-    uint8_t number_ability = command_relay->ability_number;
-    if (number_ability == 1 || number_ability == 2)
+    printf("RELAY: new command, target: %02X state: %02X number: %02X \n",
+           command_relay->ability_target,
+           command_relay->ability_state,
+           command_relay->ability_number);
+
+    if (command_relay->ability_number == 1 || command_relay->ability_number == 2)
     {
-        change_DIO_state(number_ability, command_relay->ability_state);
+        change_DIO_state(command_relay->ability_number, command_relay->ability_state);
     }
     else
     {
@@ -178,7 +185,7 @@ PROCESS_THREAD(main_process, ev, data)
   PROCESS_BEGIN();
   printf("Unwired relay device. HELL-IN-CODE free. I hope.\n");
 
-  struct command_data *message_data = NULL;
+  static struct command_data *message_data = NULL;
 
   PROCESS_PAUSE();
   
@@ -190,10 +197,9 @@ PROCESS_THREAD(main_process, ev, data)
     if(ev == PROCESS_EVENT_CONTINUE)
     {
       message_data = data;
-
       if (message_data->ability_target == DEVICE_ABILITY_RELAY)
       {
-          exe_relay_command(data);
+          exe_relay_command(message_data);
       }
     }
   }
