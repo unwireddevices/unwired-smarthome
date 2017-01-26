@@ -55,19 +55,19 @@ clean:
 	-rm -f *.hex
 	
 button-flashb: button-CLEAN
-	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v button.hex ||  /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v button.hex
+	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v button.hex || !
 
 button-flash: button-CLEAN
 	/Applications/ti/Uniflash/flash_cc2650.sh button.hex
 
 root-flashb: root-CLEAN
-	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v root.hex ||  /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v root.hex
+	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v root.hex || !
 	
 root-flash: root-CLEAN
 	/Applications/ti/Uniflash/flash_cc2650.sh root.hex
 
 relay-flashb: relay-CLEAN
-	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v relay.hex ||  /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v relay.hex
+	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v relay.hex || !
 	
 relay-flash: relay-CLEAN
 	/Applications/ti/Uniflash/flash_cc2650.sh relay.hex
