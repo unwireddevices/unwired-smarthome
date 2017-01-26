@@ -20,6 +20,7 @@
 #define DATA_TYPE_PING                      0x04
 #define DATA_TYPE_COMMAND                   0x05
 #define DATA_TYPE_STATUS                    0x06
+#define DATA_TYPE_WARNING                   0x07
 
 /* Reserved data */
 #define DATA_RESERVED                       0xFF
@@ -55,7 +56,7 @@
 #define DEVICE_ABILITY_CO_SENSOR               10
 #define DEVICE_ABILITY_GAS_SENSOR              11
 #define DEVICE_ABILITY_POWER_METER             12
-#define DEVICE_ABILITY_RESERVED2               13
+#define DEVICE_ABILITY_RADIATION_METER         13
 #define DEVICE_ABILITY_RESERVED3               14
 #define DEVICE_ABILITY_RESERVED4               15
 #define DEVICE_ABILITY_RESERVED5               16
@@ -97,7 +98,6 @@
 #define DEVICE_ABILITY_RELAY_COMMAND_OFF                0x00
 #define DEVICE_ABILITY_RELAY_COMMAND_ON                 0x01
 #define DEVICE_ABILITY_RELAY_COMMAND_TOGGLE             0x02
-
 
 /* UART Binary data */
 #define UART_PROTOCOL_VERSION_V1                        0x01
