@@ -1,4 +1,4 @@
-all: ud-rpl_root
+all: root
 
 PROJECT_SOURCEFILES += 
 DEFINES+=PROJECT_CONF_H=\"project-conf-normal.h\"

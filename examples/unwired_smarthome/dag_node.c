@@ -55,21 +55,21 @@
 #include <stdio.h>
 #include "simple-udp.h"
 
-#include "ud-dag_node.h"
 #include "net/link-stats.h"
-
-#include "xxf_types_helper.h"
-
 #include "ti-lib.h"
-#include "ud_binary_protocol.h"
 #include "dev/watchdog.h"
 
+#include "xxf_types_helper.h"
+#include "ud_binary_protocol.h"
+
+#include "dag_node.h"
+
 #ifdef IF_UD_BUTTON
-#  include "ud-button.h"
+#  include "button.h"
 #endif
 
 #ifdef IF_UD_RELAY
-#  include "ud-relay.h"
+#  include "relay.h"
 #endif
 
 #include "fake_headers.h" //no move up! not "krasivo"!

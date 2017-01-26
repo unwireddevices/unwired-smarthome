@@ -58,8 +58,8 @@
 #include "board-peripherals.h"
 #include "simple-udp.h"
 
-#include "ud-relay.h"
-#include "ud-dag_node.h"
+#include "relay.h"
+#include "dag_node.h"
 
 #include "xxf_types_helper.h"
 
