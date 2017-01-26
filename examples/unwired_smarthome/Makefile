@@ -1,6 +1,6 @@
-.PHONY: all clean cleanall 
+.PHONY: all clean 
 
-all: ud-rpl_root-CLEAN ud-button-CLEAN ud-relay-CLEAN
+all: root-CLEAN button-CLEAN relay-CLEAN
 
 ifndef CPU
   ${info Not CPU define! USE: "CPU=cc26xx/cc13xx" Set default: cc26xx}
@@ -12,23 +12,23 @@ ifndef BOARD
   BOARD = udboards
 endif
 
-ud-button-CLEAN: ud-button clean
+button-CLEAN: button clean1
 
-ud-rpl_root-CLEAN: ud-rpl_root clean2
+root-CLEAN: root clean2
 
-ud-relay-CLEAN: ud-relay clean3
+relay-CLEAN: relay clean3
 
 
-ud-button:
-	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f Makefile.ud-button
+button:
+	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f Makefile.button
 
-ud-rpl_root:
-	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f Makefile.ud-rpl_root
+root:
+	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f Makefile.root
 
-ud-relay:
-	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f Makefile.ud-relay
+relay:
+	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f Makefile.relay
 	
-clean:
+clean1:
 	-rm -f *~ *core core *.srec *.lst *.map *.cprg *.bin *.data contiki*.a *.firmware core-labels.S *.ihex *.ini *.ce *.co *.unwired *.elf 	
 
 clean2:
@@ -37,27 +37,28 @@ clean2:
 clean3:
 	-rm -f *~ *core core *.srec *.lst *.map *.cprg *.bin *.data contiki*.a *.firmware core-labels.S *.ihex *.ini *.ce *.co *.unwired *.elf 	
 
-cleanall: clean
+clean: 
+	-rm -f *~ *core core *.srec *.lst *.map *.cprg *.bin *.data contiki*.a *.firmware core-labels.S *.ihex *.ini *.ce *.co *.unwired *.elf 	
 	-rm -rf obj_unwired
 	-rm -f *.hex
 	
-ud-button-flashb: ud-button-CLEAN
-	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v ud-button.hex ||  /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v ud-button.hex
+button-flashb: button-CLEAN
+	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v button.hex ||  /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v button.hex
 
-ud-button-flash: ud-button-CLEAN
-	/Applications/ti/Uniflash/flash_cc2650.sh ud-button.hex
+button-flash: button-CLEAN
+	/Applications/ti/Uniflash/flash_cc2650.sh button.hex
 
-ud-rpl_root-flashb: ud-rpl_root-CLEAN
-	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v ud-rpl_root.hex ||  /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v ud-rpl_root.hex
+root-flashb: root-CLEAN
+	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v root.hex ||  /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v root.hex
 	
-ud-rpl_root-flash: ud-rpl_root-CLEAN
-	/Applications/ti/Uniflash/flash_cc2650.sh ud-rpl_root.hex
+root-flash: root-CLEAN
+	/Applications/ti/Uniflash/flash_cc2650.sh root.hex
 
-ud-relay-flashb: ud-relay-CLEAN
-	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v ud-relay.hex ||  /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v ud-relay.hex
+relay-flashb: relay-CLEAN
+	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v relay.hex ||  /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v relay.hex
 	
-ud-relay-flash: ud-relay-CLEAN
-	/Applications/ti/Uniflash/flash_cc2650.sh ud-relay.hex
+relay-flash: relay-CLEAN
+	/Applications/ti/Uniflash/flash_cc2650.sh relay.hex
 
 serial:
 	../../tools/sky/serialdump-macos -b115200 /dev/tty.usbserial-* || ../../tools/sky/serialdump-macos -b115200 /dev/tty.SLAB_USBtoUART
