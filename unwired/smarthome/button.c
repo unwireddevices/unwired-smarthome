@@ -63,7 +63,7 @@
 #include "dag_node.h"
 
 #include "ti-lib.h"
-#include "ud_binary_protocol.h"
+#include "../ud_binary_protocol.h"
 
 #include "net/rpl/rpl-private.h"
 

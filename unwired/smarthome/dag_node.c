@@ -60,7 +60,7 @@
 #include "dev/watchdog.h"
 
 #include "xxf_types_helper.h"
-#include "ud_binary_protocol.h"
+#include "../ud_binary_protocol.h"
 
 #include "dag_node.h"
 
@@ -72,7 +72,7 @@
 #  include "relay.h"
 #endif
 
-#include "fake_headers.h" //no move up! not "krasivo"!
+#include "../fake_headers.h" //no move up! not "krasivo"!
 
 #define DEBUG_INTERVAL                    (60 * CLOCK_SECOND)
 //#define DEBUG_INTERVAL                      (2 * CLOCK_SECOND)

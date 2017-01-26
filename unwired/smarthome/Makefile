@@ -20,13 +20,13 @@ relay-CLEAN: relay clean3
 
 
 button:
-	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f Makefile.button
+	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.button
 
 root:
-	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f Makefile.root
+	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.root
 
 relay:
-	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f Makefile.relay
+	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.relay
 	
 clean1:
 	-rm -f *~ *core core *.srec *.lst *.map *.cprg *.bin *.data contiki*.a *.firmware core-labels.S *.ihex *.ini *.ce *.co *.unwired *.elf 	
