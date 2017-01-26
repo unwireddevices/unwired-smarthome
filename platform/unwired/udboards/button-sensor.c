@@ -75,9 +75,9 @@
 //#define DEBUG
 
 #ifdef DEBUG
-    #define printf_log printf
+    #define printf_log(...) printf(__VA_ARGS__)
 #else
-    #define printf_log
+    #define printf_log(...)
 #endif
 
 
