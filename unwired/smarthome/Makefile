@@ -20,12 +20,24 @@ relay-CLEAN: relay clean3
 
 
 button:
+	CONF="LEAF"; \
+	touch /tmp/unwired_last_conf; \
+	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean; \
+	echo $$CONF > /tmp/unwired_last_conf
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.button
 
 root:
+	CONF="NOLEAF"; \
+	touch /tmp/unwired_last_conf; \
+	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean; \
+	echo $$CONF > /tmp/unwired_last_conf
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.root
 
 relay:
+	CONF="NOLEAF"; \
+	touch /tmp/unwired_last_conf; \
+	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean; \
+	echo $$CONF > /tmp/unwired_last_conf
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.relay
 	
 clean1:
