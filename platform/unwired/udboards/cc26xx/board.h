@@ -95,6 +95,15 @@
 /** @} */
 /*---------------------------------------------------------------------------*/
 /**
+ * \name Dimmer IOID mappings
+ */
+#define BOARD_IOID_DIM_1        IOID_16
+#define BOARD_IOID_DIM_2        IOID_17
+#define ZERO_CROSS_SYNC_IOID    IOID_27
+
+/** @} */
+/*---------------------------------------------------------------------------*/
+/**
  * \name UART IOID mapping
  *
  */
