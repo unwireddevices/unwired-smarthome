@@ -54,22 +54,22 @@ clean:
 	-rm -rf obj_unwired
 	-rm -f *.hex
 	
-button-flashb: button-CLEAN
+button-fb: button-CLEAN
 	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v button.hex || /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v button.hex
 
-button-flash: button-CLEAN
+button-f: button-CLEAN
 	/Applications/ti/Uniflash/flash_cc2650.sh button.hex
 
-root-flashb: root-CLEAN
+root-fb: root-CLEAN
 	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v root.hex || /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v root.hex
 	
-root-flash: root-CLEAN
+root-f: root-CLEAN
 	/Applications/ti/Uniflash/flash_cc2650.sh root.hex
 
-relay-flashb: relay-CLEAN
+relay-fb: relay-CLEAN
 	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v relay.hex || /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v relay.hex
 	
-relay-flash: relay-CLEAN
+relay-f: relay-CLEAN
 	/Applications/ti/Uniflash/flash_cc2650.sh relay.hex
 
 serial:
