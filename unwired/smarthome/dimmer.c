@@ -70,12 +70,24 @@
 /*---------------------------------------------------------------------------*/
 
 /* register main button process */
-PROCESS(main_process, "dimmer control process");
+PROCESS(main_process, "Dimmer control process");
 
 /* set autostart processes */
 AUTOSTART_PROCESSES(&dag_node_process, &main_process);
 
 /*---------------------------------------------------------------------------*/
+
+void exe_command(struct command_data *command_dimmer)
+{
+    printf("DIMMER: new command, target: %02X state: %02X number: %02X \n",
+           command_dimmer->ability_target,
+           command_dimmer->ability_state,
+           command_dimmer->ability_number);
+
+}
+
+/*---------------------------------------------------------------------------*/
+
 
 PROCESS_THREAD(main_process, ev, data)
 {
@@ -86,8 +98,6 @@ PROCESS_THREAD(main_process, ev, data)
 
   PROCESS_PAUSE();
   
-  configure_DIO();
-
   while(1)
   {
     PROCESS_YIELD();

@@ -73,6 +73,10 @@
 #  include "relay.h"
 #endif
 
+#ifdef IF_UD_DIMMER
+#  include "dimmer.h"
+#endif
+
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
 #define DEBUG_INTERVAL                    (60 * CLOCK_SECOND)
