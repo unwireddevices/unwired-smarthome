@@ -31,7 +31,7 @@
 /*---------------------------------------------------------------------------*/
 /**
  * \file
- *         Header file
+ *         Header file for DAG-node service
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */

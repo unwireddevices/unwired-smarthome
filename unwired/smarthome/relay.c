@@ -32,7 +32,7 @@
  /*---------------------------------------------------------------------------*/
  /*
  * \file
- *         UDP reporting button service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
+ *         Relay service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */

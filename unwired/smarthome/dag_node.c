@@ -27,7 +27,7 @@
 /*---------------------------------------------------------------------------*/
 /*
  * \file
- *         RPL-node service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
+ *         DAG-node service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  *
