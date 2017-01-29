@@ -1,6 +1,6 @@
 .PHONY: all clean 
 
-all: root-CLEAN button-CLEAN relay-CLEAN
+all: root-CLEAN button-CLEAN relay-CLEAN dimmer-CLEAN
 
 ifndef CPU
   ${info Not CPU define! USE: "CPU=cc26xx/cc13xx" Set default: cc26xx}
