@@ -68,6 +68,13 @@
 #include "net/rpl/rpl-private.h"
 
 /*---------------------------------------------------------------------------*/
+/* Register button sensors */
+SENSORS(&button_a_sensor_click, &button_a_sensor_long_click,
+        &button_b_sensor_click, &button_b_sensor_long_click,
+        &button_c_sensor_click, &button_c_sensor_long_click,
+        &button_d_sensor_click, &button_d_sensor_long_click,
+        &button_e_sensor_click, &button_e_sensor_long_click);
+
 
 /* register main button process */
 PROCESS(main_process, "UD Buttons control process");

@@ -27,7 +27,7 @@
 /*---------------------------------------------------------------------------*/
 /*
  * \file
- *         RPL-node service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
+ *         DAG-node service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  *
@@ -101,12 +101,6 @@ volatile clock_time_t status_send_interval = STATUS_SEND_INTERVAL;
 
 /*---------------------------------------------------------------------------*/
 
-/* Register button sensors */
-SENSORS(&button_a_sensor_click, &button_a_sensor_long_click,
-        &button_b_sensor_click, &button_b_sensor_long_click,
-        &button_c_sensor_click, &button_c_sensor_long_click,
-        &button_d_sensor_click, &button_d_sensor_long_click,
-        &button_e_sensor_click, &button_e_sensor_long_click);
 
 PROCESS(dag_node_process, "DAG-node process");
 PROCESS(dag_node_button_process, "DAG-node button process");
