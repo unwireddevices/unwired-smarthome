@@ -73,7 +73,10 @@ uint8_t relay_2_state = 0;
 
 /*---------------------------------------------------------------------------*/
 
-/* register main button process */
+/* Register buttons sensors */
+SENSORS(&button_e_sensor_click, &button_e_sensor_long_click);
+
+/* register relay process */
 PROCESS(main_process, "Relay control process");
 
 /* set autostart processes */
@@ -163,19 +166,18 @@ void configure_DIO()
 
 void exe_relay_command(struct command_data *command_relay)
 {
-    printf("RELAY: new command, target: %02X state: %02X number: %02X \n",
+    printf("RELAY: new command, target: %02X, state: %02X, number: %02X \n",
            command_relay->ability_target,
            command_relay->ability_state,
            command_relay->ability_number);
 
-    if (command_relay->ability_number == 1 || command_relay->ability_number == 2)
-    {
-        change_DIO_state(command_relay->ability_number, command_relay->ability_state);
-    }
-    else
+    if (command_relay->ability_number != DEVICE_ABILITY_RELAY_1 &&
+        command_relay->ability_number != DEVICE_ABILITY_RELAY_2)
     {
         printf("Not support relay number\n");
+        return;
     }
+    change_DIO_state(command_relay->ability_number, command_relay->ability_state);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -183,12 +185,12 @@ void exe_relay_command(struct command_data *command_relay)
 PROCESS_THREAD(main_process, ev, data)
 {
   PROCESS_BEGIN();
-  printf("Unwired relay device. HELL-IN-CODE free. I hope.\n");
 
   static struct command_data *message_data = NULL;
 
   PROCESS_PAUSE();
   
+  printf("Unwired relay device. HELL-IN-CODE free. I hope.\n");
   configure_DIO();
 
   while(1)
