@@ -105,12 +105,6 @@ volatile clock_time_t debug_interval = DEBUG_INTERVAL;
 volatile clock_time_t ping_interval = SHORT_PING_INTERVAL;
 volatile clock_time_t status_send_interval = STATUS_SEND_INTERVAL;
 volatile uint8_t percent_iterator_test = 0;
-/* Register button sensors */
-SENSORS(&button_a_sensor_click, &button_a_sensor_long_click,
-        &button_b_sensor_click, &button_b_sensor_long_click,
-        &button_c_sensor_click, &button_c_sensor_long_click,
-        &button_d_sensor_click, &button_d_sensor_long_click,
-        &button_e_sensor_click, &button_e_sensor_long_click);
 
 
 /*---------------------------------------------------------------------------*/
