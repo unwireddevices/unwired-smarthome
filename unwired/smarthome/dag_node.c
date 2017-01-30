@@ -58,7 +58,9 @@
 
 #include "net/link-stats.h"
 #include "ti-lib.h"
+#include "clock.h"
 #include "dev/watchdog.h"
+
 
 #include "xxf_types_helper.h"
 #include "../ud_binary_protocol.h"
@@ -102,15 +104,16 @@ static struct command_data message_for_main_process;
 volatile clock_time_t debug_interval = DEBUG_INTERVAL;
 volatile clock_time_t ping_interval = SHORT_PING_INTERVAL;
 volatile clock_time_t status_send_interval = STATUS_SEND_INTERVAL;
-
-/*---------------------------------------------------------------------------*/
-
+volatile uint8_t percent_iterator_test = 0;
 /* Register button sensors */
 SENSORS(&button_a_sensor_click, &button_a_sensor_long_click,
         &button_b_sensor_click, &button_b_sensor_long_click,
         &button_c_sensor_click, &button_c_sensor_long_click,
         &button_d_sensor_click, &button_d_sensor_long_click,
         &button_e_sensor_click, &button_e_sensor_long_click);
+
+
+/*---------------------------------------------------------------------------*/
 
 PROCESS(dag_node_process, "DAG-node process");
 PROCESS(dag_node_button_process, "DAG-node button process");
@@ -373,6 +376,8 @@ dag_root_find(void)
 PROCESS_THREAD(dag_node_button_process, ev, data)
 {
 	PROCESS_BEGIN();
+
+
 	PROCESS_PAUSE();
 
 	while (1)
@@ -383,16 +388,29 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
 		{
 			if (data == &button_e_sensor_click)
 			{
-				printf("DAG Node: Local repair activated\n");
-				rpl_dag_t *dag = rpl_get_any_dag();
-				rpl_local_repair(dag->instance);
+			    percent_iterator_test = percent_iterator_test + 5;
+			    if (percent_iterator_test >= 100) {
+			        percent_iterator_test = 0;
+			    }
+	            message_for_main_process.ability_target = DEVICE_ABILITY_DIMMER;
+	            message_for_main_process.ability_number = DEVICE_ABILITY_DIMMER_1;
+	            message_for_main_process.ability_state = percent_iterator_test;
+	            process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
+
 			}
 
 			if (data == &button_e_sensor_long_click)
 			{
-				led_on(LED_A);
-				printf("SYSTEM: Button E long click, reboot\n");
-				watchdog_reboot();
+			    while (1)
+			    {
+			        ti_lib_gpio_set_dio(BOARD_IOID_DIMMER_1);
+	                clock_delay((50/5)*220);
+	                ti_lib_gpio_set_dio(BOARD_IOID_DIMMER_1);
+	                clock_delay((50/5)*220);
+	                ti_lib_gpio_clear_dio(BOARD_IOID_DIMMER_1);
+	                clock_delay(2);
+			    }
+
 			}
 		}
 	}

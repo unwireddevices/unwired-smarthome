@@ -60,44 +60,104 @@
 
 #include "dimmer.h"
 #include "dag_node.h"
+#include "gpio-interrupt.h"
+
 
 #include "xxf_types_helper.h"
 
 #include "ti-lib.h"
+#include "clock.h"
 #include "../ud_binary_protocol.h"
 
-
+#define ZEROCROSS_GPIO_CFG       (IOC_CURRENT_2MA  | IOC_STRENGTH_AUTO | \
+                                 IOC_IOPULL_UP    | IOC_SLEW_DISABLE  | \
+                                 IOC_HYST_DISABLE | IOC_RISING_EDGE    | \
+                                 IOC_INT_ENABLE   | IOC_IOMODE_NORMAL | \
+                                 IOC_NO_WAKE_UP   | IOC_INPUT_ENABLE)
 /*---------------------------------------------------------------------------*/
 
-/* register main button process */
+/* Register buttons sensors */
+SENSORS(&button_e_sensor_click,
+        &button_e_sensor_long_click);
+
+/* register dimmer process */
 PROCESS(main_process, "Dimmer control process");
 
 /* set autostart processes */
 AUTOSTART_PROCESSES(&dag_node_process, &main_process);
 
+
+volatile uint8_t dimmer_1_percent = 0;
+volatile uint8_t dimmer_2_percent = 0;
+
 /*---------------------------------------------------------------------------*/
 
-void exe_command(struct command_data *command_dimmer)
+static void exe_dimmer_command(struct command_data *command_dimmer)
 {
-    printf("DIMMER: new command, target: %02X state: %02X number: %02X \n",
+    printf("DIMMER: new command, target: %02X, state: %02X, number: %02X\n",
            command_dimmer->ability_target,
            command_dimmer->ability_state,
            command_dimmer->ability_number);
+
+    if (command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_1 &&
+        command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_2)
+    {
+        printf("Not support dimmer number\n");
+        return;
+    }
+
+    dimmer_1_percent = command_dimmer->ability_state;
+}
+
+/*---------------------------------------------------------------------------*/
+static void
+zerocross_handler(uint8_t ioid)
+{
+    ti_lib_rom_ioc_int_disable(ZERO_CROSS_SYNC_IOID);
+    clock_delay_usec(1000);
+    clock_delay(abs(dimmer_1_percent-100)*100);
+    ti_lib_gpio_set_dio(BOARD_IOID_DIMMER_1);
+    clock_delay_usec(100);
+    ti_lib_gpio_clear_dio(BOARD_IOID_DIMMER_1);
+    ti_lib_gpio_clear_event_dio(ZERO_CROSS_SYNC_IOID);
+    ti_lib_rom_ioc_int_enable(ZERO_CROSS_SYNC_IOID);
+}
+
+/*---------------------------------------------------------------------------*/
+
+void configure_DIO()
+{
+
+    ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_DIMMER_1);
+    ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_DIMMER_2);
+    ti_lib_gpio_clear_dio(BOARD_IOID_DIMMER_1);
+    ti_lib_gpio_clear_dio(BOARD_IOID_DIMMER_2);
+    ti_lib_gpio_set_dio(BOARD_IOID_DIMMER_1);
+    ti_lib_gpio_set_dio(BOARD_IOID_DIMMER_2);
+
+    ti_lib_gpio_clear_event_dio(ZERO_CROSS_SYNC_IOID);
+    ti_lib_rom_ioc_pin_type_gpio_input(ZERO_CROSS_SYNC_IOID);
+    ti_lib_rom_ioc_port_configure_set(ZERO_CROSS_SYNC_IOID, IOC_PORT_GPIO, ZEROCROSS_GPIO_CFG);
+    gpio_interrupt_register_handler(ZERO_CROSS_SYNC_IOID, zerocross_handler);
+    //ti_lib_rom_ioc_int_enable(ZERO_CROSS_SYNC_IOID);
+    ti_lib_rom_ioc_int_disable(ZERO_CROSS_SYNC_IOID);
+
 
 }
 
 /*---------------------------------------------------------------------------*/
 
-
 PROCESS_THREAD(main_process, ev, data)
 {
   PROCESS_BEGIN();
-  printf("Unwired dimmer device. HELL-IN-CODE free. I hope.\n");
 
   static struct command_data *message_data = NULL;
 
   PROCESS_PAUSE();
   
+  printf("Unwired dimmer device. HELL-IN-CODE free. I hope.\n");
+  configure_DIO();
+
   while(1)
   {
     PROCESS_YIELD();
@@ -106,7 +166,7 @@ PROCESS_THREAD(main_process, ev, data)
       message_data = data;
       if (message_data->ability_target == DEVICE_ABILITY_DIMMER)
       {
-          exe_command(message_data);
+          exe_dimmer_command(message_data);
       }
     }
   }
