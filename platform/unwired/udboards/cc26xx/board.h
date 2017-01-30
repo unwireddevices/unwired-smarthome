@@ -90,8 +90,8 @@
 /**
  * \name Relay IOID mappings
  */
-#define BOARD_IOID_RELAY_1        IOID_17
-#define BOARD_IOID_RELAY_2        IOID_16
+#define BOARD_IOID_RELAY_1          IOID_17
+#define BOARD_IOID_RELAY_2          IOID_16
 /** @} */
 /*---------------------------------------------------------------------------*/
 /**
