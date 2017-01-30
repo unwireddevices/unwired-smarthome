@@ -94,10 +94,21 @@
 #define DEVICE_ABILITY_LED_COMMAND_ON                   0x01
 #define DEVICE_ABILITY_LED_COMMAND_BLINK                0x02
 
-/* DEVICE_ABILITY_RELAY commands */
+/* DEVICE_ABILITY_RELAY commands and targets */
 #define DEVICE_ABILITY_RELAY_COMMAND_OFF                0x00
 #define DEVICE_ABILITY_RELAY_COMMAND_ON                 0x01
 #define DEVICE_ABILITY_RELAY_COMMAND_TOGGLE             0x02
+
+#define DEVICE_ABILITY_RELAY_1                          0x01
+#define DEVICE_ABILITY_RELAY_2                          0x02
+
+/* DEVICE_ABILITY_DIMMER commands and targets */
+#define DEVICE_ABILITY_DIMMER_COMMAND_OFF                0x00
+#define DEVICE_ABILITY_DIMMER_COMMAND_ON                 0xFF
+
+#define DEVICE_ABILITY_DIMMER_1                          0x01
+#define DEVICE_ABILITY_DIMMER_2                          0x02
+
 
 /* UART Binary data */
 #define UART_PROTOCOL_VERSION_V1                        0x01
