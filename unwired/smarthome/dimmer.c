@@ -61,6 +61,7 @@
 #include "dimmer.h"
 #include "dag_node.h"
 #include "gpio-interrupt.h"
+#include "lpm.h"
 
 
 #include "xxf_types_helper.h"
@@ -75,6 +76,8 @@
                                  IOC_INT_ENABLE   | IOC_IOMODE_NORMAL | \
                                  IOC_NO_WAKE_UP   | IOC_INPUT_ENABLE)
 /*---------------------------------------------------------------------------*/
+
+LPM_MODULE(buzzer_module, NULL, NULL, NULL, LPM_DOMAIN_PERIPH);
 
 /* Register buttons sensors */
 SENSORS(&button_e_sensor_click,
@@ -110,18 +113,7 @@ static void exe_dimmer_command(struct command_data *command_dimmer)
 }
 
 /*---------------------------------------------------------------------------*/
-static void
-zerocross_handler(uint8_t ioid)
-{
-    ti_lib_rom_ioc_int_disable(ZERO_CROSS_SYNC_IOID);
-    clock_delay_usec(1000);
-    clock_delay(abs(dimmer_1_percent-100)*100);
-    ti_lib_gpio_set_dio(BOARD_IOID_DIMMER_1);
-    clock_delay_usec(100);
-    ti_lib_gpio_clear_dio(BOARD_IOID_DIMMER_1);
-    ti_lib_gpio_clear_event_dio(ZERO_CROSS_SYNC_IOID);
-    ti_lib_rom_ioc_int_enable(ZERO_CROSS_SYNC_IOID);
-}
+
 
 /*---------------------------------------------------------------------------*/
 
@@ -132,15 +124,44 @@ void configure_DIO()
     ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_DIMMER_2);
     ti_lib_gpio_clear_dio(BOARD_IOID_DIMMER_1);
     ti_lib_gpio_clear_dio(BOARD_IOID_DIMMER_2);
-    ti_lib_gpio_set_dio(BOARD_IOID_DIMMER_1);
-    ti_lib_gpio_set_dio(BOARD_IOID_DIMMER_2);
 
-    ti_lib_gpio_clear_event_dio(ZERO_CROSS_SYNC_IOID);
-    ti_lib_rom_ioc_pin_type_gpio_input(ZERO_CROSS_SYNC_IOID);
-    ti_lib_rom_ioc_port_configure_set(ZERO_CROSS_SYNC_IOID, IOC_PORT_GPIO, ZEROCROSS_GPIO_CFG);
-    gpio_interrupt_register_handler(ZERO_CROSS_SYNC_IOID, zerocross_handler);
-    //ti_lib_rom_ioc_int_enable(ZERO_CROSS_SYNC_IOID);
-    ti_lib_rom_ioc_int_disable(ZERO_CROSS_SYNC_IOID);
+    uint32_t freq = 10000;
+
+    uint32_t load;
+
+    /* Enable GPT0 clocks under active, sleep, deep sleep */
+    ti_lib_prcm_peripheral_run_enable(PRCM_PERIPH_TIMER0);
+    ti_lib_prcm_peripheral_sleep_enable(PRCM_PERIPH_TIMER0);
+    ti_lib_prcm_peripheral_deep_sleep_enable(PRCM_PERIPH_TIMER0);
+    ti_lib_prcm_load_set();
+    while(!ti_lib_prcm_load_get());
+
+    /* Drive the I/O ID with GPT0 / Timer A */
+    ti_lib_ioc_port_configure_set(BOARD_IOID_DIMMER_1, IOC_PORT_MCU_PORT_EVENT0, IOC_STD_OUTPUT);
+
+    /* GPT0 / Timer A: PWM, Interrupt Enable */
+    HWREG(GPT0_BASE + GPT_O_TAMR) = (TIMER_CFG_A_PWM & 0xFF) | GPT_TAMR_TAPWMIE;
+
+
+    /*
+     * Register ourself with LPM. This will keep the PERIPH PD powered on
+     * during deep sleep, allowing the buzzer to keep working while the chip is
+     * being power-cycled
+     */
+    lpm_register_module(&buzzer_module);
+
+    /* Stop the timer */
+    ti_lib_timer_disable(GPT0_BASE, TIMER_A);
+
+    if(freq > 0) {
+      load = (GET_MCU_CLOCK / freq);
+
+      ti_lib_timer_load_set(GPT0_BASE, TIMER_A, load);
+      ti_lib_timer_match_set(GPT0_BASE, TIMER_A, load / 3);
+
+      /* Start */
+      ti_lib_timer_enable(GPT0_BASE, TIMER_A);
+    }
 
 
 }
