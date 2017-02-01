@@ -75,7 +75,7 @@
 #define DEVICE_ABILITY_RESERVED13              27
 #define DEVICE_ABILITY_RESERVED14              28
 #define DEVICE_ABILITY_RESERVED15              29
-#define DEVICE_ABILITY_RESERVED16              30
+#define DEVICE_ABILITY_0_10V_ANALOG            30
 #define DEVICE_ABILITY_RS485_BRIGE             31
 #define DEVICE_ABILITY_DALI_BRIGE              32
 
@@ -104,11 +104,20 @@
 
 /* DEVICE_ABILITY_DIMMER commands and targets */
 #define DEVICE_ABILITY_DIMMER_COMMAND_OFF                0x00
-#define DEVICE_ABILITY_DIMMER_COMMAND_ON                 0xFF
+#define DEVICE_ABILITY_DIMMER_COMMAND_ON                 0x64 //100 in decimal
+#define DEVICE_ABILITY_DIMMER_COMMAND_TOGGLE             0x80
+#define DEVICE_ABILITY_DIMMER_COMMAND_BLINK              0x81
 
 #define DEVICE_ABILITY_DIMMER_1                          0x01
 #define DEVICE_ABILITY_DIMMER_2                          0x02
 
+/* DEVICE_ABILITY_0_10V_ANALOG commands and targets */
+#define DEVICE_ABILITY_0_10V_ANALOG_COMMAND_OFF                0x00
+#define DEVICE_ABILITY_0_10V_ANALOG_COMMAND_ON                 0x64 //100 in decimal
+#define DEVICE_ABILITY_0_10V_ANALOG_COMMAND_TOGGLE             0x80
+#define DEVICE_ABILITY_0_10V_ANALOG_COMMAND_BLINK              0x81
+
+#define DEVICE_ABILITY_0_10V_ANALOG_CHANNEL_1                  0x01
 
 /* UART Binary data */
 #define UART_PROTOCOL_VERSION_V1                        0x01
