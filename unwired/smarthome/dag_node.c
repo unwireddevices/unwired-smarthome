@@ -380,32 +380,19 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
 
 		if (ev == sensors_event)
 		{
-			if (data == &button_e_sensor_click)
-			{
-			    percent_iterator_test = percent_iterator_test + 5;
-			    if (percent_iterator_test >= 100) {
-			        percent_iterator_test = 0;
-			    }
-	            message_for_main_process.ability_target = DEVICE_ABILITY_DIMMER;
-	            message_for_main_process.ability_number = DEVICE_ABILITY_DIMMER_1;
-	            message_for_main_process.ability_state = percent_iterator_test;
-	            process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
+            if (data == &button_e_sensor_click)
+            {
+                printf("DAG Node: Local repair activated\n");
+                rpl_dag_t *dag = rpl_get_any_dag();
+                rpl_local_repair(dag->instance);
+            }
 
-			}
-
-			if (data == &button_e_sensor_long_click)
-			{
-			    while (1)
-			    {
-			        ti_lib_gpio_set_dio(BOARD_IOID_DIMMER_1);
-	                clock_delay((50/5)*220);
-	                ti_lib_gpio_set_dio(BOARD_IOID_DIMMER_1);
-	                clock_delay((50/5)*220);
-	                ti_lib_gpio_clear_dio(BOARD_IOID_DIMMER_1);
-	                clock_delay(2);
-			    }
-
-			}
+            if (data == &button_e_sensor_long_click)
+            {
+                led_on(LED_A);
+                printf("SYSTEM: Button E long click, reboot\n");
+                watchdog_reboot();
+            }
 		}
 	}
 
