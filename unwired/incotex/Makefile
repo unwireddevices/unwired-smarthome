@@ -1,6 +1,6 @@
-.PHONY: all clean dimmer relay root button root-CLEAN button-CLEAN relay-CLEAN dimmer-CLEAN
+.PHONY: all clean dimmer root root-CLEAN dimmer-CLEAN
 
-all: root-CLEAN button-CLEAN relay-CLEAN dimmer-CLEAN
+all: root-CLEAN light-CLEAN
 
 ifndef CPU
   ${info Not CPU define! USE: "CPU=cc26xx/cc13xx" Set default: cc26xx}
@@ -12,21 +12,10 @@ ifndef BOARD
   BOARD = udboards
 endif
 
-button-CLEAN: button clean1
 
-root-CLEAN: root clean2
+root-CLEAN: root clean1
 
-relay-CLEAN: relay clean3
-
-dimmer-CLEAN: dimmer clean4
-
-
-button:
-	CONF="LEAF"; \
-	touch /tmp/unwired_last_conf; \
-	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean; \
-	echo $$CONF > /tmp/unwired_last_conf
-	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.button
+light-CLEAN: light clean2
 
 root:
 	CONF="NOLEAF"; \
@@ -35,19 +24,12 @@ root:
 	echo $$CONF > /tmp/unwired_last_conf
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.root
 
-relay:
+light:
 	CONF="NOLEAF"; \
 	touch /tmp/unwired_last_conf; \
 	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean; \
 	echo $$CONF > /tmp/unwired_last_conf
-	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.relay
-	
-dimmer:
-	CONF="NOLEAF"; \
-	touch /tmp/unwired_last_conf; \
-	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean; \
-	echo $$CONF > /tmp/unwired_last_conf
-	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.dimmer
+	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.light
     
 	
 clean1:
@@ -68,29 +50,17 @@ clean:
 	-rm -rf obj_unwired
 	-rm -f *.hex
 	
-button-fb: button-CLEAN
-	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v button.hex || /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v button.hex
-
-button-f: button-CLEAN
-	/Applications/ti/Uniflash/flash_cc2650.sh button.hex
-
 root-fb: root-CLEAN
 	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v root.hex || /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v root.hex
 	
 root-f: root-CLEAN
 	/Applications/ti/Uniflash/flash_cc2650.sh root.hex
 
-relay-fb: relay-CLEAN
-	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v relay.hex || /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v relay.hex
+light-fb: light-CLEAN
+	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v light.hex || /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v light.hex
 	
-relay-f: relay-CLEAN
-	/Applications/ti/Uniflash/flash_cc2650.sh relay.hex
-	
-dimmer-fb: dimmer-CLEAN
-	/Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v dimmer.hex || /Applications/ti/Uniflash/backdoor-bootloader.py -e -w -v dimmer.hex
-	
-dimmer-f: dimmer-CLEAN
-	/Applications/ti/Uniflash/flash_cc2650.sh dimmer.hex
+light-f: light-CLEAN
+	/Applications/ti/Uniflash/flash_cc2650.sh light.hex
 
 serial:
 	../../tools/sky/serialdump-macos -b115200 /dev/tty.usbserial-* || ../../tools/sky/serialdump-macos -b115200 /dev/tty.SLAB_USBtoUART
@@ -98,6 +68,3 @@ serial:
 minicom:
 	minicom -D /dev/tty.usbserial-* ||  minicom -D /dev/tty.SLAB_USBtoUART
 	
-cppcheck:
-	cppcheck -q -f --enable=all -I ../../*  ./ 2>&1 |grep unwired_smarthome
-

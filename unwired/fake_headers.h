@@ -64,7 +64,10 @@
 #define CURRENT_ABILITY_4BYTE
 #endif
 
-
 #ifndef RPL_CONF_LEAF_ONLY
 #define RPL_CONF_LEAF_ONLY
+#endif
+
+#ifndef FAKEDEFINE
+#include "../../platform/unwired/udboards/cc26xx/board.h"
 #endif

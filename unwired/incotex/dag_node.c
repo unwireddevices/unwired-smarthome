@@ -67,16 +67,8 @@
 
 #include "dag_node.h"
 
-#ifdef IF_UD_BUTTON
-#  include "button.h"
-#endif
-
-#ifdef IF_UD_RELAY
-#  include "relay.h"
-#endif
-
-#ifdef IF_UD_DIMMER
-#  include "dimmer.h"
+#ifdef IF_UD_LIGHT
+#  include "light.h"
 #endif
 
 #include "../fake_headers.h" //no move up! not "krasivo"!
@@ -104,6 +96,8 @@ static struct command_data message_for_main_process;
 volatile clock_time_t debug_interval = DEBUG_INTERVAL;
 volatile clock_time_t ping_interval = SHORT_PING_INTERVAL;
 volatile clock_time_t status_send_interval = STATUS_SEND_INTERVAL;
+volatile uint8_t percent_iterator_test = 0;
+
 
 /*---------------------------------------------------------------------------*/
 
@@ -368,6 +362,8 @@ dag_root_find(void)
 PROCESS_THREAD(dag_node_button_process, ev, data)
 {
 	PROCESS_BEGIN();
+
+
 	PROCESS_PAUSE();
 
 	while (1)
@@ -378,16 +374,21 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
 		{
 			if (data == &button_e_sensor_click)
 			{
-				printf("DAG Node: Local repair activated\n");
-				rpl_dag_t *dag = rpl_get_any_dag();
-				rpl_local_repair(dag->instance);
+			    percent_iterator_test = percent_iterator_test + 10;
+			    if (percent_iterator_test > 100) {
+			        percent_iterator_test = 0;
+			    }
+	            message_for_main_process.ability_target = DEVICE_ABILITY_DIMMER;
+	            message_for_main_process.ability_number = DEVICE_ABILITY_DIMMER_1;
+	            message_for_main_process.ability_state = percent_iterator_test;
+	            process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
+
 			}
 
 			if (data == &button_e_sensor_long_click)
 			{
-				led_on(LED_A);
-				printf("SYSTEM: Button E long click, reboot\n");
-				watchdog_reboot();
+
+
 			}
 		}
 	}

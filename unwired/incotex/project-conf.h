@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Unwired Devices- http://www.unwireddevices.com
+ * Copyright (c) 2014, Texas Instruments Incorporated - http://www.ti.com/
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -10,7 +10,6 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- *
  * 3. Neither the name of the copyright holder nor the names of its
  *    contributors may be used to endorse or promote products derived
  *    from this software without specific prior written permission.
@@ -30,78 +29,63 @@
  */
 /*---------------------------------------------------------------------------*/
 /**
- * \addtogroup cc26xx-cc13xx
- * @{
- *
  * \file
- *  Driver for the CC26XX-CC13XX PWM
- *
+ *         Config file
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
 /*---------------------------------------------------------------------------*/
-#include "contiki.h"
-#include "driverlib/prcm.h"
-#include "driverlib/ioc.h"
-#include "pwm.h"
-#include "ti-lib.h"
-#include "lpm.h"
-#include <stdio.h>
-#include <stdlib.h>
-
-static uint32_t frequency;
 
 /*---------------------------------------------------------------------------*/
-LPM_MODULE(pwm_module, NULL, NULL, NULL, LPM_DOMAIN_PERIPH);
+#ifndef PROJECT_CONF_H_
+#define PROJECT_CONF_H_
 
 /*---------------------------------------------------------------------------*/
-void pwm_config(uint32_t port, uint32_t freq)
-{
-    frequency = freq;
-    /* Enable GPT0 clocks under active, sleep, deep sleep */
-    ti_lib_prcm_peripheral_run_enable(PRCM_PERIPH_TIMER0);
-    ti_lib_prcm_peripheral_sleep_enable(PRCM_PERIPH_TIMER0);
-    ti_lib_prcm_peripheral_deep_sleep_enable(PRCM_PERIPH_TIMER0);
-    ti_lib_prcm_load_set();
-    while(!ti_lib_prcm_load_get());
-
-    /* Drive the I/O ID with GPT0 / Timer A */
-    ti_lib_ioc_port_configure_set(port, IOC_PORT_MCU_PORT_EVENT0, IOC_OUTPUT);
-
-    /* GPT0 / Timer A: PWM, Interrupt Enable */
-    HWREG(GPT0_BASE + GPT_O_TAMR) = (TIMER_CFG_A_PWM & 0xFF) | GPT_TAMR_TAPWMIE;
-
-    ti_lib_timer_disable(GPT0_BASE, TIMER_A);
-}
+/* Disable button shutdown functionality */
+#define BUTTON_SENSOR_CONF_ENABLE_SHUTDOWN		0 //??????
 /*---------------------------------------------------------------------------*/
-void pwm_stop()
-{
-    ti_lib_timer_disable(GPT0_BASE, TIMER_A);
-    lpm_unregister_module(&pwm_module);
-}
-/*---------------------------------------------------------------------------*/
-void pwm_start()
-{
-    lpm_register_module(&pwm_module);
-    ti_lib_timer_enable(GPT0_BASE, TIMER_A);
-}
-/*---------------------------------------------------------------------------*/
-void pwm_set_duty(uint8_t full_percent)
-{
-    uint32_t load = (GET_MCU_CLOCK / frequency);
-    uint32_t match;
+#undef IEEE802154_CONF_PANID
+#define IEEE802154_CONF_PANID				    0xAABB
+#undef RF_CORE_CONF_CHANNEL
+#define RF_CORE_CONF_CHANNEL					    26
 
-    if (full_percent > 100)
-        return;
+#undef STARTUP_CONF_VERBOSE
+#define STARTUP_CONF_VERBOSE					    1
 
-    if (full_percent == 100)
-        match = load - 1;
-    else
-        match = (load / 100) * full_percent;
+/* MAC tune option */
+#undef NETSTACK_CONF_MAC
+#define NETSTACK_CONF_MAC						csma_driver //nullmac_driver
+#undef NETSTACK_CONF_RDC
+#define NETSTACK_CONF_RDC						contikimac_driver //nullrc_driver
+#undef NETSTACK_CONF_FRAMER
+#define NETSTACK_CONF_FRAMER					    framer_802154 //framer_nullmac
 
-    ti_lib_timer_load_set(GPT0_BASE, TIMER_A, load);
-    ti_lib_timer_match_set(GPT0_BASE, TIMER_A, match);
-}
+/* Encryption */
+/*
+#undef LLSEC802154_CONF_ENABLED
+#define LLSEC802154_CONF_ENABLED				    1
+#undef NETSTACK_CONF_FRAMER
+#define NETSTACK_CONF_FRAMER					    noncoresec_framer
+#undef NETSTACK_CONF_LLSEC
+#define NETSTACK_CONF_LLSEC						noncoresec_driver
+#undef NONCORESEC_CONF_SEC_LVL
+#define NONCORESEC_CONF_SEC_LVL					0x05
+#undef LLSEC802154_CONF_SECURITY_LEVEL
+#define LLSEC802154_CONF_SECURITY_LEVEL			0x05
+#undef NONCORESEC_CONF_KEY
+#define NONCORESEC_CONF_KEY						{0xF3,0x01,0x02,0x03,0x04,0x05,0x07,0x07,0x06,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F}
+*/
+
+#undef NONCORESEC_CONF_SEC_LVL
+#define NONCORESEC_CONF_SEC_LVL         FRAME802154_SECURITY_LEVEL_NONE
+
+/* Bootloader */
+#define SET_CCFG_BL_CONFIG_BOOTLOADER_ENABLE	    0xC5 // 0xC5 - Enable ROM boot loader, 0x00 disable
+#define SET_CCFG_BL_CONFIG_BL_LEVEL			    0x00 // Active low level to open boot loader backdoor
+#define SET_CCFG_BL_CONFIG_BL_PIN_NUMBER		    0x01 // DIO number 1 for boot loader backdoor
+#define SET_CCFG_BL_CONFIG_BL_ENABLE			    0xC5 // 0xC5 - Enabled boot loader backdoor, 0xFF disable
 
 /*---------------------------------------------------------------------------*/
-/** @} */
+
+#endif /* PROJECT_CONF_H_ */
+/*---------------------------------------------------------------------------*/

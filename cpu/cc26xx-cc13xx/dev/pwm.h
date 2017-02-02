@@ -30,32 +30,12 @@
  */
 /*---------------------------------------------------------------------------*/
 /**
- * \addtogroup cc26xx-cc13xx
- * @{
- *
- * \defgroup cc2650-cc13xx-pwm-driver CC26XX-CC13XX PWM driver
- *
- * Driver for the CC26XX-CC13XX PWM on GPTIMER
- *
- * The driver uses the timers A and B of the general purpose timers to create
- * a PWM signal, allowing to set a duty cycle value from 1-100%.  This
- * implementation relies on having a peripheral clock of 16MHz, but it can be
- * easily changed (see PWM_FREQ_MIN and PWM_FREQ_MAX values).  The reason it is
- * fixed to these frequencies is to have a consistent duty cycle
- * implementation.
- *
- * Depending on the specific needs these limits can be changed to meet a given
- * duty cycle and lower frequencies by using the prescaler (GPTIMER_TnPR).
- *
- * Running a PWM timer prevents the LPM driver from dropping to PM1+.
- *
- * @{
  *
  * \file
  * Header file for the CC26XX-CC13XX PWM driver
  *
  * \author
- *         Mikhail Churikov <mc@unwds.com>
+ *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
 /*---------------------------------------------------------------------------*/
 #ifndef PWM_H_
@@ -64,12 +44,7 @@
 #include "contiki.h"
 #include "driverlib/ioc.h"
 #include "driverlib/timer.h"
-//#include "dev/gpio.h"
-//#include "dev/sys-ctrl.h"
-/*---------------------------------------------------------------------------*/
-/** \name PWM return values
- * @{
- */
+
 #define PWM_SUCCESS    0
 #define PWM_ERROR      (-1)
 /** @} */
@@ -109,81 +84,18 @@
 #define PWM_FREQ_MIN                         PWM_SYS_16MHZ_PRES_MIN_FREQ
 #define PWM_FREQ_MAX                         PWM_SYS_16MHZ_NO_PRES_MAX_FREQ
 #define PWM_SYS_CLK                          48000000
-#define IOC_OUTPUT          (IOC_CURRENT_16MA | IOC_STRENGTH_MAX |      \
-                                         IOC_NO_IOPULL | IOC_SLEW_DISABLE |         \
-                                         IOC_HYST_DISABLE | IOC_NO_EDGE |           \
-                                         IOC_INT_DISABLE | IOC_IOMODE_INV|      \
-                                         IOC_NO_WAKE_UP | IOC_INPUT_DISABLE )
-/** @} */
-/*---------------------------------------------------------------------------*/
-/** \name PWM functions
- * @{
- */
-/** \brief Configures the general purpose timer in PWM mode
- * \param freq  PWM frequency (in Hz)
- * \param duty  PWM duty cycle (percentage in integers)
- * \param timer General purpose timer to use [0-3]
- * \param ab    Select which timer to use (Timer A or B)
- * \return \c   PWM_SUCCESS if successful, else \c PWM_ERROR
- */
-int8_t pwm_enable(uint32_t freq, uint8_t duty, uint8_t timer, uint32_t ab);
-/*---------------------------------------------------------------------------*/
-/** \brief Disables a previously PWM configured GPTn
- * \param timer General purpose timer to disable [0-3]
- * \param ab    Select which timer to disable (Timer A or B)
- * \param port  Port number used as PWM to disable (set as input GPIO)
- * \param pin   Pin number used as PWM to disable (set as input GPIO)
- * \return \c   PWM_SUCCESS if successful, else \c PWM_ERROR
- *
- * This function disables a specific timer (A or B) and reset related registers
- * to default values.  The user must explicitely pass the port/pin number of
- * the pin to disable as PWM and to be configured as input GPIO.
- * The module clock is not disabled with this function
- */
-int8_t pwm_disable(uint8_t timer, uint32_t ab, uint8_t pin);
-/*---------------------------------------------------------------------------*/
-/** \brief Once configured, starts the PWM
- * \param timer General purpose timer to start [0-3]
- * \param ab    Select which timer to start (Timer A or B)
- * \param pin   Pin number to use as PWM
- * \return \c   PWM_SUCCESS if successful, else \c PWM_ERROR
- */
-int8_t pwm_start(uint8_t timer, uint32_t ab, uint8_t pin);
-/*---------------------------------------------------------------------------*/
-/** \brief Halts the PWM in a given GPT/timer
- * \param timer General purpose timer to stop [0-3]
- * \param ab    Select which timer to stop (Timer A or B)
- * \param pin   Pin of the gpio port mapped to the PWM to start
- * \param state State to leave the pin once stopped, on (1) or off (0)
- * \return \c   PWM_SUCCESS if successful, else \c PWM_ERROR
- */
-int8_t pwm_stop(uint8_t timer, uint32_t ab, uint8_t pin, bool release);
-/*---------------------------------------------------------------------------*/
-/** \brief Sets the PWM duty cycle
- * \param timer General purpose timer [0-3]
- * \param ab    Select which timer to use (Timer A or B)
- * \param dir   Duty cycle
- * \return \c   PWM_SUCCESS if successful, else \c PWM_ERROR
- */
-int8_t pwm_set_duty(uint8_t timer, uint32_t ab, uint32_t freq, uint8_t duty);
-/*---------------------------------------------------------------------------*/
-/** \brief Sets the PWM duty cycle signal direction (high/low)
- * \param timer General purpose timer [0-3]
- * \param ab    Select which timer to use (Timer A or B)
- * \param dir   Direction of the PWM signal, \c PWM_SIGNAL_INVERTED or
- *              \c PWM_SIGNAL_STRAIGHT
- * \return \c   PWM_SUCCESS if successful, else \c PWM_ERROR
- */
-int8_t pwm_set_direction(uint8_t timer, uint32_t ab, uint32_t dir);
-/*---------------------------------------------------------------------------*/
-/** \brief Toggle the PWM signal direction (inverts the current duty cycle)
- * \param timer General purpose timer to use [0-3]
- * \param ab    Select which timer to use (Timer A or B)
- * \return \c   PWM_SUCCESS if successful, else \c PWM_ERROR
- */
-int8_t pwm_toggle_direction(uint8_t timer, uint32_t ab);
-/*---------------------------------------------------------------------------*/
-/** @} */
+#define IOC_OUTPUT                      (IOC_CURRENT_8MA    | IOC_STRENGTH_MAX | \
+                                         IOC_NO_IOPULL      | IOC_SLEW_DISABLE | \
+                                         IOC_HYST_DISABLE   | IOC_NO_EDGE      | \
+                                         IOC_INT_DISABLE    | IOC_IOMODE_INV   | \
+                                         IOC_NO_WAKE_UP     | IOC_INPUT_DISABLE )
+
+void pwm_config(uint32_t port, uint32_t freq);
+void pwm_stop();
+void pwm_start();
+void pwm_set_duty(uint8_t full_percent);
+
+
 #endif /* PWM_H_ */
 /*---------------------------------------------------------------------------*/
 /**

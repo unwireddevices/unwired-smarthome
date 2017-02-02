@@ -3,6 +3,7 @@ all: relay
 PROJECT_SOURCEFILES += dag_node.c 
 DEFINES+=PROJECT_CONF_H=\"project-conf-normal.h\"
 DEFINES+=IF_UD_RELAY=1
+DEFINES+=FAKEDEFINE=1
 GIT_VERSION := $(shell git describe --dirty --always --tags)
 DEFINES+=LOCAL_VERSION=\"$(GIT_VERSION)\"
 CONTIKI = ../..
