@@ -83,27 +83,23 @@ PROCESS(main_process, "Dimmer control process");
 /* set autostart processes */
 AUTOSTART_PROCESSES(&dag_node_process, &main_process);
 
-volatile uint8_t dimmer_1_percent = 0;
-volatile uint8_t dimmer_2_percent = 0;
 
 /*---------------------------------------------------------------------------*/
 
 static void exe_dimmer_command(struct command_data *command_dimmer)
 {
-    printf("DIMMER: new command, target: %02X, state: %02X, number: %02X\n",
+    printf("LIGHT: new command, target: %02X, state: %02X, number: %02X\n",
            command_dimmer->ability_target,
            command_dimmer->ability_state,
            command_dimmer->ability_number);
 
-    if (command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_1 &&
-        command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_2)
+    if (command_dimmer->ability_number != DEVICE_ABILITY_0_10V_ANALOG_CHANNEL_1)
     {
-        printf("Not support dimmer number\n");
+        printf("Not support light number\n");
         return;
     }
 
-    dimmer_1_percent = command_dimmer->ability_state;
-    pwm_set_duty(dimmer_1_percent);
+    pwm_set_duty(command_dimmer->ability_state);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -117,7 +113,7 @@ void configure_DIO()
     uint32_t freq = 1000;
 
     pwm_config(BOARD_IOID_1_10V_1, freq);
-    pwm_set_duty(dimmer_1_percent);
+    pwm_set_duty(0);
     pwm_start();
 }
 
@@ -140,7 +136,7 @@ PROCESS_THREAD(main_process, ev, data)
     if(ev == PROCESS_EVENT_CONTINUE)
     {
       message_data = data;
-      if (message_data->ability_target == DEVICE_ABILITY_DIMMER)
+      if (message_data->ability_target == DEVICE_ABILITY_0_10V_ANALOG)
       {
           exe_dimmer_command(message_data);
       }
