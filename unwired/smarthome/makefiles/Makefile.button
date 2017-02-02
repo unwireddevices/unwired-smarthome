@@ -3,6 +3,7 @@ all: button
 PROJECT_SOURCEFILES += dag_node.c 
 DEFINES+=PROJECT_CONF_H=\"project-conf-leaf.h\"
 DEFINES+=IF_UD_BUTTON=1
+DEFINES+=FAKEDEFINE=1
 GIT_VERSION := $(shell git describe --dirty --always --tags)
 DEFINES+=LOCAL_VERSION=\"$(GIT_VERSION)\"
 CONTIKI = ../..

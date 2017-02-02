@@ -54,7 +54,7 @@
 #include <ctype.h>
 
 #include "button-sensor.h"
-#include "cc26xx/board.h"
+#include "board.h"
 #include "board-peripherals.h"
 #include "simple-udp.h"
 
@@ -76,6 +76,7 @@
                                  IOC_INT_ENABLE   | IOC_IOMODE_NORMAL | \
                                  IOC_NO_WAKE_UP   | IOC_INPUT_ENABLE)
 /*---------------------------------------------------------------------------*/
+#include "../fake_headers.h" //no move up! not "krasivo"!
 
 LPM_MODULE(buzzer_module, NULL, NULL, NULL, LPM_DOMAIN_PERIPH);
 

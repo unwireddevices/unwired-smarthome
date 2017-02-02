@@ -54,7 +54,7 @@
 #include <ctype.h>
 
 #include "button-sensor.h"
-#include "cc26xx/board.h"
+#include "board.h"
 #include "board-peripherals.h"
 #include "simple-udp.h"
 
@@ -65,6 +65,8 @@
 
 #include "ti-lib.h"
 #include "../ud_binary_protocol.h"
+
+#include "../fake_headers.h" //no move up! not "krasivo"!
 
 /*---------------------------------------------------------------------------*/
 
