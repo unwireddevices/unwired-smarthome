@@ -58,9 +58,10 @@
 #include "board-peripherals.h"
 #include "simple-udp.h"
 
-#include "dimmer.h"
+#include "light.h"
 #include "dag_node.h"
 #include "gpio-interrupt.h"
+#include "pwm.h"
 
 #include "xxf_types_helper.h"
 
@@ -102,8 +103,10 @@ static void exe_dimmer_command(struct command_data *command_dimmer)
     }
 
     dimmer_1_percent = command_dimmer->ability_state;
+    pwm_set_duty(dimmer_1_percent);
 }
 
+/*---------------------------------------------------------------------------*/
 
 
 /*---------------------------------------------------------------------------*/
@@ -111,6 +114,11 @@ static void exe_dimmer_command(struct command_data *command_dimmer)
 void configure_DIO()
 {
 
+    uint32_t freq = 1000;
+
+    pwm_config(BOARD_IOID_1_10V_1, freq);
+    pwm_set_duty(dimmer_1_percent);
+    pwm_start();
 }
 
 /*---------------------------------------------------------------------------*/
