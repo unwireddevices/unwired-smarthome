@@ -70,6 +70,9 @@
 
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
+
+#include "driverlib/flash.h"
+
 /*---------------------------------------------------------------------------*/
 
 /* Register buttons sensors */
@@ -107,9 +110,28 @@ static void exe_dimmer_command(struct command_data *command_dimmer)
 
 
 /*---------------------------------------------------------------------------*/
+void
+FlashRead(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count) {
+  uint8_t *pui8ReadAddress = (uint8_t *)ui32Address;
+  while (ui32Count--) {
+    *pui8DataBuffer++ = *pui8ReadAddress++;
+  }
+}
+
 
 void configure_DIO()
 {
+
+    uint8_t write_data[1];
+    write_data[0] = 0x42;
+    FlashProgram(write_data, 0x1D9C5, 0x1);
+
+
+
+    uint8_t read_buffer[1];
+    FlashRead(read_buffer, 0x1D9C5, 1);
+    printf("%"PRIX32":%" PRIXX8 "\n", 0x1D9C0, read_buffer[0]);
+
 
 }
 
