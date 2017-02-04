@@ -241,6 +241,9 @@ send_status_packet(const uip_ipaddr_t *parent_addr,
                    uint8_t temp,
                    uint8_t voltage)
 {
+    if (parent_addr == NULL)
+        return;
+
 	uint8_t *uptime_uint8_t = (uint8_t *)&uptime;
 	int8_t *rssi_parent_uint8_t = (int8_t *)&rssi_parent;
 	uip_ip6addr_t addr;
@@ -414,7 +417,10 @@ PROCESS_THREAD(status_send_process, ev, data)
 			const struct link_stats *stat_parent = rpl_get_parent_link_stats(dag->preferred_parent);
 			uint8_t temp = batmon_sensor.value(BATMON_SENSOR_TYPE_TEMP);
 			uint8_t voltage = ( (batmon_sensor.value(BATMON_SENSOR_TYPE_VOLT) * 125) >> 5 ) / VOLTAGE_PRESCALER;
-			send_status_packet(ipaddr_parent, clock_seconds(), stat_parent->rssi, temp, voltage);
+			if (ipaddr_parent != NULL && stat_parent != NULL && stat_parent->rssi != NULL)
+			{
+                send_status_packet(ipaddr_parent, clock_seconds(), stat_parent->rssi, temp, voltage);
+			}
 		}
 
 		etimer_set( &status_send_timer, status_send_interval + (random_rand() % status_send_interval) );
