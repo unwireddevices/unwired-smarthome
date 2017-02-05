@@ -67,8 +67,12 @@
 #include "ti-lib.h"
 #include "clock.h"
 #include "../ud_binary_protocol.h"
+#include "../flash-common.h"
+
 
 #include "../fake_headers.h" //no move up! not "krasivo"!
+
+
 
 /*---------------------------------------------------------------------------*/
 
@@ -108,8 +112,12 @@ static void exe_dimmer_command(struct command_data *command_dimmer)
 
 /*---------------------------------------------------------------------------*/
 
+
+
 void configure_DIO()
 {
+
+
 
 }
 

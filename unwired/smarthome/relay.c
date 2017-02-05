@@ -65,6 +65,7 @@
 
 #include "ti-lib.h"
 #include "../ud_binary_protocol.h"
+#include "../flash-common.h"
 
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
@@ -156,7 +157,7 @@ void change_DIO_state(uint8_t dio_number, uint8_t dio_state) //TODO: куча к
 
 /*---------------------------------------------------------------------------*/
 
-void configure_DIO()
+void configure_dio()
 {
     ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_RELAY_1);
     ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_RELAY_2);
@@ -165,6 +166,15 @@ void configure_DIO()
 }
 
 /*---------------------------------------------------------------------------*/
+
+void recovery_old_state_power()
+{
+    change_dio_state(BOARD_IOID_RELAY_1, flash_read_power_status(POWER_1_CH));
+    change_dio_state(BOARD_IOID_RELAY_2, flash_read_power_status(POWER_2_CH));
+}
+
+/*---------------------------------------------------------------------------*/
+
 
 void exe_relay_command(struct command_data *command_relay)
 {
@@ -179,34 +189,39 @@ void exe_relay_command(struct command_data *command_relay)
         printf("Not support relay number\n");
         return;
     }
-    change_DIO_state(command_relay->ability_number, command_relay->ability_state);
+    change_dio_state(command_relay->ability_number, command_relay->ability_state);
+    flash_write_power_status(command_relay->ability_number, command_relay->ability_state);
 }
 
 /*---------------------------------------------------------------------------*/
 
 PROCESS_THREAD(main_process, ev, data)
 {
-  PROCESS_BEGIN();
+    PROCESS_BEGIN();
 
-  static struct command_data *message_data = NULL;
+    static struct command_data *message_data = NULL;
 
-  PROCESS_PAUSE();
-  
-  printf("Unwired relay device. HELL-IN-CODE free. I hope.\n");
-  configure_DIO();
+    PROCESS_PAUSE();
 
-  while(1)
-  {
-    PROCESS_YIELD();
-    if(ev == PROCESS_EVENT_CONTINUE)
+    printf("Unwired relay device. HELL-IN-CODE free. I hope.\n");
+    configure_dio();
+    recovery_old_state_power();
+
+    while(1)
     {
-      message_data = data;
-      if (message_data->ability_target == DEVICE_ABILITY_RELAY)
-      {
-          exe_relay_command(message_data);
-      }
+        PROCESS_YIELD();
+        if(ev == PROCESS_EVENT_CONTINUE)
+        {
+            message_data = data;
+            if (message_data != NULL)
+            {
+                if (message_data->ability_target == DEVICE_ABILITY_RELAY)
+                {
+                  exe_relay_command(message_data);
+                }
+            }
+        }
     }
-  }
 
-  PROCESS_END();
+    PROCESS_END();
 }
