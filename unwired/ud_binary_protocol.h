@@ -20,7 +20,9 @@
 #define DATA_TYPE_PING                      0x04
 #define DATA_TYPE_COMMAND                   0x05
 #define DATA_TYPE_STATUS                    0x06
-#define DATA_TYPE_WARNING                   0x07
+#define DATA_TYPE_GET_STATUS                0x07
+#define DATA_TYPE_SETTINGS                  0x08
+#define DATA_TYPE_WARNING                   0x09
 
 /* Reserved data */
 #define DATA_RESERVED                       0xFF
@@ -97,16 +99,23 @@
 /* DEVICE_ABILITY_RELAY commands and targets */
 #define DEVICE_ABILITY_RELAY_COMMAND_OFF                0x00
 #define DEVICE_ABILITY_RELAY_COMMAND_ON                 0x01
-#define DEVICE_ABILITY_RELAY_COMMAND_TOGGLE             0x02
+#define DEVICE_ABILITY_RELAY_COMMAND_TOGGLE             0x80
+#define DEVICE_ABILITY_RELAY_COMMAND_BLINK              0x81
+
+#define DEVICE_ABILITY_RELAY_SETTINGS_START_STATE       0x03
 
 #define DEVICE_ABILITY_RELAY_1                          0x01
 #define DEVICE_ABILITY_RELAY_2                          0x02
 
-/* DEVICE_ABILITY_DIMMER commands and targets */
+/* DEVICE_ABILITY_DIMMER commands, settings and targets */
 #define DEVICE_ABILITY_DIMMER_COMMAND_OFF                0x00
 #define DEVICE_ABILITY_DIMMER_COMMAND_ON                 0x64 //100 in decimal
 #define DEVICE_ABILITY_DIMMER_COMMAND_TOGGLE             0x80
 #define DEVICE_ABILITY_DIMMER_COMMAND_BLINK              0x81
+
+#define DEVICE_ABILITY_DIMMER_SETTINGS_FADE_TIME         0x01
+#define DEVICE_ABILITY_DIMMER_SETTINGS_RISE_TIME         0x02
+#define DEVICE_ABILITY_DIMMER_SETTINGS_START_STATE       0x03
 
 #define DEVICE_ABILITY_DIMMER_1                          0x01
 #define DEVICE_ABILITY_DIMMER_2                          0x02
@@ -117,7 +126,19 @@
 #define DEVICE_ABILITY_0_10V_ANALOG_COMMAND_TOGGLE             0x80
 #define DEVICE_ABILITY_0_10V_ANALOG_COMMAND_BLINK              0x81
 
+#define DEVICE_ABILITY_0_10V_ANALOG_SETTINGS_FADE_TIME         0x01
+#define DEVICE_ABILITY_0_10V_ANALOG_SETTINGS_RISE_TIME         0x02
+#define DEVICE_ABILITY_0_10V_ANALOG_SETTINGS_START_STATE       0x03
+
 #define DEVICE_ABILITY_0_10V_ANALOG_CHANNEL_1                  0x01
+
+/* Devices warnings */
+#define DEVICE_WARNING_HIGH_TEMPERATYRE                        0x01
+#define DEVICE_WARNING_LOW_VOLTAGE                             0x02
+#define DEVICE_WARNING_HIGH_CURRENT                            0x03
+#define DEVICE_WARNING_LOW_POWER                               0x04
+#define DEVICE_WARNING_ERROR_ON_RELAY                          0x05
+#define DEVICE_WARNING_ERROR_OFF_RELAY                         0x06
 
 /* UART Binary data */
 #define UART_PROTOCOL_VERSION_V1                        0x01
