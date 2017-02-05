@@ -36,10 +36,22 @@
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
 /*---------------------------------------------------------------------------*/
-
 #include "contiki.h"
-/*---------------------------------------------------------------------------*/
+#include "ud_binary_protocol.h"
 
+#define POWER_1_CH                      0x01
+#define POWER_2_CH                      0x02
+#define POWER_1_CH_STATUS_ADDRESS       0x1DA01
+#define POWER_2_CH_STATUS_ADDRESS       0x1DA02
+
+#define MIN_USER_FLASH                  0x1DA00
+#define MAX_USER_FLASH                  0x1DC00
+
+/*---------------------------------------------------------------------------*/
+void flash_read(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count);
+void flash_write(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count);
+void flash_write_power_status(uint8_t channel_num, uint8_t channel_state);
+uint8_t flash_read_power_status(uint8_t channel_num);
 
 
 /*---------------------------------------------------------------------------*/

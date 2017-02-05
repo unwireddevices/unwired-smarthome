@@ -42,26 +42,72 @@
 #include "ti-lib.h"
 
 #include "flash-common.h"
-
-
-#define DEBUG_INTERVAL                    (60 * CLOCK_SECOND)
-
-/*---------------------------------------------------------------------------*/
-
-/* struct for simple_udp_send */
-struct simple_udp_connection udp_connection;
-/*---------------------------------------------------------------------------*/
+#include "driverlib/flash.h"
+#include "ud_binary_protocol.h"
 
 
 /*---------------------------------------------------------------------------*/
-void flash_read(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count) {
-    uint8_t *pui8ReadAddress = (uint8_t *)ui32Address;
-    while (ui32Count--) {
-      *pui8DataBuffer++ = *pui8ReadAddress++;
-    }
-  }
-/*---------------------------------------------------------------------------*/
-void flash_write()
+
+void flash_write_power_status(uint8_t channel_num, uint8_t channel_state)
 {
+    uint8_t write_data[1];
+    write_data[0] = channel_state;
+    if (channel_num == POWER_1_CH)
+    {
+        flash_write(write_data, POWER_1_CH_STATUS_ADDRESS, 0x1);
+    }
+    if (channel_num == POWER_2_CH)
+    {
+        flash_write(write_data, POWER_1_CH_STATUS_ADDRESS, 0x1);
+    }
+}
 
+/*---------------------------------------------------------------------------*/
+
+uint8_t flash_read_power_status(uint8_t channel_num)
+{
+    uint8_t read_len = 1;
+    uint8_t read_buffer[read_len];
+    uint32_t start_address;
+    if (channel_num == POWER_1_CH)
+    {
+        start_address = POWER_1_CH_STATUS_ADDRESS;
+    }
+
+    if (channel_num == POWER_2_CH)
+    {
+        start_address = POWER_2_CH_STATUS_ADDRESS;
+    }
+
+    if (channel_num != POWER_1_CH && channel_num != POWER_2_CH)
+    {
+        return 0;
+    }
+
+    flash_read(read_buffer, start_address, read_len);
+
+    return read_buffer[1];
+}
+
+/*---------------------------------------------------------------------------*/
+
+void flash_read(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count)
+{
+    if (pui8DataBuffer != NULL && ui32Address+ui32Count < MAX_USER_FLASH && ui32Address > MIN_USER_FLASH)
+    {
+        uint8_t *pui8ReadAddress = (uint8_t *)ui32Address;
+        while (ui32Count--) {
+          *pui8DataBuffer++ = *pui8ReadAddress++;
+        }
+    }
+}
+
+/*---------------------------------------------------------------------------*/
+
+void flash_write(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count)
+{
+    if (pui8DataBuffer != NULL && ui32Address+ui32Count < MAX_USER_FLASH && ui32Address > MIN_USER_FLASH)
+    {
+        FlashProgram(pui8DataBuffer, ui32Address, ui32Count);
+    }
 }
