@@ -23,6 +23,8 @@
 #define DATA_TYPE_GET_STATUS                                    0x07
 #define DATA_TYPE_SETTINGS                                      0x08
 #define DATA_TYPE_WARNING                                       0x09
+#define DATA_TYPE_SET_TIME                                      0x0A
+#define DATA_TYPE_SET_SCHEDULE                                  0x0B
 
 
 /* Reserved data */
