@@ -87,7 +87,7 @@ AUTOSTART_PROCESSES(&dag_node_process, &main_process);
 
 /*---------------------------------------------------------------------------*/
 
-void change_DIO_state(uint8_t dio_number, uint8_t dio_state) //TODO: куча кода дублируется, сделай с этим что-нибудь
+void change_dio_state(uint8_t dio_number, uint8_t dio_state) //TODO: куча кода дублируется, сделай с этим что-нибудь
                                                             //TODO: и убери switch-case!
 {
     if (dio_number == 1)
