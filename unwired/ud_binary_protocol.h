@@ -105,7 +105,8 @@
 #define DEVICE_ABILITY_RELAY_COMMAND_TOGGLE                     0x80
 #define DEVICE_ABILITY_RELAY_COMMAND_BLINK                      0x81
 
-#define DEVICE_ABILITY_RELAY_SETTINGS_START_STATE               0x03
+#define DEVICE_ABILITY_RELAY_1_SETTINGS_START_STATE             0x01
+#define DEVICE_ABILITY_RELAY_2_SETTINGS_START_STATE             0x02
 
 #define DEVICE_ABILITY_RELAY_1                                  0x01
 #define DEVICE_ABILITY_RELAY_2                                  0x02
@@ -118,7 +119,8 @@
 
 #define DEVICE_ABILITY_DIMMER_SETTINGS_FADE_TIME                0x01
 #define DEVICE_ABILITY_DIMMER_SETTINGS_RISE_TIME                0x02
-#define DEVICE_ABILITY_DIMMER_SETTINGS_START_STATE              0x03
+#define DEVICE_ABILITY_DIMMER_1_SETTINGS_START_STATE            0x03
+#define DEVICE_ABILITY_DIMMER_2_SETTINGS_START_STATE            0x03
 
 #define DEVICE_ABILITY_DIMMER_1                                 0x01
 #define DEVICE_ABILITY_DIMMER_2                                 0x02
