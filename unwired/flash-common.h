@@ -39,20 +39,30 @@
 #include "contiki.h"
 #include "ud_binary_protocol.h"
 
-#define POWER_1_CH                      0x01
-#define POWER_2_CH                      0x02
-#define POWER_1_CH_STATUS_ADDRESS       0x1DA01
-#define POWER_2_CH_STATUS_ADDRESS       0x1DA02
+#define USER_FLASH_LENGTH                       100
 
-#define MIN_USER_FLASH                  0x1DA00
-#define MAX_USER_FLASH                  0x1DC00
+#define START_USER_FLASH                        0x10000
+#define END_USER_FLASH                          USER_FLASH_LENGTH + START_USER_FLASH
+
+#define START_ON_LAST_STATE                     0x01
+#define START_ON_ON_STATE                       0x02
+#define START_ON_OFF_STATE                      0x03
+
+#define POWER_1_DIO                             BOARD_IOID_RELAY_1
+#define POWER_1_CH_LAST_STATE_OFFSET            0x01
+#define POWER_1_CH_START_STATE_OFFSET           0x02
+
+#define POWER_2_DIO                             BOARD_IOID_RELAY_2
+#define POWER_2_CH_LAST_STATE_OFFSET            0x03
+#define POWER_2_CH_START_STATE_OFFSET           0x04
+
+#define BLANK_FLASH_VALUE                       0xFF
 
 /*---------------------------------------------------------------------------*/
+void user_flash_update_byte(uint8_t offset, uint8_t data);
+uint8_t user_flash_read_byte(uint8_t offset);
 void flash_read(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count);
-void flash_write(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count);
-void flash_write_power_status(uint8_t channel_num, uint8_t channel_state);
-uint8_t flash_read_power_status(uint8_t channel_num);
-
+uint32_t flash_write(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count);
 
 /*---------------------------------------------------------------------------*/
 
