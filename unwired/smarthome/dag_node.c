@@ -60,6 +60,7 @@
 #include "ti-lib.h"
 #include "clock.h"
 #include "dev/watchdog.h"
+#include "../flash-common.h"
 
 
 #include "xxf_types_helper.h"
@@ -141,16 +142,19 @@ udp_receiver(struct simple_udp_connection *c,
             }
 	    }
 
-        if (data[2] == DATA_TYPE_COMMAND)
+        if (data[2] == DATA_TYPE_COMMAND || data[2] == DATA_TYPE_SETTINGS)
         {
-            printf("DAG Node: Command packet received\n");
+            printf("DAG Node: Command/settings packet received\n");
+            message_for_main_process.data_type = data[2];
             message_for_main_process.ability_target = data[3];
             message_for_main_process.ability_number = data[4];
             message_for_main_process.ability_state = data[5];
             process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
         }
 
-        if (data[2] != DATA_TYPE_COMMAND && data[2] != DATA_TYPE_CONFIRM)
+        if (data[2] != DATA_TYPE_COMMAND &&
+                data[2] != DATA_TYPE_CONFIRM &&
+                data[2] != DATA_TYPE_SETTINGS)
         {
             printf("DAG Node: Incompatible data type UDP packer from");
             uip_debug_ip6addr_print(sender_addr);

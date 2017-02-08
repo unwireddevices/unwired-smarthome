@@ -45,6 +45,7 @@ volatile uip_ip6addr_t root_addr;
 
 struct command_data
 {
+    volatile uint8_t data_type;
     volatile uint8_t ability_target;
     volatile uint8_t ability_number;
     volatile uint8_t ability_state;
