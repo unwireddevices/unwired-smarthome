@@ -41,6 +41,7 @@
 #include "net/rpl/rpl-private.h"
 #include "net/ip/uip.h"
 #include "net/ipv6/uip-ds6.h"
+#include "net/mac/contikimac/contikimac.h"
 
 #include "dev/leds.h"
 #include "sys/clock.h"
@@ -55,24 +56,24 @@
 #include <stdio.h>
 #include "simple-udp.h"
 
-#include "ud-dag_node.h"
 #include "net/link-stats.h"
-
-#include "xxf_types_helper.h"
-
 #include "ti-lib.h"
-#include "ud_binary_protocol.h"
 #include "dev/watchdog.h"
 
+#include "xxf_types_helper.h"
+#include "../ud_binary_protocol.h"
+
+#include "dag_node.h"
+
 #ifdef IF_UD_BUTTON
-#  include "ud-button.h"
+#  include "button.h"
 #endif
 
 #ifdef IF_UD_RELAY
-#  include "ud-relay.h"
+#  include "relay.h"
 #endif
 
-#include "fake_headers.h" //no move up! not "krasivo"!
+#include "../fake_headers.h" //no move up! not "krasivo"!
 
 #define DEBUG_INTERVAL                    (60 * CLOCK_SECOND)
 //#define DEBUG_INTERVAL                      (2 * CLOCK_SECOND)
@@ -309,6 +310,21 @@ send_join_packet(const uip_ip6addr_t *dest_addr)
 	simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
 }
 
+/*---------------------------------------------------------------------------*/
+
+static void
+set_activity_slow(void)
+{
+    if (RPL_CONF_LEAF_ONLY == 1)
+    {
+        uip_ds_6_interval_set(CLOCK_SECOND*2);
+        printf( "DAG Node: new DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
+        set_rdc_channel_check_rate_slow();
+        printf( "DAG Node: new RDC check rate: %" PRIu8 " Hz\n", get_rdc_channel_check_rate() );
+    }
+
+}
+
 
 /*---------------------------------------------------------------------------*/
 
@@ -425,18 +441,11 @@ PROCESS_THREAD(root_ping_process, ev, data)
 
 		dag_root_find();
 
-		if (dag_active == 0 && ping_interval != SHORT_PING_INTERVAL && non_answered_ping < 20)
-		{
-			ping_interval = SHORT_PING_INTERVAL;
-			uip_ds_6_interval_set(CLOCK_SECOND / 5);
-			printf( "DAG Node: Change timer to SHORT interval, new DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
-		}
-
-		if ( (dag_active == 1 && ping_interval != LONG_PING_INTERVAL) || non_answered_ping > 20 )
+		if ((dag_active == 1 && ping_interval != LONG_PING_INTERVAL) || non_answered_ping > 20 )
 		{
 			ping_interval = LONG_PING_INTERVAL;
-			uip_ds_6_interval_set(CLOCK_SECOND);
-			printf( "DAG Node: Change timer to LONG interval, new DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
+            printf("DAG Node: Change timer to LONG interval\n");
+			set_activity_slow();
 		}
 
 		if (non_answered_ping > 30)
@@ -474,7 +483,10 @@ PROCESS_THREAD(dag_node_process, ev, data)
 		rpl_set_mode(RPL_MODE_MESH);
 	}
 
+	set_rdc_channel_check_rate_fast();
 	printf("DAG Node: started, %s mode\n", rpl_get_mode() == RPL_MODE_LEAF ? "leaf" : "no-leaf");
+    printf("DAG Node: DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
+    printf("DAG Node: RDC check rate: %" PRIu8 " Hz\n", get_rdc_channel_check_rate() );
 
 	process_start(&dag_node_button_process, NULL);
 	process_start(&root_ping_process, NULL);

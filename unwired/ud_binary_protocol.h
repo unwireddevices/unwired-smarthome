@@ -1,33 +1,3 @@
-/*
- * Copyright (c) 2010, Swedish Institute of Computer Science.
- * Copyright (c) 2014, Texas Instruments Incorporated - http://www.ti.com/
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- * 1. Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- * 2. Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- * 3. Neither the name of the Institute nor the names of its contributors
- *    may be used to endorse or promote products derived from this software
- *    without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE INSTITUTE AND CONTRIBUTORS ``AS IS'' AND
- * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED.  IN NO EVENT SHALL THE INSTITUTE OR CONTRIBUTORS BE LIABLE
- * FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
- * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
- * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
- * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
- * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
- * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
- * SUCH DAMAGE.
- *
- */
 /*---------------------------------------------------------------------------*/
 /**
  * \file
@@ -50,6 +20,7 @@
 #define DATA_TYPE_PING                      0x04
 #define DATA_TYPE_COMMAND                   0x05
 #define DATA_TYPE_STATUS                    0x06
+#define DATA_TYPE_WARNING                   0x07
 
 /* Reserved data */
 #define DATA_RESERVED                       0xFF
@@ -85,7 +56,7 @@
 #define DEVICE_ABILITY_CO_SENSOR               10
 #define DEVICE_ABILITY_GAS_SENSOR              11
 #define DEVICE_ABILITY_POWER_METER             12
-#define DEVICE_ABILITY_RESERVED2               13
+#define DEVICE_ABILITY_RADIATION_METER         13
 #define DEVICE_ABILITY_RESERVED3               14
 #define DEVICE_ABILITY_RESERVED4               15
 #define DEVICE_ABILITY_RESERVED5               16
@@ -127,7 +98,6 @@
 #define DEVICE_ABILITY_RELAY_COMMAND_OFF                0x00
 #define DEVICE_ABILITY_RELAY_COMMAND_ON                 0x01
 #define DEVICE_ABILITY_RELAY_COMMAND_TOGGLE             0x02
-
 
 /* UART Binary data */
 #define UART_PROTOCOL_VERSION_V1                        0x01

@@ -136,9 +136,7 @@ set_rf_params(void)
   printf(" PAN ID: 0x%04X\n", IEEE802154_PANID);
   printf(" Security level: %u\n", NONCORESEC_CONF_SEC_LVL);
   printf(" Define leaf: %s\n", RPL_CONF_LEAF_ONLY == 1 ? "Yes" : "No");
-  printf(" RDC channel check rate: %u Hz\n", NETSTACK_RDC_CHANNEL_CHECK_RATE);
   printf(" RPL probing interval: %u s\n", RPL_CONF_PROBING_INTERVAL/CLOCK_SECOND);
-  printf(" DS6 interval(system ticks): %" PRIu32 "\n", uip_ds_6_interval_get());
   printf(" Min DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_MIN);
   printf(" Max DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_DOUBLINGS+RPL_CONF_DIO_INTERVAL_MIN);
 

@@ -59,12 +59,12 @@
 #include "ti-lib.h"
 #include "dev/cc26xx-uart.h"
 
-#include "ud_binary_protocol.h"
+#include "../ud_binary_protocol.h"
 #include "xxf_types_helper.h"
 #include "dev/watchdog.h"
 
 
-#include "fake_headers.h" //no move up! not "krasivo"!
+#include "../fake_headers.h" //no move up! not "krasivo"!
 
 #define UART_DATA_POLL_INTERVAL 5 //in main timer ticks, one tick ~8ms
 /*---------------------------------------------------------------------------*/

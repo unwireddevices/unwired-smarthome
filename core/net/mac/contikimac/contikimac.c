@@ -78,16 +78,12 @@
 #define RDC_CONF_MCU_SLEEP           0
 #endif
 
-#if NETSTACK_RDC_CHANNEL_CHECK_RATE >= 64
-#undef WITH_PHASE_OPTIMIZATION
-#define WITH_PHASE_OPTIMIZATION 0
-#endif
 
 /* CYCLE_TIME for channel cca checks, in rtimer ticks. */
 #ifdef CONTIKIMAC_CONF_CYCLE_TIME
 #define CYCLE_TIME (CONTIKIMAC_CONF_CYCLE_TIME)
 #else
-#define CYCLE_TIME (RTIMER_ARCH_SECOND / NETSTACK_RDC_CHANNEL_CHECK_RATE)
+#define CYCLE_TIME (RTIMER_ARCH_SECOND / rdc_channel_check_rate)
 #endif
 
 /* CHANNEL_CHECK_RATE is enforced to be a power of two.
@@ -242,6 +238,8 @@ static volatile uint8_t contikimac_keep_radio_on = 0;
 static volatile unsigned char we_are_sending = 0;
 static volatile unsigned char radio_is_on = 0;
 
+static volatile uint8_t rdc_channel_check_rate = NETSTACK_RDC_CHANNEL_CHECK_RATE;
+
 #define DEBUG 0
 #if DEBUG
 #include <stdio.h>
@@ -268,6 +266,28 @@ static struct compower_activity current_packet;
 static struct timer broadcast_rate_timer;
 static int broadcast_rate_counter;
 #endif /* CONTIKIMAC_CONF_BROADCAST_RATE_LIMIT */
+
+
+/*---------------------------------------------------------------------------*/
+uint8_t
+get_rdc_channel_check_rate(void)
+{
+    return rdc_channel_check_rate;
+}
+
+/*---------------------------------------------------------------------------*/
+void
+set_rdc_channel_check_rate_slow(void)
+{
+    rdc_channel_check_rate = 1;
+}
+
+/*---------------------------------------------------------------------------*/
+void
+set_rdc_channel_check_rate_fast(void)
+{
+    rdc_channel_check_rate = 32;
+}
 
 /*---------------------------------------------------------------------------*/
 static void
@@ -378,18 +398,18 @@ advance_cycle_start(void)
 
   /* Compute cycle start when RTIMER_ARCH_SECOND is not a multiple
   of CHANNEL_CHECK_RATE */
-  if(sync_cycle_phase++ == NETSTACK_RDC_CHANNEL_CHECK_RATE) {
+  if(sync_cycle_phase++ == rdc_channel_check_rate) {
     sync_cycle_phase = 0;
     sync_cycle_start += RTIMER_ARCH_SECOND;
     cycle_start = sync_cycle_start;
-  } else if( (RTIMER_ARCH_SECOND * NETSTACK_RDC_CHANNEL_CHECK_RATE) > 65535) {
+  } else if( (RTIMER_ARCH_SECOND * rdc_channel_check_rate) > 65535) {
     uint32_t phase_time = sync_cycle_phase*RTIMER_ARCH_SECOND;
 
-    cycle_start = sync_cycle_start + phase_time/NETSTACK_RDC_CHANNEL_CHECK_RATE;
+    cycle_start = sync_cycle_start + phase_time/rdc_channel_check_rate;
   } else {
     unsigned phase_time = sync_cycle_phase*RTIMER_ARCH_SECOND;
 
-    cycle_start = sync_cycle_start + phase_time/NETSTACK_RDC_CHANNEL_CHECK_RATE;
+    cycle_start = sync_cycle_start + phase_time/rdc_channel_check_rate;
   }
   #endif
 

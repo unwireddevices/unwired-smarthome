@@ -46,4 +46,8 @@
 
 extern const struct rdc_driver contikimac_driver;
 
+uint8_t get_rdc_channel_check_rate(void);
+void set_rdc_channel_check_rate_slow(void);
+void set_rdc_channel_check_rate_fast(void);
+
 #endif /* CONTIKIMAC_H */

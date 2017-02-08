@@ -43,15 +43,11 @@
 /*---------------------------------------------------------------------------*/
 #define BUTTON_SENSOR "Button"
 /*---------------------------------------------------------------------------*/
-#define BUTTON_SENSOR_VALUE_STATE    0
-#define BUTTON_SENSOR_VALUE_DURATION 1
-
-#define BUTTON_SENSOR_VALUE_RELEASED 0
-#define BUTTON_SENSOR_VALUE_PRESSED  1
 
 PROCESS_NAME(button_sensor_short_process);
 PROCESS_NAME(button_sensor_long_process);
 
+void button_press_handler(uint8_t ioid);
 /*---------------------------------------------------------------------------*/
 extern const struct sensors_sensor button_a_sensor_click;
 extern const struct sensors_sensor button_a_sensor_long_click;
