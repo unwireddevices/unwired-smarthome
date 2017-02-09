@@ -31,19 +31,6 @@
 /** \addtogroup cc26xx-srf-tag
  * @{
  *
- * \defgroup srf06-cc26xx-peripherals Peripherals for the SmartRF06EB + CC26xxEM
- *
- * Defines related to the SmartRF06 Evaluation Board with a CC26xxEM
- *
- * This file provides connectivity information on LEDs, Buttons, UART and
- * other peripherals
- *
- * This file can be used as the basis to configure other boards using the
- * CC13xx/CC26xx code as their basis.
- *
- * This file is not meant to be modified by the user.
- * @{
- *
  * \file
  * Header file with definitions related to the I/O connections on the TI
  * SmartRF06 Evaluation Board with a CC26xxEM
@@ -60,8 +47,6 @@
 /**
  * \name LED configurations
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 /* Some files include leds.h before us, so we need to get rid of defaults in
  * leds.h before we provide correct definitions */
@@ -86,16 +71,13 @@
 /*---------------------------------------------------------------------------*/
 /**
  * \name LED IOID mappings
- *
- * Those values are not meant to be modified by the user
- * @{
- */
 
+ */
 #define BOARD_IOID_LED_A          IOID_25
 #define BOARD_IOID_LED_B          IOID_27
 #define BOARD_IOID_LED_C          IOID_7
 #define BOARD_IOID_LED_D          IOID_6
-#define BOARD_IOID_LED_E          IOID_22 //led on radio-board
+#define BOARD_IOID_LED_E          IOID_6
 #define BOARD_LED_A               (1 << BOARD_IOID_LED_A)
 #define BOARD_LED_B               (1 << BOARD_IOID_LED_B)
 #define BOARD_LED_C               (1 << BOARD_IOID_LED_C)
@@ -103,13 +85,34 @@
 #define BOARD_LED_E               (1 << BOARD_IOID_LED_E)
 #define BOARD_LED_ALL             (BOARD_LED_A | BOARD_LED_B | BOARD_LED_C | \
                                    BOARD_LED_D | BOARD_LED_E)
+
+/*---------------------------------------------------------------------------*/
+/**
+ * \name Relay IOID mappings
+ */
+#define BOARD_IOID_RELAY_1          IOID_17
+#define BOARD_IOID_RELAY_2          IOID_16
+/** @} */
+/*---------------------------------------------------------------------------*/
+/**
+ * \name Dimmer IOID mappings
+ */
+#define BOARD_IOID_DIMMER_1         IOID_16
+#define BOARD_IOID_DIMMER_2         IOID_17
+#define ZERO_CROSS_SYNC_IOID        IOID_27
+
+/** @} */
+/*---------------------------------------------------------------------------*/
+/**
+ * \name 1-10V IOID mappings
+ */
+#define BOARD_IOID_1_10V_1         IOID_16
+
 /** @} */
 /*---------------------------------------------------------------------------*/
 /**
  * \name UART IOID mapping
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 #define BOARD_IOID_UART_RX        IOID_2 //SmartRF06
 #define BOARD_IOID_UART_TX        IOID_3 //SmartRF06
@@ -124,14 +127,12 @@
 /**
  * \name Button IOID mapping
  *
- * Those values are not meant to be modified by the user
- * @{
  */
-#define BOARD_IOID_KEY_A            IOID_15
-#define BOARD_IOID_KEY_B            IOID_18
-#define BOARD_IOID_KEY_C            IOID_19
-#define BOARD_IOID_KEY_D            IOID_12
-#define BOARD_IOID_KEY_E            IOID_11
+#define BOARD_IOID_KEY_A            IOID_15 //SmartRF06
+#define BOARD_IOID_KEY_B            IOID_18 //SmartRF06
+#define BOARD_IOID_KEY_C            IOID_19 //SmartRF06
+#define BOARD_IOID_KEY_D            IOID_12 //SmartRF06
+#define BOARD_IOID_KEY_E            IOID_11 //SmartRF06
 #define BOARD_KEY_A                 (1 << BOARD_IOID_KEY_A)
 #define BOARD_KEY_B                 (1 << BOARD_IOID_KEY_B)
 #define BOARD_KEY_C                 (1 << BOARD_IOID_KEY_C)
@@ -142,8 +143,6 @@
 /**
  * \name 3.3V domain IOID mapping
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 #define BOARD_IOID_3V3_EN         IOID_13
 #define BOARD_3V3_EN              (1 << BOARD_IOID_3V3_EN)
@@ -152,8 +151,6 @@
 /**
  * \name SPI IOID mapping
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 #define BOARD_IOID_SPI_SCK        IOID_UNUSED
 #define BOARD_IOID_SPI_MOSI       IOID_UNUSED
@@ -166,20 +163,16 @@
 /**
  * \brief I2C IOID mappings
  *
- * Those values are not meant to be modified by the user
- * @{
  */
-#define BOARD_IOID_SDA            IOID_UNUSED /**< Interface 0 SDA: All sensors bar MPU */
-#define BOARD_IOID_SCL            IOID_UNUSED /**< Interface 0 SCL: All sensors bar MPU */
-#define BOARD_IOID_SDA_HP         IOID_UNUSED /**< Interface 1 SDA: MPU */
-#define BOARD_IOID_SCL_HP         IOID_UNUSED /**< Interface 1 SCL: MPU */
+#define BOARD_IOID_SDA            IOID_29 /**< Interface 0 SDA: All sensors bar MPU */
+#define BOARD_IOID_SCL            IOID_30 /**< Interface 0 SCL: All sensors bar MPU */
+#define BOARD_IOID_SDA_HP         IOID_29 /**< Interface 1 SDA: MPU */
+#define BOARD_IOID_SCL_HP         IOID_30 /**< Interface 1 SCL: MPU */
 /** @} */
 /*---------------------------------------------------------------------------*/
 /**
  * \name LCD IOID mapping
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 #define BOARD_IOID_LCD_MODE       IOID_UNUSED
 #define BOARD_IOID_LCD_RST        IOID_UNUSED
@@ -196,8 +189,6 @@
 /**
  * \name SD Card IOID mapping
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 #define BOARD_IOID_SDCARD_CS      IOID_UNUSED
 #define BOARD_SDCARD_CS           (1 << BOARD_IOID_SDCARD_CS)
@@ -212,8 +203,6 @@
 /**
  * \name ALS IOID mapping
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 #define BOARD_IOID_ALS_PWR        IOID_UNUSED
 #define BOARD_IOID_ALS_OUT        IOID_UNUSED
@@ -224,8 +213,6 @@
 /**
  * \name ACC IOID mapping
  *
- * Those values are not meant to be modified by the user
- * @{
  */
 #define BOARD_IOID_ACC_PWR        IOID_UNUSED
 #define BOARD_IOID_ACC_INT        IOID_UNUSED
