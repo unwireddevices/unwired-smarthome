@@ -204,8 +204,8 @@
  * \name ALS IOID mapping
  *
  */
-#define BOARD_IOID_ALS_PWR        IOID_UNUSED
-#define BOARD_IOID_ALS_OUT        IOID_UNUSED
+#define BOARD_IOID_ALS_PWR        IOID_26
+#define BOARD_IOID_ALS_OUT        IOID_23
 #define BOARD_ALS_PWR             (1 << BOARD_IOID_ALS_PWR)
 #define BOARD_ALS_OUT             (1 << BOARD_IOID_ALS_OUT)
 /** @} */
@@ -214,11 +214,11 @@
  * \name ACC IOID mapping
  *
  */
-#define BOARD_IOID_ACC_PWR        IOID_UNUSED
-#define BOARD_IOID_ACC_INT        IOID_UNUSED
-#define BOARD_IOID_ACC_INT1       IOID_UNUSED
-#define BOARD_IOID_ACC_INT2       IOID_UNUSED
-#define BOARD_IOID_ACC_CS         IOID_UNUSED
+#define BOARD_IOID_ACC_PWR        IOID_20
+#define BOARD_IOID_ACC_INT        IOID_28
+#define BOARD_IOID_ACC_INT1       IOID_28
+#define BOARD_IOID_ACC_INT2       IOID_29
+#define BOARD_IOID_ACC_CS         IOID_24
 #define BOARD_ACC_PWR             (1 << BOARD_IOID_ACC_PWR)
 #define BOARD_ACC_INT             (1 << BOARD_IOID_ACC_INT)
 #define BOARD_ACC_INT1            (1 << BOARD_IOID_ACC_INT1)

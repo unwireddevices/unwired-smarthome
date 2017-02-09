@@ -3,12 +3,12 @@
 all: root-CLEAN button-CLEAN relay-CLEAN dimmer-CLEAN
 
 ifndef CPU
-  ${info Not CPU define! USE: "CPU=cc26xx/cc13xx" Set default: cc26xx}
+  ${info Not CPU define! USE: "CPU=cc26xx" or "CPU=cc13xx" Set default: cc26xx}
   CPU = cc26xx
 endif
 
 ifndef BOARD
-  ${info Not BOARD define! USE: "BOARD=udboards/srf06" Set default: udboards}
+  ${info Not BOARD define! USE: "BOARD=srf06" or "BOARD=udboards" Set default: udboards}
   BOARD = udboards
 endif
 
