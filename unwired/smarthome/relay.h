@@ -31,7 +31,7 @@
 /*---------------------------------------------------------------------------*/
 /**
  * \file
- *         Header file
+ *         Header file for relay service
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */

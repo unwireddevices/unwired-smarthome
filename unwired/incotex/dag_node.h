@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2008, Swedish Institute of Computer Science
+ * Copyright (c) 2010, Swedish Institute of Computer Science.
+ * Copyright (c) 2014, Texas Instruments Incorporated - http://www.ti.com/
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,52 +27,46 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * This file is part of the Contiki operating system.
- *
  */
-
+/*---------------------------------------------------------------------------*/
 /**
  * \file
- *	Coffee architecture-dependent header for the native platform.
+ *         Header file for DAG-node service
  * \author
- * 	Nicolas Tsiftes <nvt@sics.se>
+ *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
+/*---------------------------------------------------------------------------*/
 
-#ifndef CFS_COFFEE_ARCH_H
-#define CFS_COFFEE_ARCH_H
+#include "contiki.h"
+/*---------------------------------------------------------------------------*/
+struct simple_udp_connection udp_connection;
+volatile uint8_t dag_active;
+volatile uip_ip6addr_t root_addr;
 
-#include "contiki-conf.h"
-#include "dev/xmem.h"
+struct command_data
+{
+    volatile uint8_t ability_target;
+    volatile uint8_t ability_number;
+    volatile uint8_t ability_state;
+};
 
-#define COFFEE_SECTOR_SIZE		65536UL
-#define COFFEE_PAGE_SIZE		256UL
-#define COFFEE_START			0
-#define COFFEE_SIZE			((1024UL * 1024UL) - COFFEE_START)
-#define COFFEE_NAME_LENGTH		16
-#define COFFEE_DYN_SIZE			16384
-#define COFFEE_MAX_OPEN_FILES		6
-#define COFFEE_FD_SET_SIZE		8
-#define COFFEE_LOG_DIVISOR		4
-#define COFFEE_LOG_SIZE			8192
-#define COFFEE_LOG_TABLE_LIMIT		256
-#define COFFEE_MICRO_LOGS		0
+struct sensor_packet
+{
+    uint8_t protocol_version;
+    uint8_t device_version;
+    uint8_t data_type;
+    uint8_t number_ability;
+    uint8_t sensor_number;
+    uint8_t sensor_event;
+};
 
-#define COFFEE_WRITE(buf, size, offset)				\
-		xmem_pwrite((char *)(buf), (size), COFFEE_START + (offset))
+void send_sensor_event(struct sensor_packet *packet);
 
-#define COFFEE_READ(buf, size, offset)				\
-  		xmem_pread((char *)(buf), (size), COFFEE_START + (offset))
+PROCESS_NAME(dag_node_process);
+PROCESS_NAME(dag_node_button_process);
+PROCESS_NAME(root_ping_process);
+PROCESS_NAME(status_send_process);
 
-#define COFFEE_ERASE(sector)					\
-  		xmem_erase(COFFEE_SECTOR_SIZE, COFFEE_START + (sector) * COFFEE_SECTOR_SIZE)
 
-#define READ_HEADER(hdr, page)						\
-  COFFEE_READ((hdr), sizeof (*hdr), (page) * COFFEE_PAGE_SIZE)
+/*---------------------------------------------------------------------------*/
 
-#define WRITE_HEADER(hdr, page)						\
-  COFFEE_WRITE((hdr), sizeof (*hdr), (page) * COFFEE_PAGE_SIZE)
-
-/* Coffee types. */
-typedef int16_t coffee_page_t;
-
-#endif /* !COFFEE_ARCH_H */

@@ -32,7 +32,7 @@
  /*---------------------------------------------------------------------------*/
  /*
  * \file
- *         Button service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
+ *         Dimmer service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
@@ -56,52 +56,69 @@
 #include "button-sensor.h"
 #include "board.h"
 #include "board-peripherals.h"
-#include "dev/watchdog.h"
 #include "simple-udp.h"
 
-#include "button.h"
+#include "dimmer.h"
 #include "dag_node.h"
+#include "gpio-interrupt.h"
+
+#include "xxf_types_helper.h"
 
 #include "ti-lib.h"
+#include "clock.h"
 #include "../ud_binary_protocol.h"
+#include "../flash-common.h"
 
-#include "net/rpl/rpl-private.h"
+
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
 
+
 /*---------------------------------------------------------------------------*/
-/* Register button sensors */
-SENSORS(&button_a_sensor_click, &button_a_sensor_long_click,
-        &button_b_sensor_click, &button_b_sensor_long_click,
-        &button_c_sensor_click, &button_c_sensor_long_click,
-        &button_d_sensor_click, &button_d_sensor_long_click,
-        &button_e_sensor_click, &button_e_sensor_long_click);
 
+/* Register buttons sensors */
+SENSORS(&button_e_sensor_click,
+        &button_e_sensor_long_click);
 
-/* register main button process */
-PROCESS(main_process, "UD Buttons control process");
+/* register dimmer process */
+PROCESS(main_process, "Dimmer control process");
 
 /* set autostart processes */
 AUTOSTART_PROCESSES(&dag_node_process, &main_process);
 
+volatile uint8_t dimmer_1_percent = 0;
+volatile uint8_t dimmer_2_percent = 0;
+
 /*---------------------------------------------------------------------------*/
 
-void send_button_status_packet(uint8_t button_number,
-                               uint8_t click_type)
+static void exe_dimmer_command(struct command_data *command_dimmer)
 {
-    if(dag_active == 1)
+    printf("DIMMER: new command, target: %02X, state: %02X, number: %02X\n",
+           command_dimmer->ability_target,
+           command_dimmer->ability_state,
+           command_dimmer->ability_number);
+
+    if (command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_1 &&
+        command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_2)
     {
-        struct sensor_packet button_sensor_packet;
-        button_sensor_packet.protocol_version = CURRENT_PROTOCOL_VERSION;
-        button_sensor_packet.device_version = CURRENT_DEVICE_VERSION;
-        button_sensor_packet.data_type = DATA_TYPE_SENSOR_DATA;
-        button_sensor_packet.number_ability = DEVICE_ABILITY_BUTTON;
-        button_sensor_packet.sensor_number = button_number;
-        button_sensor_packet.sensor_event = click_type;
-        send_sensor_event(&button_sensor_packet);
+        printf("Not support dimmer number\n");
+        return;
     }
 
-    led_blink(LED_A);
+    dimmer_1_percent = command_dimmer->ability_state;
+}
+
+
+
+/*---------------------------------------------------------------------------*/
+
+
+
+void configure_DIO()
+{
+
+
+
 }
 
 /*---------------------------------------------------------------------------*/
@@ -109,50 +126,24 @@ void send_button_status_packet(uint8_t button_number,
 PROCESS_THREAD(main_process, ev, data)
 {
   PROCESS_BEGIN();
-  printf("Unwired buttons device. HELL-IN-CODE free. I hope.\n");
+
+  static struct command_data *message_data = NULL;
 
   PROCESS_PAUSE();
+  
+  printf("Unwired dimmer device. HELL-IN-CODE free. I hope.\n");
+  configure_DIO();
 
-  while(1) {
+  while(1)
+  {
     PROCESS_YIELD();
-    if(ev == sensors_event) {
-      if(data == &button_a_sensor_click) {
-        printf("BCP: Button A click\n");
-        send_button_status_packet('a', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
+    if(ev == PROCESS_EVENT_CONTINUE)
+    {
+      message_data = data;
+      if (message_data->ability_target == DEVICE_ABILITY_DIMMER)
+      {
+          exe_dimmer_command(message_data);
       }
-      if(data == &button_a_sensor_long_click) {
-        printf("BCP: Button A long click\n");
-        send_button_status_packet('a', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
-      }
-      if(data == &button_b_sensor_click) {
-        printf("BCP: Button B click\n");
-        send_button_status_packet('b', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
-      }
-      if(data == &button_b_sensor_long_click) {
-        printf("BCP: Button B long click\n");
-        send_button_status_packet('b', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
-      }
-      if(data == &button_c_sensor_click) {
-        printf("BCP: Button C click\n");
-        send_button_status_packet('c', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
-      }
-      if(data == &button_c_sensor_long_click) {
-        printf("BCP: Button C long click\n");
-        send_button_status_packet('c', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
-      }
-      if(data == &button_d_sensor_click) {
-        printf("BCP: Button D click\n");
-        send_button_status_packet('d', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
-      }
-      if(data == &button_d_sensor_long_click) {
-        printf("BCP: Button D long click\n");
-        send_button_status_packet('d', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
-      }
-      if(data == &button_e_sensor_click) {
-        printf("BCP: Button E click\n");
-        send_button_status_packet('e', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
-      }
-
     }
   }
 

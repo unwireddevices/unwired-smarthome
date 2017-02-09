@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2005, Swedish Institute of Computer Science.
+ * Copyright (c) 2010, Swedish Institute of Computer Science.
+ * Copyright (c) 2014, Texas Instruments Incorporated - http://www.ti.com/
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,35 +27,28 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * This file is part of the Contiki operating system.
- *
  */
-
+/*---------------------------------------------------------------------------*/
 /**
  * \file
- *         A brief description of what this file is.
+ *         Header file for dimmer service
  * \author
- *         Adam Dunkels <adam@sics.se>
+ *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
+/*---------------------------------------------------------------------------*/
+#include "contiki.h"
+#include "net/ip/uip.h"
 
-#include "dev/leds.h"
-static unsigned char leds;
+PROCESS_NAME(main_process);
+
 /*---------------------------------------------------------------------------*/
-void
-leds_arch_init(void)
-{
-  leds = 0;
-}
-/*---------------------------------------------------------------------------*/
-unsigned char
-leds_arch_get(void)
-{
-  return leds;
-}
-/*---------------------------------------------------------------------------*/
-void
-leds_arch_set(unsigned char l)
-{
-  leds = l;
-}
+#define CURRENT_DEVICE_SLEEP_TYPE             DEVICE_SLEEP_TYPE_NORMAL
+#define CURRENT_DEVICE_GROUP                  DEVICE_ABILITY_DIMMER
+#define CURRENT_DEVICE_VERSION                DEVICE_VERSION_V1
+#define CURRENT_PROTOCOL_VERSION              PROTOCOL_VERSION_V1
+#define CURRENT_ABILITY_1BYTE                 0b00000000
+#define CURRENT_ABILITY_2BYTE                 0b00000000
+#define CURRENT_ABILITY_3BYTE                 0b01000000
+#define CURRENT_ABILITY_4BYTE                 0b00000000
+
 /*---------------------------------------------------------------------------*/

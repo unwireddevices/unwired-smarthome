@@ -76,7 +76,7 @@
 #define BOARD_IOID_LED_A          IOID_22 //led on radio-board
 #define BOARD_IOID_LED_B          IOID_25 //on UMDK-BUTTON
 #define BOARD_IOID_LED_C          IOID_26 //on UMDK-BUTTON
-#define BOARD_IOID_LED_D          IOID_27 //on UMDK-BUTTON
+#define BOARD_IOID_LED_D          IOID_28 //on UMDK-BUTTON
 #define BOARD_IOID_LED_E          IOID_28 //on UMDK-BUTTON
 #define BOARD_LED_A               (1 << BOARD_IOID_LED_A)
 #define BOARD_LED_B               (1 << BOARD_IOID_LED_B)
@@ -90,8 +90,24 @@
 /**
  * \name Relay IOID mappings
  */
-#define BOARD_IOID_RELAY_1        IOID_17
-#define BOARD_IOID_RELAY_2        IOID_16
+#define BOARD_IOID_RELAY_1          IOID_17
+#define BOARD_IOID_RELAY_2          IOID_16
+/** @} */
+/*---------------------------------------------------------------------------*/
+/**
+ * \name Dimmer IOID mappings
+ */
+#define BOARD_IOID_DIMMER_1         IOID_16
+#define BOARD_IOID_DIMMER_2         IOID_17
+#define ZERO_CROSS_SYNC_IOID        IOID_27
+
+/** @} */
+/*---------------------------------------------------------------------------*/
+/**
+ * \name 1-10V IOID mappings
+ */
+#define BOARD_IOID_1_10V_1         IOID_16
+
 /** @} */
 /*---------------------------------------------------------------------------*/
 /**

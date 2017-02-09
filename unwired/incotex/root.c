@@ -341,7 +341,7 @@ PROCESS_THREAD(send_command_process, ev, data)
       PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_command_process_timer));
       if (command_message.ready_to_send == 1)
       {
-            disable_interrupts();
+            disable_interrupts(); //надо ли запрещать прерывания? надо ли очищать буфер uart-а при запрете/разрешения прерывания?
             send_command_packet(&command_message);
             command_message.ready_to_send = 0;
             enable_interrupts();

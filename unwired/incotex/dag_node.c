@@ -60,7 +60,6 @@
 #include "ti-lib.h"
 #include "clock.h"
 #include "dev/watchdog.h"
-#include "../flash-common.h"
 
 
 #include "xxf_types_helper.h"
@@ -68,16 +67,8 @@
 
 #include "dag_node.h"
 
-#ifdef IF_UD_BUTTON
-#  include "button.h"
-#endif
-
-#ifdef IF_UD_RELAY
-#  include "relay.h"
-#endif
-
-#ifdef IF_UD_DIMMER
-#  include "dimmer.h"
+#ifdef IF_UD_LIGHT
+#  include "light.h"
 #endif
 
 #include "../fake_headers.h" //no move up! not "krasivo"!
@@ -105,6 +96,8 @@ static struct command_data message_for_main_process;
 volatile clock_time_t debug_interval = DEBUG_INTERVAL;
 volatile clock_time_t ping_interval = SHORT_PING_INTERVAL;
 volatile clock_time_t status_send_interval = STATUS_SEND_INTERVAL;
+volatile uint8_t percent_iterator_test = 0;
+
 
 /*---------------------------------------------------------------------------*/
 
@@ -142,19 +135,16 @@ udp_receiver(struct simple_udp_connection *c,
             }
 	    }
 
-        if (data[2] == DATA_TYPE_COMMAND || data[2] == DATA_TYPE_SETTINGS)
+        if (data[2] == DATA_TYPE_COMMAND)
         {
-            printf("DAG Node: Command/settings packet received\n");
-            message_for_main_process.data_type = data[2];
+            printf("DAG Node: Command packet received\n");
             message_for_main_process.ability_target = data[3];
             message_for_main_process.ability_number = data[4];
             message_for_main_process.ability_state = data[5];
             process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
         }
 
-        if (data[2] != DATA_TYPE_COMMAND &&
-                data[2] != DATA_TYPE_CONFIRM &&
-                data[2] != DATA_TYPE_SETTINGS)
+        if (data[2] != DATA_TYPE_COMMAND && data[2] != DATA_TYPE_CONFIRM)
         {
             printf("DAG Node: Incompatible data type UDP packer from");
             uip_debug_ip6addr_print(sender_addr);
@@ -245,10 +235,6 @@ send_status_packet(const uip_ipaddr_t *parent_addr,
                    uint8_t temp,
                    uint8_t voltage)
 {
-    if (parent_addr == NULL){
-        return;
-    }
-
 	uint8_t *uptime_uint8_t = (uint8_t *)&uptime;
 	int8_t *rssi_parent_uint8_t = (int8_t *)&rssi_parent;
 	uip_ip6addr_t addr;
@@ -376,6 +362,8 @@ dag_root_find(void)
 PROCESS_THREAD(dag_node_button_process, ev, data)
 {
 	PROCESS_BEGIN();
+
+
 	PROCESS_PAUSE();
 
 	while (1)
@@ -386,16 +374,21 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
 		{
 			if (data == &button_e_sensor_click)
 			{
-				printf("DAG Node: Local repair activated\n");
-				rpl_dag_t *dag = rpl_get_any_dag();
-				rpl_local_repair(dag->instance);
+			    percent_iterator_test = percent_iterator_test + 10;
+			    if (percent_iterator_test > 100) {
+			        percent_iterator_test = 0;
+			    }
+	            message_for_main_process.ability_target = DEVICE_ABILITY_DIMMER;
+	            message_for_main_process.ability_number = DEVICE_ABILITY_DIMMER_1;
+	            message_for_main_process.ability_state = percent_iterator_test;
+	            process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
+
 			}
 
 			if (data == &button_e_sensor_long_click)
 			{
-				led_on(LED_A);
-				printf("SYSTEM: Button E long click, reboot\n");
-				watchdog_reboot();
+
+
 			}
 		}
 	}
@@ -422,10 +415,7 @@ PROCESS_THREAD(status_send_process, ev, data)
 			const struct link_stats *stat_parent = rpl_get_parent_link_stats(dag->preferred_parent);
 			uint8_t temp = batmon_sensor.value(BATMON_SENSOR_TYPE_TEMP);
 			uint8_t voltage = ( (batmon_sensor.value(BATMON_SENSOR_TYPE_VOLT) * 125) >> 5 ) / VOLTAGE_PRESCALER;
-			if (ipaddr_parent != NULL && stat_parent != NULL)
-			{
-                send_status_packet(ipaddr_parent, clock_seconds(), stat_parent->rssi, temp, voltage);
-			}
+			send_status_packet(ipaddr_parent, clock_seconds(), stat_parent->rssi, temp, voltage);
 		}
 
 		etimer_set( &status_send_timer, status_send_interval + (random_rand() % status_send_interval) );

@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2004, Swedish Institute of Computer Science.
+ * Copyright (c) 2010, Swedish Institute of Computer Science.
+ * Copyright (c) 2014, Texas Instruments Incorporated - http://www.ti.com/
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,62 +27,42 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * This file is part of the Contiki operating system.
- *
- * Author: Adam Dunkels <adam@sics.se>
- *
  */
-
-#include "contiki-conf.h"
-#include "dev/xmem.h"
-
-#include <stdio.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdio.h>
-#include <string.h>
-
-#define XMEM_SIZE 1024 * 1024
-
-static unsigned char xmem[XMEM_SIZE];
 /*---------------------------------------------------------------------------*/
-int
-xmem_pwrite(const void *buf, int size, unsigned long offset)
-{
-  /*  int f;
-  char name[400];
-
-  snprintf(name, sizeof(name), "xmem.%d.%d", node_x(), node_y());
-  f = open(name, O_WRONLY | O_APPEND | O_CREAT, 0644);
-  lseek(f, addr, SEEK_SET);
-  write(f, buf, size);
-  close(f);*/
-
-  /*  printf("xmem_write(offset 0x%02x, buf %p, size %l);\n", offset, buf, size);*/
-
-  memcpy(&xmem[offset], buf, size);
-  return size;
-}
+/**
+ * \file
+ *         Header file for flash functions
+ * \author
+ *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
+ */
 /*---------------------------------------------------------------------------*/
-int
-xmem_pread(void *buf, int size, unsigned long offset)
-{
-  /*  printf("xmem_read(addr 0x%02x, buf %p, size %d);\n", addr, buf, size);*/
-  memcpy(buf, &xmem[offset], size);
-  return size;
-}
-/*---------------------------------------------------------------------------*/
-int
-xmem_erase(long nbytes, unsigned long offset)
-{
-  /*  printf("xmem_read(addr 0x%02x, buf %p, size %d);\n", addr, buf, size);*/
-  memset(&xmem[offset], 0, nbytes);
-  return nbytes;
-}
-/*---------------------------------------------------------------------------*/
-void
-xmem_init(void)
-{
+#include "contiki.h"
+#include "ud_binary_protocol.h"
 
-}
+#define USER_FLASH_LENGTH                       100
+
+#define START_USER_FLASH                        0x10000
+#define END_USER_FLASH                          USER_FLASH_LENGTH + START_USER_FLASH
+
+#define START_ON_LAST_STATE                     0x01
+#define START_ON_ON_STATE                       0x02
+#define START_ON_OFF_STATE                      0x03
+
+#define POWER_1_DIO                             BOARD_IOID_RELAY_1
+#define POWER_1_CH_LAST_STATE_OFFSET            0x01
+#define POWER_1_CH_START_STATE_OFFSET           0x02
+
+#define POWER_2_DIO                             BOARD_IOID_RELAY_2
+#define POWER_2_CH_LAST_STATE_OFFSET            0x03
+#define POWER_2_CH_START_STATE_OFFSET           0x04
+
+#define BLANK_FLASH_VALUE                       0xFF
+
 /*---------------------------------------------------------------------------*/
+void user_flash_update_byte(uint8_t offset, uint8_t data);
+uint8_t user_flash_read_byte(uint8_t offset);
+void flash_read(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count);
+uint32_t flash_write(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count);
+
+/*---------------------------------------------------------------------------*/
+

@@ -531,6 +531,12 @@
 #define ti_lib_vims_mode_set(...)  VIMSModeSet(__VA_ARGS__)
 #define ti_lib_vims_mode_get(...)  VIMSModeGet(__VA_ARGS__)
 /*---------------------------------------------------------------------------*/
+/* flash.h */
+#include "driverlib/flash.h"
+
+#define ti_lib_flash_program(...)           FlashProgram(__VA_ARGS__)
+#define ti_lib_flash_sector_erase(...)      FlashSectorErase(__VA_ARGS__)
+/*---------------------------------------------------------------------------*/
 /* watchdog.h */
 #include "driverlib/watchdog.h"
 

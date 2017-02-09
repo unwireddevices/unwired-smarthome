@@ -31,7 +31,7 @@
 /*---------------------------------------------------------------------------*/
 /**
  * \file
- *         Header file
+ *         Header file for DAG-node service
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
@@ -45,6 +45,7 @@ volatile uip_ip6addr_t root_addr;
 
 struct command_data
 {
+    volatile uint8_t data_type;
     volatile uint8_t ability_target;
     volatile uint8_t ability_number;
     volatile uint8_t ability_state;
