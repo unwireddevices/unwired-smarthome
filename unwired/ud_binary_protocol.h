@@ -7,8 +7,6 @@
  */
 /*---------------------------------------------------------------------------*/
 
-#define UDP_DATA_PORT                                           4004
-
 /* Inter-device protocol versions */
 #define PROTOCOL_VERSION_V1                                     0x01
 #define DEVICE_VERSION_V1                                       0x01
@@ -152,5 +150,7 @@
 
 #define CLASS_B                                                 0x0B
 #define CLASS_C                                                 0x0C
+
+#define UDP_DATA_PORT                                           4004
 
 #define VOLTAGE_PRESCALER                                       16
