@@ -16,8 +16,8 @@
 /* Data types */
 #define DATA_TYPE_JOIN                                          0x01
 #define DATA_TYPE_SENSOR_DATA                                   0x02
-#define DATA_TYPE_CONFIRM                                       0x03
-#define DATA_TYPE_PING                                          0x04
+#define DATA_TYPE_JOIN_CONFIRM                                  0x03
+#define DATA_TYPE_PONG                                          0x04
 #define DATA_TYPE_COMMAND                                       0x05
 #define DATA_TYPE_STATUS                                        0x06
 #define DATA_TYPE_GET_STATUS                                    0x07
