@@ -89,16 +89,18 @@ AUTOSTART_PROCESSES(&dag_node_process, &main_process);
 void send_button_status_packet(uint8_t button_number,
                                uint8_t click_type)
 {
-    if(dag_active == 1)
+    struct sensor_packet button_sensor_packet;
+    button_sensor_packet.protocol_version = CURRENT_PROTOCOL_VERSION;
+    button_sensor_packet.device_version = CURRENT_DEVICE_VERSION;
+    button_sensor_packet.data_type = DATA_TYPE_SENSOR_DATA;
+    button_sensor_packet.number_ability = DEVICE_ABILITY_BUTTON;
+    button_sensor_packet.sensor_number = button_number;
+    button_sensor_packet.sensor_event = click_type;
+    send_sensor_event(&button_sensor_packet);
+
+    if (node_mode == 2) //MODE_NOTROOT_SLEEP
     {
-        struct sensor_packet button_sensor_packet;
-        button_sensor_packet.protocol_version = CURRENT_PROTOCOL_VERSION;
-        button_sensor_packet.device_version = CURRENT_DEVICE_VERSION;
-        button_sensor_packet.data_type = DATA_TYPE_SENSOR_DATA;
-        button_sensor_packet.number_ability = DEVICE_ABILITY_BUTTON;
-        button_sensor_packet.sensor_number = button_number;
-        button_sensor_packet.sensor_event = click_type;
-        send_sensor_event(&button_sensor_packet);
+        watchdog_reboot();
     }
 
     led_blink(LED_A);

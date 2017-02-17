@@ -40,8 +40,8 @@
 #include "contiki.h"
 /*---------------------------------------------------------------------------*/
 struct simple_udp_connection udp_connection;
-volatile uint8_t dag_active;
 volatile uip_ip6addr_t root_addr;
+volatile uint8_t node_mode;
 
 struct command_data
 {
@@ -65,8 +65,10 @@ void send_sensor_event(struct sensor_packet *packet);
 
 PROCESS_NAME(dag_node_process);
 PROCESS_NAME(dag_node_button_process);
-PROCESS_NAME(root_ping_process);
+PROCESS_NAME(root_find_process);
 PROCESS_NAME(status_send_process);
+PROCESS_NAME(radio_off_process);
+PROCESS_NAME(maintenance_process);
 
 
 /*---------------------------------------------------------------------------*/
