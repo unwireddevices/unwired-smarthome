@@ -118,7 +118,30 @@ void send_confirmation_packet(const uip_ip6addr_t *dest_addr)
     char buf[length];
     buf[0] = PROTOCOL_VERSION_V1;
     buf[1] = DEVICE_VERSION_V1;
-    buf[2] = DATA_TYPE_CONFIRM;
+    buf[2] = DATA_TYPE_JOIN_CONFIRM;
+    buf[3] = DATA_RESERVED;
+    buf[4] = DATA_RESERVED;
+    buf[5] = DATA_RESERVED;
+    buf[6] = DATA_RESERVED;
+    buf[7] = DATA_RESERVED;
+    buf[8] = DATA_RESERVED;
+    buf[9] = DATA_RESERVED;
+    simple_udp_sendto(&udp_connection, buf, length + 1, dest_addr);
+}
+
+/*---------------------------------------------------------------------------*/
+void send_pong_packet(const uip_ip6addr_t *dest_addr)
+{
+    if (dest_addr == NULL) {
+        printf("ERROR: dest_addr in send_pong_packet null\n");
+        return;
+    }
+
+    int length = 10;
+    char buf[length];
+    buf[0] = PROTOCOL_VERSION_V1;
+    buf[1] = DEVICE_VERSION_V1;
+    buf[2] = DATA_TYPE_PONG;
     buf[3] = DATA_RESERVED;
     buf[4] = DATA_RESERVED;
     buf[5] = DATA_RESERVED;
@@ -277,9 +300,15 @@ static void udp_data_receiver(struct simple_udp_connection *connection,
 
     dag_root_raw_print(sender_addr, data, datalen);
 
-    if (data[0] == PROTOCOL_VERSION_V1 && data[2] == DATA_TYPE_JOIN )
+    if (data[0] == PROTOCOL_VERSION_V1 && data[2] == DATA_TYPE_JOIN)
     {
         send_confirmation_packet(sender_addr);
+    }
+
+    if (data[0] == PROTOCOL_VERSION_V1 && (data[2] == DATA_TYPE_STATUS ||
+                                           data[2] == DATA_TYPE_SENSOR_DATA) )
+    {
+        send_pong_packet(sender_addr);
     }
 
     led_off(LED_A);
