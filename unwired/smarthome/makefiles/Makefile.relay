@@ -1,9 +1,10 @@
 all: relay
 
 PROJECT_SOURCEFILES += dag_node.c ../flash-common.c
-DEFINES+=PROJECT_CONF_H=\"project-conf-normal.h\"
+DEFINES+=PROJECT_CONF_H=\"project-conf-class-c.h\"
 DEFINES+=IF_UD_RELAY=1
 DEFINES+=FAKEDEFINE=1
+DEFINES+=CLASS=0x0C
 GIT_VERSION := $(shell git describe --dirty --always --tags)
 DEFINES+=LOCAL_VERSION=\"$(GIT_VERSION)\"
 CONTIKI = ../..

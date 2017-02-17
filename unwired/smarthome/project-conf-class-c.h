@@ -30,14 +30,13 @@
 /*---------------------------------------------------------------------------*/
 /**
  * \file
- *         Config file for normal-mode devices(DC power modules)
+ *         Config file for c-class devices(DC power modules)
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
 /*---------------------------------------------------------------------------*/
 #include "project-conf.h"
 
-/* Power save mode */
 #undef RF_BLE_CONF_ENABLED
 #define RF_BLE_CONF_ENABLED                      0
 #undef UIP_DS6_CONF_PERIOD
@@ -47,8 +46,6 @@
 #undef RPL_CONF_LEAF_ONLY
 #define RPL_CONF_LEAF_ONLY                       0
 
-#undef NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE
-#define NETSTACK_CONF_RDC_CHANNEL_CHECK_RATE     32 //in Hz, 2, 4, 8(default), 16, 32...
 #undef RPL_CONF_DIO_INTERVAL_MIN
 #define RPL_CONF_DIO_INTERVAL_MIN                12 //2^X ms, 12(2^12 = 4.096s) default
 #undef RPL_CONF_DIO_INTERVAL_DOUBLINGS

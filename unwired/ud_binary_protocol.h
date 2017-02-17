@@ -150,5 +150,7 @@
 #define UART_DATA_LENGTH                                        42
 #define MAGIC_SEQUENCE_LENGTH                                   6
 
+#define CLASS_B                                                 0x0B
+#define CLASS_C                                                 0x0C
 
 #define VOLTAGE_PRESCALER                                       16
