@@ -83,7 +83,7 @@
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
 #define SHORT_STATUS_INTERVAL           (10 * 60 * CLOCK_SECOND)
-#define LONG_STATUS_INTERVAL            (30 * 60 * CLOCK_SECOND)//(60 * 60 * CLOCK_SECOND)
+#define LONG_STATUS_INTERVAL            (60 * 60 * CLOCK_SECOND)//(60 * 60 * CLOCK_SECOND)
 #define ROOT_FIND_INTERVAL                    (2 * CLOCK_SECOND)
 #define ROOT_FIND_LIMIT_TIME                 (60 * CLOCK_SECOND)
 #define RADIO_OFF_DELAY                     (0.5 * CLOCK_SECOND)
