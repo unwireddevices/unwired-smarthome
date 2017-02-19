@@ -118,7 +118,7 @@ static void radio_on()
 {
     if (CLASS == CLASS_B)
     {
-        printf("Radio: Change to ON\n");
+        printf("DAG Node: Radio ON\n");
         NETSTACK_MAC.on();
     }
 
@@ -183,7 +183,7 @@ static void udp_receiver(struct simple_udp_connection *c,
             printf("DAG Node: Pong packet received\n");
 
             if (CLASS == CLASS_B){
-                printf("Radio: Change to OFF on pong message\n");
+                printf("DAG Node: Radio OFF on pong message\n");
                 NETSTACK_MAC.off(0);
                 process_exit(&radio_off_process);
             }
@@ -417,7 +417,7 @@ PROCESS_THREAD(radio_off_process, ev, data)
         static struct etimer radio_off_timer;
         etimer_set( &radio_off_timer, RADIO_OFF_DELAY);
         PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&radio_off_timer) );
-        printf("Radio: Change to OFF on timer\n");
+        printf("DAG Node: Radio OFF on timer expired\n");
         NETSTACK_MAC.off(0);
     }
 
@@ -591,7 +591,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
 	else
 		rpl_set_mode(RPL_MODE_MESH);
 
-	printf("DAG Node: started, %s mode, %s class\n",
+	printf("Node started, %s mode, %s class\n",
 	           rpl_get_mode() == RPL_MODE_LEAF ? "leaf" : "no-leaf",
 	           CLASS == CLASS_B ? "B(sleep)" : "C(non-sleep)");
 
