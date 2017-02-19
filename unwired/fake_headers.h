@@ -36,6 +36,14 @@
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
 /*---------------------------------------------------------------------------*/
+
+
+#ifndef FAKEDEFINE
+
+
+
+#include "../../platform/unwired/udboards/cc26xx/board.h"
+
 #ifndef CURRENT_DEVICE_VERSION
 #define CURRENT_DEVICE_VERSION
 #endif
@@ -68,6 +76,17 @@
 #define RPL_CONF_LEAF_ONLY
 #endif
 
-#ifndef FAKEDEFINE
-#include "../../platform/unwired/udboards/cc26xx/board.h"
+#ifndef CLASS
+#define CLASS
 #endif
+
+#ifndef CLASS_B
+#define CLASS_B
+#endif
+
+#ifndef CLASS_C
+#define CLASS_C
+#endif
+
+
+#endif //FAKEDEFINE

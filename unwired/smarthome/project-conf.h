@@ -41,8 +41,7 @@
 #define PROJECT_CONF_H_
 
 /*---------------------------------------------------------------------------*/
-/* Disable button shutdown functionality */
-#define BUTTON_SENSOR_CONF_ENABLE_SHUTDOWN		0 //??????
+#define BUTTON_SENSOR_CONF_ENABLE_SHUTDOWN		0
 /*---------------------------------------------------------------------------*/
 #undef IEEE802154_CONF_PANID
 #define IEEE802154_CONF_PANID				    0xAABB
@@ -56,7 +55,7 @@
 #undef NETSTACK_CONF_MAC
 #define NETSTACK_CONF_MAC						csma_driver //nullmac_driver
 #undef NETSTACK_CONF_RDC
-#define NETSTACK_CONF_RDC						contikimac_driver //nullrc_driver
+#define NETSTACK_CONF_RDC						nullrdc_driver //nullrc_driver
 #undef NETSTACK_CONF_FRAMER
 #define NETSTACK_CONF_FRAMER					    framer_802154 //framer_nullmac
 
@@ -77,7 +76,7 @@
 */
 
 #undef NONCORESEC_CONF_SEC_LVL
-#define NONCORESEC_CONF_SEC_LVL         FRAME802154_SECURITY_LEVEL_NONE
+#define NONCORESEC_CONF_SEC_LVL                 FRAME802154_SECURITY_LEVEL_NONE
 
 /* Bootloader */
 #define SET_CCFG_BL_CONFIG_BOOTLOADER_ENABLE	    0xC5 // 0xC5 - Enable ROM boot loader, 0x00 disable

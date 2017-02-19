@@ -7,8 +7,6 @@
  */
 /*---------------------------------------------------------------------------*/
 
-#define UDP_DATA_PORT                                           4004
-
 /* Inter-device protocol versions */
 #define PROTOCOL_VERSION_V1                                     0x01
 #define DEVICE_VERSION_V1                                       0x01
@@ -16,8 +14,8 @@
 /* Data types */
 #define DATA_TYPE_JOIN                                          0x01
 #define DATA_TYPE_SENSOR_DATA                                   0x02
-#define DATA_TYPE_CONFIRM                                       0x03
-#define DATA_TYPE_PING                                          0x04
+#define DATA_TYPE_JOIN_CONFIRM                                  0x03
+#define DATA_TYPE_PONG                                          0x04
 #define DATA_TYPE_COMMAND                                       0x05
 #define DATA_TYPE_STATUS                                        0x06
 #define DATA_TYPE_GET_STATUS                                    0x07
@@ -150,5 +148,9 @@
 #define UART_DATA_LENGTH                                        42
 #define MAGIC_SEQUENCE_LENGTH                                   6
 
+#define CLASS_B                                                 0x0B
+#define CLASS_C                                                 0x0C
+
+#define UDP_DATA_PORT                                           4004
 
 #define VOLTAGE_PRESCALER                                       16
