@@ -45,20 +45,20 @@ volatile uint8_t node_mode;
 
 struct command_data
 {
-    volatile uint8_t data_type;
-    volatile uint8_t ability_target;
-    volatile uint8_t ability_number;
-    volatile uint8_t ability_state;
+   volatile uint8_t data_type;
+   volatile uint8_t ability_target;
+   volatile uint8_t ability_number;
+   volatile uint8_t ability_state;
 };
 
 struct sensor_packet
 {
-    uint8_t protocol_version;
-    uint8_t device_version;
-    uint8_t data_type;
-    uint8_t number_ability;
-    uint8_t sensor_number;
-    uint8_t sensor_event;
+   uint8_t protocol_version;
+   uint8_t device_version;
+   uint8_t data_type;
+   uint8_t number_ability;
+   uint8_t sensor_number;
+   uint8_t sensor_event;
 };
 
 void send_sensor_event(struct sensor_packet *packet);
