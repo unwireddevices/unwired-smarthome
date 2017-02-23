@@ -115,6 +115,7 @@ PROCESS_THREAD(main_process, ev, data)
 
   PROCESS_PAUSE();
 
+
   while(1) {
     PROCESS_YIELD();
     if(ev == sensors_event) {
