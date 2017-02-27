@@ -1,0 +1,42 @@
+---
+engines:
+  checkstyle:
+    enabled: true
+    channel: beta
+  csslint:
+    enabled: true
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - ruby
+      - javascript
+      - python
+      - php
+  eslint:
+    enabled: true
+  fixme:
+    enabled: true
+  pmd:
+    enabled: true
+    channel: beta
+  radon:
+    enabled: true
+ratings:
+  paths:
+  - "**.java"
+  - "**.css"
+  - "**.inc"
+  - "**.js"
+  - "**.jsx"
+  - "**.module"
+  - "**.php"
+  - "**.py"
+  - "**.rb"
+exclude_paths: 
+  - "apps/"
+  - "dev/"
+  - "core/"
+  - "lib/"
+  - "tools/"
+  - "platform/"
