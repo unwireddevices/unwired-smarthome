@@ -99,7 +99,7 @@
 /* struct for simple_udp_send */
 struct simple_udp_connection udp_connection;
 
-volatile uint8_t node_mode = MODE_JOIN_PROGRESS;
+volatile uint8_t node_mode;
 
 volatile uint8_t non_answered_ping = 0;
 volatile uip_ip6addr_t root_addr;
@@ -110,27 +110,28 @@ PROCESS(dag_node_process, "DAG-node process");
 PROCESS(dag_node_button_process, "DAG-node button process");
 PROCESS(root_find_process, "Root find process");
 PROCESS(status_send_process, "Status send process");
-PROCESS(radio_off_process, "Radio off delay process");
+PROCESS(net_off_process, "Radio off delay process");
 PROCESS(maintenance_process, "Maintenance process");
+
 /*---------------------------------------------------------------------------*/
 
-static void radio_on()
+static void net_on()
 {
    if (CLASS == CLASS_B)
    {
-      printf("DAG Node: Radio ON\n");
       NETSTACK_MAC.on();
+      printf("DAG Node: Radio ON\n");
    }
 
 }
 
 /*---------------------------------------------------------------------------*/
 
-static void radio_off()
+static void net_off()
 {
    if (CLASS == CLASS_B)
    {
-      process_start(&radio_off_process, NULL);
+      process_start(&net_off_process, NULL);
    }
 
 }
@@ -158,12 +159,13 @@ static void udp_receiver(struct simple_udp_connection *c,
          non_answered_ping = 0;
          printf("DAG Node: Non-answered ping counter reset\n");
          node_mode = MODE_NORMAL;
+         process_start(&maintenance_process, NULL);
 
          if (CLASS == CLASS_B)
          {
             uip_ds_6_interval_set(CLOCK_SECOND*2);
             printf( "DAG Node: New DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
-            process_start(&radio_off_process, NULL);
+            process_start(&net_off_process, NULL);
          }
 
       }
@@ -186,7 +188,7 @@ static void udp_receiver(struct simple_udp_connection *c,
          {
             printf("DAG Node: Radio OFF on pong message\n");
             NETSTACK_MAC.off(0);
-            process_exit(&radio_off_process);
+            process_exit(&net_off_process);
          }
 
          non_answered_ping = 0;
@@ -275,9 +277,9 @@ void send_sensor_event(struct sensor_packet *packet)
    udp_buffer[8] = DATA_RESERVED;
    udp_buffer[9] = DATA_RESERVED;
 
-   radio_on();
+   net_on();
    simple_udp_sendto(&udp_connection, udp_buffer, lenght + 1, &addr);
-   radio_off();
+   net_off();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -330,9 +332,9 @@ send_status_packet(const uip_ipaddr_t *parent_addr,
    udp_buffer[21] = DATA_RESERVED;
    udp_buffer[22] = DATA_RESERVED;
 
-   radio_on();
+   net_on();
    simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
-   radio_off();
+   net_off();
 }
 
 
@@ -407,7 +409,7 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
 
 /*---------------------------------------------------------------------------*/
 
-PROCESS_THREAD(radio_off_process, ev, data)
+PROCESS_THREAD(net_off_process, ev, data)
 {
    PROCESS_BEGIN();
 
@@ -417,9 +419,9 @@ PROCESS_THREAD(radio_off_process, ev, data)
    }
    else
    {
-      static struct etimer radio_off_timer;
-      etimer_set( &radio_off_timer, RADIO_OFF_DELAY);
-      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&radio_off_timer) );
+      static struct etimer net_off_timer;
+      etimer_set( &net_off_timer, RADIO_OFF_DELAY);
+      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&net_off_timer) );
       printf("DAG Node: Radio OFF on timer expired\n");
       NETSTACK_MAC.off(0);
    }
@@ -432,47 +434,69 @@ PROCESS_THREAD(radio_off_process, ev, data)
 PROCESS_THREAD(maintenance_process, ev, data)
 {
    PROCESS_BEGIN();
-   //static struct etimer maintenance_timer;
+   static struct etimer maintenance_timer;
    PROCESS_PAUSE();
 
-   //while (1)
-   //{
-   if (non_answered_ping > MAX_NON_ANSWERED_PINGS && node_mode == MODE_NORMAL)
+   while (1)
    {
-      printf("DAG Node: Root not available, reboot\n");
-      watchdog_reboot();
+      if (node_mode == MODE_NORMAL)
+      {
+         if (process_is_running(&status_send_process) == 0)
+            process_start(&status_send_process, NULL);
+
+         if (process_is_running(&root_find_process) == 1)
+            process_exit(&root_find_process);
+
+         if (non_answered_ping > MAX_NON_ANSWERED_PINGS)
+         {
+            printf("DAG Node: Root not available, reboot\n");
+            watchdog_reboot();
+         }
+      }
+
+      if (node_mode == MODE_NOTROOT)
+      {
+         if (CLASS == CLASS_B)
+         {
+            printf("DAG Node: Root not found, sleep\n");
+            if (process_is_running(&dag_node_button_process) == 1)
+               process_exit(&dag_node_button_process);
+
+            if (process_is_running(&root_find_process) == 1)
+               process_exit(&root_find_process);
+
+            if (process_is_running(&status_send_process) == 1)
+               process_exit(&status_send_process);
+
+            if (process_is_running(&maintenance_process) == 1)
+               process_exit(&maintenance_process);
+
+            process_start(&net_off_process, NULL);
+            led_off(LED_A);
+         }
+
+         if (CLASS == CLASS_C)
+         {
+            printf("DAG Node: Root not found, reboot\n");
+            watchdog_reboot();
+         }
+      }
+
+      if (node_mode == MODE_JOIN_PROGRESS)
+      {
+         net_on();
+
+         if (process_is_running(&root_find_process) == 0)
+            process_start(&root_find_process, NULL);
+
+         if (process_is_running(&status_send_process) == 1)
+            process_exit(&status_send_process);
+      }
+
+
+      etimer_set( &maintenance_timer, SHORT_STATUS_INTERVAL);
+      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&maintenance_timer) && node_mode == MODE_NORMAL );
    }
-
-   if (node_mode == MODE_NOTROOT && CLASS == CLASS_B)
-   {
-      printf("DAG Node: Root not found, sleep\n");
-      if (process_is_running(&dag_node_button_process) == 1)
-         process_exit(&dag_node_button_process);
-
-      if (process_is_running(&root_find_process) == 1)
-         process_exit(&root_find_process);
-
-      if (process_is_running(&status_send_process) == 1)
-         process_exit(&status_send_process);
-
-      //if (process_is_running(&maintenance_process) == 1)
-      //    process_exit(&maintenance_process);
-
-      process_start(&radio_off_process, NULL);
-      led_off(LED_A);
-   }
-
-   if (node_mode == MODE_NOTROOT && CLASS != CLASS_B)
-   {
-      printf("DAG Node: Root not found, reboot\n");
-      watchdog_reboot();
-   }
-
-   //if (node_mode != MODE_NOTROOT)
-   //    etimer_set( &maintenance_timer, SHORT_STATUS_INTERVAL + (random_rand() % SHORT_STATUS_INTERVAL) );
-
-   //PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&maintenance_timer) && node_mode == MODE_NORMAL );
-   //}
    PROCESS_END();
 }
 
@@ -493,17 +517,20 @@ PROCESS_THREAD(status_send_process, ev, data)
 
       if (dag != NULL && node_mode == MODE_NORMAL)
       {
-         /*
-          if (rpl_parent_is_reachable(dag->preferred_parent) == 0)
-          {
-               printf("DAG Node: Parent is not reachable\n");
-               //rpl_local_repair(dag->instance);
-               uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
-               printf("RPL: parent ip address: ");
-               uip_debug_ipaddr_print(ipaddr_parent);
-               printf("\n");
-          }
-          */
+
+         if (rpl_parent_is_reachable(dag->preferred_parent) == 0)
+         {
+
+            printf("DAG Node: Parent is not reachable\n");
+            node_mode = MODE_JOIN_PROGRESS;
+
+            //rpl_local_repair(dag->instance);
+            //uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
+            //printf("RPL: parent ip address: ");
+            //uip_debug_ipaddr_print(ipaddr_parent);
+            //printf("\n");
+         }
+
 
          const uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
          const struct link_stats *stat_parent = rpl_get_parent_link_stats(dag->preferred_parent);
@@ -515,7 +542,6 @@ PROCESS_THREAD(status_send_process, ev, data)
          }
          non_answered_ping++;
          printf("DAG Node: Non-answered ping counter increase(status message): %"PRId8" \n", non_answered_ping);
-         process_start(&maintenance_process, NULL);
       }
 
       if (CLASS == CLASS_B)
@@ -523,7 +549,7 @@ PROCESS_THREAD(status_send_process, ev, data)
          printf("DAG Node: Next status message planned on long interval\n");
          etimer_set( &status_send_timer, LONG_STATUS_INTERVAL + (random_rand() % LONG_STATUS_INTERVAL) );
       }
-      else
+      if (CLASS == CLASS_C)
       {
          printf("DAG Node: Next status message planned on short interval\n");
          etimer_set( &status_send_timer, SHORT_STATUS_INTERVAL + (random_rand() % SHORT_STATUS_INTERVAL) );
@@ -540,6 +566,10 @@ PROCESS_THREAD(status_send_process, ev, data)
 PROCESS_THREAD(root_find_process, ev, data)
 {
    PROCESS_BEGIN();
+
+   if (ev == PROCESS_EVENT_EXIT)
+      return 1;
+
    static struct etimer find_root_timer;
    static struct etimer find_root_limit_timer;
    PROCESS_PAUSE();
@@ -564,16 +594,6 @@ PROCESS_THREAD(root_find_process, ev, data)
          printf("DAG Node: Non-answered ping counter increase(join message): %"PRId8" \n", non_answered_ping);
          process_start(&maintenance_process, NULL);
       }
-
-      if (node_mode == MODE_NORMAL)
-      {
-         if (process_is_running(&status_send_process) == 0)
-            process_start(&status_send_process, NULL);
-
-         if (process_is_running(&root_find_process) == 1)
-            process_exit(&root_find_process);
-      }
-
    }
 
    PROCESS_END();
@@ -594,12 +614,14 @@ PROCESS_THREAD(dag_node_process, ev, data)
    else
       rpl_set_mode(RPL_MODE_MESH);
 
+   node_mode = MODE_JOIN_PROGRESS;
+
    printf("Node started, %s mode, %s class\n",
           rpl_get_mode() == RPL_MODE_LEAF ? "leaf" : "no-leaf",
           CLASS == CLASS_B ? "B(sleep)" : "C(non-sleep)");
 
    process_start(&dag_node_button_process, NULL);
-   process_start(&root_find_process, NULL);
+   process_start(&maintenance_process, NULL);
 
    SENSORS_ACTIVATE(batmon_sensor);
 

@@ -67,7 +67,7 @@ PROCESS_NAME(dag_node_process);
 PROCESS_NAME(dag_node_button_process);
 PROCESS_NAME(root_find_process);
 PROCESS_NAME(status_send_process);
-PROCESS_NAME(radio_off_process);
+PROCESS_NAME(net_off_process);
 PROCESS_NAME(maintenance_process);
 
 
