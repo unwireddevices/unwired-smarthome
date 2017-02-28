@@ -104,9 +104,11 @@ struct simple_udp_connection udp_connection;
 
 volatile uint8_t node_mode;
 
-volatile uint8_t non_answered_ping = 0;
+volatile uint8_t non_answered_packet = 0;
 volatile uip_ip6addr_t root_addr;
 static struct command_data message_for_main_process;
+
+static struct etimer maintenance_timer;
 
 /*---------------------------------------------------------------------------*/
 
@@ -125,10 +127,8 @@ static void net_on()
    {
       NETSTACK_MAC.on();
       uip_ds_6_interval_set(CLOCK_SECOND/2);
-      printf("DAG Node: New DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
       printf("DAG Node: Radio ON\n");
    }
-
 }
 
 /*---------------------------------------------------------------------------*/
@@ -137,8 +137,7 @@ static void net_off(uint8_t mode)
 {
    if (CLASS == CLASS_B)
    {
-      uip_ds_6_interval_set(CLOCK_SECOND*2);
-      printf("DAG Node: New DS6 interval: %" PRIu32 " ticks\n", uip_ds_6_interval_get() );
+      uip_ds_6_interval_set(CLOCK_SECOND*20);
 
       if (mode == TIMER)
       {
@@ -176,12 +175,11 @@ static void udp_receiver(struct simple_udp_connection *c,
    {
       if (data[2] == DATA_TYPE_JOIN_CONFIRM)
       {
-         printf("DAG Node: DAG join packet confirmation received, DAG active, mode set to MODE_NORMAL\n");
+         printf("DAG Node: DAG active, join packet confirmation received, mode set to MODE_NORMAL\n");
          led_off(LED_A);
          uip_ipaddr_copy(&root_addr, sender_addr);
-         non_answered_ping = 0;
-         printf("DAG Node: Non-answered ping counter reset\n");
          node_mode = MODE_NORMAL;
+         etimer_set(&maintenance_timer, 0);
          net_off(NOW);
       }
 
@@ -197,16 +195,9 @@ static void udp_receiver(struct simple_udp_connection *c,
 
       if (data[2] == DATA_TYPE_PONG)
       {
-         printf("DAG Node: Pong packet received\n");
-
-         if (CLASS == CLASS_B)
-         {
-            printf("DAG Node: Radio OFF on pong message\n");
-            net_off(NOW);
-         }
-
-         non_answered_ping = 0;
-         printf("DAG Node: Non-answered ping counter reset\n");
+         printf("DAG Node: Pong packet received, non-answered packet counter reset\n");
+         net_off(NOW);
+         non_answered_packet = 0;
       }
 
       if (data[2] != DATA_TYPE_COMMAND &&
@@ -270,10 +261,16 @@ print_debug_data(void)
 
 void send_sensor_event(struct sensor_packet *packet)
 {
+   if (node_mode != MODE_NORMAL)
+      return;
+
+   if (packet == NULL)
+      return;
+
    uip_ip6addr_t addr;
    uip_ip6addr_copy(&addr, &root_addr);
 
-   printf("DAG Node: send sensor-event message to DAG-root node:");
+   printf("DAG Node: Send sensor-event message to DAG-root node:");
    uip_debug_ip6addr_print(&addr);
    printf("\n");
 
@@ -448,7 +445,6 @@ PROCESS_THREAD(net_off_process, ev, data)
 PROCESS_THREAD(maintenance_process, ev, data)
 {
    PROCESS_BEGIN();
-   static struct etimer maintenance_timer;
    PROCESS_PAUSE();
 
    while (1)
@@ -462,7 +458,7 @@ PROCESS_THREAD(maintenance_process, ev, data)
          if (process_is_running(&root_find_process) == 1)
             process_exit(&root_find_process);
 
-         if (non_answered_ping > MAX_NON_ANSWERED_PINGS)
+         if (non_answered_packet > MAX_NON_ANSWERED_PINGS)
          {
             printf("DAG Node: Root not available, reboot\n");
             watchdog_reboot();
@@ -536,8 +532,9 @@ PROCESS_THREAD(status_send_process, ev, data)
          if (rpl_parent_is_reachable(dag->preferred_parent) == 0)
          {
             printf("DAG Node: Parent is not reachable\n");
-            node_mode = MODE_JOIN_PROGRESS;
+            watchdog_reboot();
 
+            //node_mode = MODE_JOIN_PROGRESS;
             //rpl_local_repair(dag->instance);
             //uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
             //printf("RPL: parent ip address: ");
@@ -554,8 +551,8 @@ PROCESS_THREAD(status_send_process, ev, data)
          {
             send_status_packet(ipaddr_parent, clock_seconds(), stat_parent->rssi, temp, voltage);
          }
-         non_answered_ping++;
-         printf("DAG Node: Non-answered ping counter increase(status message): %"PRId8" \n", non_answered_ping);
+         non_answered_packet++;
+         printf("DAG Node: Non-answered packet counter increase(status message): %"PRId8" \n", non_answered_packet);
       }
 
       if (CLASS == CLASS_B)
@@ -601,11 +598,9 @@ PROCESS_THREAD(root_find_process, ev, data)
          {
             node_mode = MODE_NOTROOT;
             printf("DAG Node: mode set to MODE_NOTROOT\n");
+            etimer_set(&maintenance_timer, 0);
          }
-
          dag_root_find();
-         non_answered_ping++;
-         printf("DAG Node: Non-answered ping counter increase(join message): %"PRId8" \n", non_answered_ping);
       }
    }
 
