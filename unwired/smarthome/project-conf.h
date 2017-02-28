@@ -47,7 +47,7 @@
 #undef IEEE802154_CONF_PANID
 #define IEEE802154_CONF_PANID				    0xAABB
 #undef RF_CORE_CONF_CHANNEL
-#define RF_CORE_CONF_CHANNEL					    26
+#define RF_CORE_CONF_CHANNEL					    1
 
 #undef STARTUP_CONF_VERBOSE
 #define STARTUP_CONF_VERBOSE					    1
@@ -56,7 +56,7 @@
 #undef NETSTACK_CONF_MAC
 #define NETSTACK_CONF_MAC						csma_driver //nullmac_driver
 #undef NETSTACK_CONF_RDC
-#define NETSTACK_CONF_RDC						contikimac_driver //nullrc_driver
+#define NETSTACK_CONF_RDC						nullrdc_driver //nullrdc_driver
 #undef NETSTACK_CONF_FRAMER
 #define NETSTACK_CONF_FRAMER					    framer_802154 //framer_nullmac
 
