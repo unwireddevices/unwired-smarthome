@@ -463,6 +463,11 @@ PROCESS_THREAD(maintenance_process, ev, data)
             printf("DAG Node: Root not available, reboot\n");
             watchdog_reboot();
          }
+
+         if (CLASS == CLASS_B)
+         {
+
+         }
       }
 
       if (node_mode == MODE_NOTROOT)
@@ -506,7 +511,7 @@ PROCESS_THREAD(maintenance_process, ev, data)
       }
 
       etimer_set( &maintenance_timer, SHORT_STATUS_INTERVAL);
-      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&maintenance_timer) && node_mode == MODE_NORMAL );
+      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&maintenance_timer) );
    }
    PROCESS_END();
 }
