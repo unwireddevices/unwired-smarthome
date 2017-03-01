@@ -1,6 +1,6 @@
 .PHONY: all clean dimmer relay root button root-CLEAN button-CLEAN relay-CLEAN dimmer-CLEAN
 
-all: root-CLEAN button-CLEAN relay-CLEAN dimmer-CLEAN
+all: root-CLEAN relay-CLEAN dimmer-CLEAN button-CLEAN
 
 ifndef CPU
   ${info Not CPU define! USE: "CPU=cc26xx" or "CPU=cc13xx" Set default: cc26xx}
@@ -23,7 +23,7 @@ dimmer-CLEAN: dimmer clean4
 button:
 	CONF="LEAF"; \
 	touch /tmp/unwired_last_conf; \
-	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean; \
+	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean_no_hex; \
 	echo $$CONF > /tmp/unwired_last_conf
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.button
 	arm-none-eabi-size button.elf | grep -v text > /tmp/size.tmp 
@@ -32,7 +32,7 @@ button:
 root:
 	CONF="NOLEAF"; \
 	touch /tmp/unwired_last_conf; \
-	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean; \
+	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean_no_hex; \
 	echo $$CONF > /tmp/unwired_last_conf
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.root
 	arm-none-eabi-size root.elf  | grep -v text > /tmp/size.tmp 
@@ -41,7 +41,7 @@ root:
 relay:
 	CONF="NOLEAF"; \
 	touch /tmp/unwired_last_conf; \
-	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean; \
+	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean_no_hex; \
 	echo $$CONF > /tmp/unwired_last_conf
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.relay
 	arm-none-eabi-size relay.elf | grep -v text > /tmp/size.tmp 
@@ -67,6 +67,10 @@ clean3:
 
 clean4:
 	-rm -f *~ *core core *.srec *.lst *.map *.cprg *.bin *.data contiki*.a *.firmware core-labels.S *.ihex *.ini *.ce *.co *.unwired *.elf  *.o *.d		
+
+clean_no_hex:
+	-rm -f *~ *core core *.srec *.lst *.map *.cprg *.bin *.data contiki*.a *.firmware core-labels.S *.ihex *.ini *.ce *.co *.unwired *.elf  *.o *.d		
+	-rm -rf obj_unwired
 
 clean: 
 	-rm -f *~ *core core *.srec *.lst *.map *.cprg *.bin *.data contiki*.a *.firmware core-labels.S *.ihex *.ini *.ce *.co *.unwired *.elf  *.o *.d		
