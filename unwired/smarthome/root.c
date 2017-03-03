@@ -268,7 +268,7 @@ static int uart_data_receiver(unsigned char c)
    }
    uart_command_buf[uart_iterator] = c;
 
-   if (uart_iterator < UART_DATA_LENGTH-1)
+   if (uart_iterator < UART_DATA_LENGTH - 1)
    {
       uart_iterator++;
    }
@@ -280,7 +280,7 @@ static int uart_data_receiver(unsigned char c)
       {
          for (int i = 0; i <= 15; i++)
          {
-            command_message.destination_address.u8[i] = uart_command_buf[i+7];
+            command_message.destination_address.u8[i] = uart_command_buf[i + 7];
          }
          command_message.ability_number = uart_command_buf[24];
          command_message.ability_state = uart_command_buf[25];
