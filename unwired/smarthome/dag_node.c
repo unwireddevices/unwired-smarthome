@@ -41,6 +41,7 @@
 #include "net/rpl/rpl-private.h"
 #include "net/ip/uip.h"
 #include "net/ipv6/uip-ds6.h"
+#include "net/ipv6/uip-ds6-nbr.h"
 #include "net/mac/contikimac/contikimac.h"
 
 #include "dev/leds.h"
@@ -92,6 +93,9 @@
 #define MODE_NOTROOT                            0x02
 #define MODE_JOIN_PROGRESS                      0x03
 
+#define FALSE                                   0x00
+#define TRUE                                    0x01
+
 #define TIMER                                   0x01
 #define NOW                                     0x02
 
@@ -104,12 +108,16 @@ struct simple_udp_connection udp_connection;
 
 volatile uint8_t node_mode;
 
+volatile uint8_t node_rpl_maintenance = FALSE;
+
 volatile uint8_t non_answered_packet = 0;
 volatile uip_ip6addr_t root_addr;
 static struct command_data message_for_main_process;
 
 static struct etimer maintenance_timer;
+static struct ctimer net_off_delay_timer;
 
+static void net_off(uint8_t mode);
 /*---------------------------------------------------------------------------*/
 
 PROCESS(dag_node_process, "DAG-node process");
@@ -118,6 +126,7 @@ PROCESS(root_find_process, "Root find process");
 PROCESS(status_send_process, "Status send process");
 PROCESS(net_off_process, "Radio off delay process");
 PROCESS(maintenance_process, "Maintenance process");
+PROCESS(rpl_maintenance_process, "RPL maintenance process");
 
 /*---------------------------------------------------------------------------*/
 
@@ -133,11 +142,23 @@ static void net_on()
 
 /*---------------------------------------------------------------------------*/
 
+static void timer_net_off_event(void *ptr){
+   net_off(TIMER);
+}
+
+/*---------------------------------------------------------------------------*/
+
 static void net_off(uint8_t mode)
 {
+   if (node_rpl_maintenance == TRUE)
+   {
+      ctimer_set(&net_off_delay_timer, CLOCK_SECOND * 2, timer_net_off_event, NULL);
+      return;
+   }
+
    if (CLASS == CLASS_B)
    {
-      uip_ds_6_interval_set(CLOCK_SECOND*20);
+      uip_ds_6_interval_set(CLOCK_SECOND * 20);
 
       if (mode == TIMER)
       {
@@ -464,10 +485,6 @@ PROCESS_THREAD(maintenance_process, ev, data)
             watchdog_reboot();
          }
 
-         if (CLASS == CLASS_B)
-         {
-
-         }
       }
 
       if (node_mode == MODE_NOTROOT)
@@ -518,6 +535,50 @@ PROCESS_THREAD(maintenance_process, ev, data)
 
 /*---------------------------------------------------------------------------*/
 
+PROCESS_THREAD(rpl_maintenance_process, ev, data)
+{
+   PROCESS_BEGIN();
+   static struct etimer rpl_maintenance_timer;
+   static uint32_t delay;
+   static uip_ds6_nbr_t *nbr = NULL;
+   PROCESS_PAUSE();
+
+
+   while (1)
+   {
+      nbr = uip_ds6_nbr_lookup(uip_ds6_defrt_choose());
+      if (nbr == NULL)
+      {
+         node_rpl_maintenance = TRUE;
+      }
+      else
+      {
+         if(nbr->state != NBR_REACHABLE)
+            node_rpl_maintenance = TRUE;
+         else
+            node_rpl_maintenance = FALSE;
+      }
+
+      if (node_rpl_maintenance == TRUE)
+         net_on();
+
+      if (node_rpl_maintenance == FALSE)
+         net_off(TIMER);
+
+
+      if (node_rpl_maintenance == FALSE)
+         delay = (5 * CLOCK_SECOND);
+      else
+         delay = (CLOCK_SECOND);
+
+      etimer_set( &rpl_maintenance_timer, delay);
+      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&rpl_maintenance_timer) );
+   }
+   PROCESS_END();
+}
+
+/*---------------------------------------------------------------------------*/
+
 PROCESS_THREAD(status_send_process, ev, data)
 {
    PROCESS_BEGIN();
@@ -537,9 +598,8 @@ PROCESS_THREAD(status_send_process, ev, data)
          if (rpl_parent_is_reachable(dag->preferred_parent) == 0)
          {
             printf("DAG Node: Parent is not reachable\n");
-            watchdog_reboot();
-
-            //node_mode = MODE_JOIN_PROGRESS;
+            //node_mode = MODE_RPL_PROBING;
+            //watchdog_reboot();
             //rpl_local_repair(dag->instance);
             //uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
             //printf("RPL: parent ip address: ");
