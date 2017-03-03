@@ -24,7 +24,6 @@
 #define DATA_TYPE_SET_TIME                                      0x0A
 #define DATA_TYPE_SET_SCHEDULE                                  0x0B
 
-
 /* Reserved data */
 #define DATA_RESERVED                                           0xFF
 
@@ -147,6 +146,8 @@
 #define UART_PROTOCOL_VERSION_V1                                0x01
 #define UART_DATA_LENGTH                                        42
 #define MAGIC_SEQUENCE_LENGTH                                   6
+
+/* Defines */
 
 #define CLASS_B                                                 0x0B
 #define CLASS_C                                                 0x0C
