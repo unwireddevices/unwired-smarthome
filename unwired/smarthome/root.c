@@ -87,14 +87,11 @@ volatile static uint8_t uart_command_buf[UART_DATA_LENGTH];
 /* UART char iterator */
 volatile static uint8_t uart_iterator = 0;
 
+/* UDCP mode */
+volatile static uint8_t udcp_mode = UART_PROTOCOL_COMMAND_MODE;
+
 /* The sequence of start and end command */
-static uint8_t uart_magic_sequence[UART_DATA_LENGTH] =
-{
-   0x01,0x16,0x16,0x16,0x16,0x10,
-   0x01,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-   0x01,0x01,0x01,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-   0x03,0x16,0x16,0x16,0x17,0x04
-};
+static uint8_t uart_magic_sequence[6] = {0x01,0x16,0x16,0x16,0x16,0x10};
 
 /* UPD connection structure */
 static struct simple_udp_connection udp_connection;
@@ -254,9 +251,51 @@ void uart_packet_dump(uint8_t *uart_command_buf) {
 */
 /*---------------------------------------------------------------------------*/
 
-static int uart_data_receiver(unsigned char c)
+static int uart_data_receiver(unsigned char uart_char)
 {
    led_blink(LED_A);
+
+   if (uart_iterator < MAGIC_SEQUENCE_LENGTH)
+   {
+      if (uart_char != uart_magic_sequence[uart_iterator])
+      {
+         uart_iterator = 0;
+         return 1;
+      }
+   }
+   uart_command_buf[uart_iterator] = uart_char;
+
+   if (uart_iterator < UART_DATA_LENGTH - 1)
+   {
+      uart_iterator++;
+   }
+
+   if (uart_iterator == UART_DATA_LENGTH)
+   {
+      uart_iterator = 0;
+
+      if (uart_command_buf[6] == UART_PROTOCOL_VERSION_V2)
+      {
+         for (int i = 0; i <= 15; i++)
+         {
+            command_message.destination_address.u8[i] = uart_command_buf[i + 8];
+         }
+
+         if (uart_command_buf[23] == DATA_TYPE_COMMAND)
+         {
+            command_message.ability_target = uart_command_buf[24];
+            command_message.ability_number = uart_command_buf[25];
+            command_message.ability_state = uart_command_buf[26];
+            command_message.ready_to_send = 1;
+         }
+
+      }
+   }
+
+
+
+
+
    if ((uart_iterator <= MAGIC_SEQUENCE_LENGTH - 1) ||
          ((uart_iterator >= UART_DATA_LENGTH - MAGIC_SEQUENCE_LENGTH) && (uart_iterator <= UART_DATA_LENGTH - 1)))
    {
@@ -287,9 +326,16 @@ static int uart_data_receiver(unsigned char c)
          command_message.ability_target = uart_command_buf[23];
          command_message.ready_to_send = 1;
       }
-      else
+
+      if (uart_command_buf[6] == UART_PROTOCOL_OTA_MODE)
       {
-         printf("USER: Incompatible protocol version!\n");
+         udcp_mode = UART_PROTOCOL_OTA_MODE;
+      }
+
+      if (uart_command_buf[6] != UART_PROTOCOL_OTA_MODE &&
+            uart_command_buf[6] != UART_PROTOCOL_VERSION_V1 )
+      {
+         printf("USER: Incompatible protocol mode or version!\n");
       }
       //uart_packet_dump(uart_command_buf);
    }
