@@ -84,10 +84,10 @@
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
 #define SHORT_STATUS_INTERVAL           (10 * 60 * CLOCK_SECOND)
-#define LONG_STATUS_INTERVAL            (60 * 60 * CLOCK_SECOND)//(60 * 60 * CLOCK_SECOND)
+#define LONG_STATUS_INTERVAL            (10 * 60 * CLOCK_SECOND)//(60 * 60 * CLOCK_SECOND)
 #define ROOT_FIND_INTERVAL                    (2 * CLOCK_SECOND)
 #define ROOT_FIND_LIMIT_TIME                 (60 * CLOCK_SECOND)
-#define RADIO_OFF_DELAY                     (0.5 * CLOCK_SECOND)
+#define RADIO_OFF_DELAY                     (0.4 * CLOCK_SECOND)
 
 #define MODE_NORMAL                             0x01
 #define MODE_NOTROOT                            0x02
@@ -217,7 +217,7 @@ static void udp_receiver(struct simple_udp_connection *c,
       if (data[2] == DATA_TYPE_PONG)
       {
          printf("DAG Node: Pong packet received, non-answered packet counter reset\n");
-         net_off(NOW);
+         //net_off(NOW);
          non_answered_packet = 0;
       }
 
