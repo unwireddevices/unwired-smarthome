@@ -78,25 +78,25 @@ clean:
 	-rm -f *.hex
 	
 button-fb: button-CLEAN
-	../../tools/backdoor-bootloader.py -e -w -v button.hex || ../../tools/backdoor-bootloader.py -e -w -v button.hex
+	while true; do ../../tools/backdoor-bootloader.py -e -w -v button.hex && break; done;
 
 button-f: button-CLEAN
 	/Applications/ti/Uniflash/flash_cc2650.sh button.hex
 
 root-fb: root-CLEAN
-	../../tools/backdoor-bootloader.py -e -w -v root.hex || ../../tools/backdoor-bootloader.py -e -w -v root.hex
+	while true; do ../../tools/backdoor-bootloader.py -e -w -v root.hex && break; done;
 	
 root-f: root-CLEAN
 	/Applications/ti/Uniflash/flash_cc2650.sh root.hex
 
 relay-fb: relay-CLEAN
-	../../tools/backdoor-bootloader.py -e -w -v relay.hex || ../../tools/backdoor-bootloader.py -e -w -v relay.hex
+	while true; do ../../tools/backdoor-bootloader.py -e -w -v relay.hex && break; done;
 	
 relay-f: relay-CLEAN
 	/Applications/ti/Uniflash/flash_cc2650.sh relay.hex
 	
 dimmer-fb: dimmer-CLEAN
-	../../tools/backdoor-bootloader.py -e -w -v dimmer.hex || ../../tools/backdoor-bootloader.py -e -w -v dimmer.hex
+	while true; do ../../tools/backdoor-bootloader.py -e -w -v dimmer.hex && break; done;
 	
 dimmer-f: dimmer-CLEAN
 	/Applications/ti/Uniflash/flash_cc2650.sh dimmer.hex
