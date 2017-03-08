@@ -151,7 +151,7 @@
 /* UART Binary data */
 #define UART_PROTOCOL_VERSION_V1                                0x01
 #define UART_PROTOCOL_VERSION_V2                                0x02
-#define UART_DATA_LENGTH                                        256
+#define UART_DATA_LENGTH                                        255
 #define MAGIC_SEQUENCE_LENGTH                                   6
 
 /* Defines */
