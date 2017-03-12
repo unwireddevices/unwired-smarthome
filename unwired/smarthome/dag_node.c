@@ -221,9 +221,20 @@ static void udp_receiver(struct simple_udp_connection *c,
          non_answered_packet = 0;
       }
 
+      if (data[2] == DATA_TYPE_FIRMWARE)
+      {
+         printf("DAG Node: DATA_TYPE_FIRMWARE packet received:");
+         for (int i = 0; i < datalen; i++)
+         {
+             printf("%"PRIXX8, data[i]);
+         }
+         printf("\n");
+      }
+
       if (data[2] != DATA_TYPE_COMMAND &&
             data[2] != DATA_TYPE_JOIN_CONFIRM &&
             data[2] != DATA_TYPE_SETTINGS &&
+            data[2] != DATA_TYPE_FIRMWARE &&
             data[2] != DATA_TYPE_PONG)
       {
          printf("DAG Node: Incompatible data type UDP packer from");
