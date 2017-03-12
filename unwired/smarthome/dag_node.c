@@ -33,40 +33,35 @@
  *
  */
 /*---------------------------------------------------------------------------*/
+#include <string.h>
+#include <stdio.h>
 
 #include "contiki.h"
 #include "contiki-lib.h"
 #include "contiki-net.h"
+
+#include "clock.h"
+
 #include "net/rpl/rpl.h"
 #include "net/rpl/rpl-private.h"
-#include "net/ip/uip.h"
 #include "net/ipv6/uip-ds6.h"
 #include "net/ipv6/uip-ds6-nbr.h"
-#include "net/mac/contikimac/contikimac.h"
+#include "net/ip/uip-debug.h"
+#include "net/link-stats.h"
 
 #include "dev/leds.h"
 #include "sys/clock.h"
 #include "button-sensor.h"
 #include "batmon-sensor.h"
+#include "dev/watchdog.h"
+#include "dev/cc26xx-uart.h"
 #include "board-peripherals.h"
 #include "board.h"
-#include "net/ip/uip-debug.h"
-#include "dev/cc26xx-uart.h"
-
-#include <string.h>
-#include <stdio.h>
-#include "simple-udp.h"
-
-#include "net/link-stats.h"
 #include "ti-lib.h"
-#include "clock.h"
-#include "dev/watchdog.h"
+
 #include "../flash-common.h"
-
-
 #include "xxf_types_helper.h"
 #include "../ud_binary_protocol.h"
-
 #include "dag_node.h"
 
 #ifdef IF_UD_BUTTON
