@@ -33,40 +33,35 @@
  *
  */
 /*---------------------------------------------------------------------------*/
+#include <string.h>
+#include <stdio.h>
 
 #include "contiki.h"
 #include "contiki-lib.h"
 #include "contiki-net.h"
+
+#include "clock.h"
+
 #include "net/rpl/rpl.h"
 #include "net/rpl/rpl-private.h"
-#include "net/ip/uip.h"
 #include "net/ipv6/uip-ds6.h"
 #include "net/ipv6/uip-ds6-nbr.h"
-#include "net/mac/contikimac/contikimac.h"
+#include "net/ip/uip-debug.h"
+#include "net/link-stats.h"
 
 #include "dev/leds.h"
 #include "sys/clock.h"
 #include "button-sensor.h"
 #include "batmon-sensor.h"
+#include "dev/watchdog.h"
+#include "dev/cc26xx-uart.h"
 #include "board-peripherals.h"
 #include "board.h"
-#include "net/ip/uip-debug.h"
-#include "dev/cc26xx-uart.h"
-
-#include <string.h>
-#include <stdio.h>
-#include "simple-udp.h"
-
-#include "net/link-stats.h"
 #include "ti-lib.h"
-#include "clock.h"
-#include "dev/watchdog.h"
+
 #include "../flash-common.h"
-
-
 #include "xxf_types_helper.h"
 #include "../ud_binary_protocol.h"
-
 #include "dag_node.h"
 
 #ifdef IF_UD_BUTTON
@@ -84,10 +79,10 @@
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
 #define SHORT_STATUS_INTERVAL           (10 * 60 * CLOCK_SECOND)
-#define LONG_STATUS_INTERVAL            (10 * 60 * CLOCK_SECOND)//(60 * 60 * CLOCK_SECOND)
-#define ROOT_FIND_INTERVAL                    (2 * CLOCK_SECOND)
+#define LONG_STATUS_INTERVAL            (20 * 60 * CLOCK_SECOND)//(60 * 60 * CLOCK_SECOND)
+#define ROOT_FIND_INTERVAL                    (1 * CLOCK_SECOND)
 #define ROOT_FIND_LIMIT_TIME                 (60 * CLOCK_SECOND)
-#define RADIO_OFF_DELAY                     (0.4 * CLOCK_SECOND)
+#define RADIO_OFF_DELAY                     (0.5 * CLOCK_SECOND)
 
 #define MODE_NORMAL                             0x01
 #define MODE_NOTROOT                            0x02
@@ -117,6 +112,10 @@ static struct command_data message_for_main_process;
 static struct etimer maintenance_timer;
 static struct ctimer net_off_delay_timer;
 
+static struct ctimer net_off_timer;
+
+rpl_dag_t *rpl_probing_dag;
+
 static void net_off(uint8_t mode);
 /*---------------------------------------------------------------------------*/
 
@@ -124,7 +123,6 @@ PROCESS(dag_node_process, "DAG-node process");
 PROCESS(dag_node_button_process, "DAG-node button process");
 PROCESS(root_find_process, "Root find process");
 PROCESS(status_send_process, "Status send process");
-PROCESS(net_off_process, "Radio off delay process");
 PROCESS(maintenance_process, "Maintenance process");
 PROCESS(rpl_maintenance_process, "RPL maintenance process");
 
@@ -148,31 +146,35 @@ static void timer_net_off_event(void *ptr){
 
 /*---------------------------------------------------------------------------*/
 
+static void net_off_timer_now(void *ptr){
+   printf("DAG Node: Radio OFF on timer expired\n");
+   NETSTACK_MAC.off(0);
+}
+
+/*---------------------------------------------------------------------------*/
+
+
 static void net_off(uint8_t mode)
 {
-   if (node_rpl_maintenance == TRUE)
-   {
-      ctimer_set(&net_off_delay_timer, CLOCK_SECOND * 2, timer_net_off_event, NULL);
-      return;
-   }
-
    if (CLASS == CLASS_B)
    {
+      if (node_rpl_maintenance == TRUE)
+      {
+         ctimer_set(&net_off_delay_timer, CLOCK_SECOND * 2, timer_net_off_event, NULL);
+         return;
+      }
+
       uip_ds_6_interval_set(CLOCK_SECOND * 20);
 
       if (mode == TIMER)
       {
-         if (process_is_running(&net_off_process) == 1)
-            process_exit(&net_off_process);
-
-         process_start(&net_off_process, NULL);
+         ctimer_reset(&net_off_timer);
+         ctimer_set(&net_off_timer, CLOCK_SECOND / 3, net_off_timer_now, NULL);
       }
 
       if (mode == NOW)
       {
-         if (process_is_running(&net_off_process) == 1)
-            process_exit(&net_off_process);
-
+         ctimer_stop(&net_off_timer);
          printf("DAG Node: Radio OFF immediately\n");
          NETSTACK_MAC.off(0);
       }
@@ -202,6 +204,8 @@ static void udp_receiver(struct simple_udp_connection *c,
          node_mode = MODE_NORMAL;
          etimer_set(&maintenance_timer, 0);
          net_off(NOW);
+         //rpl_probing_dag = rpl_get_any_dag();
+         //rpl_schedule_probing(rpl_probing_dag->instance);
       }
 
       if (data[2] == DATA_TYPE_COMMAND || data[2] == DATA_TYPE_SETTINGS)
@@ -216,14 +220,25 @@ static void udp_receiver(struct simple_udp_connection *c,
 
       if (data[2] == DATA_TYPE_PONG)
       {
-         printf("DAG Node: Pong packet received, non-answered packet counter reset\n");
-         //net_off(NOW);
          non_answered_packet = 0;
+         printf("DAG Node: Pong packet received, non-answered packet counter: %"PRId8" \n", non_answered_packet);
+         net_off(NOW);
+      }
+
+      if (data[2] == DATA_TYPE_FIRMWARE)
+      {
+         printf("DAG Node: DATA_TYPE_FIRMWARE packet received:");
+         for (int i = 0; i < datalen; i++)
+         {
+             printf("%"PRIXX8, data[i]);
+         }
+         printf("\n\n");
       }
 
       if (data[2] != DATA_TYPE_COMMAND &&
             data[2] != DATA_TYPE_JOIN_CONFIRM &&
             data[2] != DATA_TYPE_SETTINGS &&
+            data[2] != DATA_TYPE_FIRMWARE &&
             data[2] != DATA_TYPE_PONG)
       {
          printf("DAG Node: Incompatible data type UDP packer from");
@@ -441,28 +456,6 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
 
 /*---------------------------------------------------------------------------*/
 
-PROCESS_THREAD(net_off_process, ev, data)
-{
-   PROCESS_BEGIN();
-
-   if (ev == PROCESS_EVENT_EXIT)
-   {
-      return 1;
-   }
-   else
-   {
-      static struct etimer net_off_timer;
-      etimer_set( &net_off_timer, RADIO_OFF_DELAY);
-      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&net_off_timer) );
-      printf("DAG Node: Radio OFF on timer expired\n");
-      NETSTACK_MAC.off(0);
-   }
-
-   PROCESS_END();
-}
-
-/*---------------------------------------------------------------------------*/
-
 PROCESS_THREAD(maintenance_process, ev, data)
 {
    PROCESS_BEGIN();
@@ -543,7 +536,7 @@ PROCESS_THREAD(rpl_maintenance_process, ev, data)
    static uip_ds6_nbr_t *nbr = NULL;
    PROCESS_PAUSE();
 
-
+   /*
    while (1)
    {
       nbr = uip_ds6_nbr_lookup(uip_ds6_defrt_choose());
@@ -574,6 +567,7 @@ PROCESS_THREAD(rpl_maintenance_process, ev, data)
       etimer_set( &rpl_maintenance_timer, delay);
       PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&rpl_maintenance_timer) );
    }
+   */
    PROCESS_END();
 }
 
@@ -599,7 +593,7 @@ PROCESS_THREAD(status_send_process, ev, data)
          {
             printf("DAG Node: Parent is not reachable\n");
             //node_mode = MODE_RPL_PROBING;
-            //watchdog_reboot();
+            watchdog_reboot();
             //rpl_local_repair(dag->instance);
             //uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
             //printf("RPL: parent ip address: ");
