@@ -41,48 +41,59 @@
 #define PROJECT_CONF_H_
 
 /*---------------------------------------------------------------------------*/
-#define BUTTON_SENSOR_CONF_ENABLE_SHUTDOWN      0
+#define BUTTON_SENSOR_CONF_ENABLE_SHUTDOWN         0
 /*---------------------------------------------------------------------------*/
 #undef IEEE802154_CONF_PANID
-#define IEEE802154_CONF_PANID              0xAABB
+#define IEEE802154_CONF_PANID                      0xAABB
 #undef RF_CORE_CONF_CHANNEL
-#define RF_CORE_CONF_CHANNEL                  26
+#define RF_CORE_CONF_CHANNEL                       26
 
 #undef STARTUP_CONF_VERBOSE
-#define STARTUP_CONF_VERBOSE                  1
+#define STARTUP_CONF_VERBOSE                       1
 
 /* MAC tune option */
 #undef NETSTACK_CONF_MAC
-#define NETSTACK_CONF_MAC                 csma_driver //nullmac_driver
+#define NETSTACK_CONF_MAC                          csma_driver //nullmac_driver
 #undef NETSTACK_CONF_RDC
-#define NETSTACK_CONF_RDC                 nullrdc_driver //nullrc_driver
+#define NETSTACK_CONF_RDC                          nullrdc_driver //nullrc_driver
 #undef NETSTACK_CONF_FRAMER
-#define NETSTACK_CONF_FRAMER                  framer_802154 //framer_nullmac
+#define NETSTACK_CONF_FRAMER                       framer_802154 //framer_nullmac
+
+#define UIP_CONF_BUFFER_SIZE                       900
+
+#undef RPL_CONF_WITH_PROBING
+#define RPL_CONF_WITH_PROBING                      0
+#undef RPL_CONF_PROBING_INTERVAL
+#define RPL_CONF_PROBING_INTERVAL                  ((RPL_CONF_DEFAULT_LIFETIME * RPL_CONF_DEFAULT_LIFETIME_UNIT) / 2 ) * CLOCK_SECOND
+#undef RPL_CONF_DEFAULT_LIFETIME
+#define RPL_CONF_DEFAULT_LIFETIME                  5      //LIFETIME = DEFAULT_LIFETIME*DEFAULT_LIFETIME_UNIT
+#undef RPL_CONF_DEFAULT_LIFETIME_UNIT
+#define RPL_CONF_DEFAULT_LIFETIME_UNIT             60*60
 
 /* Encryption */
+
+#undef NONCORESEC_CONF_SEC_LVL
+#define NONCORESEC_CONF_SEC_LVL                    FRAME802154_SECURITY_LEVEL_NONE
 /*
 #undef LLSEC802154_CONF_ENABLED
-#define LLSEC802154_CONF_ENABLED              1
+#define LLSEC802154_CONF_ENABLED                   1
 #undef NETSTACK_CONF_FRAMER
-#define NETSTACK_CONF_FRAMER                  noncoresec_framer
+#define NETSTACK_CONF_FRAMER                       noncoresec_framer
 #undef NETSTACK_CONF_LLSEC
-#define NETSTACK_CONF_LLSEC                  noncoresec_driver
+#define NETSTACK_CONF_LLSEC                        noncoresec_driver
 #undef NONCORESEC_CONF_SEC_LVL
-#define NONCORESEC_CONF_SEC_LVL              FRAME802154_SECURITY_LEVEL_ENC_MIC_32
+#define NONCORESEC_CONF_SEC_LVL                    FRAME802154_SECURITY_LEVEL_ENC_MIC_32
 //#undef LLSEC802154_CONF_SECURITY_LEVEL
-//#define LLSEC802154_CONF_SECURITY_LEVEL       FRAME802154_SECURITY_LEVEL_ENC_MIC_32
+//#define LLSEC802154_CONF_SECURITY_LEVEL          FRAME802154_SECURITY_LEVEL_ENC_MIC_32
 #undef NONCORESEC_CONF_KEY
-#define NONCORESEC_CONF_KEY                  {0xF3,0x01,0x02,0x03,0x04,0x05,0x07,0x07,0x06,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F}
+#define NONCORESEC_CONF_KEY                        {0xF3,0x01,0x02,0x03,0x04,0x05,0x07,0x07,0x06,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F}
 */
 
-#undef NONCORESEC_CONF_SEC_LVL
-#define NONCORESEC_CONF_SEC_LVL                 FRAME802154_SECURITY_LEVEL_NONE
-
 /* Bootloader */
-#define SET_CCFG_BL_CONFIG_BOOTLOADER_ENABLE     0xC5 // 0xC5 - Enable ROM boot loader, 0x00 disable
-#define SET_CCFG_BL_CONFIG_BL_LEVEL              0x00 // Active low level to open boot loader backdoor
-#define SET_CCFG_BL_CONFIG_BL_PIN_NUMBER         0x01 // DIO number 1 for boot loader backdoor
-#define SET_CCFG_BL_CONFIG_BL_ENABLE             0xC5 // 0xC5 - Enabled boot loader backdoor, 0xFF disable
+#define SET_CCFG_BL_CONFIG_BOOTLOADER_ENABLE       0xC5 // 0xC5 - Enable ROM boot loader, 0x00 disable
+#define SET_CCFG_BL_CONFIG_BL_LEVEL                0x00 // Active low level to open boot loader backdoor
+#define SET_CCFG_BL_CONFIG_BL_PIN_NUMBER           0x01 // DIO number 1 for boot loader backdoor
+#define SET_CCFG_BL_CONFIG_BL_ENABLE               0xC5 // 0xC5 - Enabled boot loader backdoor, 0xFF disable
 
 /*---------------------------------------------------------------------------*/
 
