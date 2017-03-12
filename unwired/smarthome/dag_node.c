@@ -211,9 +211,9 @@ static void udp_receiver(struct simple_udp_connection *c,
 
       if (data[2] == DATA_TYPE_PONG)
       {
-         printf("DAG Node: Pong packet received, non-answered packet counter reset\n");
-         net_off(NOW);
          non_answered_packet = 0;
+         printf("DAG Node: Pong packet received, non-answered packet counter: %"PRId8" \n", non_answered_packet);
+         net_off(NOW);
       }
 
       if (data[2] == DATA_TYPE_FIRMWARE)
@@ -223,7 +223,7 @@ static void udp_receiver(struct simple_udp_connection *c,
          {
              printf("%"PRIXX8, data[i]);
          }
-         printf("\n");
+         printf("\n\n");
       }
 
       if (data[2] != DATA_TYPE_COMMAND &&
