@@ -41,8 +41,6 @@
 #define PROJECT_CONF_H_
 
 /*---------------------------------------------------------------------------*/
-#define BUTTON_SENSOR_CONF_ENABLE_SHUTDOWN         0
-/*---------------------------------------------------------------------------*/
 #undef IEEE802154_CONF_PANID
 #define IEEE802154_CONF_PANID                      0xAABB
 #undef RF_CORE_CONF_CHANNEL

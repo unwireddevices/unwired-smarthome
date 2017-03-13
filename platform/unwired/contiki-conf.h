@@ -314,9 +314,6 @@
  * Configure a button as power on/off: We use the right button for both boards.
  * @{
  */
-#ifndef BUTTON_SENSOR_CONF_ENABLE_SHUTDOWN
-#define BUTTON_SENSOR_CONF_ENABLE_SHUTDOWN 1
-#endif
 
 /* Notify various examples that we have Buttons */
 #define PLATFORM_HAS_BUTTON      1
