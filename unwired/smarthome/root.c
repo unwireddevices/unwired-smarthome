@@ -69,8 +69,9 @@
 #define UART_DATA_POLL_INTERVAL 5 //in main timer ticks, one tick ~8ms
 /*---------------------------------------------------------------------------*/
 
-typedef struct firmware_packet {
-  uint8_t data[227];
+typedef struct firmware_packet
+{
+   uint8_t data[227];
 } firmware_packet;
 
 struct firmware_data
@@ -283,18 +284,20 @@ void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const ui
 
 /*---------------------------------------------------------------------------*/
 
-void uart_packet_dump(volatile uint8_t *uart_command_buf) {
-    if (uart_command_buf == NULL) {
-        printf("ERROR: uart_command_buf in uart_packet_dump null\n");
-        return;
-    }
+void uart_packet_dump(volatile uint8_t *uart_command_buf)
+{
+   if (uart_command_buf == NULL)
+   {
+      printf("ERROR: uart_command_buf in uart_packet_dump null\n");
+      return;
+   }
 
-    printf("\nUART->6LP: ");
-    for (int i = 0; i < UART_DATA_LENGTH; i++)
-    {
-        printf("%"PRIXX8, uart_command_buf[i]);
-    }
-    printf("\n");
+   printf("\nUART->6LP: ");
+   for (int i = 0; i < UART_DATA_LENGTH; i++)
+   {
+      printf("%"PRIXX8, uart_command_buf[i]);
+   }
+   printf("\n");
 }
 
 /*---------------------------------------------------------------------------*/

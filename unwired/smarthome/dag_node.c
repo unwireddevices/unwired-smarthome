@@ -142,13 +142,15 @@ static void net_on()
 
 /*---------------------------------------------------------------------------*/
 
-static void timer_net_off_event(void *ptr){
+static void timer_net_off_event(void *ptr)
+{
    net_off(TIMER);
 }
 
 /*---------------------------------------------------------------------------*/
 
-static void net_off_timer_now(void *ptr){
+static void net_off_timer_now(void *ptr)
+{
    printf("DAG Node: Radio OFF on timer expired\n");
    NETSTACK_MAC.off(0);
 }
@@ -232,7 +234,7 @@ static void udp_receiver(struct simple_udp_connection *c,
          printf("DAG Node: DATA_TYPE_FIRMWARE packet received:");
          for (int i = 0; i < datalen; i++)
          {
-             printf("%"PRIXX8, data[i]);
+            printf("%"PRIXX8, data[i]);
          }
          printf("\n\n");
       }
