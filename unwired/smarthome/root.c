@@ -190,10 +190,11 @@ void send_firmware_packet(struct firmware_data *firmware_message)
    udp_buffer[0] = firmware_message->protocol_version;
    udp_buffer[1] = firmware_message->device_version;
    udp_buffer[2] = DATA_TYPE_FIRMWARE;
+   udp_buffer[3] = firmware_message->firmware_command;
 
-   for (int i = 0; i <= length - 3; i++)
+   for (int i = 0; i <= length - 4; i++)
    {
-      udp_buffer[3 + i] = firmware_message->firmware_payload.data[i];
+      udp_buffer[4 + i] = firmware_message->firmware_payload.data[i];
    }
 
    simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
@@ -344,14 +345,14 @@ static int uart_data_receiver(unsigned char uart_char)
             {
                firmware_message.destination_address.u8[i] = uart_command_buf[8 + i];
             }
-            for (int i = 0; i <= 226; i++)
-            {
-               firmware_message.firmware_payload.data[i] = uart_command_buf[28 + i];
-            }
             firmware_message.protocol_version = uart_command_buf[24];
             firmware_message.device_version = uart_command_buf[25];
             firmware_message.firmware_command = uart_command_buf[27];
             firmware_message.ready_to_send = 1;
+            for (int i = 0; i < 227; i++)
+            {
+               firmware_message.firmware_payload.data[i] = uart_command_buf[28 + i];
+            }
          }
       }
       else
