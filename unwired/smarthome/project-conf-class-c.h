@@ -37,12 +37,8 @@
 /*---------------------------------------------------------------------------*/
 #include "project-conf.h"
 
-#undef RF_BLE_CONF_ENABLED
-#define RF_BLE_CONF_ENABLED                      0
 #undef UIP_DS6_CONF_PERIOD
 #define UIP_DS6_CONF_PERIOD                      (CLOCK_SECOND/10)
-#undef UIP_CONF_TCP
-#define UIP_CONF_TCP                             0
 #undef RPL_CONF_LEAF_ONLY
 #define RPL_CONF_LEAF_ONLY                       0
 

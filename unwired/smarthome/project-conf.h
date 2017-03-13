@@ -45,6 +45,8 @@
 #define IEEE802154_CONF_PANID                      0xAABB
 #undef RF_CORE_CONF_CHANNEL
 #define RF_CORE_CONF_CHANNEL                       26
+#undef RF_BLE_CONF_ENABLED
+#define RF_BLE_CONF_ENABLED                        0
 
 #undef STARTUP_CONF_VERBOSE
 #define STARTUP_CONF_VERBOSE                       1
@@ -59,6 +61,8 @@
 
 /* Net tune option */
 #define UIP_CONF_BUFFER_SIZE                       900
+#undef UIP_CONF_TCP
+#define UIP_CONF_TCP                               0
 
 /* RPL tune option */
 #undef RPL_CONF_WITH_PROBING
