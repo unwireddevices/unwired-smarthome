@@ -367,7 +367,7 @@ static int uart_data_receiver(unsigned char uart_char)
 /*---------------------------------------------------------------------------*/
 
 static void udp_data_receiver(struct simple_udp_connection *connection,
-                              const uip_ipaddr_t *sender_addr, //TODO: fd00 or fe80?
+                              const uip_ipaddr_t *sender_addr,
                               uint16_t sender_port,
                               const uip_ipaddr_t *receiver_addr,
                               uint16_t receiver_port,
@@ -448,6 +448,7 @@ PROCESS_THREAD(send_command_process, ev, data)
    {
       etimer_set(&send_command_process_timer, UART_DATA_POLL_INTERVAL);
       PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_command_process_timer));
+
       if (command_message.ready_to_send != 0)
       {
          disable_interrupts();
@@ -455,6 +456,7 @@ PROCESS_THREAD(send_command_process, ev, data)
          command_message.ready_to_send = 0;
          enable_interrupts();
       }
+
       if (firmware_message.ready_to_send != 0)
       {
          disable_interrupts();
