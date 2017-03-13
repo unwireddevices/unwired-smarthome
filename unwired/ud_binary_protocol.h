@@ -12,17 +12,18 @@
 #define DEVICE_VERSION_V1                                       0x01
 
 /* Data types */
-#define DATA_TYPE_JOIN                                          0x01
-#define DATA_TYPE_SENSOR_DATA                                   0x02
-#define DATA_TYPE_JOIN_CONFIRM                                  0x03
-#define DATA_TYPE_PONG                                          0x04
-#define DATA_TYPE_COMMAND                                       0x05
-#define DATA_TYPE_STATUS                                        0x06
-#define DATA_TYPE_GET_STATUS                                    0x07
-#define DATA_TYPE_SETTINGS                                      0x08
-#define DATA_TYPE_WARNING                                       0x09
-#define DATA_TYPE_SET_TIME                                      0x0A
-#define DATA_TYPE_SET_SCHEDULE                                  0x0B
+#define DATA_TYPE_JOIN                                          0x01 //Запрос на включение в сеть
+#define DATA_TYPE_SENSOR_DATA                                   0x02 //Данные с датчиков устройства
+#define DATA_TYPE_JOIN_CONFIRM                                  0x03 //Подтверждение запроса на включение в сеть
+#define DATA_TYPE_PONG                                          0x04 //Подтверждение доставки пакета
+#define DATA_TYPE_COMMAND                                       0x05 //Команды возможностям устройства
+#define DATA_TYPE_STATUS                                        0x06 //Пакет со статусными данными
+#define DATA_TYPE_GET_STATUS                                    0x07 //Запрос статуса(не реализовано)
+#define DATA_TYPE_SETTINGS                                      0x08 //Команда настройки параметров(не реализовано)
+#define DATA_TYPE_WARNING                                       0x09 //Ошибки и предупреждения(не реализовано)
+#define DATA_TYPE_SET_TIME                                      0x0A //Команда установки времени(не реализовано)
+#define DATA_TYPE_SET_SCHEDULE                                  0x0B //Команда установки расписания(не реализовано)
+#define DATA_TYPE_FIRMWARE                                      0x0C //Команда с данными для OTA
 
 /* Reserved data */
 #define DATA_RESERVED                                           0xFF
@@ -134,6 +135,11 @@
 
 #define DEVICE_ABILITY_0_10V_ANALOG_CHANNEL_1                   0x01
 
+/* DATA_TYPE_FIRMWARE commands  */
+#define DATA_TYPE_FIRMWARE_COMMAND_START                        0x01 //Старт процесса обновления
+#define DATA_TYPE_FIRMWARE_COMMAND_DATA                         0x02 //Данные прошивки
+#define DATA_TYPE_FIRMWARE_COMMAND_UPDATE                       0x03 //Старт обновления после передачи данных
+
 /* Devices warnings */
 #define DEVICE_WARNING_HIGH_TEMPERATYRE                         0x01
 #define DEVICE_WARNING_LOW_VOLTAGE                              0x02
@@ -144,7 +150,8 @@
 
 /* UART Binary data */
 #define UART_PROTOCOL_VERSION_V1                                0x01
-#define UART_DATA_LENGTH                                        42
+#define UART_PROTOCOL_VERSION_V2                                0x02
+#define UART_DATA_LENGTH                                        255
 #define MAGIC_SEQUENCE_LENGTH                                   6
 
 /* Defines */

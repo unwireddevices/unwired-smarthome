@@ -69,17 +69,34 @@
 #define UART_DATA_POLL_INTERVAL 5 //in main timer ticks, one tick ~8ms
 /*---------------------------------------------------------------------------*/
 
+typedef struct firmware_packet {
+  uint8_t data[227];
+} firmware_packet;
+
+struct firmware_data
+{
+   volatile uip_ip6addr_t destination_address;
+   volatile uint8_t firmware_command;
+   volatile firmware_packet firmware_payload;
+   volatile uint8_t protocol_version;
+   volatile uint8_t device_version;
+   volatile uint8_t ready_to_send;
+};
+
 struct command_data
 {
    volatile uip_ip6addr_t destination_address;
    volatile uint8_t ability_target;
    volatile uint8_t ability_number;
    volatile uint8_t ability_state;
+   volatile uint8_t protocol_version;
+   volatile uint8_t device_version;
    volatile uint8_t ready_to_send;
 };
 
 /* Received data via UART */
 static struct command_data command_message;
+static struct firmware_data firmware_message;
 
 /* UART-buffer for raw command */
 volatile static uint8_t uart_command_buf[UART_DATA_LENGTH];
@@ -88,13 +105,7 @@ volatile static uint8_t uart_command_buf[UART_DATA_LENGTH];
 volatile static uint8_t uart_iterator = 0;
 
 /* The sequence of start and end command */
-static uint8_t uart_magic_sequence[UART_DATA_LENGTH] =
-{
-   0x01,0x16,0x16,0x16,0x16,0x10,
-   0x01,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-   0x01,0x01,0x01,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,
-   0x03,0x16,0x16,0x16,0x17,0x04
-};
+static uint8_t uart_magic_sequence[6] = {0x01,0x16,0x16,0x16,0x16,0x10};
 
 /* UPD connection structure */
 static struct simple_udp_connection udp_connection;
@@ -158,6 +169,39 @@ void send_pong_packet(const uip_ip6addr_t *dest_addr)
 
 /*---------------------------------------------------------------------------*/
 
+void send_firmware_packet(struct firmware_data *firmware_message)
+{
+   if (&firmware_message->destination_address == NULL)
+   {
+      printf("ERROR: dest_addr in send_command_packet null\n");
+      return;
+   }
+   if (&udp_connection.udp_conn == NULL)   //указатель на что?
+   {
+      printf("ERROR: connection in send_command_packet null\n");
+      return;
+   }
+
+   uip_ip6addr_t addr;
+   uip_ip6addr_copy(&addr, &firmware_message->destination_address);
+
+   int length = 229;
+   char udp_buffer[length];
+   udp_buffer[0] = firmware_message->protocol_version;
+   udp_buffer[1] = firmware_message->device_version;
+   udp_buffer[2] = DATA_TYPE_FIRMWARE;
+
+   for (int i = 0; i <= length - 3; i++)
+   {
+      udp_buffer[3 + i] = firmware_message->firmware_payload.data[i];
+   }
+
+   simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
+
+}
+
+/*---------------------------------------------------------------------------*/
+
 void send_command_packet(struct command_data *command_message)
 {
    if (&command_message->destination_address == NULL)
@@ -176,8 +220,8 @@ void send_command_packet(struct command_data *command_message)
 
    int length = 10;
    char udp_buffer[length];
-   udp_buffer[0] = PROTOCOL_VERSION_V1;
-   udp_buffer[1] = DEVICE_VERSION_V1;
+   udp_buffer[0] = command_message->protocol_version;
+   udp_buffer[1] = command_message->device_version;
    udp_buffer[2] = DATA_TYPE_COMMAND;
    udp_buffer[3] = command_message->ability_target;
    udp_buffer[4] = command_message->ability_number;
@@ -237,8 +281,8 @@ void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const ui
 }
 
 /*---------------------------------------------------------------------------*/
-/*
-void uart_packet_dump(uint8_t *uart_command_buf) {
+
+void uart_packet_dump(volatile uint8_t *uart_command_buf) {
     if (uart_command_buf == NULL) {
         printf("ERROR: uart_command_buf in uart_packet_dump null\n");
         return;
@@ -247,51 +291,74 @@ void uart_packet_dump(uint8_t *uart_command_buf) {
     printf("\nUART->6LP: ");
     for (int i = 0; i < UART_DATA_LENGTH; i++)
     {
-        printf("%02X", uart_command_buf[i]);
+        printf("%"PRIXX8, uart_command_buf[i]);
     }
     printf("\n");
 }
-*/
+
 /*---------------------------------------------------------------------------*/
 
-static int uart_data_receiver(unsigned char c)
+static int uart_data_receiver(unsigned char uart_char)
 {
    led_blink(LED_A);
-   if ((uart_iterator <= MAGIC_SEQUENCE_LENGTH - 1) ||
-         ((uart_iterator >= UART_DATA_LENGTH - MAGIC_SEQUENCE_LENGTH) && (uart_iterator <= UART_DATA_LENGTH - 1)))
-   {
-      if (c != uart_magic_sequence[uart_iterator])
-      {
-         uart_iterator = 0;
-         return 1;
-      }
-   }
-   uart_command_buf[uart_iterator] = c;
 
-   if (uart_iterator < UART_DATA_LENGTH - 1)
+   if (uart_iterator < UART_DATA_LENGTH)
    {
+      uart_command_buf[uart_iterator] = uart_char;
+      //printf("UDCP: New char(%" PRIXX8 ") in buffer: %" PRIu8 "\n", uart_char, uart_iterator);
+      if (uart_iterator < MAGIC_SEQUENCE_LENGTH)
+      {
+         if (uart_char != uart_magic_sequence[uart_iterator])
+         {
+            //printf("UDCP: Char 0x%" PRIXX8 "(#%" PRIu8 ") non-MQ!\n", uart_char, uart_iterator);
+            uart_iterator = 0;
+            return 1;
+         }
+      }
       uart_iterator++;
    }
-   else
+
+   if (uart_iterator == UART_DATA_LENGTH)
    {
       uart_iterator = 0;
-
-      if (uart_command_buf[6] == UART_PROTOCOL_VERSION_V1)
+      //uart_packet_dump(uart_command_buf);
+      if (uart_command_buf[6] == UART_PROTOCOL_VERSION_V2)
       {
-         for (int i = 0; i <= 15; i++)
+         if (uart_command_buf[26] == DATA_TYPE_COMMAND)
          {
-            command_message.destination_address.u8[i] = uart_command_buf[i + 7];
+            for (int i = 0; i < 16; i++)
+            {
+               command_message.destination_address.u8[i] = uart_command_buf[8 + i];
+            }
+            command_message.protocol_version = uart_command_buf[24];
+            command_message.device_version = uart_command_buf[25];
+            command_message.ability_target = uart_command_buf[27];
+            command_message.ability_number = uart_command_buf[28];
+            command_message.ability_state = uart_command_buf[29];
+            command_message.ready_to_send = 1;
          }
-         command_message.ability_number = uart_command_buf[24];
-         command_message.ability_state = uart_command_buf[25];
-         command_message.ability_target = uart_command_buf[23];
-         command_message.ready_to_send = 1;
+
+         if (uart_command_buf[26] == DATA_TYPE_FIRMWARE)
+         {
+            for (int i = 0; i < 16; i++)
+            {
+               firmware_message.destination_address.u8[i] = uart_command_buf[8 + i];
+            }
+            for (int i = 0; i <= 226; i++)
+            {
+               firmware_message.firmware_payload.data[i] = uart_command_buf[28 + i];
+            }
+            firmware_message.protocol_version = uart_command_buf[24];
+            firmware_message.device_version = uart_command_buf[25];
+            firmware_message.firmware_command = uart_command_buf[27];
+            firmware_message.ready_to_send = 1;
+         }
       }
       else
       {
-         printf("USER: Incompatible protocol version!\n");
+         printf("UDCP: Incompatible protocol version: %" PRIXX8 "!\n", uart_command_buf[6]);
       }
-      //uart_packet_dump(uart_command_buf);
+
    }
 
    return 1;
@@ -381,11 +448,18 @@ PROCESS_THREAD(send_command_process, ev, data)
    {
       etimer_set(&send_command_process_timer, UART_DATA_POLL_INTERVAL);
       PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_command_process_timer));
-      if (command_message.ready_to_send == 1)
+      if (command_message.ready_to_send != 0)
       {
          disable_interrupts();
          send_command_packet(&command_message);
          command_message.ready_to_send = 0;
+         enable_interrupts();
+      }
+      if (firmware_message.ready_to_send != 0)
+      {
+         disable_interrupts();
+         send_firmware_packet(&firmware_message);
+         firmware_message.ready_to_send = 0;
          enable_interrupts();
       }
    }

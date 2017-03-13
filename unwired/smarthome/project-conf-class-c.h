@@ -50,10 +50,6 @@
 #define RPL_CONF_DIO_INTERVAL_MIN                12 //2^X ms, 12(2^12 = 4.096s) default
 #undef RPL_CONF_DIO_INTERVAL_DOUBLINGS
 #define RPL_CONF_DIO_INTERVAL_DOUBLINGS          4 // RPL_CONF_DIO_INTERVAL_MIN + RPL_CONF_DIO_INTERVAL_DOUBLINGS <= 20
-#undef RPL_CONF_WITH_PROBING
-#define RPL_CONF_WITH_PROBING                    1
-#undef RPL_CONF_PROBING_INTERVAL
-#define RPL_CONF_PROBING_INTERVAL                (30 * CLOCK_SECOND) //120 default
 
 //#define RPL_CONF_WITH_DAO_ACK                    1
 //#define RPL_CONF_RPL_REPAIR_ON_DAO_NACK          1
