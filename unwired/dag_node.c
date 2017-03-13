@@ -61,21 +61,21 @@
 #include "board.h"
 #include "ti-lib.h"
 
-#include "../flash-common.h"
+#include "flash-common.h"
 #include "xxf_types_helper.h"
-#include "../ud_binary_protocol.h"
+#include "ud_binary_protocol.h"
 #include "dag_node.h"
 
 #ifdef IF_UD_BUTTON
-#  include "button.h"
+#  include "smarthome/button.h"
 #endif
 
 #ifdef IF_UD_RELAY
-#  include "relay.h"
+#  include "smarthome/relay.h"
 #endif
 
 #ifdef IF_UD_DIMMER
-#  include "dimmer.h"
+#  include "smarthome/dimmer.h"
 #endif
 
 #include "../fake_headers.h" //no move up! not "krasivo"!
@@ -535,12 +535,13 @@ PROCESS_THREAD(maintenance_process, ev, data)
 PROCESS_THREAD(rpl_maintenance_process, ev, data)
 {
    PROCESS_BEGIN();
+   /*
    static struct etimer rpl_maintenance_timer;
    static uint32_t delay;
    static uip_ds6_nbr_t *nbr = NULL;
    PROCESS_PAUSE();
 
-   /*
+
    while (1)
    {
       nbr = uip_ds6_nbr_lookup(uip_ds6_defrt_choose());

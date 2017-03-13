@@ -59,7 +59,7 @@
 #include "simple-udp.h"
 
 #include "dimmer.h"
-#include "dag_node.h"
+#include "../dag_node.h"
 #include "gpio-interrupt.h"
 
 #include "xxf_types_helper.h"

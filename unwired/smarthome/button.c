@@ -60,10 +60,10 @@
 #include "simple-udp.h"
 
 #include "button.h"
-#include "dag_node.h"
 
 #include "ti-lib.h"
 #include "../ud_binary_protocol.h"
+#include "../dag_node.h"
 
 #include "net/rpl/rpl-private.h"
 #include "../fake_headers.h" //no move up! not "krasivo"!
