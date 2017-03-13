@@ -51,7 +51,7 @@
 #undef STARTUP_CONF_VERBOSE
 #define STARTUP_CONF_VERBOSE                       1
 
-/* MAC tune option */
+/* Stacks options */
 #undef NETSTACK_CONF_MAC
 #define NETSTACK_CONF_MAC                          csma_driver //nullmac_driver
 #undef NETSTACK_CONF_RDC
@@ -59,19 +59,20 @@
 #undef NETSTACK_CONF_FRAMER
 #define NETSTACK_CONF_FRAMER                       framer_802154 //framer_nullmac
 
+/* Net tune option */
 #define UIP_CONF_BUFFER_SIZE                       900
 
+/* RPL tune option */
 #undef RPL_CONF_WITH_PROBING
 #define RPL_CONF_WITH_PROBING                      0
 #undef RPL_CONF_PROBING_INTERVAL
 #define RPL_CONF_PROBING_INTERVAL                  ((RPL_CONF_DEFAULT_LIFETIME * RPL_CONF_DEFAULT_LIFETIME_UNIT) / 2 ) * CLOCK_SECOND
 #undef RPL_CONF_DEFAULT_LIFETIME
-#define RPL_CONF_DEFAULT_LIFETIME                  5      //LIFETIME = DEFAULT_LIFETIME*DEFAULT_LIFETIME_UNIT
+#define RPL_CONF_DEFAULT_LIFETIME                  5      //LIFETIME = DEFAULT_LIFETIME * DEFAULT_LIFETIME_UNIT
 #undef RPL_CONF_DEFAULT_LIFETIME_UNIT
 #define RPL_CONF_DEFAULT_LIFETIME_UNIT             60*60
 
 /* Encryption */
-
 #undef NONCORESEC_CONF_SEC_LVL
 #define NONCORESEC_CONF_SEC_LVL                    FRAME802154_SECURITY_LEVEL_NONE
 /*
