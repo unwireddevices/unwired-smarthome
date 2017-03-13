@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2016, Unwired Devices LLC. All rights reserved.
+ * Copyright (c) 2016, Unwired Devices LLC - http://www.unwireddevices.com/
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions

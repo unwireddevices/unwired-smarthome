@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated - http://www.ti.com/
+ * Copyright (c) 2016, Unwired Devices LLC - http://www.unwireddevices.com/
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
