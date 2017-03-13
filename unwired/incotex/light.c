@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Unwired Devices LLC. All rights reserved.
+ * Copyright (c) 2016, Unwired Devices LLC - http://www.unwireddevices.com/
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,14 +29,14 @@
  *
  */
 
- /*---------------------------------------------------------------------------*/
- /*
- * \file
- *         Dimmer service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
- * \author
- *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
- */
- /*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+/*
+* \file
+*         Incotext-light service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
+* \author
+*         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
+*/
+/*---------------------------------------------------------------------------*/
 
 #include "contiki.h"
 #include "contiki-lib.h"
@@ -59,9 +59,8 @@
 #include "simple-udp.h"
 
 #include "light.h"
-#include "dag_node.h"
+#include "../dag_node.h"
 #include "gpio-interrupt.h"
-#include "pwm.h"
 
 #include "xxf_types_helper.h"
 
@@ -69,7 +68,6 @@
 #include "clock.h"
 #include "../ud_binary_protocol.h"
 #include "../flash-common.h"
-
 
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
@@ -80,7 +78,7 @@ SENSORS(&button_e_sensor_click,
         &button_e_sensor_long_click);
 
 /* register dimmer process */
-PROCESS(main_process, "Dimmer control process");
+PROCESS(main_process, "Incotext-light control process");
 
 /* set autostart processes */
 AUTOSTART_PROCESSES(&dag_node_process, &main_process);
@@ -90,60 +88,44 @@ AUTOSTART_PROCESSES(&dag_node_process, &main_process);
 
 static void exe_dimmer_command(struct command_data *command_dimmer)
 {
-    printf("LIGHT: new command, target: %02X, state: %02X, number: %02X\n",
-           command_dimmer->ability_target,
-           command_dimmer->ability_state,
-           command_dimmer->ability_number);
+   printf("DIMMER: new command, target: %02X, state: %02X, number: %02X\n",
+          command_dimmer->ability_target,
+          command_dimmer->ability_state,
+          command_dimmer->ability_number);
 
-    if (command_dimmer->ability_number != DEVICE_ABILITY_0_10V_ANALOG_CHANNEL_1)
-    {
-        printf("Not support light number\n");
-        return;
-    }
+   if (command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_1 &&
+         command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_2)
+   {
+      printf("Not support dimmer number\n");
+      return;
+   }
 
-    pwm_set_duty(command_dimmer->ability_state);
-}
-
-/*---------------------------------------------------------------------------*/
-
-
-/*---------------------------------------------------------------------------*/
-
-void configure_DIO()
-{
-
-    uint32_t freq = 1000;
-
-    pwm_config(BOARD_IOID_1_10V_1, freq);
-    pwm_set_duty(0);
-    pwm_start();
 }
 
 /*---------------------------------------------------------------------------*/
 
 PROCESS_THREAD(main_process, ev, data)
 {
-  PROCESS_BEGIN();
+   PROCESS_BEGIN();
 
-  static struct command_data *message_data = NULL;
+   static struct command_data *message_data = NULL;
 
-  PROCESS_PAUSE();
-  
-  printf("Unwired dimmer device. HELL-IN-CODE free. I hope.\n");
-  configure_DIO();
+   PROCESS_PAUSE();
 
-  while(1)
-  {
-    PROCESS_YIELD();
-    if(ev == PROCESS_EVENT_CONTINUE)
-    {
-      message_data = data;
-      if (message_data->ability_target == DEVICE_ABILITY_0_10V_ANALOG)
+   printf("Unwired Incotext-light device. HELL-IN-CODE free. I hope.\n");
+
+   while (1)
+   {
+      PROCESS_YIELD();
+      if (ev == PROCESS_EVENT_CONTINUE)
       {
-          exe_dimmer_command(message_data);
+         message_data = data;
+         if (message_data->ability_target == DEVICE_ABILITY_DIMMER)
+         {
+            exe_dimmer_command(message_data);
+         }
       }
-    }
-  }
+   }
 
-  PROCESS_END();
+   PROCESS_END();
 }
