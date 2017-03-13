@@ -37,18 +37,19 @@
 /*---------------------------------------------------------------------------*/
 #include "project-conf.h"
 
+/* Net tune option */
 #undef UIP_DS6_CONF_PERIOD
 #define UIP_DS6_CONF_PERIOD                      (CLOCK_SECOND/10)
+
+/* RPL tune option */
 #undef RPL_CONF_LEAF_ONLY
 #define RPL_CONF_LEAF_ONLY                       0
 
 #undef RPL_CONF_DIO_INTERVAL_MIN
 #define RPL_CONF_DIO_INTERVAL_MIN                12 //2^X ms, 12(2^12 = 4.096s) default
+
 #undef RPL_CONF_DIO_INTERVAL_DOUBLINGS
 #define RPL_CONF_DIO_INTERVAL_DOUBLINGS          4 // RPL_CONF_DIO_INTERVAL_MIN + RPL_CONF_DIO_INTERVAL_DOUBLINGS <= 20
 
 //#define RPL_CONF_WITH_DAO_ACK                    1
 //#define RPL_CONF_RPL_REPAIR_ON_DAO_NACK          1
-
-
-

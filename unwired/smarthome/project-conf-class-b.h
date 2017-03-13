@@ -37,14 +37,16 @@
 /*---------------------------------------------------------------------------*/
 #include "project-conf.h"
 
+/* Net tune option */
 #undef UIP_DS6_CONF_PERIOD
 #define UIP_DS6_CONF_PERIOD                      (CLOCK_SECOND) //Проверить потребление!
+
+/* RPL tune option */
 #undef RPL_CONF_LEAF_ONLY
 #define RPL_CONF_LEAF_ONLY                       1
 
 #undef RPL_CONF_DIO_INTERVAL_MIN
 #define RPL_CONF_DIO_INTERVAL_MIN                12 //2^X ms, 12(2^12 = 4.096s) default. The DIO interval (n) represents
+
 #undef RPL_CONF_DIO_INTERVAL_DOUBLINGS
 #define RPL_CONF_DIO_INTERVAL_DOUBLINGS          8 // RPL_CONF_DIO_INTERVAL_MIN + RPL_CONF_DIO_INTERVAL_DOUBLINGS <= 20
-
-
