@@ -226,7 +226,7 @@ void change_dio_state(uint8_t ability_number, uint8_t dio_state)    //TODO: ку
       case DEVICE_ABILITY_RELAY_COMMAND_ON:
          ti_lib_gpio_set_dio(BOARD_IOID_RELAY_2);
          printf("RELAY: Relay 2 set to ON\n");
-         relay_2_state = 2;
+         relay_2_state = 1;
          break;
       case DEVICE_ABILITY_RELAY_COMMAND_TOGGLE:
          if (relay_2_state == 1)
