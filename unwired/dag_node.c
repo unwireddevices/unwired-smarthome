@@ -64,6 +64,7 @@
 #include "flash-common.h"
 #include "xxf_types_helper.h"
 #include "ud_binary_protocol.h"
+
 #include "dag_node.h"
 
 #ifdef IF_UD_BUTTON
@@ -346,12 +347,11 @@ void send_sensor_event(struct sensor_packet *packet)
 
 /*---------------------------------------------------------------------------*/
 
-void
-send_status_packet(const uip_ipaddr_t *parent_addr,
-                   uint32_t uptime,
-                   int16_t rssi_parent,
-                   uint8_t temp,
-                   uint8_t voltage)
+void send_status_packet(const uip_ipaddr_t *parent_addr,
+                        uint32_t uptime,
+                        int16_t rssi_parent,
+                        uint8_t temp,
+                        uint8_t voltage)
 {
    if (parent_addr == NULL)
       return;
@@ -401,8 +401,7 @@ send_status_packet(const uip_ipaddr_t *parent_addr,
 
 /*---------------------------------------------------------------------------*/
 
-void
-send_join_packet(const uip_ip6addr_t *dest_addr)
+void send_join_packet(const uip_ip6addr_t *dest_addr)
 {
    if (dest_addr == NULL)
       return;
@@ -431,8 +430,7 @@ send_join_packet(const uip_ip6addr_t *dest_addr)
 
 /*---------------------------------------------------------------------------*/
 
-static void
-dag_root_find(void)
+static void dag_root_find(void)
 {
    rpl_dag_t *dag = NULL;
 
@@ -564,7 +562,6 @@ PROCESS_THREAD(maintenance_process, ev, data)
 
             if (process_is_running(&maintenance_process) == 1)
                process_exit(&maintenance_process);
-
             net_off(NOW);
          }
 

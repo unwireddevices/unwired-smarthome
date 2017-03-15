@@ -135,6 +135,7 @@
 
 #define DEVICE_ABILITY_0_10V_ANALOG_CHANNEL_1                   0x01
 
+
 /* DATA_TYPE_FIRMWARE commands  */
 #define DATA_TYPE_FIRMWARE_COMMAND_START                        0x01 //Старт процесса обновления
 #define DATA_TYPE_FIRMWARE_COMMAND_DATA                         0x02 //Данные прошивки
@@ -158,7 +159,6 @@
 
 #define CLASS_B                                                 0x0B
 #define CLASS_C                                                 0x0C
-
 #define UDP_DATA_PORT                                           4004
 
 #define VOLTAGE_PRESCALER                                       16
