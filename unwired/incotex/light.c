@@ -52,6 +52,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 #include "button-sensor.h"
 #include "board.h"
@@ -83,6 +84,24 @@ PROCESS(main_process, "Incotext-light control process");
 /* set autostart processes */
 AUTOSTART_PROCESSES(&dag_node_process, &main_process);
 
+/*---------------------------------------------------------------------------*/
+
+static void send_uart_command(struct command_data *command_dimmer)
+{
+   printf("DIMMER: new command, target: %02X, state: %02X, number: %02X\n",
+          command_dimmer->ability_target,
+          command_dimmer->ability_state,
+          command_dimmer->ability_number);
+
+   if (command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_1 &&
+         command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_2)
+   {
+      printf("Not support dimmer number\n");
+      return;
+   }
+
+}
+
 
 /*---------------------------------------------------------------------------*/
 
@@ -113,6 +132,19 @@ PROCESS_THREAD(main_process, ev, data)
    PROCESS_PAUSE();
 
    printf("Unwired Incotext-light device. HELL-IN-CODE free. I hope.\n");
+
+
+   ext_flash_init();
+   bool flash_result = ext_flash_test();
+
+   if (flash_result == true)
+   {
+      printf("Flash test passed\n");
+   }
+   else
+   {
+      printf("Flash test failed\n");
+   }
 
    while (1)
    {

@@ -154,9 +154,11 @@
  * \name SPI IOID mapping
  *
  */
-#define BOARD_IOID_SPI_SCK        IOID_UNUSED
-#define BOARD_IOID_SPI_MOSI       IOID_UNUSED
-#define BOARD_IOID_SPI_MISO       IOID_UNUSED
+#define BOARD_IOID_SPI_SCK        IOID_5
+#define BOARD_IOID_SPI_CLK_FLASH  BOARD_IOID_SPI_SCK
+#define BOARD_IOID_SPI_MOSI       IOID_25
+#define BOARD_IOID_SPI_MISO       IOID_4
+#define BOARD_IOID_FLASH_CS       IOID_24
 #define BOARD_SPI_SCK             (1 << BOARD_IOID_SPI_SCK)
 #define BOARD_SPI_MOSI            (1 << BOARD_IOID_SPI_MOSI)
 #define BOARD_SPI_MISO            (1 << BOARD_IOID_SPI_MISO)
