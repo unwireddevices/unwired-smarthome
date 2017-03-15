@@ -55,6 +55,7 @@
 #include "sys/clock.h"
 #include "button-sensor.h"
 #include "batmon-sensor.h"
+#include "radio_power.h"
 #include "dev/watchdog.h"
 #include "dev/cc26xx-uart.h"
 #include "board-peripherals.h"
@@ -89,7 +90,6 @@
 #define LONG_STATUS_INTERVAL            (20 * 60 * CLOCK_SECOND)//(60 * 60 * CLOCK_SECOND)
 #define ROOT_FIND_INTERVAL                    (1 * CLOCK_SECOND)
 #define ROOT_FIND_LIMIT_TIME                 (60 * CLOCK_SECOND)
-#define RADIO_OFF_DELAY                     (0.5 * CLOCK_SECOND)
 
 #define MODE_NORMAL                             0x01
 #define MODE_NOTROOT                            0x02
@@ -98,8 +98,6 @@
 #define FALSE                                   0x00
 #define TRUE                                    0x01
 
-#define TIMER                                   0x01
-#define NOW                                     0x02
 #define LED_OFF                                 0x00
 #define LED_ON                                  0x01
 #define LED_FLASH                               0x02
@@ -124,13 +122,9 @@ volatile uip_ip6addr_t root_addr;
 static struct command_data message_for_main_process;
 
 static struct etimer maintenance_timer;
-static struct ctimer net_off_delay_timer;
-
-static struct ctimer net_off_timer;
 
 rpl_dag_t *rpl_probing_dag;
 
-static void net_off(uint8_t mode);
 /*---------------------------------------------------------------------------*/
 
 PROCESS(dag_node_process, "DAG-node process");
@@ -139,64 +133,6 @@ PROCESS(root_find_process, "Root find process");
 PROCESS(status_send_process, "Status send process");
 PROCESS(maintenance_process, "Maintenance process");
 PROCESS(rpl_maintenance_process, "RPL maintenance process");
-
-/*---------------------------------------------------------------------------*/
-
-static void net_on()
-{
-   if (CLASS == CLASS_B)
-   {
-      NETSTACK_MAC.on();
-      uip_ds_6_interval_set(CLOCK_SECOND/2);
-      printf("DAG Node: Radio ON\n");
-   }
-}
-
-/*---------------------------------------------------------------------------*/
-
-static void timer_net_off_event(void *ptr)
-{
-   net_off(TIMER);
-}
-
-/*---------------------------------------------------------------------------*/
-
-static void net_off_timer_now(void *ptr)
-{
-   printf("DAG Node: Radio OFF on timer expired\n");
-   NETSTACK_MAC.off(0);
-}
-
-/*---------------------------------------------------------------------------*/
-
-
-static void net_off(uint8_t mode)
-{
-   if (CLASS == CLASS_B)
-   {
-      if (node_rpl_maintenance == TRUE)
-      {
-         ctimer_set(&net_off_delay_timer, CLOCK_SECOND * 2, timer_net_off_event, NULL);
-         return;
-      }
-
-      uip_ds_6_interval_set(CLOCK_SECOND * 20);
-
-      if (mode == TIMER)
-      {
-         ctimer_reset(&net_off_timer);
-         ctimer_set(&net_off_timer, CLOCK_SECOND / 3, net_off_timer_now, NULL);
-      }
-
-      if (mode == NOW)
-      {
-         ctimer_stop(&net_off_timer);
-         printf("DAG Node: Radio OFF immediately\n");
-         NETSTACK_MAC.off(0);
-      }
-   }
-
-}
 PROCESS(led_process, "Led process");
 
 /*---------------------------------------------------------------------------*/
@@ -218,9 +154,10 @@ static void udp_receiver(struct simple_udp_connection *c,
          uip_ipaddr_copy(&root_addr, sender_addr);
          node_mode = MODE_NORMAL;
          etimer_set(&maintenance_timer, 0);
-         net_off(NOW);
          //rpl_probing_dag = rpl_get_any_dag();
          //rpl_schedule_probing(rpl_probing_dag->instance);
+         net_mode(RADIO_FREEDOM);
+         net_off(RADIO_OFF_NOW);
       }
 
       if (data[2] == DATA_TYPE_COMMAND || data[2] == DATA_TYPE_SETTINGS)
@@ -237,7 +174,7 @@ static void udp_receiver(struct simple_udp_connection *c,
       {
          non_answered_packet = 0;
          printf("DAG Node: Pong packet received, non-answered packet counter: %"PRId8" \n", non_answered_packet);
-         net_off(NOW);
+         net_off(RADIO_OFF_NOW);
       }
 
       if (data[2] == DATA_TYPE_FIRMWARE)
@@ -339,9 +276,8 @@ void send_sensor_event(struct sensor_packet *packet)
    udp_buffer[8] = DATA_RESERVED;
    udp_buffer[9] = DATA_RESERVED;
 
-   net_on();
+   net_on(RADIO_ON_TIMER_OFF);
    simple_udp_sendto(&udp_connection, udp_buffer, lenght + 1, &addr);
-   net_off(TIMER);
    led_mode_set(LED_FLASH);
 }
 
@@ -392,9 +328,8 @@ void send_status_packet(const uip_ipaddr_t *parent_addr,
    udp_buffer[21] = DATA_RESERVED;
    udp_buffer[22] = DATA_RESERVED;
 
-   net_on();
+   net_on(RADIO_ON_TIMER_OFF);
    simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
-   net_off(TIMER);
    led_mode_set(LED_FLASH);
 }
 
@@ -562,7 +497,9 @@ PROCESS_THREAD(maintenance_process, ev, data)
 
             if (process_is_running(&maintenance_process) == 1)
                process_exit(&maintenance_process);
-            net_off(NOW);
+            net_mode(RADIO_FREEDOM);
+            net_off(RADIO_OFF_NOW);
+            net_mode(RADIO_HOLD);
          }
 
          if (CLASS == CLASS_C)
@@ -575,7 +512,8 @@ PROCESS_THREAD(maintenance_process, ev, data)
 
       if (node_mode == MODE_JOIN_PROGRESS)
       {
-         net_on();
+         net_on(RADIO_ON_NORMAL);
+         net_mode(RADIO_HOLD);
          led_mode_set(LED_SLOW_BLINK);
 
          if (process_is_running(&root_find_process) == 0)
