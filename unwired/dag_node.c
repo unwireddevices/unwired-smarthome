@@ -361,20 +361,6 @@ void send_join_packet(const uip_ip6addr_t *dest_addr)
 
 /*---------------------------------------------------------------------------*/
 
-static void dag_root_find(void)
-{
-   rpl_dag_t *dag = NULL;
-
-   if (uip_ds6_get_global(ADDR_PREFERRED) != NULL)
-   {
-      dag = rpl_get_any_dag();
-      if (dag != NULL && &dag->dag_id)
-         send_join_packet(&dag->dag_id);
-   }
-}
-
-/*---------------------------------------------------------------------------*/
-
 static void led_mode_set(uint8_t mode)
 {
    led_mode = mode;
@@ -615,6 +601,7 @@ PROCESS_THREAD(root_find_process, ev, data)
 
    static struct etimer find_root_timer;
    static struct etimer find_root_limit_timer;
+   static rpl_dag_t *root_find_dag = NULL;
    PROCESS_PAUSE();
 
    etimer_set( &find_root_limit_timer, ROOT_FIND_LIMIT_TIME);
@@ -626,13 +613,22 @@ PROCESS_THREAD(root_find_process, ev, data)
 
       if (node_mode == MODE_JOIN_PROGRESS)
       {
-         if (etimer_expired(&find_root_limit_timer))
+         if (!etimer_expired(&find_root_limit_timer))
+         {
+            if (uip_ds6_get_global(ADDR_PREFERRED) != NULL)
+            {
+               root_find_dag = rpl_get_any_dag();
+               if (root_find_dag != NULL && &root_find_dag->dag_id)
+                  send_join_packet(&root_find_dag->dag_id);
+            }
+         }
+         else
          {
             node_mode = MODE_NOTROOT;
             printf("DAG Node: mode set to MODE_NOTROOT\n");
             etimer_set(&maintenance_timer, 0);
          }
-         dag_root_find();
+
       }
    }
 
