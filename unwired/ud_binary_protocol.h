@@ -77,7 +77,7 @@
 #define DEVICE_ABILITY_RESERVED12                               26
 #define DEVICE_ABILITY_RESERVED13                               27
 #define DEVICE_ABILITY_RESERVED14                               28
-#define DEVICE_ABILITY_RESERVED15                               29
+#define DEVICE_ABILITY_UART_BRIGE                               29
 #define DEVICE_ABILITY_0_10V_ANALOG                             30
 #define DEVICE_ABILITY_RS485_BRIGE                              31
 #define DEVICE_ABILITY_DALI_BRIGE                               32
