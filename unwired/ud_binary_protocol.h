@@ -157,8 +157,6 @@
 
 /* Defines */
 
-#define CLASS_B                                                 0x0B
-#define CLASS_C                                                 0x0C
 #define UDP_DATA_PORT                                           4004
 
 #define VOLTAGE_PRESCALER                                       16
