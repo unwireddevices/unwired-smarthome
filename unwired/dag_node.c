@@ -152,8 +152,6 @@ static void udp_receiver(struct simple_udp_connection *c,
          uip_ipaddr_copy(&root_addr, sender_addr);
          node_mode = MODE_NORMAL;
          etimer_set(&maintenance_timer, 0);
-         //rpl_probing_dag = rpl_get_any_dag();
-         //rpl_schedule_probing(rpl_probing_dag->instance);
          net_mode(RADIO_FREEDOM);
          net_off(RADIO_OFF_NOW);
       }
@@ -432,6 +430,7 @@ PROCESS_THREAD(led_process, ev, data)
 PROCESS_THREAD(dag_node_button_process, ev, data)
 {
    PROCESS_BEGIN();
+
    PROCESS_PAUSE();
 
    while (1)
@@ -457,6 +456,7 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
 PROCESS_THREAD(maintenance_process, ev, data)
 {
    PROCESS_BEGIN();
+
    PROCESS_PAUSE();
 
    while (1)
@@ -502,8 +502,8 @@ PROCESS_THREAD(maintenance_process, ev, data)
 
          if (CLASS == CLASS_C)
          {
-            printf("DAG Node: Root not found, reboot\n");
             led_mode_set(LED_FAST_BLINK);
+            printf("DAG Node: Root not found, reboot\n"); //почему-то не перезагружается!
             watchdog_reboot();
          }
       }
@@ -532,6 +532,7 @@ PROCESS_THREAD(maintenance_process, ev, data)
 PROCESS_THREAD(status_send_process, ev, data)
 {
    PROCESS_BEGIN();
+
    static struct etimer status_send_timer;
    const rpl_dag_t *dag = NULL;
    PROCESS_PAUSE();
