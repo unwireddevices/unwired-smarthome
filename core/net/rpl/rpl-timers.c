@@ -45,6 +45,7 @@
 #include "net/rpl/rpl-private.h"
 #include "net/rpl/rpl-ns.h"
 #include "net/link-stats.h"
+#include "radio_power.h"
 #include "net/ipv6/multicast/uip-mcast6.h"
 #include "lib/random.h"
 #include "sys/ctimer.h"
@@ -475,6 +476,7 @@ handle_probing_timer(void *ptr)
         (unsigned)((clock_time() - stats->last_tx_time) / (60 * CLOCK_SECOND)) : 0
         );
     /* Send probe, e.g. unicast DIO or DIS */
+    net_on(RADIO_ON_TIMER_OFF);
     RPL_PROBING_SEND_FUNC(instance, target_ipaddr);
     instance->urgent_probing_target = NULL;
   }
