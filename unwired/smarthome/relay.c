@@ -1,5 +1,6 @@
 /*
- * Copyright (c) 2016, Unwired Devices LLC. All rights reserved.
+ * Copyright (c) 2016, Unwired Devices LLC - http://www.unwireddevices.com/
+ * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -59,13 +60,13 @@
 #include "simple-udp.h"
 
 #include "relay.h"
-#include "dag_node.h"
 
 #include "xxf_types_helper.h"
 
 #include "ti-lib.h"
 #include "../ud_binary_protocol.h"
 #include "../flash-common.h"
+#include "../dag_node.h"
 
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
@@ -225,7 +226,7 @@ void change_dio_state(uint8_t ability_number, uint8_t dio_state)    //TODO: ку
       case DEVICE_ABILITY_RELAY_COMMAND_ON:
          ti_lib_gpio_set_dio(BOARD_IOID_RELAY_2);
          printf("RELAY: Relay 2 set to ON\n");
-         relay_2_state = 2;
+         relay_2_state = 1;
          break;
       case DEVICE_ABILITY_RELAY_COMMAND_TOGGLE:
          if (relay_2_state == 1)

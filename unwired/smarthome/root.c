@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2011, Swedish Institute of Computer Science.
+ * Copyright (c) 2016, Unwired Devices LLC - http://www.unwireddevices.com/
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -69,8 +69,9 @@
 #define UART_DATA_POLL_INTERVAL 5 //in main timer ticks, one tick ~8ms
 /*---------------------------------------------------------------------------*/
 
-typedef struct firmware_packet {
-  uint8_t data[227];
+typedef struct firmware_packet
+{
+   uint8_t data[227];
 } firmware_packet;
 
 struct firmware_data
@@ -190,10 +191,11 @@ void send_firmware_packet(struct firmware_data *firmware_message)
    udp_buffer[0] = firmware_message->protocol_version;
    udp_buffer[1] = firmware_message->device_version;
    udp_buffer[2] = DATA_TYPE_FIRMWARE;
+   udp_buffer[3] = firmware_message->firmware_command;
 
-   for (int i = 0; i <= length - 3; i++)
+   for (int i = 0; i <= length - 4; i++)
    {
-      udp_buffer[3 + i] = firmware_message->firmware_payload.data[i];
+      udp_buffer[4 + i] = firmware_message->firmware_payload.data[i];
    }
 
    simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
@@ -282,18 +284,20 @@ void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const ui
 
 /*---------------------------------------------------------------------------*/
 
-void uart_packet_dump(volatile uint8_t *uart_command_buf) {
-    if (uart_command_buf == NULL) {
-        printf("ERROR: uart_command_buf in uart_packet_dump null\n");
-        return;
-    }
+void uart_packet_dump(volatile uint8_t *uart_command_buf)
+{
+   if (uart_command_buf == NULL)
+   {
+      printf("ERROR: uart_command_buf in uart_packet_dump null\n");
+      return;
+   }
 
-    printf("\nUART->6LP: ");
-    for (int i = 0; i < UART_DATA_LENGTH; i++)
-    {
-        printf("%"PRIXX8, uart_command_buf[i]);
-    }
-    printf("\n");
+   printf("\nUART->6LP: ");
+   for (int i = 0; i < UART_DATA_LENGTH; i++)
+   {
+      printf("%"PRIXX8, uart_command_buf[i]);
+   }
+   printf("\n");
 }
 
 /*---------------------------------------------------------------------------*/
@@ -344,14 +348,14 @@ static int uart_data_receiver(unsigned char uart_char)
             {
                firmware_message.destination_address.u8[i] = uart_command_buf[8 + i];
             }
-            for (int i = 0; i <= 226; i++)
-            {
-               firmware_message.firmware_payload.data[i] = uart_command_buf[28 + i];
-            }
             firmware_message.protocol_version = uart_command_buf[24];
             firmware_message.device_version = uart_command_buf[25];
             firmware_message.firmware_command = uart_command_buf[27];
             firmware_message.ready_to_send = 1;
+            for (int i = 0; i < 227; i++)
+            {
+               firmware_message.firmware_payload.data[i] = uart_command_buf[28 + i];
+            }
          }
       }
       else

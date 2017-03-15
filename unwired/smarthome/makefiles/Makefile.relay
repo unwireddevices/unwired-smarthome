@@ -1,6 +1,6 @@
 all: relay
 
-PROJECT_SOURCEFILES += dag_node.c ../flash-common.c
+PROJECT_SOURCEFILES += ../dag_node.c ../flash-common.c
 DEFINES+=PROJECT_CONF_H=\"project-conf-class-c.h\"
 DEFINES+=IF_UD_RELAY=1
 DEFINES+=FAKEDEFINE=1

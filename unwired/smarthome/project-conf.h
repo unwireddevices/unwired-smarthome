@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated - http://www.ti.com/
+ * Copyright (c) 2016, Unwired Devices LLC - http://www.unwireddevices.com/
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -41,17 +41,17 @@
 #define PROJECT_CONF_H_
 
 /*---------------------------------------------------------------------------*/
-#define BUTTON_SENSOR_CONF_ENABLE_SHUTDOWN         0
-/*---------------------------------------------------------------------------*/
 #undef IEEE802154_CONF_PANID
 #define IEEE802154_CONF_PANID                      0xAABB
 #undef RF_CORE_CONF_CHANNEL
 #define RF_CORE_CONF_CHANNEL                       26
+#undef RF_BLE_CONF_ENABLED
+#define RF_BLE_CONF_ENABLED                        0
 
 #undef STARTUP_CONF_VERBOSE
 #define STARTUP_CONF_VERBOSE                       1
 
-/* MAC tune option */
+/* Stacks options */
 #undef NETSTACK_CONF_MAC
 #define NETSTACK_CONF_MAC                          csma_driver //nullmac_driver
 #undef NETSTACK_CONF_RDC
@@ -59,19 +59,22 @@
 #undef NETSTACK_CONF_FRAMER
 #define NETSTACK_CONF_FRAMER                       framer_802154 //framer_nullmac
 
+/* Net tune option */
 #define UIP_CONF_BUFFER_SIZE                       900
+#undef UIP_CONF_TCP
+#define UIP_CONF_TCP                               0
 
+/* RPL tune option */
 #undef RPL_CONF_WITH_PROBING
-#define RPL_CONF_WITH_PROBING                      0
+#define RPL_CONF_WITH_PROBING                      1
 #undef RPL_CONF_PROBING_INTERVAL
 #define RPL_CONF_PROBING_INTERVAL                  ((RPL_CONF_DEFAULT_LIFETIME * RPL_CONF_DEFAULT_LIFETIME_UNIT) / 2 ) * CLOCK_SECOND
 #undef RPL_CONF_DEFAULT_LIFETIME
-#define RPL_CONF_DEFAULT_LIFETIME                  5      //LIFETIME = DEFAULT_LIFETIME*DEFAULT_LIFETIME_UNIT
+#define RPL_CONF_DEFAULT_LIFETIME                  10      //LIFETIME = DEFAULT_LIFETIME * DEFAULT_LIFETIME_UNIT
 #undef RPL_CONF_DEFAULT_LIFETIME_UNIT
 #define RPL_CONF_DEFAULT_LIFETIME_UNIT             60*60
 
 /* Encryption */
-
 #undef NONCORESEC_CONF_SEC_LVL
 #define NONCORESEC_CONF_SEC_LVL                    FRAME802154_SECURITY_LEVEL_NONE
 /*

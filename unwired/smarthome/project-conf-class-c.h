@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2014, Texas Instruments Incorporated - http://www.ti.com/
+ * Copyright (c) 2016, Unwired Devices LLC - http://www.unwireddevices.com/
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -37,22 +37,19 @@
 /*---------------------------------------------------------------------------*/
 #include "project-conf.h"
 
-#undef RF_BLE_CONF_ENABLED
-#define RF_BLE_CONF_ENABLED                      0
+/* Net tune option */
 #undef UIP_DS6_CONF_PERIOD
 #define UIP_DS6_CONF_PERIOD                      (CLOCK_SECOND/10)
-#undef UIP_CONF_TCP
-#define UIP_CONF_TCP                             0
+
+/* RPL tune option */
 #undef RPL_CONF_LEAF_ONLY
 #define RPL_CONF_LEAF_ONLY                       0
 
 #undef RPL_CONF_DIO_INTERVAL_MIN
 #define RPL_CONF_DIO_INTERVAL_MIN                12 //2^X ms, 12(2^12 = 4.096s) default
+
 #undef RPL_CONF_DIO_INTERVAL_DOUBLINGS
 #define RPL_CONF_DIO_INTERVAL_DOUBLINGS          4 // RPL_CONF_DIO_INTERVAL_MIN + RPL_CONF_DIO_INTERVAL_DOUBLINGS <= 20
 
 //#define RPL_CONF_WITH_DAO_ACK                    1
 //#define RPL_CONF_RPL_REPAIR_ON_DAO_NACK          1
-
-
-

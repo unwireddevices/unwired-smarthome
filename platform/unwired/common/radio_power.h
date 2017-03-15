@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2010, Swedish Institute of Computer Science.
- * Copyright (c) 2014, Texas Instruments Incorporated - http://www.ti.com/
+ * Copyright (c) 2016, Unwired Devices LLC - http://www.unwireddevices.com/
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +30,7 @@
 /*---------------------------------------------------------------------------*/
 /**
  * \file
- *         Header file for DAG-node service
+ *         Header file for radio-power
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
@@ -39,34 +38,23 @@
 
 #include "contiki.h"
 /*---------------------------------------------------------------------------*/
-struct simple_udp_connection udp_connection;
-volatile uint8_t dag_active;
-volatile uip_ip6addr_t root_addr;
 
-struct command_data
-{
-    volatile uint8_t ability_target;
-    volatile uint8_t ability_number;
-    volatile uint8_t ability_state;
-};
+#define CLASS_B                                                 0x0B //battery nodes
+#define CLASS_C                                                 0x0C //power nodes
 
-struct sensor_packet
-{
-    uint8_t protocol_version;
-    uint8_t device_version;
-    uint8_t data_type;
-    uint8_t number_ability;
-    uint8_t sensor_number;
-    uint8_t sensor_event;
-};
+#define RADIO_OFF_ON_TIMER                                      0x01
+#define RADIO_OFF_NOW                                           0x02
 
-void send_sensor_event(struct sensor_packet *packet);
+#define RADIO_ON_NORMAL                                         0x01
+#define RADIO_ON_TIMER_OFF                                      0x02
 
-PROCESS_NAME(dag_node_process);
-PROCESS_NAME(dag_node_button_process);
-PROCESS_NAME(root_ping_process);
-PROCESS_NAME(status_send_process);
+#define RADIO_HOLD                                              0x01
+#define RADIO_FREEDOM                                           0x02
 
+#define RADIO_OFF_DELAY                                         (CLOCK_SECOND / 3)
 
 /*---------------------------------------------------------------------------*/
 
+void net_on(uint8_t mode);
+void net_off(uint8_t mode);
+void net_mode(uint8_t mode);

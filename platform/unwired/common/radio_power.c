@@ -24,128 +24,112 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
- * This file is part of the Contiki operating system.
- *
  */
 
 /*---------------------------------------------------------------------------*/
 /*
-* \file
-*         Dimmer service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
-* \author
-*         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
-*/
+ * \file
+ *         Radio power on/off functions for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
+ * \author
+ *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
+ *
+ */
 /*---------------------------------------------------------------------------*/
+#include <string.h>
+#include <stdio.h>
 
 #include "contiki.h"
 #include "contiki-lib.h"
 #include "contiki-net.h"
-#include "net/ip/uip.h"
+
+#include "clock.h"
+
 #include "net/rpl/rpl.h"
-
-#include "net/netstack.h"
-#include "uip-ds6-route.h"
+#include "net/ipv6/uip-ds6.h"
+#include "net/ipv6/uip-ds6-nbr.h"
 #include "net/ip/uip-debug.h"
+#include "net/link-stats.h"
+
 #include "dev/leds.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-
-#include "button-sensor.h"
-#include "board.h"
-#include "board-peripherals.h"
-#include "simple-udp.h"
-
-#include "dimmer.h"
-#include "../dag_node.h"
-#include "gpio-interrupt.h"
+#include "sys/clock.h"
 
 #include "xxf_types_helper.h"
 
-#include "ti-lib.h"
-#include "clock.h"
-#include "../ud_binary_protocol.h"
-#include "../flash-common.h"
-
+#include "radio_power.h"
 
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
+/*---------------------------------------------------------------------------*/
 
+static struct ctimer net_off_timer;
+volatile uint8_t radio_mode;
 
 /*---------------------------------------------------------------------------*/
 
-/* Register buttons sensors */
-SENSORS(&button_e_sensor_click,
-        &button_e_sensor_long_click);
-
-/* register dimmer process */
-PROCESS(main_process, "Dimmer control process");
-
-/* set autostart processes */
-AUTOSTART_PROCESSES(&dag_node_process, &main_process);
-
-volatile uint8_t dimmer_1_percent = 0;
-volatile uint8_t dimmer_2_percent = 0;
-
-/*---------------------------------------------------------------------------*/
-
-static void exe_dimmer_command(struct command_data *command_dimmer)
+void net_on(uint8_t mode)
 {
-   printf("DIMMER: new command, target: %02X, state: %02X, number: %02X\n",
-          command_dimmer->ability_target,
-          command_dimmer->ability_state,
-          command_dimmer->ability_number);
-
-   if (command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_1 &&
-         command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_2)
+   if (CLASS == CLASS_B)
    {
-      printf("Not support dimmer number\n");
-      return;
-   }
-
-   dimmer_1_percent = command_dimmer->ability_state;
-}
-
-
-
-/*---------------------------------------------------------------------------*/
-
-
-
-void configure_DIO()
-{
-
-
-
-}
-
-/*---------------------------------------------------------------------------*/
-
-PROCESS_THREAD(main_process, ev, data)
-{
-   PROCESS_BEGIN();
-
-   static struct command_data *message_data = NULL;
-
-   PROCESS_PAUSE();
-
-   printf("Unwired dimmer device. HELL-IN-CODE free. I hope.\n");
-   configure_DIO();
-
-   while (1)
-   {
-      PROCESS_YIELD();
-      if (ev == PROCESS_EVENT_CONTINUE)
+      if (mode == RADIO_ON_NORMAL && radio_mode == RADIO_FREEDOM)
       {
-         message_data = data;
-         if (message_data->ability_target == DEVICE_ABILITY_DIMMER)
-         {
-            exe_dimmer_command(message_data);
-         }
+         NETSTACK_MAC.on();
+         uip_ds_6_interval_set(CLOCK_SECOND/2);
+         printf("RADIO: Radio ON\n");
+      }
+
+      if (mode == RADIO_ON_TIMER_OFF && radio_mode == RADIO_FREEDOM)
+      {
+         NETSTACK_MAC.on();
+         uip_ds_6_interval_set(CLOCK_SECOND/2);
+         printf("RADIO: Radio ON\n");
+         net_off(RADIO_OFF_ON_TIMER);
+      }
+   }
+}
+
+/*---------------------------------------------------------------------------*/
+
+static void net_off_timer_now(void *ptr)
+{
+   printf("RADIO: Radio OFF on timer expired\n");
+   NETSTACK_MAC.off(0);
+}
+
+/*---------------------------------------------------------------------------*/
+
+
+void net_off(uint8_t mode)
+{
+   if (CLASS == CLASS_B)
+   {
+
+      uip_ds_6_interval_set(CLOCK_SECOND * 20);
+
+      if (mode == RADIO_OFF_ON_TIMER && radio_mode == RADIO_FREEDOM)
+      {
+         ctimer_reset(&net_off_timer);
+         ctimer_set(&net_off_timer, RADIO_OFF_DELAY, net_off_timer_now, NULL);
+      }
+
+
+      if (mode == RADIO_OFF_NOW && radio_mode == RADIO_FREEDOM)
+      {
+         ctimer_stop(&net_off_timer);
+         printf("RADIO: Radio OFF immediately\n");
+         NETSTACK_MAC.off(0);
       }
    }
 
-   PROCESS_END();
 }
+
+/*---------------------------------------------------------------------------*/
+
+void net_mode(uint8_t mode)
+{
+   if (CLASS == CLASS_B)
+   {
+      radio_mode = mode;
+   }
+}
+/*---------------------------------------------------------------------------*/
+

@@ -77,7 +77,7 @@
 #define DEVICE_ABILITY_RESERVED12                               26
 #define DEVICE_ABILITY_RESERVED13                               27
 #define DEVICE_ABILITY_RESERVED14                               28
-#define DEVICE_ABILITY_RESERVED15                               29
+#define DEVICE_ABILITY_UART_BRIGE                               29
 #define DEVICE_ABILITY_0_10V_ANALOG                             30
 #define DEVICE_ABILITY_RS485_BRIGE                              31
 #define DEVICE_ABILITY_DALI_BRIGE                               32
@@ -135,6 +135,7 @@
 
 #define DEVICE_ABILITY_0_10V_ANALOG_CHANNEL_1                   0x01
 
+
 /* DATA_TYPE_FIRMWARE commands  */
 #define DATA_TYPE_FIRMWARE_COMMAND_START                        0x01 //Старт процесса обновления
 #define DATA_TYPE_FIRMWARE_COMMAND_DATA                         0x02 //Данные прошивки
@@ -155,9 +156,6 @@
 #define MAGIC_SEQUENCE_LENGTH                                   6
 
 /* Defines */
-
-#define CLASS_B                                                 0x0B
-#define CLASS_C                                                 0x0C
 
 #define UDP_DATA_PORT                                           4004
 

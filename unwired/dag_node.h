@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2010, Swedish Institute of Computer Science.
- * Copyright (c) 2014, Texas Instruments Incorporated - http://www.ti.com/
+ * Copyright (c) 2016, Unwired Devices LLC - http://www.unwireddevices.com/
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -68,7 +67,7 @@ PROCESS_NAME(dag_node_button_process);
 PROCESS_NAME(root_find_process);
 PROCESS_NAME(status_send_process);
 PROCESS_NAME(maintenance_process);
-PROCESS_NAME(rpl_maintenance_process);
+PROCESS_NAME(led_process);
 
 /*---------------------------------------------------------------------------*/
 

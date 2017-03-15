@@ -1,6 +1,5 @@
 /*
- * Copyright (c) 2010, Swedish Institute of Computer Science.
- * Copyright (c) 2014, Texas Instruments Incorporated - http://www.ti.com/
+ * Copyright (c) 2016, Unwired Devices LLC - http://www.unwireddevices.com/
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,7 +30,7 @@
 /*---------------------------------------------------------------------------*/
 /**
  * \file
- *         Header file for dimmer service
+ *         Header file for Incotext-light service
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
@@ -43,12 +42,12 @@ PROCESS_NAME(main_process);
 
 /*---------------------------------------------------------------------------*/
 #define CURRENT_DEVICE_SLEEP_TYPE             DEVICE_SLEEP_TYPE_NORMAL
-#define CURRENT_DEVICE_GROUP                  DEVICE_ABILITY_0_10V_ANALOG
+#define CURRENT_DEVICE_GROUP                  DEVICE_GROUP_BRIDGE_CONVERTER
 #define CURRENT_DEVICE_VERSION                DEVICE_VERSION_V1
 #define CURRENT_PROTOCOL_VERSION              PROTOCOL_VERSION_V1
 #define CURRENT_ABILITY_1BYTE                 0b00000000
 #define CURRENT_ABILITY_2BYTE                 0b00000000
 #define CURRENT_ABILITY_3BYTE                 0b00000000
-#define CURRENT_ABILITY_4BYTE                 0b00000100
+#define CURRENT_ABILITY_4BYTE                 0b00001000
 
 /*---------------------------------------------------------------------------*/

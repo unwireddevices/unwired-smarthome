@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Unwired Devices LLC. All rights reserved.
+ * Copyright (c) 2016, Unwired Devices LLC - http://www.unwireddevices.com/
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -60,10 +60,10 @@
 #include "simple-udp.h"
 
 #include "button.h"
-#include "dag_node.h"
 
 #include "ti-lib.h"
 #include "../ud_binary_protocol.h"
+#include "../dag_node.h"
 
 #include "net/rpl/rpl-private.h"
 #include "../fake_headers.h" //no move up! not "krasivo"!
