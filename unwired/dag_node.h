@@ -67,7 +67,6 @@ PROCESS_NAME(dag_node_button_process);
 PROCESS_NAME(root_find_process);
 PROCESS_NAME(status_send_process);
 PROCESS_NAME(maintenance_process);
-PROCESS_NAME(rpl_maintenance_process);
 PROCESS_NAME(led_process);
 
 /*---------------------------------------------------------------------------*/

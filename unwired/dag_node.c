@@ -113,7 +113,6 @@ struct simple_udp_connection udp_connection;
 
 volatile uint8_t node_mode;
 
-volatile uint8_t node_rpl_maintenance = FALSE;
 volatile uint8_t led_mode;
 static void led_mode_set(uint8_t mode);
 
@@ -132,7 +131,6 @@ PROCESS(dag_node_button_process, "DAG-node button process");
 PROCESS(root_find_process, "Root find process");
 PROCESS(status_send_process, "Status send process");
 PROCESS(maintenance_process, "Maintenance process");
-PROCESS(rpl_maintenance_process, "RPL maintenance process");
 PROCESS(led_process, "Led process");
 
 /*---------------------------------------------------------------------------*/
@@ -526,52 +524,6 @@ PROCESS_THREAD(maintenance_process, ev, data)
       etimer_set( &maintenance_timer, SHORT_STATUS_INTERVAL);
       PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&maintenance_timer) );
    }
-   PROCESS_END();
-}
-
-/*---------------------------------------------------------------------------*/
-
-PROCESS_THREAD(rpl_maintenance_process, ev, data)
-{
-   PROCESS_BEGIN();
-   /*
-   static struct etimer rpl_maintenance_timer;
-   static uint32_t delay;
-   static uip_ds6_nbr_t *nbr = NULL;
-   PROCESS_PAUSE();
-
-
-   while (1)
-   {
-      nbr = uip_ds6_nbr_lookup(uip_ds6_defrt_choose());
-      if (nbr == NULL)
-      {
-         node_rpl_maintenance = TRUE;
-      }
-      else
-      {
-         if(nbr->state != NBR_REACHABLE)
-            node_rpl_maintenance = TRUE;
-         else
-            node_rpl_maintenance = FALSE;
-      }
-
-      if (node_rpl_maintenance == TRUE)
-         net_on();
-
-      if (node_rpl_maintenance == FALSE)
-         net_off(TIMER);
-
-
-      if (node_rpl_maintenance == FALSE)
-         delay = (5 * CLOCK_SECOND);
-      else
-         delay = (CLOCK_SECOND);
-
-      etimer_set( &rpl_maintenance_timer, delay);
-      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&rpl_maintenance_timer) );
-   }
-   */
    PROCESS_END();
 }
 
