@@ -403,16 +403,26 @@ PROCESS_THREAD(led_process, ev, data)
    {
       if (led_mode == LED_FAST_BLINK)
          etimer_set( &led_mode_timer, CLOCK_SECOND/10);
-      else
+
+      if (led_mode == LED_SLOW_BLINK)
          etimer_set( &led_mode_timer, CLOCK_SECOND/2);
+
+      if (led_mode == LED_FLASH)
+         etimer_set( &led_mode_timer, 1);
+
       PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&led_mode_timer) );
 
       led_on(LED_A);
 
-      if (led_mode == LED_FAST_BLINK || led_mode == LED_FLASH)
+      if (led_mode == LED_FAST_BLINK)
          etimer_set( &led_mode_timer, CLOCK_SECOND/32);
-      else
+
+      if (led_mode == LED_SLOW_BLINK)
          etimer_set( &led_mode_timer, CLOCK_SECOND/32);
+
+      if (led_mode == LED_FLASH)
+         etimer_set( &led_mode_timer, CLOCK_SECOND/16);
+
       PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&led_mode_timer) );
 
       led_off(LED_A);
@@ -443,7 +453,7 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
       {
          if (data == &button_e_sensor_long_click)
          {
-            led_mode_set(LED_FAST_BLINK);
+            led_mode_set(LED_ON);
             printf("SYSTEM: Button E long click, reboot\n");
             watchdog_reboot();
          }
