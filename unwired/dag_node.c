@@ -430,6 +430,8 @@ PROCESS_THREAD(led_process, ev, data)
 PROCESS_THREAD(dag_node_button_process, ev, data)
 {
    PROCESS_BEGIN();
+   if (ev == PROCESS_EVENT_EXIT)
+      return 1;
 
    PROCESS_PAUSE();
 
@@ -456,6 +458,8 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
 PROCESS_THREAD(maintenance_process, ev, data)
 {
    PROCESS_BEGIN();
+   if (ev == PROCESS_EVENT_EXIT)
+      return 1;
 
    PROCESS_PAUSE();
 
@@ -532,6 +536,8 @@ PROCESS_THREAD(maintenance_process, ev, data)
 PROCESS_THREAD(status_send_process, ev, data)
 {
    PROCESS_BEGIN();
+   if (ev == PROCESS_EVENT_EXIT)
+      return 1;
 
    static struct etimer status_send_timer;
    const rpl_dag_t *dag = NULL;
