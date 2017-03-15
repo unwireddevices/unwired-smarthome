@@ -99,6 +99,11 @@
 
 #define TIMER                                   0x01
 #define NOW                                     0x02
+#define LED_OFF                                 0x00
+#define LED_ON                                  0x01
+#define LED_FLASH                               0x02
+#define LED_SLOW_BLINK                          0x03
+#define LED_FAST_BLINK                          0x04
 
 #define MAX_NON_ANSWERED_PINGS                  3
 
@@ -110,6 +115,8 @@ struct simple_udp_connection udp_connection;
 volatile uint8_t node_mode;
 
 volatile uint8_t node_rpl_maintenance = FALSE;
+volatile uint8_t led_mode;
+static void led_mode_set(uint8_t mode);
 
 volatile uint8_t non_answered_packet = 0;
 volatile uip_ip6addr_t root_addr;
@@ -189,6 +196,7 @@ static void net_off(uint8_t mode)
    }
 
 }
+PROCESS(led_process, "Led process");
 
 /*---------------------------------------------------------------------------*/
 
@@ -200,14 +208,12 @@ static void udp_receiver(struct simple_udp_connection *c,
                          const uint8_t *data, //TODO: make "parse" function(data[0] -> data.protocol_version)
                          uint16_t datalen)
 {
-   led_on(LED_A);
-
    if (data[0] == PROTOCOL_VERSION_V1 && data[1] == CURRENT_DEVICE_VERSION)
    {
       if (data[2] == DATA_TYPE_JOIN_CONFIRM)
       {
          printf("DAG Node: DAG active, join packet confirmation received, mode set to MODE_NORMAL\n");
-         led_off(LED_A);
+         led_mode_set(LED_SLOW_BLINK);
          uip_ipaddr_copy(&root_addr, sender_addr);
          node_mode = MODE_NORMAL;
          etimer_set(&maintenance_timer, 0);
@@ -262,7 +268,7 @@ static void udp_receiver(struct simple_udp_connection *c,
       printf("(%02x%02x%02x)\n", data[0],data[1],data[2]);
    }
 
-   led_off(LED_A);
+   led_mode_set(LED_FLASH);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -335,6 +341,7 @@ void send_sensor_event(struct sensor_packet *packet)
    net_on();
    simple_udp_sendto(&udp_connection, udp_buffer, lenght + 1, &addr);
    net_off(TIMER);
+   led_mode_set(LED_FLASH);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -388,6 +395,7 @@ send_status_packet(const uip_ipaddr_t *parent_addr,
    net_on();
    simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
    net_off(TIMER);
+   led_mode_set(LED_FLASH);
 }
 
 
@@ -436,6 +444,57 @@ dag_root_find(void)
    }
 }
 
+/*---------------------------------------------------------------------------*/
+
+static void led_mode_set(uint8_t mode)
+{
+   led_mode = mode;
+   if (led_mode == LED_OFF)
+      led_off(LED_A);
+
+   if (led_mode == LED_ON)
+      led_on(LED_A);
+
+   if (led_mode == LED_SLOW_BLINK || led_mode == LED_FAST_BLINK || led_mode == LED_FLASH)
+      process_start(&led_process, NULL);
+   else
+      process_exit(&led_process);
+}
+
+/*---------------------------------------------------------------------------*/
+
+PROCESS_THREAD(led_process, ev, data)
+{
+   PROCESS_BEGIN();
+   if (ev == PROCESS_EVENT_EXIT)
+      return 1;
+   static struct etimer led_mode_timer;
+
+   while (led_mode == LED_SLOW_BLINK || led_mode == LED_FAST_BLINK || led_mode == LED_FLASH)
+   {
+      if (led_mode == LED_FAST_BLINK)
+         etimer_set( &led_mode_timer, CLOCK_SECOND/10);
+      else
+         etimer_set( &led_mode_timer, CLOCK_SECOND/2);
+      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&led_mode_timer) );
+
+      led_on(LED_A);
+
+      if (led_mode == LED_FAST_BLINK || led_mode == LED_FLASH)
+         etimer_set( &led_mode_timer, CLOCK_SECOND/32);
+      else
+         etimer_set( &led_mode_timer, CLOCK_SECOND/32);
+      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&led_mode_timer) );
+
+      led_off(LED_A);
+
+      if (led_mode == LED_FLASH)
+         led_mode = LED_OFF;
+   }
+
+
+   PROCESS_END();
+}
 
 /*---------------------------------------------------------------------------*/
 
@@ -452,7 +511,7 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
       {
          if (data == &button_e_sensor_long_click)
          {
-            led_on(LED_A);
+            led_mode_set(LED_FAST_BLINK);
             printf("SYSTEM: Button E long click, reboot\n");
             watchdog_reboot();
          }
@@ -473,7 +532,7 @@ PROCESS_THREAD(maintenance_process, ev, data)
    {
       if (node_mode == MODE_NORMAL)
       {
-         led_off(LED_A);
+         led_mode_set(LED_OFF);
          if (process_is_running(&status_send_process) == 0)
             process_start(&status_send_process, NULL);
 
@@ -492,7 +551,7 @@ PROCESS_THREAD(maintenance_process, ev, data)
       {
          if (CLASS == CLASS_B)
          {
-            led_off(LED_A);
+            led_mode_set(LED_OFF);
             printf("DAG Node: Root not found, sleep\n");
             if (process_is_running(&dag_node_button_process) == 1)
                process_exit(&dag_node_button_process);
@@ -512,6 +571,7 @@ PROCESS_THREAD(maintenance_process, ev, data)
          if (CLASS == CLASS_C)
          {
             printf("DAG Node: Root not found, reboot\n");
+            led_mode_set(LED_FAST_BLINK);
             watchdog_reboot();
          }
       }
@@ -519,7 +579,7 @@ PROCESS_THREAD(maintenance_process, ev, data)
       if (node_mode == MODE_JOIN_PROGRESS)
       {
          net_on();
-         led_on(LED_A);
+         led_mode_set(LED_SLOW_BLINK);
 
          if (process_is_running(&root_find_process) == 0)
             process_start(&root_find_process, NULL);
@@ -701,7 +761,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
 
    SENSORS_ACTIVATE(batmon_sensor);
 
-   led_on(LED_A);
+   led_mode_set(LED_FAST_BLINK);
 
    PROCESS_END();
 }
