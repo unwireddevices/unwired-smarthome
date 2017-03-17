@@ -36,9 +36,8 @@
  */
 /*---------------------------------------------------------------------------*/
 #include "project-conf.h"
-#include "radio_power.h"
-
-#define CLASS CLASS_C
+#define CLASS_C                                  0x0C //ext power nodes
+#define CLASS                                    CLASS_C
 
 /* Net tune option */
 #undef UIP_DS6_CONF_PERIOD

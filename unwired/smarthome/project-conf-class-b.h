@@ -36,9 +36,8 @@
  */
 /*---------------------------------------------------------------------------*/
 #include "project-conf.h"
-#include "radio_power.h"
-
-#define CLASS CLASS_B
+#define CLASS_B                                  0x0B //battery power nodes
+#define CLASS                                    CLASS_B
 
 /* Net tune option */
 #undef UIP_DS6_CONF_PERIOD
