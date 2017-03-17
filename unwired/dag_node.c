@@ -626,7 +626,7 @@ PROCESS_THREAD(root_find_process, ev, data)
          {
             node_mode = MODE_NOTROOT;
             printf("DAG Node: mode set to MODE_NOTROOT\n");
-            etimer_set(&maintenance_timer, 0);
+            //etimer_set(&maintenance_timer, 1); //не перезагружается из-за этого
          }
 
       }
