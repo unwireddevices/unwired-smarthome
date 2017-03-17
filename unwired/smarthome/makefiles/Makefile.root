@@ -3,7 +3,6 @@ all: root
 PROJECT_SOURCEFILES += 
 DEFINES+=PROJECT_CONF_H=\"project-conf-class-c.h\"
 DEFINES+=FAKEDEFINE=1
-DEFINES+=CLASS=0x0C
 GIT_VERSION := $(shell git describe --dirty --always --tags)
 DEFINES+=LOCAL_VERSION=\"$(GIT_VERSION)\"
 PROJECTDIRS += $(VARIANT)

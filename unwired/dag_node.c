@@ -652,9 +652,10 @@ PROCESS_THREAD(dag_node_process, ev, data)
 
    node_mode = MODE_JOIN_PROGRESS;
 
-   printf("Node started, %s mode, %s class\n",
+   printf("Node started, %s mode, %s%s class\n",
           rpl_get_mode() == RPL_MODE_LEAF ? "leaf" : "no-leaf",
-          CLASS == CLASS_B ? "B(sleep)" : "C(non-sleep)");
+          CLASS == CLASS_B ? "B(sleep)" : "",
+          CLASS == CLASS_C ? "C(non-sleep)" : "");
 
    process_start(&dag_node_button_process, NULL);
    process_start(&maintenance_process, NULL);

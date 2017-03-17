@@ -36,6 +36,9 @@
  */
 /*---------------------------------------------------------------------------*/
 #include "project-conf.h"
+#include "radio_power.h"
+
+#define CLASS CLASS_C
 
 /* Net tune option */
 #undef UIP_DS6_CONF_PERIOD
