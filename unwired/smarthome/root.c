@@ -526,7 +526,7 @@ PROCESS_THREAD(rpl_root_process, ev, data)
          {
             led_on(LED_A);
             printf("SYSTEM: Button E long click, reboot\n");
-            watchdog_reboot();
+            ti_lib_sys_ctrl_system_reset();
          }
       }
    }

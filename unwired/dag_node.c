@@ -441,7 +441,7 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
          {
             led_mode_set(LED_ON);
             printf("SYSTEM: Button E long click, reboot\n");
-            watchdog_reboot();
+            ti_lib_sys_ctrl_system_reset();
          }
       }
    }
@@ -473,7 +473,7 @@ PROCESS_THREAD(maintenance_process, ev, data)
          if (non_answered_packet > MAX_NON_ANSWERED_PINGS)
          {
             printf("DAG Node: Root not available, reboot\n");
-            watchdog_reboot();
+            ti_lib_sys_ctrl_system_reset();
          }
 
       }
@@ -504,7 +504,7 @@ PROCESS_THREAD(maintenance_process, ev, data)
          {
             led_mode_set(LED_FAST_BLINK);
             printf("DAG Node: Root not found, reboot\n"); //почему-то не перезагружается!
-            watchdog_reboot();
+            ti_lib_sys_ctrl_system_reset();
          }
       }
 
@@ -552,7 +552,7 @@ PROCESS_THREAD(status_send_process, ev, data)
          {
             printf("DAG Node: Parent is not reachable\n");
             //node_mode = MODE_RPL_PROBING;
-            watchdog_reboot();
+            ti_lib_sys_ctrl_system_reset();
             //rpl_local_repair(dag->instance);
             //uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
             //printf("RPL: parent ip address: ");
