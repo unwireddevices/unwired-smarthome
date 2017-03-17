@@ -48,22 +48,22 @@
 
 /*---------------------------------------------------------------------------*/
 /* Instruction codes */
-
-#define BLS_CODE_PROGRAM          0x02 /**< Page Program */
-#define BLS_CODE_READ             0x03 /**< Read Data */
-#define BLS_CODE_READ_STATUS      0x05 /**< Read Status Register */
 #define BLS_CODE_WRITE_ENABLE     0x06 /**< Write Enable */
-#define BLS_CODE_SECTOR_ERASE     0xD8 /**< Sector Erase */             //0xD8 in M25P40?
+#define BLS_CODE_WRITE_DISABLE    0x04 /**< Write Disable */
 #define BLS_CODE_MDID             0x9F /**< Manufacturer Device ID */
-
-#define BLS_CODE_PD               0xB9 /**< Power down */
+#define BLS_CODE_READ_STATUS      0x05 /**< Read Status Register */
+#define BLS_CODE_WRITE_STATUS     0x01 /**< Read Status Register */
+#define BLS_CODE_READ             0x03 /**< Read Data */
+#define BLS_CODE_FAST_READ        0x0B /**< Read Data */
+#define BLS_CODE_PROGRAM          0x02 /**< Page Program */
+#define BLS_CODE_SECTOR_ERASE     0xD8 /**< Sector Erase */
+#define BLS_CODE_BULK_ERASE       BLS_CODE_ERASE_ALL /**< ALL Erase */
+#define BLS_CODE_POWERDOWN        0xB9 /**< Power down */
 #define BLS_CODE_RPD              0xAB /**< Release Power-Down */
 /*---------------------------------------------------------------------------*/
 /* Erase instructions */
 
-#define BLS_CODE_ERASE_4K         0x20 /**< Sector Erase */
-#define BLS_CODE_ERASE_32K        0x52
-#define BLS_CODE_ERASE_64K        0xD8
+#define BLS_CODE_ERASE_512K       0xD8
 #define BLS_CODE_ERASE_ALL        0xC7 /**< Mass Erase */
 /*---------------------------------------------------------------------------*/
 /* Bitmasks of the status register */
@@ -76,17 +76,9 @@
 #define BLS_STATUS_BIT_BUSY       0x01 /**< Busy bit of the status register */
 /*---------------------------------------------------------------------------*/
 /* Part specific constants */
-#define BLS_DEVICE_ID_W25X20CL    0x11
-#define BLS_DEVICE_ID_W25X40CL    0x12
-#define BLS_DEVICE_ID_MX25R8035F  0x14
-#define BLS_DEVICE_ID_MX25R1635F  0x15
-
-#define BLS_DEVICE_ID_MP25P40_1   0x15
-#define BLS_DEVICE_ID_MP25P40_2   0x13
-
-#define BLS_WINBOND_MID           0xEF
-#define BLS_MICRON_MID            0x20
-#define BLS_MACRONIX_MID          0xC2
+#define BLS_NUMONYX_MID           0x20
+#define BLS_DEVICE_ID_NU_MP25P40  0x20
+#define BLS_NU_4MBIT              0x13
 
 #define BLS_PROGRAM_PAGE_SIZE      256
 #define BLS_ERASE_SECTOR_SIZE     4096
@@ -188,18 +180,10 @@ verify_part(void)
     return VERIFY_PART_ERROR;
   }
 
-  printf("\nFLASH: ");
-  for (int i = 0; i < sizeof(rbuf); i++)
+  if((rbuf[0] != BLS_NUMONYX_MID) || (rbuf[1] != BLS_DEVICE_ID_NU_MP25P40) || (rbuf[2] != BLS_NU_4MBIT))
   {
-     printf("%"PRIXX8, rbuf[i]);
-  }
-  printf("\n");
-
-  if((rbuf[0] != BLS_MACRONIX_MID) || (rbuf[1] != BLS_DEVICE_ID_MP25P40_1) || (rbuf[2] != BLS_DEVICE_ID_MP25P40_2)) {
-     printf("SPIFLASH: board_spi_read return VERIFY_PART_POWERED_DOWN\n");
     return VERIFY_PART_POWERED_DOWN;
   }
-  printf("SPIFLASH: board_spi_read return VERIFY_PART_OK\n");
   return VERIFY_PART_OK;
 }
 /*---------------------------------------------------------------------------*/
@@ -219,7 +203,7 @@ power_down(void)
     return;
   }
 
-  cmd = BLS_CODE_PD;
+  cmd = BLS_CODE_POWERDOWN;
   select_on_bus();
   board_spi_write(&cmd, sizeof(cmd));
   deselect();
@@ -461,21 +445,22 @@ ext_flash_test(void)
 void
 ext_flash_probe(void)
 {
-   board_spi_open(500000, BOARD_IOID_SPI_CLK_FLASH);
-   ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_FLASH_CS);
+   ext_flash_open();
+   printf("SPIFLASH: verify_part return %s\n", verify_part() == VERIFY_PART_OK ? "VERIFY_PART_OK" : "VERIFY_PART_ERROR");
 
-   /* Default output to clear chip select */
-   deselect();
 
-   //printf("SPIFLASH: power_standby return %s\n", power_standby() == true ? "true" : "false");
-   uint8_t buf;
-   //ext_flash_read(0, 1, &buf);
+/*
+   printf("\nFLASH: ");
+   for (int i = 0; i < sizeof(rbuf); i++)
+   {
+      printf("%"PRIXX8, rbuf[i]);
+   }
 
-   verify_part();
 
-   //power_down();
+   printf("\n");
+*/
 
-   //board_spi_close();
+   ext_flash_close();
 
 }
 /*---------------------------------------------------------------------------*/
