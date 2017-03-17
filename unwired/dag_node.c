@@ -553,6 +553,8 @@ PROCESS_THREAD(status_send_process, ev, data)
             printf("DAG Node: Parent is not reachable\n");
             //node_mode = MODE_RPL_PROBING;
             watchdog_reboot();
+            //ti_lib_sys_ctrl_system_reset() //new reset?
+
             //rpl_local_repair(dag->instance);
             //uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
             //printf("RPL: parent ip address: ");
