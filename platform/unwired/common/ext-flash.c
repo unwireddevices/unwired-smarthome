@@ -42,7 +42,10 @@
 #include "board-spi.h"
 
 #include <stdint.h>
+#include <stdio.h>
 #include <stdbool.h>
+#include "xxf_types_helper.h"
+
 /*---------------------------------------------------------------------------*/
 /* Instruction codes */
 
@@ -50,8 +53,8 @@
 #define BLS_CODE_READ             0x03 /**< Read Data */
 #define BLS_CODE_READ_STATUS      0x05 /**< Read Status Register */
 #define BLS_CODE_WRITE_ENABLE     0x06 /**< Write Enable */
-#define BLS_CODE_SECTOR_ERASE     0x20 /**< Sector Erase */
-#define BLS_CODE_MDID             0x90 /**< Manufacturer Device ID */
+#define BLS_CODE_SECTOR_ERASE     0xD8 /**< Sector Erase */             //0xD8 in M25P40?
+#define BLS_CODE_MDID             0x9F /**< Manufacturer Device ID */
 
 #define BLS_CODE_PD               0xB9 /**< Power down */
 #define BLS_CODE_RPD              0xAB /**< Release Power-Down */
@@ -78,7 +81,11 @@
 #define BLS_DEVICE_ID_MX25R8035F  0x14
 #define BLS_DEVICE_ID_MX25R1635F  0x15
 
+#define BLS_DEVICE_ID_MP25P40_1   0x15
+#define BLS_DEVICE_ID_MP25P40_2   0x13
+
 #define BLS_WINBOND_MID           0xEF
+#define BLS_MICRON_MID            0x20
 #define BLS_MACRONIX_MID          0xC2
 
 #define BLS_PROGRAM_PAGE_SIZE      256
@@ -161,8 +168,8 @@ wait_ready(void)
 static uint8_t
 verify_part(void)
 {
-  const uint8_t wbuf[] = { BLS_CODE_MDID, 0xFF, 0xFF, 0x00 };
-  uint8_t rbuf[2] = { 0, 0 };
+  const uint8_t wbuf[] = { BLS_CODE_MDID };
+  uint8_t rbuf[3] = { 0, 0, 0 };
   bool ret;
 
   select_on_bus();
@@ -174,19 +181,25 @@ verify_part(void)
     return VERIFY_PART_ERROR;
   }
 
-  ret = board_spi_read(rbuf, sizeof(rbuf));
+  ret = board_spi_read(rbuf, 3);
   deselect();
 
   if(ret == false) {
     return VERIFY_PART_ERROR;
   }
 
-  if((rbuf[0] != BLS_WINBOND_MID && rbuf[0] != BLS_MACRONIX_MID) ||
-     (rbuf[1] != BLS_DEVICE_ID_W25X20CL && rbuf[1] != BLS_DEVICE_ID_W25X40CL
-      && rbuf[1] != BLS_DEVICE_ID_MX25R8035F
-      && rbuf[1] != BLS_DEVICE_ID_MX25R1635F)) {
+  printf("\nFLASH: ");
+  for (int i = 0; i < sizeof(rbuf); i++)
+  {
+     printf("%"PRIXX8, rbuf[i]);
+  }
+  printf("\n");
+
+  if((rbuf[0] != BLS_MACRONIX_MID) || (rbuf[1] != BLS_DEVICE_ID_MP25P40_1) || (rbuf[2] != BLS_DEVICE_ID_MP25P40_2)) {
+     printf("SPIFLASH: board_spi_read return VERIFY_PART_POWERED_DOWN\n");
     return VERIFY_PART_POWERED_DOWN;
   }
+  printf("SPIFLASH: board_spi_read return VERIFY_PART_OK\n");
   return VERIFY_PART_OK;
 }
 /*---------------------------------------------------------------------------*/
@@ -297,12 +310,12 @@ bool
 ext_flash_read(size_t offset, size_t length, uint8_t *buf)
 {
   uint8_t wbuf[4];
-
+  bool ret;
   /* Wait till previous erase/program operation completes */
-  bool ret = wait_ready();
-  if(ret == false) {
-    return false;
-  }
+  //bool ret = wait_ready();
+  //if(ret == false) {
+  //  return false;
+  //}
 
   /*
    * SPI is driven with very low frequency (1MHz < 33MHz fR spec)
@@ -443,6 +456,27 @@ ext_flash_test(void)
   ext_flash_close();
 
   return ret;
+}
+/*---------------------------------------------------------------------------*/
+void
+ext_flash_probe(void)
+{
+   board_spi_open(500000, BOARD_IOID_SPI_CLK_FLASH);
+   ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_FLASH_CS);
+
+   /* Default output to clear chip select */
+   deselect();
+
+   //printf("SPIFLASH: power_standby return %s\n", power_standby() == true ? "true" : "false");
+   uint8_t buf;
+   //ext_flash_read(0, 1, &buf);
+
+   verify_part();
+
+   //power_down();
+
+   //board_spi_close();
+
 }
 /*---------------------------------------------------------------------------*/
 void

@@ -134,17 +134,6 @@ PROCESS_THREAD(main_process, ev, data)
    printf("Unwired Incotext-light device. HELL-IN-CODE free. I hope.\n");
 
 
-   ext_flash_init();
-   bool flash_result = ext_flash_test();
-
-   if (flash_result == true)
-   {
-      printf("Flash test passed\n");
-   }
-   else
-   {
-      printf("Flash test failed\n");
-   }
 
    while (1)
    {
@@ -155,6 +144,14 @@ PROCESS_THREAD(main_process, ev, data)
          if (message_data->ability_target == DEVICE_ABILITY_DIMMER)
          {
             exe_dimmer_command(message_data);
+         }
+      }
+      if (ev == sensors_event)
+      {
+         if (data == &button_e_sensor_click)
+         {
+            printf("BCP: Button E click\n");
+            ext_flash_probe();
          }
       }
    }
