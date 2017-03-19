@@ -446,7 +446,10 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
          {
             led_mode_set(LED_ON);
             printf("SYSTEM: Button E long click, reboot\n");
-            ti_lib_sys_ctrl_system_reset();
+            if (CLASS == CLASS_C)
+               ti_lib_sys_ctrl_system_reset();
+            if (CLASS == CLASS_B)
+               watchdog_reboot();
          }
       }
    }
