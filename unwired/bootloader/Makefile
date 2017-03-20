@@ -31,7 +31,13 @@ OBJCOPY_FLAGS += -O binary --gap-fill 0xff
 OBJDUMP_FLAGS += --disassemble --source --disassembler-options=force-thumb
 
 #	TI 26XX ware sources
-TI_XXWARE_PATH = lib/cc26xxware
+ifeq ($(CPU),cc13xx)
+	TI_XXWARE_PATH = lib/cc13xxware
+endif
+ifeq ($(CPU),cc26xx)
+	TI_XXWARE_PATH = lib/cc26xxware
+endif
+
 TI_XXWARE = $(CPU_ABS_PATH)/$(TI_XXWARE_PATH)
 CFLAGS += -I$(CPU_ABS_PATH) -I$(OTA_SOURCE) -I./ext-flash -I$(TI_XXWARE) -I$(TI_XXWARE)/driverlib -I$(TI_XXWARE)/inc
 SOURCEDIRS = . ./ext-flash $(TI_XXWARE)/startup_files $(TI_XXWARE)/driverlib

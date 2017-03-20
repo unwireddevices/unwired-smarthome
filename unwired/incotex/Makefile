@@ -63,8 +63,7 @@ clean:
 	-rm -f *.hex
 	
 net-bootloader: 
-	cd ../bootloader \
-	make bootloader.hex
+	cd ../bootloader && make -j5 CPU=$(CPU) bootloader.hex
 	
 light-fb: light-CLEAN
 	while true; do ../../tools/backdoor-bootloader.py -e -w -v light-firmware.hex && break; done;
