@@ -777,8 +777,8 @@ void
 jump_to_image(uint32_t destination_address)
 {
   if ( destination_address ) {
-    //  Only add the metadata length offset if destination_address is NOT 0!
-    //  (Jumping to 0x0 is used to reboot the device)
+      //Only add the metadata length offset if destination_address is NOT 0!
+      //(Jumping to 0x0 is used to reboot the device)
     destination_address += OTA_METADATA_SPACE;
   }
   destination_address += OTA_RESET_VECTOR;
