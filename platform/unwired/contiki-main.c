@@ -153,6 +153,8 @@ set_rf_params(void)
 int
 main(void)
 {
+  HWREG(NVIC_VTABLE) = OTA_IMAGE_OFFSET + OTA_METADATA_SPACE;
+
   /* Enable flash cache and prefetch. */
   ti_lib_vims_mode_set(VIMS_BASE, VIMS_MODE_ENABLED);
   ti_lib_vims_configure(VIMS_BASE, true, true);
