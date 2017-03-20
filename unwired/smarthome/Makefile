@@ -28,6 +28,10 @@ button:
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.button
 	arm-none-eabi-size button.elf | grep -v text > /tmp/size.tmp 
 	lua ../../tools/mem_used.lua /tmp/size.tmp 125000 20000
+	../bootloader/common/generate-metadata button.bin 0x0 0xabcd1234 1
+	srec_cat firmware-metadata.bin -binary button.bin -binary -offset 0x100 -o button-ota-image.bin -binary
+	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 button-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o button-firmware.hex -intel
+	
 	
 root:
 	CONF="NOLEAF"; \
@@ -37,6 +41,10 @@ root:
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.root
 	arm-none-eabi-size root.elf  | grep -v text > /tmp/size.tmp 
 	lua ../../tools/mem_used.lua /tmp/size.tmp 125000 20000
+	../bootloader/common/generate-metadata root.bin 0x0 0xabcd1234 1
+	srec_cat firmware-metadata.bin -binary root.bin -binary -offset 0x100 -o root-ota-image.bin -binary
+	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 root-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o root-firmware.hex -intel
+	
 
 relay:
 	CONF="NOLEAF"; \
@@ -46,6 +54,9 @@ relay:
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.relay
 	arm-none-eabi-size relay.elf | grep -v text > /tmp/size.tmp 
 	lua ../../tools/mem_used.lua /tmp/size.tmp 125000 20000
+	../bootloader/common/generate-metadata relay.bin 0x0 0xabcd1234 1
+	srec_cat firmware-metadata.bin -binary relay.bin -binary -offset 0x100 -o relay-ota-image.bin -binary
+	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 relay-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o relay-firmware.hex -intel
 	
 dimmer:
 	CONF="NOLEAF"; \
@@ -55,6 +66,10 @@ dimmer:
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.dimmer
 	arm-none-eabi-size dimmer.elf | grep -v text > /tmp/size.tmp 
 	lua ../../tools/mem_used.lua /tmp/size.tmp 125000 20000
+	../bootloader/common/generate-metadata dimmer.bin 0x0 0xabcd1234 1
+	srec_cat firmware-metadata.bin -binary dimmer.bin -binary -offset 0x100 -o dimmer-ota-image.bin -binary
+	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 dimmer-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o dimmer-firmware.hex -intel
+	
 	
 clean1:
 	-rm -f *~ *core core *.srec *.lst *.map *.cprg *.bin *.data contiki*.a *.firmware core-labels.S *.ihex *.ini *.ce *.co *.unwired *.elf *.o *.d	
@@ -78,28 +93,28 @@ clean:
 	-rm -f *.hex
 	
 button-fb: button-CLEAN
-	while true; do ../../tools/backdoor-bootloader.py -e -w -v button.hex && break; done;
+	while true; do ../../tools/backdoor-bootloader.py -e -w -v button-firmware.hex && break; done;
 
 button-f: button-CLEAN
-	/Applications/ti/Uniflash/flash_cc2650.sh button.hex
+	/Applications/ti/Uniflash/flash_cc2650.sh button-firmware.hex
 
 root-fb: root-CLEAN
-	while true; do ../../tools/backdoor-bootloader.py -e -w -v root.hex && break; done;
+	while true; do ../../tools/backdoor-bootloader.py -e -w -v root-firmware.hex && break; done;
 	
 root-f: root-CLEAN
-	/Applications/ti/Uniflash/flash_cc2650.sh root.hex
+	/Applications/ti/Uniflash/flash_cc2650.sh root-firmware.hex
 
 relay-fb: relay-CLEAN
-	while true; do ../../tools/backdoor-bootloader.py -e -w -v relay.hex && break; done;
+	while true; do ../../tools/backdoor-bootloader.py -e -w -v relay-firmware.hex && break; done;
 	
 relay-f: relay-CLEAN
-	/Applications/ti/Uniflash/flash_cc2650.sh relay.hex
+	/Applications/ti/Uniflash/flash_cc2650.sh relay-firmware.hex
 	
 dimmer-fb: dimmer-CLEAN
-	while true; do ../../tools/backdoor-bootloader.py -e -w -v dimmer.hex && break; done;
+	while true; do ../../tools/backdoor-bootloader.py -e -w -v dimmer-firmware.hex && break; done;
 	
 dimmer-f: dimmer-CLEAN
-	/Applications/ti/Uniflash/flash_cc2650.sh dimmer.hex
+	/Applications/ti/Uniflash/flash_cc2650.sh dimmer-firmware.hex
 
 serial:
 	../../tools/sky/serialdump-macos -b115200 /dev/tty.usbserial-* || ../../tools/sky/serialdump-macos -b115200 /dev/tty.SLAB_USBtoUART
