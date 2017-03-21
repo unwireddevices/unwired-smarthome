@@ -19,7 +19,7 @@
 #define DATA_TYPE_COMMAND                                       0x05 //Команды возможностям устройства
 #define DATA_TYPE_STATUS                                        0x06 //Пакет со статусными данными
 #define DATA_TYPE_GET_STATUS                                    0x07 //Запрос статуса(не реализовано)
-#define DATA_TYPE_SETTINGS                                      0x08 //Команда настройки параметров(не реализовано)
+#define DATA_TYPE_SETTINGS                                      0x08 //Команда настройки параметров
 #define DATA_TYPE_WARNING                                       0x09 //Ошибки и предупреждения(не реализовано)
 #define DATA_TYPE_SET_TIME                                      0x0A //Команда установки времени(не реализовано)
 #define DATA_TYPE_SET_SCHEDULE                                  0x0B //Команда установки расписания(не реализовано)
