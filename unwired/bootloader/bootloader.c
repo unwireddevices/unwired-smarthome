@@ -40,8 +40,16 @@ initialize_peripherals() {
 int
 main(void)
 {
-  initialize_peripherals();
-    ti_lib_gpio_set_dio(IOID_22);
+   initialize_peripherals();
+
+   ti_lib_ioc_pin_type_gpio_output(IOID_22);
+   ti_lib_gpio_set_dio(IOID_22);
+   for (volatile int i = 0; i < 2000000; i++) { }
+   ti_lib_gpio_clear_dio(IOID_22);
+
+   jump_to_image( (CURRENT_FIRMWARE<<12) );
+
+
 
   #if CLEAR_OTA_SLOTS
   erase_ota_image( 1 );
@@ -82,6 +90,8 @@ main(void)
     update_firmware( newest_ota_slot );
     ti_lib_sys_ctrl_system_reset(); // reboot
   }
+
+
 
   //  main() *should* never return - we should have rebooted or branched
   //  to other code by now.
