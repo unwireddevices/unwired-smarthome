@@ -24,6 +24,7 @@
 #define DATA_TYPE_SET_TIME                                      0x0A //Команда установки времени(не реализовано)
 #define DATA_TYPE_SET_SCHEDULE                                  0x0B //Команда установки расписания(не реализовано)
 #define DATA_TYPE_FIRMWARE                                      0x0C //Команда с данными для OTA
+#define DATA_TYPE_UART                                          0x0D //Команда с данными UART
 
 /* Reserved data */
 #define DATA_RESERVED                                           0xFF

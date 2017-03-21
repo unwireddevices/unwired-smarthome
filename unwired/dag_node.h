@@ -48,6 +48,8 @@ struct command_data
    volatile uint8_t ability_target;
    volatile uint8_t ability_number;
    volatile uint8_t ability_state;
+   volatile uint8_t uart_returned_data_lenth;
+   volatile uint8_t payload[5];
 };
 
 struct sensor_packet

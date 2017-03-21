@@ -73,6 +73,17 @@
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
 /*---------------------------------------------------------------------------*/
+/* UART char iterator */
+volatile static uint8_t uart_data_iterator = 0;
+
+volatile static uint8_t uart_returned_data_lenth = 0;
+
+
+/* UART-buffer */
+volatile static uint8_t uart_returned_data_buf[23];
+
+/*---------------------------------------------------------------------------*/
+
 
 /* Register buttons sensors */
 SENSORS(&button_e_sensor_click,
@@ -86,40 +97,50 @@ AUTOSTART_PROCESSES(&dag_node_process, &main_process);
 
 /*---------------------------------------------------------------------------*/
 
-static void send_uart_command(struct command_data *command_dimmer)
+static int uart_data_receiver(unsigned char uart_char)
 {
-   printf("DIMMER: new command, target: %02X, state: %02X, number: %02X\n",
-          command_dimmer->ability_target,
-          command_dimmer->ability_state,
-          command_dimmer->ability_number);
-
-   if (command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_1 &&
-         command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_2)
+   if (uart_returned_data_lenth > 0)
    {
-      printf("Not support dimmer number\n");
-      return;
+      uart_returned_data_buf[uart_data_iterator] = uart_char;
+
+      if (uart_data_iterator < uart_returned_data_lenth)
+      {
+         uart_data_iterator++;
+      }
+      else
+      {
+         struct command_data uart_data;
+         uart_data.data_type = DATA_TYPE_UART;
+         uart_data.uart_returned_data_lenth = 0;
+
+         for (int i = 0; i <= uart_returned_data_lenth; i++)
+         {
+            uart_data.payload[i] = uart_returned_data_buf[i];
+         }
+
+         send_uart_data(&uart_data);
+
+         uart_returned_data_lenth = 0;
+         uart_data_iterator = 0;
+      }
+
    }
-
+   return 1;
 }
-
 
 /*---------------------------------------------------------------------------*/
 
-static void exe_dimmer_command(struct command_data *command_dimmer)
+static void send_uart_command(struct command_data *uart_data)
 {
-   printf("DIMMER: new command, target: %02X, state: %02X, number: %02X\n",
-          command_dimmer->ability_target,
-          command_dimmer->ability_state,
-          command_dimmer->ability_number);
-
-   if (command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_1 &&
-         command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_2)
-   {
-      printf("Not support dimmer number\n");
-      return;
-   }
-
+   cc26xx_uart_write_byte(uart_data->payload[0]);
+   cc26xx_uart_write_byte(uart_data->payload[1]);
+   cc26xx_uart_write_byte(uart_data->payload[2]);
+   cc26xx_uart_write_byte(uart_data->payload[3]);
+   cc26xx_uart_write_byte(uart_data->payload[4]);
+   uart_returned_data_lenth_iterator = uart_data->uart_returned_data_lenth;
 }
+
+
 
 /*---------------------------------------------------------------------------*/
 
@@ -133,7 +154,8 @@ PROCESS_THREAD(main_process, ev, data)
 
    printf("Unwired Incotext-light device. HELL-IN-CODE free. I hope.\n");
 
-
+   /* set incoming uart-data handler(uart_data_receiver) */
+   cc26xx_uart_set_input(&uart_data_receiver);
 
    while (1)
    {
@@ -141,9 +163,9 @@ PROCESS_THREAD(main_process, ev, data)
       if (ev == PROCESS_EVENT_CONTINUE)
       {
          message_data = data;
-         if (message_data->ability_target == DEVICE_ABILITY_DIMMER)
+         if (message_data->data_type == DATA_TYPE_UART)
          {
-            exe_dimmer_command(message_data);
+            send_uart_command(message_data);
          }
       }
       if (ev == sensors_event)

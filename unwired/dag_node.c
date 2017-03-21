@@ -119,6 +119,7 @@ static void led_mode_set(uint8_t mode);
 volatile uint8_t non_answered_packet = 0;
 volatile uip_ip6addr_t root_addr;
 static struct command_data message_for_main_process;
+static struct uart_data message_for_main_process;
 
 static struct etimer maintenance_timer;
 
@@ -163,6 +164,19 @@ static void udp_receiver(struct simple_udp_connection *c,
          message_for_main_process.ability_target = data[3];
          message_for_main_process.ability_number = data[4];
          message_for_main_process.ability_state = data[5];
+         process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
+      }
+
+      if (data[2] == DATA_TYPE_UART)
+      {
+         printf("DAG Node: Uart packet received\n");
+         message_for_main_process.data_type = data[2];
+         message_for_main_process.uart_returned_data_lenth = data[3];
+         message_for_main_process.payload[0] = data[4];
+         message_for_main_process.payload[1] = data[5];
+         message_for_main_process.payload[2] = data[6];
+         message_for_main_process.payload[3] = data[7];
+         message_for_main_process.payload[4] = data[8];
          process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
       }
 
@@ -268,6 +282,43 @@ void send_sensor_event(struct sensor_packet *packet)
    udp_buffer[4] = DATA_RESERVED;
    udp_buffer[5] = packet->sensor_number;
    udp_buffer[6] = packet->sensor_event;
+   udp_buffer[7] = DATA_RESERVED;
+   udp_buffer[8] = DATA_RESERVED;
+   udp_buffer[9] = DATA_RESERVED;
+
+   net_on(RADIO_ON_TIMER_OFF);
+   simple_udp_sendto(&udp_connection, udp_buffer, lenght + 1, &addr);
+   led_mode_set(LED_FLASH);
+}
+
+
+/*---------------------------------------------------------------------------*/
+
+void send_uart_data(struct command_data *uart_data)
+{
+   if (node_mode != MODE_NORMAL)
+      return;
+
+   if (uart_data == NULL)
+      return;
+
+   uip_ip6addr_t addr;
+   uip_ip6addr_copy(&addr, &root_addr);
+
+   printf("DAG Node: Send uart data to DAG-root node:");
+   uip_debug_ip6addr_print(&addr);
+   printf("\n");
+
+   uint8_t lenght = 10;
+   uint8_t udp_buffer[lenght];
+   udp_buffer[0] = uart_data->protocol_version;
+   udp_buffer[1] = uart_data->device_version;
+   udp_buffer[2] = uart_data->data_type;
+
+   udp_buffer[3] = uart_data->number_ability;
+   udp_buffer[4] = DATA_RESERVED;
+   udp_buffer[5] = uart_data->sensor_number;
+   udp_buffer[6] = uart_data->sensor_event;
    udp_buffer[7] = DATA_RESERVED;
    udp_buffer[8] = DATA_RESERVED;
    udp_buffer[9] = DATA_RESERVED;
