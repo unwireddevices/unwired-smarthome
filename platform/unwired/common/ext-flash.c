@@ -448,6 +448,21 @@ ext_flash_probe(void)
    ext_flash_open();
    printf("SPIFLASH: verify_part return %s\n", verify_part() == VERIFY_PART_OK ? "VERIFY_PART_OK" : "VERIFY_PART_ERROR");
 
+     uint8_t _word[4];
+     int eeprom_access = ext_flash_open();
+
+     eeprom_access = ext_flash_read(0x0, 4, _word);
+     if(!eeprom_access) {
+        printf("[external-flash]:\tError - Could not read EEPROM.\n");
+       ext_flash_close();
+     }
+
+     for (int idx = 0; idx < 4; idx++)
+     {
+        printf("%"PRIXX8, _word[idx]);
+     }
+
+
 
 /*
    printf("\nFLASH: ");
