@@ -119,7 +119,6 @@ static void led_mode_set(uint8_t mode);
 volatile uint8_t non_answered_packet = 0;
 volatile uip_ip6addr_t root_addr;
 static struct command_data message_for_main_process;
-static struct uart_data message_for_main_process;
 
 static struct etimer maintenance_timer;
 
@@ -169,14 +168,28 @@ static void udp_receiver(struct simple_udp_connection *c,
 
       if (data[2] == DATA_TYPE_UART)
       {
-         printf("DAG Node: Uart packet received\n");
+         //printf("DAG Node: Uart packet received\n");
          message_for_main_process.data_type = data[2];
-         message_for_main_process.uart_returned_data_lenth = data[3];
-         message_for_main_process.payload[0] = data[4];
-         message_for_main_process.payload[1] = data[5];
-         message_for_main_process.payload[2] = data[6];
-         message_for_main_process.payload[3] = data[7];
-         message_for_main_process.payload[4] = data[8];
+         message_for_main_process.uart_returned_data_length = data[3];
+         message_for_main_process.uart_data_length = data[4];
+         if ( message_for_main_process.uart_returned_data_length > 16 )
+            message_for_main_process.uart_returned_data_length = 16;
+         message_for_main_process.payload[0] = data[5];
+         message_for_main_process.payload[1] = data[6];
+         message_for_main_process.payload[2] = data[7];
+         message_for_main_process.payload[3] = data[8];
+         message_for_main_process.payload[4] = data[9];
+         message_for_main_process.payload[5] = data[10];
+         message_for_main_process.payload[6] = data[11];
+         message_for_main_process.payload[7] = data[12];
+         message_for_main_process.payload[8] = data[13];
+         message_for_main_process.payload[9] = data[14];
+         message_for_main_process.payload[10] = data[15];
+         message_for_main_process.payload[11] = data[16];
+         message_for_main_process.payload[12] = data[17];
+         message_for_main_process.payload[13] = data[18];
+         message_for_main_process.payload[14] = data[19];
+         message_for_main_process.payload[15] = data[20];
          process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
       }
 
@@ -201,7 +214,8 @@ static void udp_receiver(struct simple_udp_connection *c,
             data[2] != DATA_TYPE_JOIN_CONFIRM &&
             data[2] != DATA_TYPE_SETTINGS &&
             data[2] != DATA_TYPE_FIRMWARE &&
-            data[2] != DATA_TYPE_PONG)
+            data[2] != DATA_TYPE_PONG &&
+            data[2] != DATA_TYPE_UART)
       {
          printf("DAG Node: Incompatible data type UDP packer from");
          uip_debug_ip6addr_print(sender_addr);
@@ -257,12 +271,12 @@ print_debug_data(void)
 
 /*---------------------------------------------------------------------------*/
 
-void send_sensor_event(struct sensor_packet *packet)
+void send_sensor_event(struct sensor_packet *sensor_packet)
 {
    if (node_mode != MODE_NORMAL)
       return;
 
-   if (packet == NULL)
+   if (sensor_packet == NULL)
       return;
 
    uip_ip6addr_t addr;
@@ -272,22 +286,22 @@ void send_sensor_event(struct sensor_packet *packet)
    uip_debug_ip6addr_print(&addr);
    printf("\n");
 
-   uint8_t lenght = 10;
-   uint8_t udp_buffer[lenght];
-   udp_buffer[0] = packet->protocol_version;
-   udp_buffer[1] = packet->device_version;
-   udp_buffer[2] = packet->data_type;
+   uint8_t length = 10;
+   uint8_t udp_buffer[length];
+   udp_buffer[0] = sensor_packet->protocol_version;
+   udp_buffer[1] = sensor_packet->device_version;
+   udp_buffer[2] = sensor_packet->data_type;
 
-   udp_buffer[3] = packet->number_ability;
+   udp_buffer[3] = sensor_packet->number_ability;
    udp_buffer[4] = DATA_RESERVED;
-   udp_buffer[5] = packet->sensor_number;
-   udp_buffer[6] = packet->sensor_event;
+   udp_buffer[5] = sensor_packet->sensor_number;
+   udp_buffer[6] = sensor_packet->sensor_event;
    udp_buffer[7] = DATA_RESERVED;
    udp_buffer[8] = DATA_RESERVED;
    udp_buffer[9] = DATA_RESERVED;
 
    net_on(RADIO_ON_TIMER_OFF);
-   simple_udp_sendto(&udp_connection, udp_buffer, lenght + 1, &addr);
+   simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
    led_mode_set(LED_FLASH);
 }
 
@@ -305,27 +319,42 @@ void send_uart_data(struct command_data *uart_data)
    uip_ip6addr_t addr;
    uip_ip6addr_copy(&addr, &root_addr);
 
-   printf("DAG Node: Send uart data to DAG-root node:");
-   uip_debug_ip6addr_print(&addr);
-   printf("\n");
+   //printf("DAG Node: Send uart data to DAG-root node:");
+   //uip_debug_ip6addr_print(&addr);
+   //printf("\n");
 
-   uint8_t lenght = 10;
-   uint8_t udp_buffer[lenght];
+   uint8_t length = 23;
+   uint8_t udp_buffer[length];
    udp_buffer[0] = uart_data->protocol_version;
    udp_buffer[1] = uart_data->device_version;
    udp_buffer[2] = uart_data->data_type;
 
-   udp_buffer[3] = uart_data->number_ability;
-   udp_buffer[4] = DATA_RESERVED;
-   udp_buffer[5] = uart_data->sensor_number;
-   udp_buffer[6] = uart_data->sensor_event;
-   udp_buffer[7] = DATA_RESERVED;
-   udp_buffer[8] = DATA_RESERVED;
-   udp_buffer[9] = DATA_RESERVED;
+   udp_buffer[3] = uart_data->uart_returned_data_length;
+   udp_buffer[4] = uart_data->uart_data_length;
+
+   udp_buffer[5] = uart_data->payload[0];
+   udp_buffer[6] = uart_data->payload[1];
+   udp_buffer[7] = uart_data->payload[2];
+   udp_buffer[8] = uart_data->payload[3];
+   udp_buffer[9] = uart_data->payload[4];
+   udp_buffer[10] = uart_data->payload[5];
+   udp_buffer[11] = uart_data->payload[6];
+   udp_buffer[12] = uart_data->payload[7];
+   udp_buffer[13] = uart_data->payload[8];
+   udp_buffer[14] = uart_data->payload[9];
+   udp_buffer[15] = uart_data->payload[10];
+   udp_buffer[16] = uart_data->payload[11];
+   udp_buffer[17] = uart_data->payload[12];
+   udp_buffer[18] = uart_data->payload[13];
+   udp_buffer[19] = uart_data->payload[14];
+   udp_buffer[20] = uart_data->payload[15];
+   udp_buffer[21] = uart_data->payload[16];
+   udp_buffer[22] = DATA_RESERVED;
 
    net_on(RADIO_ON_TIMER_OFF);
-   simple_udp_sendto(&udp_connection, udp_buffer, lenght + 1, &addr);
+   simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
    led_mode_set(LED_FLASH);
+
 }
 
 /*---------------------------------------------------------------------------*/
@@ -672,7 +701,13 @@ PROCESS_THREAD(root_find_process, ev, data)
             {
                root_find_dag = rpl_get_any_dag();
                if (root_find_dag != NULL && &root_find_dag->dag_id)
+               {
+                  if ( led_mode != LED_FAST_BLINK)
+                     led_mode_set(LED_FAST_BLINK);
+
                   send_join_packet(&root_find_dag->dag_id);
+               }
+
             }
          }
          else
@@ -680,6 +715,7 @@ PROCESS_THREAD(root_find_process, ev, data)
             node_mode = MODE_NOTROOT;
             printf("DAG Node: mode set to MODE_NOTROOT\n");
             etimer_set(&maintenance_timer, 0);
+            watchdog_reboot(); //КОСТЫЛЬ11
          }
 
       }
@@ -713,8 +749,6 @@ PROCESS_THREAD(dag_node_process, ev, data)
    process_start(&maintenance_process, NULL);
 
    SENSORS_ACTIVATE(batmon_sensor);
-
-   led_mode_set(LED_FAST_BLINK);
 
    PROCESS_END();
 }

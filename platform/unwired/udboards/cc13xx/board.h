@@ -130,7 +130,7 @@
 //#define BOARD_IOID_UART_RX        IOID_26 //UMDK generic UART
 //#define BOARD_IOID_UART_TX        IOID_25 //UMDK generic UART
 #define BOARD_IOID_UART_RX        IOID_2 //Unwired mesh usb adapter
-#define BOARD_IOID_UART_TX        IOID_3 //Unwired mesh usb adapter
+#define BOARD_IOID_UART_TX        IOID_5 //Unwired mesh usb adapter
 #define BOARD_IOID_UART_CTS       IOID_UNUSED
 #define BOARD_IOID_UART_RTS       IOID_UNUSED
 #define BOARD_UART_RX             (1 << BOARD_IOID_UART_RX)
