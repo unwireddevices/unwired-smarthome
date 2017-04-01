@@ -1,0 +1,1 @@
+astyle --pad-header --convert-tabs --indent=spaces=3 -A1 ./unwired/*.c ./unwired/*.h ./unwired/smarthome/*.c ./unwired/smarthome/*.h

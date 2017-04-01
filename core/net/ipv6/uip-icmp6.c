@@ -301,7 +301,6 @@ echo_reply_input(void)
   int ttl;
   uip_ipaddr_t sender;
 
-  PRINTF("Received Echo Reply from ");
   PRINT6ADDR(&UIP_IP_BUF->srcipaddr);
   PRINTF(" to ");
   PRINT6ADDR(&UIP_IP_BUF->destipaddr);

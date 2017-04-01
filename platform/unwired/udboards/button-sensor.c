@@ -53,12 +53,6 @@
 #include "xxf_types_helper.h"
 
 /*---------------------------------------------------------------------------*/
-#ifdef BUTTON_SENSOR_CONF_ENABLE_SHUTDOWN
-#define BUTTON_SENSOR_ENABLE_SHUTDOWN BUTTON_SENSOR_CONF_ENABLE_SHUTDOWN
-#else
-#define BUTTON_SENSOR_ENABLE_SHUTDOWN 1
-#endif
-/*---------------------------------------------------------------------------*/
 #define BUTTON_GPIO_CFG         (IOC_CURRENT_2MA  | IOC_STRENGTH_AUTO | \
                                  IOC_IOPULL_UP    | IOC_SLEW_DISABLE  | \
                                  IOC_HYST_DISABLE | IOC_BOTH_EDGES    | \

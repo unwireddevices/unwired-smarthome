@@ -1,7 +1,7 @@
 all: relay
 
-PROJECT_SOURCEFILES += dag_node.c ../flash-common.c
-DEFINES+=PROJECT_CONF_H=\"project-conf-normal.h\"
+PROJECT_SOURCEFILES += ../dag_node.c ../flash-common.c
+DEFINES+=PROJECT_CONF_H=\"project-conf-class-c.h\"
 DEFINES+=IF_UD_RELAY=1
 DEFINES+=FAKEDEFINE=1
 GIT_VERSION := $(shell git describe --dirty --always --tags)

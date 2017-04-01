@@ -1,4 +1,6 @@
 /*
+ * Copyright (c) 2016, Unwired Devices LLC - http://www.unwireddevices.com/
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -27,76 +29,107 @@
 /*---------------------------------------------------------------------------*/
 /*
  * \file
- *         Flash write-read functions for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
+ *         Radio power on/off functions for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  *
  */
 /*---------------------------------------------------------------------------*/
+#include <string.h>
+#include <stdio.h>
 
 #include "contiki.h"
 #include "contiki-lib.h"
+#include "contiki-net.h"
 
-#include <string.h>
-#include <stdio.h>
-#include "ti-lib.h"
+#include "clock.h"
 
-#include "flash-common.h"
-#include "driverlib/flash.h"
-#include "driverlib/vims.h"
-#include "ud_binary_protocol.h"
+#include "net/rpl/rpl.h"
+#include "net/ipv6/uip-ds6.h"
+#include "net/ipv6/uip-ds6-nbr.h"
+#include "net/ip/uip-debug.h"
+#include "net/link-stats.h"
+
+#include "dev/leds.h"
+#include "sys/clock.h"
+
 #include "xxf_types_helper.h"
 
+#include "radio_power.h"
 
-
-void user_flash_update_byte(uint8_t offset, uint8_t data)
-{
-   uint32_t old_vims_state = ti_lib_vims_mode_get(VIMS_BASE);
-   ti_lib_vims_mode_set(VIMS_BASE, VIMS_MODE_DISABLED);
-
-   uint8_t buffer[USER_FLASH_LENGTH];
-   flash_read(buffer, START_USER_FLASH, USER_FLASH_LENGTH);
-   buffer[offset] = data;
-
-   ti_lib_flash_sector_erase(START_USER_FLASH);
-   ti_lib_flash_program(buffer, START_USER_FLASH, USER_FLASH_LENGTH);
-
-   ti_lib_vims_mode_set(VIMS_BASE, old_vims_state);
-}
+#include "../fake_headers.h" //no move up! not "krasivo"!
 
 /*---------------------------------------------------------------------------*/
 
-uint8_t user_flash_read_byte(uint8_t offset)
-{
-   uint32_t old_vims_state = ti_lib_vims_mode_get(VIMS_BASE);
-   ti_lib_vims_mode_set(VIMS_BASE, VIMS_MODE_DISABLED);
-   uint32_t address = offset + START_USER_FLASH;
-   uint8_t data = *(uint8_t *)address;
-   ti_lib_vims_mode_set(VIMS_BASE, old_vims_state);
-   return data;
-}
+static struct ctimer net_off_timer;
+volatile uint8_t radio_mode;
 
 /*---------------------------------------------------------------------------*/
 
-void flash_read(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count)
+void net_on(uint8_t mode)
 {
-   uint32_t old_vims_state = ti_lib_vims_mode_get(VIMS_BASE);
-   ti_lib_vims_mode_set(VIMS_BASE, VIMS_MODE_DISABLED);
-   uint8_t *pui8ReadAddress = (uint8_t *)ui32Address;
-   while (ui32Count--)
+   if (CLASS == CLASS_B)
    {
-      *pui8DataBuffer++ = *pui8ReadAddress++;
+      if (mode == RADIO_ON_NORMAL && radio_mode == RADIO_FREEDOM)
+      {
+         NETSTACK_MAC.on();
+         uip_ds_6_interval_set(CLOCK_SECOND/2);
+         printf("RADIO: Radio ON\n");
+      }
+
+      if (mode == RADIO_ON_TIMER_OFF && radio_mode == RADIO_FREEDOM)
+      {
+         NETSTACK_MAC.on();
+         uip_ds_6_interval_set(CLOCK_SECOND/2);
+         printf("RADIO: Radio ON\n");
+         net_off(RADIO_OFF_ON_TIMER);
+      }
    }
-   ti_lib_vims_mode_set(VIMS_BASE, old_vims_state);
 }
 
 /*---------------------------------------------------------------------------*/
 
-uint32_t flash_write(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count)
+static void net_off_timer_now(void *ptr)
 {
-   uint32_t old_vims_state = ti_lib_vims_mode_get(VIMS_BASE);
-   ti_lib_vims_mode_set(VIMS_BASE, VIMS_MODE_DISABLED);
-   uint32_t write_status = ti_lib_flash_program(pui8DataBuffer, ui32Address, ui32Count);
-   ti_lib_vims_mode_set(VIMS_BASE, old_vims_state);
-   return write_status;
+   printf("RADIO: Radio OFF on timer expired\n");
+   NETSTACK_MAC.off(0);
 }
+
+/*---------------------------------------------------------------------------*/
+
+
+void net_off(uint8_t mode)
+{
+   if (CLASS == CLASS_B)
+   {
+
+      uip_ds_6_interval_set(CLOCK_SECOND * 20);
+
+      if (mode == RADIO_OFF_ON_TIMER && radio_mode == RADIO_FREEDOM)
+      {
+         ctimer_reset(&net_off_timer);
+         ctimer_set(&net_off_timer, RADIO_OFF_DELAY, net_off_timer_now, NULL);
+      }
+
+
+      if (mode == RADIO_OFF_NOW && radio_mode == RADIO_FREEDOM)
+      {
+         ctimer_stop(&net_off_timer);
+         printf("RADIO: Radio OFF immediately\n");
+         NETSTACK_MAC.off(0);
+      }
+   }
+
+}
+
+/*---------------------------------------------------------------------------*/
+
+void net_mode(uint8_t mode)
+{
+   if (CLASS == CLASS_B)
+   {
+      radio_mode = mode;
+   }
+}
+/*---------------------------------------------------------------------------*/
+

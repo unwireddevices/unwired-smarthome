@@ -1,7 +1,7 @@
 all: button
 
-PROJECT_SOURCEFILES += dag_node.c ../flash-common.c
-DEFINES+=PROJECT_CONF_H=\"project-conf-leaf.h\"
+PROJECT_SOURCEFILES += ../dag_node.c ../flash-common.c
+DEFINES+=PROJECT_CONF_H=\"project-conf-class-b.h\"
 DEFINES+=IF_UD_BUTTON=1
 DEFINES+=FAKEDEFINE=1
 GIT_VERSION := $(shell git describe --dirty --always --tags)

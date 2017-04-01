@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Unwired Devices LLC. All rights reserved.
+ * Copyright (c) 2016, Unwired Devices LLC - http://www.unwireddevices.com/
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -29,14 +29,14 @@
  *
  */
 
- /*---------------------------------------------------------------------------*/
- /*
- * \file
- *         Button service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
- * \author
- *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
- */
- /*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/
+/*
+* \file
+*         Button service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
+* \author
+*         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
+*/
+/*---------------------------------------------------------------------------*/
 
 #include "contiki.h"
 #include "contiki-lib.h"
@@ -60,10 +60,10 @@
 #include "simple-udp.h"
 
 #include "button.h"
-#include "dag_node.h"
 
 #include "ti-lib.h"
 #include "../ud_binary_protocol.h"
+#include "../dag_node.h"
 
 #include "net/rpl/rpl-private.h"
 #include "../fake_headers.h" //no move up! not "krasivo"!
@@ -89,72 +89,86 @@ AUTOSTART_PROCESSES(&dag_node_process, &main_process);
 void send_button_status_packet(uint8_t button_number,
                                uint8_t click_type)
 {
-    if(dag_active == 1)
-    {
-        struct sensor_packet button_sensor_packet;
-        button_sensor_packet.protocol_version = CURRENT_PROTOCOL_VERSION;
-        button_sensor_packet.device_version = CURRENT_DEVICE_VERSION;
-        button_sensor_packet.data_type = DATA_TYPE_SENSOR_DATA;
-        button_sensor_packet.number_ability = DEVICE_ABILITY_BUTTON;
-        button_sensor_packet.sensor_number = button_number;
-        button_sensor_packet.sensor_event = click_type;
-        send_sensor_event(&button_sensor_packet);
-    }
+   struct sensor_packet button_sensor_packet;
+   button_sensor_packet.protocol_version = CURRENT_PROTOCOL_VERSION;
+   button_sensor_packet.device_version = CURRENT_DEVICE_VERSION;
+   button_sensor_packet.data_type = DATA_TYPE_SENSOR_DATA;
+   button_sensor_packet.number_ability = DEVICE_ABILITY_BUTTON;
+   button_sensor_packet.sensor_number = button_number;
+   button_sensor_packet.sensor_event = click_type;
+   send_sensor_event(&button_sensor_packet);
 
-    led_blink(LED_A);
+   if (node_mode == 2) //MODE_NOTROOT_SLEEP
+   {
+      watchdog_reboot();
+   }
+
+   led_blink(LED_A);
 }
 
 /*---------------------------------------------------------------------------*/
 
 PROCESS_THREAD(main_process, ev, data)
 {
-  PROCESS_BEGIN();
-  printf("Unwired buttons device. HELL-IN-CODE free. I hope.\n");
+   PROCESS_BEGIN();
+   printf("Unwired buttons device. HELL-IN-CODE free. I hope.\n");
 
-  PROCESS_PAUSE();
+   PROCESS_PAUSE();
 
-  while(1) {
-    PROCESS_YIELD();
-    if(ev == sensors_event) {
-      if(data == &button_a_sensor_click) {
-        printf("BCP: Button A click\n");
-        send_button_status_packet('a', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
-      }
-      if(data == &button_a_sensor_long_click) {
-        printf("BCP: Button A long click\n");
-        send_button_status_packet('a', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
-      }
-      if(data == &button_b_sensor_click) {
-        printf("BCP: Button B click\n");
-        send_button_status_packet('b', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
-      }
-      if(data == &button_b_sensor_long_click) {
-        printf("BCP: Button B long click\n");
-        send_button_status_packet('b', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
-      }
-      if(data == &button_c_sensor_click) {
-        printf("BCP: Button C click\n");
-        send_button_status_packet('c', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
-      }
-      if(data == &button_c_sensor_long_click) {
-        printf("BCP: Button C long click\n");
-        send_button_status_packet('c', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
-      }
-      if(data == &button_d_sensor_click) {
-        printf("BCP: Button D click\n");
-        send_button_status_packet('d', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
-      }
-      if(data == &button_d_sensor_long_click) {
-        printf("BCP: Button D long click\n");
-        send_button_status_packet('d', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
-      }
-      if(data == &button_e_sensor_click) {
-        printf("BCP: Button E click\n");
-        send_button_status_packet('e', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
-      }
 
-    }
-  }
+   while (1)
+   {
+      PROCESS_YIELD();
+      if (ev == sensors_event)
+      {
+         if (data == &button_a_sensor_click)
+         {
+            printf("BCP: Button A click\n");
+            send_button_status_packet('a', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
+         }
+         if (data == &button_a_sensor_long_click)
+         {
+            printf("BCP: Button A long click\n");
+            send_button_status_packet('a', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
+         }
+         if (data == &button_b_sensor_click)
+         {
+            printf("BCP: Button B click\n");
+            send_button_status_packet('b', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
+         }
+         if (data == &button_b_sensor_long_click)
+         {
+            printf("BCP: Button B long click\n");
+            send_button_status_packet('b', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
+         }
+         if (data == &button_c_sensor_click)
+         {
+            printf("BCP: Button C click\n");
+            send_button_status_packet('c', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
+         }
+         if (data == &button_c_sensor_long_click)
+         {
+            printf("BCP: Button C long click\n");
+            send_button_status_packet('c', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
+         }
+         if (data == &button_d_sensor_click)
+         {
+            printf("BCP: Button D click\n");
+            send_button_status_packet('d', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
+         }
+         if (data == &button_d_sensor_long_click)
+         {
+            printf("BCP: Button D long click\n");
+            send_button_status_packet('d', DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK);
+         }
+         if (data == &button_e_sensor_click)
+         {
+            printf("BCP: Button E click\n");
+            send_button_status_packet('e', DEVICE_ABILITY_BUTTON_EVENT_CLICK);
+         }
 
-  PROCESS_END();
+      }
+   }
+
+   PROCESS_END();
 }

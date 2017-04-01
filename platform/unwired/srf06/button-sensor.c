@@ -38,14 +38,20 @@
 /*---------------------------------------------------------------------------*/
 #include "contiki.h"
 #include "lib/sensors.h"
-#include "srf06/button-sensor.h"
+#include "button-sensor.h"
 #include "gpio-interrupt.h"
 #include "sys/timer.h"
+#include "sys/process.h"
+#include "stdio.h"
+
 #include "lpm.h"
 
 #include "ti-lib.h"
 
 #include <stdint.h>
+
+#include "xxf_types_helper.h"
+
 /*---------------------------------------------------------------------------*/
 #ifdef BUTTON_SENSOR_CONF_ENABLE_SHUTDOWN
 #define BUTTON_SENSOR_ENABLE_SHUTDOWN BUTTON_SENSOR_CONF_ENABLE_SHUTDOWN
@@ -59,116 +65,65 @@
                                  IOC_INT_ENABLE   | IOC_IOMODE_NORMAL | \
                                  IOC_NO_WAKE_UP   | IOC_INPUT_ENABLE)
 /*---------------------------------------------------------------------------*/
-//#define DEBOUNCE_DURATION (CLOCK_SECOND >> 5)
+#define LONG_INTERVAL_MS 720
+#define DEBOUNCE_INTERVAL_MS 60
 
-struct btn_timer {
-  struct timer debounce;
-  clock_time_t start;
-  clock_time_t duration;
-};
+#define LONG_INTERVAL LONG_INTERVAL_MS*CLOCK_SECOND/1000
+#define DEBOUNCE_INTERVAL DEBOUNCE_INTERVAL_MS*CLOCK_SECOND/1000
 
-static struct btn_timer e_timer, a_timer, b_timer, c_timer,
-              d_timer;
+//#define DEBUG
+
+#ifdef DEBUG
+    #define printf_log(...) printf(__VA_ARGS__)
+#else
+    #define printf_log(...)
+#endif
+
+
+volatile uint32_t button_last_low_time[32];
+volatile uint32_t button_last_state[32];
+volatile uint8_t current_button;
+volatile uint8_t current_button_long;
+
+static struct etimer button_long_timer;
+
 /*---------------------------------------------------------------------------*/
-/**
- * \brief Handler for SmartRF button presses
- */
-static void
-button_press_handler(uint8_t ioid)
+
+PROCESS(button_sensor_long_process, "Button sensor long process");
+PROCESS_THREAD(button_sensor_long_process, ev, data)
 {
-  if(ioid == BOARD_IOID_KEY_A) {
-    if(!timer_expired(&a_timer.debounce)) {
-      return;
-    }
-    timer_set(&a_timer.debounce, DEBOUNCE_DURATION);
-    /*
-     * Start press duration counter on press (falling), notify on release
-     * (rising)
-     */
-    if(ti_lib_gpio_read_dio(BOARD_IOID_KEY_A) == 0) {
-      a_timer.start = clock_time();
-      a_timer.duration = 0;
-    } else {
-      a_timer.duration = clock_time() - a_timer.start;
-      sensors_changed(&button_a_sensor);
-    }
+  PROCESS_BEGIN();
+
+  printf_log("SENSOR LONG PROCESS: enter on %"PRIu32" tick\n", clock_time());
+
+  if (ev == PROCESS_EVENT_EXIT) {
+      printf_log("SENSOR LONG PROCESS: event exit on %"PRIu32" tick\n", clock_time());
+      return 1;
   }
 
-  if(ioid == BOARD_IOID_KEY_B) {
-    if(!timer_expired(&b_timer.debounce)) {
-      return;
-    }
-    timer_set(&b_timer.debounce, DEBOUNCE_DURATION);
-    /*
-     * Start press duration counter on press (falling), notify on release
-     * (rising)
-     */
-    if(ti_lib_gpio_read_dio(BOARD_IOID_KEY_B) == 0) {
-      b_timer.start = clock_time();
-      b_timer.duration = 0;
-    } else {
-      b_timer.duration = clock_time() - b_timer.start;
-      sensors_changed(&button_b_sensor);
-    }
+  current_button_long = current_button;
+  etimer_reset(&button_long_timer);
+  etimer_set(&button_long_timer, LONG_INTERVAL);
+  PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&button_long_timer));
+
+  printf_log("SENSOR LONG PROCESS: resume on %"PRIu32" tick\n", clock_time());
+
+  if (ti_lib_gpio_read_dio(current_button_long) == 0) {
+      if (current_button_long == BOARD_IOID_KEY_A)
+        sensors_changed(&button_a_sensor_long_click);
+      if (current_button_long == BOARD_IOID_KEY_B)
+        sensors_changed(&button_b_sensor_long_click);
+      if (current_button_long == BOARD_IOID_KEY_C)
+        sensors_changed(&button_c_sensor_long_click);
+      if (current_button_long == BOARD_IOID_KEY_D)
+        sensors_changed(&button_d_sensor_long_click);
+      if (current_button_long == BOARD_IOID_KEY_E)
+        sensors_changed(&button_e_sensor_long_click);
   }
 
-  if(ioid == BOARD_IOID_KEY_C) {
-    if(BUTTON_SENSOR_ENABLE_SHUTDOWN == 0) {
-      if(!timer_expired(&c_timer.debounce)) {
-        return;
-      }
-      timer_set(&c_timer.debounce, DEBOUNCE_DURATION);
-      /*
-       * Start press duration counter on press (falling), notify on release
-       * (rising)
-       */
-      if(ti_lib_gpio_read_dio(BOARD_IOID_KEY_C) == 0) {
-        c_timer.start = clock_time();
-        c_timer.duration = 0;
-      } else {
-        c_timer.duration = clock_time() - c_timer.start;
-        sensors_changed(&button_c_sensor);
-      }
-    } else {
-      lpm_shutdown(BOARD_IOID_KEY_C, IOC_IOPULL_UP, IOC_WAKE_ON_LOW);
-    }
-  }
+  printf_log("SENSOR LONG PROCESS: exit on %"PRIu32" tick\n", clock_time());
 
-  if(ioid == BOARD_IOID_KEY_D) {
-    if(!timer_expired(&d_timer.debounce)) {
-      return;
-    }
-    timer_set(&d_timer.debounce, DEBOUNCE_DURATION);
-    /*
-     * Start press duration counter on press (falling), notify on release
-     * (rising)
-     */
-    if(ti_lib_gpio_read_dio(BOARD_IOID_KEY_D) == 0) {
-      d_timer.start = clock_time();
-      d_timer.duration = 0;
-    } else {
-      d_timer.duration = clock_time() - d_timer.start;
-      sensors_changed(&button_d_sensor);
-    }
-  }
-
-  if(ioid == BOARD_IOID_KEY_E) {
-    if(!timer_expired(&e_timer.debounce)) {
-      return;
-    }
-    timer_set(&e_timer.debounce, DEBOUNCE_DURATION);
-    /*
-     * Start press duration counter on press (falling), notify on release
-     * (rising)
-     */
-    if(ti_lib_gpio_read_dio(BOARD_IOID_KEY_E) == 0) {
-      e_timer.start = clock_time();
-      e_timer.duration = 0;
-    } else {
-      e_timer.duration = clock_time() - e_timer.start;
-      sensors_changed(&button_e_sensor);
-    }
-  }
+  PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
 /**
@@ -187,6 +142,8 @@ config_buttons(int type, int c, uint32_t key)
     ti_lib_rom_ioc_pin_type_gpio_input(key);
     ti_lib_rom_ioc_port_configure_set(key, IOC_PORT_GPIO, BUTTON_GPIO_CFG);
     gpio_interrupt_register_handler(key, button_press_handler);
+    button_last_low_time[key] = 0;
+    button_last_state[key] = 1;
     break;
   case SENSORS_ACTIVE:
     if(c) {
@@ -203,270 +160,124 @@ config_buttons(int type, int c, uint32_t key)
   }
 }
 /*---------------------------------------------------------------------------*/
-/**
- * \brief Configuration function for the select button.
- *
- * Parameters are passed onto config_buttons, which does the actual
- * configuration
- * Parameters are ignored. They have been included because the prototype is
- * dictated by the core sensor api. The return value is also required by
- * the API but otherwise ignored.
- *
- * \param type passed to config_buttons as-is
- * \param value passed to config_buttons as-is
- *
- * \return ignored
- */
-static int
-config_e(int type, int value)
+
+
+void
+button_press_handler(uint8_t ioid)
 {
-  config_buttons(type, value, BOARD_IOID_KEY_E);
-  return 1;
+    uint8_t current_button_ioid = ioid;
+    uint32_t current_button_state = ti_lib_gpio_read_dio(ioid);
+    uint32_t current_time = clock_time();
+    printf_log("SENSOR: button %"PRIu8" change state to %"PRIu32" on %"PRIu32" tick\n",
+               current_button_ioid,
+               current_button_state,
+               current_time);
+
+
+        if (button_last_state[current_button_ioid] != current_button_state)
+        {
+            config_buttons(SENSORS_ACTIVE, 0, (uint32_t)current_button_ioid);
+
+            button_last_state[current_button_ioid] = current_button_state;
+            if (current_button_state == 0)
+            {
+                button_last_low_time[current_button_ioid] = current_time;
+                if (process_is_running(&button_sensor_long_process) == 0)
+                {
+                    current_button = current_button_ioid;
+                    process_start(&button_sensor_long_process, NULL);
+                }
+
+            }
+            if (current_button_state == 1)
+            {
+                printf_log("SENSOR: current_time: %"PRIu32", button_last_low_time[%"PRIu8"]: %"PRIu32", diff %"PRIu32", debounce interval %"PRIu8"\n",
+                           current_time,
+                           current_button_ioid,
+                           button_last_low_time[current_button_ioid],
+                           current_time - button_last_low_time[current_button_ioid],
+                           DEBOUNCE_INTERVAL);
+
+                if (current_time - button_last_low_time[current_button_ioid] > DEBOUNCE_INTERVAL &&
+                    current_time - button_last_low_time[current_button_ioid] < LONG_INTERVAL)
+                {
+                    if (process_is_running(&button_sensor_long_process) == 1)
+                        process_exit(&button_sensor_long_process);
+
+                    if (current_button_ioid == BOARD_IOID_KEY_A)
+                      sensors_changed(&button_a_sensor_click);
+                    if (current_button_ioid == BOARD_IOID_KEY_B)
+                      sensors_changed(&button_b_sensor_click);
+                    if (current_button_ioid == BOARD_IOID_KEY_C)
+                      sensors_changed(&button_c_sensor_click);
+                    if (current_button_ioid == BOARD_IOID_KEY_D)
+                      sensors_changed(&button_d_sensor_click);
+                    if (current_button_ioid == BOARD_IOID_KEY_E)
+                      sensors_changed(&button_e_sensor_click);
+                }
+            }
+
+            config_buttons(SENSORS_ACTIVE, 1, (uint32_t)current_button_ioid);
+        }
+
 }
+
 /*---------------------------------------------------------------------------*/
-/**
- * \brief Configuration function for the left button.
- *
- * Parameters are passed onto config_buttons, which does the actual
- * configuration
- * Parameters are ignored. They have been included because the prototype is
- * dictated by the core sensor api. The return value is also required by
- * the API but otherwise ignored.
- *
- * \param type passed to config_buttons as-is
- * \param value passed to config_buttons as-is
- *
- * \return ignored
- */
-static int
-config_a(int type, int value)
+
+static int config_a(int type, int value)
 {
   config_buttons(type, value, BOARD_IOID_KEY_A);
   return 1;
 }
-/*---------------------------------------------------------------------------*/
-/**
- * \brief Configuration function for the right button.
- *
- * Parameters are passed onto config_buttons, which does the actual
- * configuration
- * Parameters are ignored. They have been included because the prototype is
- * dictated by the core sensor api. The return value is also required by
- * the API but otherwise ignored.
- *
- * \param type passed to config_buttons as-is
- * \param value passed to config_buttons as-is
- *
- * \return ignored
- */
-static int
-config_b(int type, int value)
+
+static int config_b(int type, int value)
 {
   config_buttons(type, value, BOARD_IOID_KEY_B);
   return 1;
 }
-/*---------------------------------------------------------------------------*/
-/**
- * \brief Configuration function for the up button.
- *
- * Parameters are passed onto config_buttons, which does the actual
- * configuration
- * Parameters are ignored. They have been included because the prototype is
- * dictated by the core sensor api. The return value is also required by
- * the API but otherwise ignored.
- *
- * \param type passed to config_buttons as-is
- * \param value passed to config_buttons as-is
- *
- * \return ignored
- */
-static int
-config_c(int type, int value)
+
+static int config_c(int type, int value)
 {
   config_buttons(type, value, BOARD_IOID_KEY_C);
   return 1;
 }
-/*---------------------------------------------------------------------------*/
-/**
- * \brief Configuration function for the down button.
- *
- * Parameters are passed onto config_buttons, which does the actual
- * configuration
- * Parameters are ignored. They have been included because the prototype is
- * dictated by the core sensor api. The return value is also required by
- * the API but otherwise ignored.
- *
- * \param type passed to config_buttons as-is
- * \param value passed to config_buttons as-is
- *
- * \return ignored
- */
-static int
-config_d(int type, int value)
+
+static int config_d(int type, int value)
 {
   config_buttons(type, value, BOARD_IOID_KEY_D);
   return 1;
 }
-/*---------------------------------------------------------------------------*/
-static int
-value_e(int type)
+
+static int config_e(int type, int value)
 {
-  if(type == BUTTON_SENSOR_VALUE_STATE) {
-    return ti_lib_gpio_read_dio(BOARD_IOID_KEY_E) == 0 ?
-           BUTTON_SENSOR_VALUE_PRESSED : BUTTON_SENSOR_VALUE_RELEASED;
-  } else if(type == BUTTON_SENSOR_VALUE_DURATION) {
-    return (int)e_timer.duration;
-  }
-  return 0;
+  config_buttons(type, value, BOARD_IOID_KEY_E);
+  return 1;
 }
+
+
 /*---------------------------------------------------------------------------*/
-static int
-value_a(int type)
-{
-  if(type == BUTTON_SENSOR_VALUE_STATE) {
-    return ti_lib_gpio_read_dio(BOARD_IOID_KEY_A) == 0 ?
-           BUTTON_SENSOR_VALUE_PRESSED : BUTTON_SENSOR_VALUE_RELEASED;
-  } else if(type == BUTTON_SENSOR_VALUE_DURATION) {
-    return (int)a_timer.duration;
-  }
-  return 0;
-}
-/*---------------------------------------------------------------------------*/
-static int
-value_b(int type)
-{
-  if(type == BUTTON_SENSOR_VALUE_STATE) {
-    return ti_lib_gpio_read_dio(BOARD_IOID_KEY_B) == 0 ?
-           BUTTON_SENSOR_VALUE_PRESSED : BUTTON_SENSOR_VALUE_RELEASED;
-  } else if(type == BUTTON_SENSOR_VALUE_DURATION) {
-    return (int)b_timer.duration;
-  }
-  return 0;
-}
-/*---------------------------------------------------------------------------*/
-static int
-value_c(int type)
-{
-  if(type == BUTTON_SENSOR_VALUE_STATE) {
-    return ti_lib_gpio_read_dio(BOARD_IOID_KEY_C) == 0 ?
-           BUTTON_SENSOR_VALUE_PRESSED : BUTTON_SENSOR_VALUE_RELEASED;
-  } else if(type == BUTTON_SENSOR_VALUE_DURATION) {
-    return (int)c_timer.duration;
-  }
-  return 0;
-}
-/*---------------------------------------------------------------------------*/
-static int
-value_d(int type)
-{
-  if(type == BUTTON_SENSOR_VALUE_STATE) {
-    return ti_lib_gpio_read_dio(BOARD_IOID_KEY_D) == 0 ?
-           BUTTON_SENSOR_VALUE_PRESSED : BUTTON_SENSOR_VALUE_RELEASED;
-  } else if(type == BUTTON_SENSOR_VALUE_DURATION) {
-    return (int)d_timer.duration;
-  }
-  return 0;
-}
-/*---------------------------------------------------------------------------*/
-/**
- * \brief Status function for all buttons
- * \param type SENSORS_ACTIVE or SENSORS_READY
- * \param key_io_id BOARD_IOID_KEY_LEFT, BOARD_IOID_KEY_RIGHT etc
- * \return 1 if the button's port interrupt is enabled (edge detect)
- *
- * This function will only be called by status_left, status_right and the
- * called will pass the correct key_io_id
- */
-static int
-status(int type, uint32_t key_io_id)
-{
-  switch(type) {
-  case SENSORS_ACTIVE:
-  case SENSORS_READY:
-    if(ti_lib_ioc_port_configure_get(key_io_id) & IOC_INT_ENABLE) {
-      return 1;
-    }
-    break;
-  default:
-    break;
-  }
-  return 0;
-}
-/*---------------------------------------------------------------------------*/
-/**
- * \brief Status function for the select button.
- * \param type SENSORS_ACTIVE or SENSORS_READY
- * \return 1 if the button's port interrupt is enabled (edge detect)
- *
- * This function will call status. It will pass type verbatim and it will also
- * pass the correct key_io_id
- */
-static int
-status_e(int type)
-{
-  return status(type, BOARD_IOID_KEY_E);
-}
-/*---------------------------------------------------------------------------*/
-/**
- * \brief Status function for the left button.
- * \param type SENSORS_ACTIVE or SENSORS_READY
- * \return 1 if the button's port interrupt is enabled (edge detect)
- *
- * This function will call status. It will pass type verbatim and it will also
- * pass the correct key_io_id
- */
-static int
-status_a(int type)
-{
-  return status(type, BOARD_IOID_KEY_A);
-}
-/*---------------------------------------------------------------------------*/
-/**
- * \brief Status function for the right button.
- * \param type SENSORS_ACTIVE or SENSORS_READY
- * \return 1 if the button's port interrupt is enabled (edge detect)
- *
- * This function will call status. It will pass type verbatim and it will also
- * pass the correct key_io_id
- */
-static int
-status_b(int type)
-{
-  return status(type, BOARD_IOID_KEY_B);
-}
-/*---------------------------------------------------------------------------*/
-/**
- * \brief Status function for the up button.
- * \param type SENSORS_ACTIVE or SENSORS_READY
- * \return 1 if the button's port interrupt is enabled (edge detect)
- *
- * This function will call status. It will pass type verbatim and it will also
- * pass the correct key_io_id
- */
-static int
-status_c(int type)
-{
-  return status(type, BOARD_IOID_KEY_C);
-}
-/*---------------------------------------------------------------------------*/
-/**
- * \brief Status function for the down button.
- * \param type SENSORS_ACTIVE or SENSORS_READY
- * \return 1 if the button's port interrupt is enabled (edge detect)
- *
- * This function will call status. It will pass type verbatim and it will also
- * pass the correct key_io_id
- */
-static int
-status_d(int type)
-{
-  return status(type, BOARD_IOID_KEY_D);
-}
-/*---------------------------------------------------------------------------*/
-SENSORS_SENSOR(button_a_sensor, BUTTON_SENSOR, value_a, config_a, status_a);
-SENSORS_SENSOR(button_b_sensor, BUTTON_SENSOR, value_b, config_b, status_b);
-SENSORS_SENSOR(button_c_sensor, BUTTON_SENSOR, value_c, config_c, status_c);
-SENSORS_SENSOR(button_d_sensor, BUTTON_SENSOR, value_d, config_d, status_d);
-SENSORS_SENSOR(button_e_sensor, BUTTON_SENSOR, value_e, config_e, status_e);
-/*---------------------------------------------------------------------------*/
-/** @} */
+
+SENSORS_SENSOR(button_a_sensor_click, BUTTON_SENSOR, NULL, config_a, NULL);
+SENSORS_SENSOR(button_a_sensor_long_click, BUTTON_SENSOR, NULL, config_a, NULL);
+SENSORS_SENSOR(button_a_sensor_change_on, BUTTON_SENSOR, NULL, config_a, NULL);
+SENSORS_SENSOR(button_a_sensor_change_off, BUTTON_SENSOR, NULL, config_a, NULL);
+
+SENSORS_SENSOR(button_b_sensor_click, BUTTON_SENSOR, NULL, config_b, NULL);
+SENSORS_SENSOR(button_b_sensor_long_click, BUTTON_SENSOR, NULL, config_b, NULL);
+SENSORS_SENSOR(button_b_sensor_change_on, BUTTON_SENSOR, NULL, config_b, NULL);
+SENSORS_SENSOR(button_b_sensor_change_off, BUTTON_SENSOR, NULL, config_b, NULL);
+
+SENSORS_SENSOR(button_c_sensor_click, BUTTON_SENSOR, NULL, config_c, NULL);
+SENSORS_SENSOR(button_c_sensor_long_click, BUTTON_SENSOR, NULL, config_c, NULL);
+SENSORS_SENSOR(button_c_sensor_change_on, BUTTON_SENSOR, NULL, config_c, NULL);
+SENSORS_SENSOR(button_c_sensor_change_off, BUTTON_SENSOR, NULL, config_c, NULL);
+
+SENSORS_SENSOR(button_d_sensor_click, BUTTON_SENSOR, NULL, config_d, NULL);
+SENSORS_SENSOR(button_d_sensor_long_click, BUTTON_SENSOR, NULL, config_d, NULL);
+SENSORS_SENSOR(button_d_sensor_change_on, BUTTON_SENSOR, NULL, config_d, NULL);
+SENSORS_SENSOR(button_d_sensor_change_off, BUTTON_SENSOR, NULL, config_d, NULL);
+
+SENSORS_SENSOR(button_e_sensor_click, BUTTON_SENSOR, NULL, config_e, NULL);
+SENSORS_SENSOR(button_e_sensor_long_click, BUTTON_SENSOR, NULL, config_e, NULL);
+SENSORS_SENSOR(button_e_sensor_change_on, BUTTON_SENSOR, NULL, config_e, NULL);
+SENSORS_SENSOR(button_e_sensor_change_off, BUTTON_SENSOR, NULL, config_e, NULL);

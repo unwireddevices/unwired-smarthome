@@ -30,24 +30,44 @@
 /*---------------------------------------------------------------------------*/
 /**
  * \file
- *         Header file for Incotext-light service
+ *         Header file for DAG-node service
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
 /*---------------------------------------------------------------------------*/
+
 #include "contiki.h"
-#include "net/ip/uip.h"
+/*---------------------------------------------------------------------------*/
+struct simple_udp_connection udp_connection;
+volatile uip_ip6addr_t root_addr;
+volatile uint8_t node_mode;
 
-PROCESS_NAME(main_process);
+struct command_data
+{
+   volatile uint8_t data_type;
+   volatile uint8_t ability_target;
+   volatile uint8_t ability_number;
+   volatile uint8_t ability_state;
+};
+
+struct sensor_packet
+{
+   uint8_t protocol_version;
+   uint8_t device_version;
+   uint8_t data_type;
+   uint8_t number_ability;
+   uint8_t sensor_number;
+   uint8_t sensor_event;
+};
+
+void send_sensor_event(struct sensor_packet *packet);
+
+PROCESS_NAME(dag_node_process);
+PROCESS_NAME(dag_node_button_process);
+PROCESS_NAME(root_find_process);
+PROCESS_NAME(status_send_process);
+PROCESS_NAME(maintenance_process);
+PROCESS_NAME(led_process);
 
 /*---------------------------------------------------------------------------*/
-#define CURRENT_DEVICE_SLEEP_TYPE             DEVICE_SLEEP_TYPE_NORMAL
-#define CURRENT_DEVICE_GROUP                  DEVICE_GROUP_BRIDGE_CONVERTER
-#define CURRENT_DEVICE_VERSION                DEVICE_VERSION_V1
-#define CURRENT_PROTOCOL_VERSION              PROTOCOL_VERSION_V1
-#define CURRENT_ABILITY_1BYTE                 0b00000000
-#define CURRENT_ABILITY_2BYTE                 0b00000000
-#define CURRENT_ABILITY_3BYTE                 0b00000000
-#define CURRENT_ABILITY_4BYTE                 0b00001000
 
-/*---------------------------------------------------------------------------*/

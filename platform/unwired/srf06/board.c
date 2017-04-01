@@ -62,23 +62,23 @@ wakeup_handler(void)
  */
 LPM_MODULE(srf_module, NULL, NULL, wakeup_handler, LPM_DOMAIN_NONE);
 /*---------------------------------------------------------------------------*/
-//static void
-//configure_unused_pins(void)
-//{
-//  /* Turn off 3.3-V domain (lcd/sdcard power, output low) */
-//  //ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_3V3_EN);
-//  //ti_lib_gpio_pin_write(BOARD_3V3_EN, 0);
-//
-//  /* Accelerometer (PWR output low, CSn output, high) */
-//  //ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_ACC_PWR);
-//  //ti_lib_gpio_pin_write(BOARD_ACC_PWR, 0);
-//
-//  /* Ambient light sensor (off, output low) */
-//  //ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_ALS_PWR);
-//  //ti_lib_gpio_pin_write(BOARD_ALS_PWR, 0);
-//  //ti_lib_ioc_pin_type_gpio_input(BOARD_IOID_ALS_OUT);
-//  //ti_lib_ioc_io_port_pull_set(BOARD_IOID_ALS_OUT, IOC_NO_IOPULL);
-//}
+static void
+configure_unused_pins(void)
+{
+ /* Turn off 3.3-V domain (lcd/sdcard power, output low) */
+ ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_3V3_EN);
+ ti_lib_gpio_clear_dio(BOARD_3V3_EN);
+
+ /* Accelerometer (PWR output low, CSn output, high) */
+ ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_ACC_PWR);
+ ti_lib_gpio_clear_dio(BOARD_ACC_PWR);
+
+ /* Ambient light sensor (off, output low) */
+ ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_ALS_PWR);
+ ti_lib_gpio_clear_dio(BOARD_ALS_PWR);
+ ti_lib_ioc_pin_type_gpio_input(BOARD_IOID_ALS_OUT);
+ ti_lib_ioc_io_port_pull_set(BOARD_IOID_ALS_OUT, IOC_NO_IOPULL);
+}
 /*---------------------------------------------------------------------------*/
 void
 board_init()
@@ -102,7 +102,7 @@ board_init()
 
   lpm_register_module(&srf_module);
 
-  //configure_unused_pins();
+  configure_unused_pins();
 
   /* Re-enable interrupt if initially enabled. */
   if(!int_disabled) {

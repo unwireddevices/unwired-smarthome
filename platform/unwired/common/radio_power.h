@@ -30,24 +30,31 @@
 /*---------------------------------------------------------------------------*/
 /**
  * \file
- *         Header file for Incotext-light service
+ *         Header file for radio-power
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
 /*---------------------------------------------------------------------------*/
+
 #include "contiki.h"
-#include "net/ip/uip.h"
+/*---------------------------------------------------------------------------*/
 
-PROCESS_NAME(main_process);
+#define CLASS_B                                                 0x0B //battery nodes
+#define CLASS_C                                                 0x0C //power nodes
+
+#define RADIO_OFF_ON_TIMER                                      0x01
+#define RADIO_OFF_NOW                                           0x02
+
+#define RADIO_ON_NORMAL                                         0x01
+#define RADIO_ON_TIMER_OFF                                      0x02
+
+#define RADIO_HOLD                                              0x01
+#define RADIO_FREEDOM                                           0x02
+
+#define RADIO_OFF_DELAY                                         (CLOCK_SECOND / 3)
 
 /*---------------------------------------------------------------------------*/
-#define CURRENT_DEVICE_SLEEP_TYPE             DEVICE_SLEEP_TYPE_NORMAL
-#define CURRENT_DEVICE_GROUP                  DEVICE_GROUP_BRIDGE_CONVERTER
-#define CURRENT_DEVICE_VERSION                DEVICE_VERSION_V1
-#define CURRENT_PROTOCOL_VERSION              PROTOCOL_VERSION_V1
-#define CURRENT_ABILITY_1BYTE                 0b00000000
-#define CURRENT_ABILITY_2BYTE                 0b00000000
-#define CURRENT_ABILITY_3BYTE                 0b00000000
-#define CURRENT_ABILITY_4BYTE                 0b00001000
 
-/*---------------------------------------------------------------------------*/
+void net_on(uint8_t mode);
+void net_off(uint8_t mode);
+void net_mode(uint8_t mode);
