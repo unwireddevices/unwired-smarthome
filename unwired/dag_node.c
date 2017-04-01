@@ -86,8 +86,8 @@
 
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
-#define SHORT_STATUS_INTERVAL           (10 * 60 * CLOCK_SECOND)
-#define LONG_STATUS_INTERVAL            (20 * 60 * CLOCK_SECOND)//(60 * 60 * CLOCK_SECOND)
+#define SHORT_STATUS_INTERVAL           (20 * 60 * CLOCK_SECOND)
+#define LONG_STATUS_INTERVAL        (2 * 60 * 60 * CLOCK_SECOND)
 #define ROOT_FIND_INTERVAL                    (1 * CLOCK_SECOND)
 #define ROOT_FIND_LIMIT_TIME                 (60 * CLOCK_SECOND)
 
@@ -103,6 +103,7 @@
 #define LED_FLASH                               0x02
 #define LED_SLOW_BLINK                          0x03
 #define LED_FAST_BLINK                          0x04
+#define LED_FLASH_LONG                          0x05
 
 #define MAX_NON_ANSWERED_PINGS                  3
 
@@ -121,6 +122,7 @@ volatile uip_ip6addr_t root_addr;
 static struct command_data message_for_main_process;
 
 static struct etimer maintenance_timer;
+static struct etimer led_mode_timer;
 
 rpl_dag_t *rpl_probing_dag;
 
@@ -148,7 +150,7 @@ static void udp_receiver(struct simple_udp_connection *c,
       if (data[2] == DATA_TYPE_JOIN_CONFIRM)
       {
          printf("DAG Node: DAG active, join packet confirmation received, mode set to MODE_NORMAL\n");
-         led_mode_set(LED_SLOW_BLINK);
+         led_mode_set(LED_FLASH_LONG);
          uip_ipaddr_copy(&root_addr, sender_addr);
          node_mode = MODE_NORMAL;
          etimer_set(&maintenance_timer, 0);
@@ -370,7 +372,7 @@ static void led_mode_set(uint8_t mode)
    if (led_mode == LED_ON)
       led_on(LED_A);
 
-   if (led_mode == LED_SLOW_BLINK || led_mode == LED_FAST_BLINK || led_mode == LED_FLASH)
+   if (led_mode != LED_OFF && led_mode != LED_ON)
       process_start(&led_process, NULL);
    else
       process_exit(&led_process);
@@ -383,9 +385,8 @@ PROCESS_THREAD(led_process, ev, data)
    PROCESS_BEGIN();
    if (ev == PROCESS_EVENT_EXIT)
       return 1;
-   static struct etimer led_mode_timer;
 
-   while (led_mode == LED_SLOW_BLINK || led_mode == LED_FAST_BLINK || led_mode == LED_FLASH)
+   while (led_mode != LED_OFF && led_mode != LED_ON)
    {
       if (led_mode == LED_FAST_BLINK)
          etimer_set( &led_mode_timer, CLOCK_SECOND/10);
@@ -393,7 +394,7 @@ PROCESS_THREAD(led_process, ev, data)
       if (led_mode == LED_SLOW_BLINK)
          etimer_set( &led_mode_timer, CLOCK_SECOND/2);
 
-      if (led_mode == LED_FLASH)
+      if (led_mode == LED_FLASH || led_mode == LED_FLASH_LONG)
          etimer_set( &led_mode_timer, 1);
 
       PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&led_mode_timer) );
@@ -409,15 +410,19 @@ PROCESS_THREAD(led_process, ev, data)
       if (led_mode == LED_FLASH)
          etimer_set( &led_mode_timer, CLOCK_SECOND/16);
 
+      if (led_mode == LED_FLASH_LONG)
+         etimer_set( &led_mode_timer, CLOCK_SECOND);
+
       PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&led_mode_timer) );
 
       led_off(LED_A);
 
-      if (led_mode == LED_FLASH)
+      if (led_mode != LED_FAST_BLINK && led_mode != LED_SLOW_BLINK)
+      {
          led_mode = LED_OFF;
+         break;
+      }
    }
-
-
    PROCESS_END();
 }
 
@@ -441,7 +446,10 @@ PROCESS_THREAD(dag_node_button_process, ev, data)
          {
             led_mode_set(LED_ON);
             printf("SYSTEM: Button E long click, reboot\n");
-            ti_lib_sys_ctrl_system_reset();
+            if (CLASS == CLASS_C)
+               ti_lib_sys_ctrl_system_reset();
+            if (CLASS == CLASS_B)
+               watchdog_reboot();
          }
       }
    }
@@ -512,7 +520,6 @@ PROCESS_THREAD(maintenance_process, ev, data)
       {
          net_on(RADIO_ON_NORMAL);
          net_mode(RADIO_HOLD);
-         led_mode_set(LED_SLOW_BLINK);
 
          if (process_is_running(&root_find_process) == 0)
             process_start(&root_find_process, NULL);
@@ -604,6 +611,8 @@ PROCESS_THREAD(root_find_process, ev, data)
    static rpl_dag_t *root_find_dag = NULL;
    PROCESS_PAUSE();
 
+   led_mode_set(LED_SLOW_BLINK);
+
    etimer_set( &find_root_limit_timer, ROOT_FIND_LIMIT_TIME);
 
    while (1)
@@ -619,7 +628,12 @@ PROCESS_THREAD(root_find_process, ev, data)
             {
                root_find_dag = rpl_get_any_dag();
                if (root_find_dag != NULL && &root_find_dag->dag_id)
+               {
+                  if (led_mode != LED_FAST_BLINK)
+                     led_mode_set(LED_FAST_BLINK);
+
                   send_join_packet(&root_find_dag->dag_id);
+               }
             }
          }
          else
@@ -661,8 +675,6 @@ PROCESS_THREAD(dag_node_process, ev, data)
    process_start(&maintenance_process, NULL);
 
    SENSORS_ACTIVATE(batmon_sensor);
-
-   led_mode_set(LED_FAST_BLINK);
 
    PROCESS_END();
 }
