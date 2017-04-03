@@ -129,7 +129,7 @@ void uip_ds6_notification_rm(struct uip_ds6_notification *n);
   } while(0)
 
 struct rpl_dag;
-typedef struct rpl_route_entry {
+typedef struct __attribute__((__packed__)) rpl_route_entry {
   uint32_t lifetime;
   struct rpl_dag *dag;
   uint8_t dao_seqno_out;
