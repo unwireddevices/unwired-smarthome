@@ -3,8 +3,8 @@
 all: root-CLEAN light-CLEAN
 
 ifndef CPU
-  ${info Not CPU define! USE: "CPU=cc26xx" or "CPU=cc13xx" Set default: cc26xx}
-  CPU = cc26xx
+  ${info Not CPU define! USE: "CPU=cc26xx" or "CPU=cc13xx" Set default: cc13xx}
+  CPU = cc13xx
 endif
 
 ifndef BOARD
