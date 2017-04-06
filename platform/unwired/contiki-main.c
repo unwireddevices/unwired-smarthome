@@ -73,6 +73,7 @@
 #include <stdio.h>
 /*---------------------------------------------------------------------------*/
 unsigned short node_id = 0;
+static struct timer start_rand_timer;
 /*---------------------------------------------------------------------------*/
 /** \brief Board specific initialization */
 void board_init(void);
@@ -208,6 +209,13 @@ main(void)
          ti_lib_chipinfo_supports_ieee_802_15_4() == true ? "Yes" : "No",
          ti_lib_chipinfo_chip_family_is_cc13xx() == true ? "Yes" : "No");
 
+  // start_rand_timer
+  timer_set(&start_rand_timer, (random_rand() % (CLOCK_SECOND / 2)));
+
+  do
+  {
+     fade(LED_A);
+  } while(timer_expired(&start_rand_timer) == 0);
 
   process_start(&etimer_process, NULL);
   ctimer_init();
