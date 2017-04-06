@@ -140,6 +140,7 @@ set_rf_params(void)
   printf(" RPL probing interval: %u s\n", RPL_CONF_PROBING_INTERVAL/CLOCK_SECOND);
   printf(" Min DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_MIN);
   printf(" Max DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_DOUBLINGS+RPL_CONF_DIO_INTERVAL_MIN);
+  printf(" Max routes: %u\n", UIP_CONF_MAX_ROUTES);
 
 }
 /*---------------------------------------------------------------------------*/
@@ -223,8 +224,6 @@ main(void)
   energest_init();
   ENERGEST_ON(ENERGEST_TYPE_CPU);
 
-  fade(LED_B);
-
   printf(" Net: ");
   printf("%s\n", NETSTACK_NETWORK.name);
   printf(" MAC: ");
@@ -248,7 +247,7 @@ main(void)
   process_start(&tcpip_process, NULL);
 #endif /* NETSTACK_CONF_WITH_IPV6 */
 
-  fade(LED_C);
+  fade(LED_A);
 
   process_start(&sensors_process, NULL);
 
@@ -256,7 +255,7 @@ main(void)
 
   watchdog_start();
 
-  fade(LED_D);
+  fade(LED_A);
 
   while(1) {
     uint8_t r;
