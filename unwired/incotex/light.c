@@ -78,12 +78,10 @@
 volatile static uint8_t uart_data_iterator = 0;
 volatile static uint8_t uart_returned_data_length = 0;
 
-
 /* UART-buffer */
 volatile static uint8_t uart_returned_data_buf[23];
 
 /*---------------------------------------------------------------------------*/
-
 
 /* Register buttons sensors */
 SENSORS(&button_e_sensor_click,
@@ -206,7 +204,6 @@ PROCESS_THREAD(main_process, ev, data)
          if (data == &button_e_sensor_click)
          {
             printf("BCP: Button E click\n");
-            //ext_flash_probe();
          }
       }
    }

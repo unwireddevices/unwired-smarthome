@@ -74,7 +74,7 @@
 /*---------------------------------------------------------------------------*/
 unsigned short node_id = 0;
 /*---------------------------------------------------------------------------*/
-/** \brief Board specific iniatialisation */
+/** \brief Board specific initialization */
 void board_init(void);
 /*---------------------------------------------------------------------------*/
 static void
@@ -139,9 +139,6 @@ set_rf_params(void)
   printf(" RPL probing interval: %u s\n", RPL_CONF_PROBING_INTERVAL/CLOCK_SECOND);
   printf(" Min DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_MIN);
   printf(" Max DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_DOUBLINGS+RPL_CONF_DIO_INTERVAL_MIN);
-
-
-
 
 }
 /*---------------------------------------------------------------------------*/

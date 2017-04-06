@@ -238,9 +238,10 @@ static void udp_receiver(struct simple_udp_connection *c,
 void
 print_debug_data(void)
 {
+   /*
    printf("\n");
    printf( "SYSTEM: uptime: %" PRIu32 " s\n", clock_seconds() );
-   /*
+
       rpl_dag_t *dag = rpl_get_any_dag();
 
       if (dag) {
@@ -354,7 +355,6 @@ void send_uart_data(struct command_data *uart_data)
    net_on(RADIO_ON_TIMER_OFF);
    simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
    led_mode_set(LED_FLASH);
-
 }
 
 /*---------------------------------------------------------------------------*/
@@ -372,7 +372,6 @@ void send_status_packet(const uip_ipaddr_t *parent_addr,
    int8_t *rssi_parent_uint8_t = (int8_t *)&rssi_parent;
    uip_ip6addr_t addr;
    uip_ip6addr_copy(&addr, &root_addr);
-
 
    printf("DAG Node: Send status packet to DAG-root node:");
    uip_debug_ip6addr_print(&addr);
@@ -497,7 +496,6 @@ PROCESS_THREAD(led_process, ev, data)
          led_mode = LED_OFF;
    }
 
-
    PROCESS_END();
 }
 
@@ -555,7 +553,6 @@ PROCESS_THREAD(maintenance_process, ev, data)
             printf("DAG Node: Root not available, reboot\n");
             watchdog_reboot();
          }
-
       }
 
       if (node_mode == MODE_NOTROOT)
@@ -707,7 +704,6 @@ PROCESS_THREAD(root_find_process, ev, data)
 
                   send_join_packet(&root_find_dag->dag_id);
                }
-
             }
          }
          else
