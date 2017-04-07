@@ -179,8 +179,6 @@ main(void)
    */
   ti_lib_pwr_ctrl_io_freeze_disable();
 
-  fade(LED_A);
-
   ti_lib_int_master_enable();
 
   soc_rtc_init();
@@ -203,6 +201,16 @@ main(void)
   printf("With DriverLib v%u.%u\n", DRIVERLIB_RELEASE_GROUP,
          DRIVERLIB_RELEASE_BUILD);
   printf("\n");
+
+  printf("Random timer...\n");
+  // start_rand_timer
+  timer_set(&start_rand_timer, (random_rand() % (CLOCK_SECOND * 4)));
+
+  do
+  {
+     fade(LED_A);
+  } while(timer_expired(&start_rand_timer) == 0);
+
   printf(BOARD_STRING ", version: %s\n", LOCAL_VERSION);
   printf("Build on: %s %s\n", __DATE__, __TIME__);
 
@@ -210,13 +218,7 @@ main(void)
          ti_lib_chipinfo_supports_ieee_802_15_4() == true ? "Yes" : "No",
          ti_lib_chipinfo_chip_family_is_cc13xx() == true ? "Yes" : "No");
 
-  // start_rand_timer
-  timer_set(&start_rand_timer, (random_rand() % (CLOCK_SECOND / 2)));
 
-  do
-  {
-     fade(LED_A);
-  } while(timer_expired(&start_rand_timer) == 0);
 
   process_start(&etimer_process, NULL);
   ctimer_init();
@@ -247,15 +249,11 @@ main(void)
   process_start(&tcpip_process, NULL);
 #endif /* NETSTACK_CONF_WITH_IPV6 */
 
-  fade(LED_A);
-
   process_start(&sensors_process, NULL);
 
   autostart_start(autostart_processes);
 
   watchdog_start();
-
-  fade(LED_A);
 
   while(1) {
     uint8_t r;
