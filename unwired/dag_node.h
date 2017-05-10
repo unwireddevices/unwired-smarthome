@@ -74,6 +74,9 @@ PROCESS_NAME(root_find_process);
 PROCESS_NAME(status_send_process);
 PROCESS_NAME(maintenance_process);
 PROCESS_NAME(led_process);
+PROCESS_NAME(fw_update_process);
+
+
 
 /*---------------------------------------------------------------------------*/
 

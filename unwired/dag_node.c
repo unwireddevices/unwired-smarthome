@@ -90,6 +90,7 @@
 #define LONG_STATUS_INTERVAL            (20 * 60 * CLOCK_SECOND)
 #define ROOT_FIND_INTERVAL                    (5 * CLOCK_SECOND)
 #define ROOT_FIND_LIMIT_TIME             (2 * 60 * CLOCK_SECOND)
+#define FW_DELAY                              (1 * CLOCK_SECOND)
 
 #define MODE_NORMAL                             0x01
 #define MODE_NOTROOT                            0x02
@@ -132,6 +133,8 @@ PROCESS(root_find_process, "Root find process");
 PROCESS(status_send_process, "Status send process");
 PROCESS(maintenance_process, "Maintenance process");
 PROCESS(led_process, "Led process");
+PROCESS(fw_update_process, "FW OTA update process");
+
 
 /*---------------------------------------------------------------------------*/
 
@@ -154,6 +157,8 @@ static void udp_receiver(struct simple_udp_connection *c,
          etimer_set(&maintenance_timer, 0);
          net_mode(RADIO_FREEDOM);
          net_off(RADIO_OFF_NOW);
+
+         process_start(&fw_update_process, NULL);
       }
 
       if (data[2] == DATA_TYPE_COMMAND || data[2] == DATA_TYPE_SETTINGS)
@@ -202,18 +207,29 @@ static void udp_receiver(struct simple_udp_connection *c,
 
       if (data[2] == DATA_TYPE_FIRMWARE)
       {
-         printf("DAG Node: DATA_TYPE_FIRMWARE packet received:");
-         for (int i = 0; i < datalen; i++)
+
+         printf("DAG Node: DATA_TYPE_FIRMWARE packet received(%"PRId16" bytes): ", datalen-4);
+         for (int i = 4; i < datalen; i++)
          {
-            printf("%"PRIXX8, data[i]);
+            printf(" %"PRIXX8, data[i]);
          }
          printf("\n\n");
+
+      }
+
+      if (data[2] == DATA_TYPE_FIRMWARE_CMD)
+      {
+         if (data[3] == DATA_TYPE_FIRMWARE_COMMAND_NEW_FW)
+         {
+            printf("DAG Node: DATA_TYPE_FIRMWARE_CMD packet received(DATA_TYPE_FIRMWARE_COMMAND_NEW_FW)\n");
+         }
       }
 
       if (data[2] != DATA_TYPE_COMMAND &&
             data[2] != DATA_TYPE_JOIN_CONFIRM &&
             data[2] != DATA_TYPE_SETTINGS &&
             data[2] != DATA_TYPE_FIRMWARE &&
+            data[2] != DATA_TYPE_FIRMWARE_CMD &&
             data[2] != DATA_TYPE_PONG &&
             data[2] != DATA_TYPE_UART)
       {
@@ -269,6 +285,30 @@ print_debug_data(void)
     */
 }
 
+/*---------------------------------------------------------------------------*/
+
+void send_confirmation_packet(const uip_ipaddr_t *dest_addr)
+{
+   if (dest_addr == NULL)
+   {
+      printf("ERROR: dest_addr in send_confirmation_packet null\n");
+      return;
+   }
+
+   int length = 10;
+   char buf[length];
+   buf[0] = PROTOCOL_VERSION_V1;
+   buf[1] = DEVICE_VERSION_V1;
+   buf[2] = DATA_TYPE_JOIN_CONFIRM;
+   buf[3] = DATA_RESERVED;
+   buf[4] = DATA_RESERVED;
+   buf[5] = DATA_RESERVED;
+   buf[6] = DATA_RESERVED;
+   buf[7] = DATA_RESERVED;
+   buf[8] = DATA_RESERVED;
+   buf[9] = DATA_RESERVED;
+   simple_udp_sendto(&udp_connection, buf, length, dest_addr);
+}
 
 /*---------------------------------------------------------------------------*/
 
@@ -434,6 +474,34 @@ void send_join_packet(const uip_ip6addr_t *dest_addr)
    udp_buffer[6] = CURRENT_ABILITY_2BYTE;
    udp_buffer[7] = CURRENT_ABILITY_3BYTE;
    udp_buffer[8] = CURRENT_ABILITY_4BYTE;
+   udp_buffer[9] = DATA_RESERVED;
+   simple_udp_sendto(&udp_connection, udp_buffer, length, &addr);
+}
+
+/*---------------------------------------------------------------------------*/
+
+void send_fw_chank_req_packet(uint16_t chank_num)
+{
+   uip_ip6addr_t addr;
+   uip_ip6addr_copy(&addr, &root_addr);
+
+   int8_t *chank_num_uint8_t = (int8_t *)&chank_num;
+
+   printf("DAG Node: Send fw request packet to DAG-root node:");
+   uip_debug_ip6addr_print(&addr);
+   printf("\n");
+
+   uint8_t length = 10;
+   uint8_t udp_buffer[length];
+   udp_buffer[0] = PROTOCOL_VERSION_V1;
+   udp_buffer[1] = CURRENT_DEVICE_VERSION;
+   udp_buffer[2] = DATA_TYPE_FIRMWARE_CMD;
+   udp_buffer[3] = DATA_TYPE_FIRMWARE_COMMAND_CHANK_REQ;
+   udp_buffer[4] = *chank_num_uint8_t++;
+   udp_buffer[5] = *chank_num_uint8_t++;
+   udp_buffer[6] = DATA_RESERVED;
+   udp_buffer[7] = DATA_RESERVED;
+   udp_buffer[8] = DATA_RESERVED;
    udp_buffer[9] = DATA_RESERVED;
    simple_udp_sendto(&udp_connection, udp_buffer, length, &addr);
 }
@@ -668,6 +736,40 @@ PROCESS_THREAD(status_send_process, ev, data)
 
    PROCESS_END();
 }
+
+/*---------------------------------------------------------------------------*/
+
+PROCESS_THREAD(fw_update_process, ev, data)
+{
+   PROCESS_BEGIN();
+
+   if (ev == PROCESS_EVENT_EXIT)
+      return 1;
+
+   static struct etimer fw_timer;
+   static uint16_t chank_num = 0;
+
+   while (1)
+   {
+      etimer_set( &fw_timer, FW_DELAY);
+      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&fw_timer) );
+
+      if (chank_num < 500)
+      {
+         send_fw_chank_req_packet(chank_num);
+         printf("Req %"PRIXX8" chank\n", chank_num);
+         chank_num++;
+      }
+      else
+      {
+         process_exit(&fw_update_process);
+         return 0;
+      }
+   }
+
+   PROCESS_END();
+}
+
 
 /*---------------------------------------------------------------------------*/
 

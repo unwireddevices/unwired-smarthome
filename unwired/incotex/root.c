@@ -67,11 +67,12 @@
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
 #define UART_DATA_POLL_INTERVAL 5 //in main timer ticks, one tick ~8ms
+#define FIRMWARE_PAYLOAD_LENGTH 224 //in main timer ticks, one tick ~8ms
 /*---------------------------------------------------------------------------*/
 
 typedef struct firmware_packet
 {
-   uint8_t data[227];
+   uint8_t data[FIRMWARE_PAYLOAD_LENGTH];
 } firmware_packet;
 
 struct firmware_data
@@ -199,14 +200,16 @@ void send_firmware_packet(struct firmware_data *firmware_message)
    uip_ip6addr_t addr;
    uip_ip6addr_copy(&addr, &firmware_message->destination_address);
 
-   int length = 229;
-   char udp_buffer[length];
+
+   int payload_length = FIRMWARE_PAYLOAD_LENGTH;
+   int packet_length = payload_length + 4;
+   char udp_buffer[packet_length];
    udp_buffer[0] = firmware_message->protocol_version;
    udp_buffer[1] = firmware_message->device_version;
    udp_buffer[2] = DATA_TYPE_FIRMWARE;
    udp_buffer[3] = firmware_message->firmware_command;
 
-   for (int i = 0; i <= length - 4; i++)
+   for (int i = 0; i < payload_length; i++)
    {
       udp_buffer[4 + i] = firmware_message->firmware_payload.data[i];
    }
@@ -423,11 +426,11 @@ static int uart_data_receiver(unsigned char uart_char)
             firmware_message.protocol_version = uart_command_buf[24];
             firmware_message.device_version = uart_command_buf[25];
             firmware_message.firmware_command = uart_command_buf[27];
-            firmware_message.ready_to_send = 1;
-            for (int i = 0; i < 227; i++)
+            for (int i = 0; i < FIRMWARE_PAYLOAD_LENGTH; i++)
             {
                firmware_message.firmware_payload.data[i] = uart_command_buf[28 + i];
             }
+            firmware_message.ready_to_send = 1;
          }
 
          if (uart_command_buf[26] == DATA_TYPE_UART)
