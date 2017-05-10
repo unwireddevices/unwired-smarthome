@@ -128,7 +128,6 @@ static int uart_data_receiver(unsigned char uart_char)
          }
 
          uart_data.uart_data_length = uart_returned_data_length;
-
          send_uart_data(&uart_data);
 
          uart_returned_data_length = 0;
@@ -173,6 +172,7 @@ static void send_uart_command(struct command_data *uart_data)
 }
 
 /*---------------------------------------------------------------------------*/
+
 
 PROCESS_THREAD(main_process, ev, data)
 {

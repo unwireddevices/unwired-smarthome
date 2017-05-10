@@ -491,14 +491,14 @@ static uip_ipaddr_t *set_global_address(void)
 {
    static uip_ipaddr_t ipaddr;
 
-   /* Fill in the address with zeros and the local prefix */
-   uip_ip6addr(&ipaddr, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
+      /* Fill in the address with zeros and the local prefix */
+      uip_ip6addr(&ipaddr, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
 
-   /* Generate an address based on the chip ID */
-   uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
+      /* Generate an address based on the chip ID */
+      uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
 
-   /* Adding autoconfigured address as the device address */
-   uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
+      /* Adding autoconfigured address as the device address */
+      uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
 
    return &ipaddr;
 }
