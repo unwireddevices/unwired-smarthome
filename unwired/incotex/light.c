@@ -73,6 +73,12 @@
 
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
+#define UART_DATA_POLL_INTERVAL 5 //in main timer ticks, one tick ~8ms
+
+
+#define MODE_NORMAL                             0x01
+#define MODE_NOTROOT                            0x02
+#define MODE_JOIN_PROGRESS                      0x03
 
 /*---------------------------------------------------------------------------*/
 /* UART char iterator */
@@ -82,6 +88,8 @@ volatile static uint8_t uart_returned_data_length = 0;
 /* UART-buffer */
 volatile static uint8_t uart_returned_data_buf[23];
 
+/* UART-data */
+struct command_data uart_data;
 
 /*---------------------------------------------------------------------------*/
 
@@ -91,9 +99,10 @@ SENSORS(&button_e_sensor_click,
 
 /* register dimmer process */
 PROCESS(main_process, "Incotext-light control process");
+PROCESS(send_data_process, "uart-data send process");
 
 /* set autostart processes */
-AUTOSTART_PROCESSES(&dag_node_process, &main_process);
+AUTOSTART_PROCESSES(&dag_node_process, &main_process, &send_data_process);
 
 /*---------------------------------------------------------------------------*/
 
@@ -111,7 +120,6 @@ static int uart_data_receiver(unsigned char uart_char)
       }
       else
       {
-         struct command_data uart_data;
          uart_data.data_type = DATA_TYPE_UART;
          uart_data.protocol_version = PROTOCOL_VERSION_V1;
          uart_data.device_version = DEVICE_VERSION_V1;
@@ -128,7 +136,7 @@ static int uart_data_receiver(unsigned char uart_char)
          }
 
          uart_data.uart_data_length = uart_returned_data_length;
-         send_uart_data(&uart_data);
+         uart_data.ready_to_send = 1;
 
          uart_returned_data_length = 0;
          uart_data_iterator = 0;
@@ -138,37 +146,46 @@ static int uart_data_receiver(unsigned char uart_char)
    return 1;
 }
 
-/*---------------------------------------------------------------------------*/
-
 static void send_uart_command(struct command_data *uart_data)
 {
-   /*
-   printf("uart_data_receiver: new message:(return %" PRIu8 " bytes, message %" PRIu8 " bytes):",
-          uart_data->uart_returned_data_length,
-          uart_data->uart_data_length);
 
-   for (int i = 0; i < uart_data->uart_data_length; i++)
-   {
-      printf("Ox%" PRIXX8 " ", uart_data->payload[i]);
-   }
-   printf("\n");
-   */
-
-
-   ti_lib_ioc_pin_type_uart(UART0_BASE, IOID_2, IOID_3, BOARD_IOID_UART_CTS, BOARD_IOID_UART_RTS);
-
+   disable_interrupts();
+   enable_interrupts();
 
    for (int i = 0; i < uart_data->uart_data_length; i++)
    {
       cc26xx_uart_write_byte(uart_data->payload[i]);
-      //printf("Ox%" PRIXX8 " ", uart_data->payload[i]);
    }
-
    printf("\n");
 
-   ti_lib_ioc_pin_type_uart(UART0_BASE, IOID_2, IOID_5, BOARD_IOID_UART_CTS, BOARD_IOID_UART_RTS);
-
    uart_returned_data_length = uart_data->uart_returned_data_length;
+}
+
+/*---------------------------------------------------------------------------*/
+
+
+PROCESS_THREAD(send_data_process, ev, data)
+{
+   PROCESS_BEGIN();
+
+   static struct etimer send_data_process_timer;
+   PROCESS_PAUSE();
+
+   while (1)
+   {
+      etimer_set(&send_data_process_timer, UART_DATA_POLL_INTERVAL);
+      PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_data_process_timer));
+
+      if (uart_data.ready_to_send != 0)
+      {
+         disable_interrupts();
+         send_uart_data(&uart_data);
+         uart_data.ready_to_send = 0;
+         enable_interrupts();
+      }
+   }
+
+   PROCESS_END();
 }
 
 /*---------------------------------------------------------------------------*/
@@ -187,8 +204,7 @@ PROCESS_THREAD(main_process, ev, data)
    /* set incoming uart-data handler(uart_data_receiver) */
    cc26xx_uart_set_input(&uart_data_receiver);
 
-   ti_lib_ioc_pin_type_gpio_output(IOID_3);
-   ti_lib_gpio_set_dio(IOID_3);
+   ext_flash_probe();
 
    while (1)
    {
@@ -198,7 +214,8 @@ PROCESS_THREAD(main_process, ev, data)
          message_data = data;
          if (message_data->data_type == DATA_TYPE_UART)
          {
-            send_uart_command(message_data);
+            if (node_mode == MODE_NORMAL)
+               send_uart_command(message_data);
          }
       }
       if (ev == sensors_event)
