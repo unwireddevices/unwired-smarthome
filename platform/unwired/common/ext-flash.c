@@ -445,22 +445,33 @@ ext_flash_test(void)
 void
 ext_flash_probe(void)
 {
+   uint8_t flash_data[4] = {0x00, 0x00, 0x00, 0x00};
+   int eeprom_access;
+
    ext_flash_open();
-   printf("SPIFLASH: verify_part return %s\n", verify_part() == VERIFY_PART_OK ? "VERIFY_PART_OK" : "VERIFY_PART_ERROR");
 
-     uint8_t _word[4];
-     int eeprom_access = ext_flash_open();
+   eeprom_access = ext_flash_read(0x00, 4, flash_data);
+   if(!eeprom_access) {
+    printf("SPIFLASH: Error - Could not read EEPROM\n");
+   }
+   else
+   {
+      printf("SPIFLASH: READ: ");
+      for (int i = 0; i < 4; i++)
+      {
+       printf("%"PRIXX8" ", flash_data[i]);
+      }
+      printf("\n");
+   }
 
-     eeprom_access = ext_flash_read(0x0, 4, _word);
-     if(!eeprom_access) {
-        printf("[external-flash]:\tError - Could not read EEPROM.\n");
-       ext_flash_close();
-     }
+   const uint8_t flash_write_data[4] = {0x42, 0x42, 0x42, 0x42};
 
-     for (int idx = 0; idx < 4; idx++)
-     {
-        printf("%"PRIXX8, _word[idx]);
-     }
+   bool flash_read = ext_flash_write(0x00, 4, flash_write_data);
+
+   printf("SPIFLASH: ext_flash_write return %s\n", flash_read == true ? "write ok" : "write error");
+
+
+
 
 
 
@@ -468,7 +479,7 @@ ext_flash_probe(void)
    printf("\nFLASH: ");
    for (int i = 0; i < sizeof(rbuf); i++)
    {
-      printf("%"PRIXX8, rbuf[i]);
+      printf("%"PRIXX8"", rbuf[i]);
    }
 
 
