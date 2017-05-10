@@ -389,7 +389,7 @@ void send_uart_data(struct command_data *uart_data)
    udp_buffer[18] = uart_data->payload[13];
    udp_buffer[19] = uart_data->payload[14];
    udp_buffer[20] = uart_data->payload[15];
-   udp_buffer[21] = uart_data->payload[16];
+   udp_buffer[21] = DATA_RESERVED; //uart_data->payload[16]; фигня?
    udp_buffer[22] = DATA_RESERVED;
 
    net_on(RADIO_ON_TIMER_OFF);
