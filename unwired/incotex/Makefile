@@ -76,6 +76,14 @@ light-fb: light-CLEAN
 
 light-f: light-CLEAN
 	/Applications/ti/Uniflash/flash_cc2650.sh light-firmware.hex
+	
+light-chanks: light
+	srec_cat light-ota-image.bin -binary -o light-ota-image.hex -intel
+	srec_cat light-ota-image.hex -intel -fill 0xFF 0x0 0x1B000 -o light-ota-image.binary -binary
+	rm -rf ./light-ota-chanks
+	mkdir light-ota-chanks
+	lua ../../tools/bin_cut.lua light-ota-image.binary light-ota-chanks 224
+	-rm -f *~ *core core *.srec *.lst *.map *.cprg *.bin *.data contiki*.a *.firmware core-labels.S *.ihex *.ini *.ce *.co *.unwired *.elf  *.o *.d		
 
 root-fb: root-CLEAN
 	while true; do ../../tools/backdoor-bootloader.py -e -w -v root-firmware.hex && break; done;
