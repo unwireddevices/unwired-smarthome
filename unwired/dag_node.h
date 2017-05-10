@@ -52,6 +52,7 @@ struct command_data
    volatile uint8_t ability_state;
    volatile uint8_t uart_returned_data_length;
    volatile uint8_t uart_data_length;
+   volatile uint8_t ready_to_send;
    volatile uint8_t payload[16];
 };
 
