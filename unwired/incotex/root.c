@@ -211,7 +211,7 @@ void send_firmware_packet(struct firmware_data *firmware_message)
       udp_buffer[4 + i] = firmware_message->firmware_payload.data[i];
    }
 
-   simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
+   simple_udp_sendto(&udp_connection, udp_buffer, packet_length, &addr);
 
 }
 
@@ -245,7 +245,7 @@ void send_command_packet(struct command_data *command_message)
    udp_buffer[7] = DATA_RESERVED;
    udp_buffer[8] = DATA_RESERVED;
    udp_buffer[9] = DATA_RESERVED;
-   simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
+   simple_udp_sendto(&udp_connection, udp_buffer, length, &addr);
 
 }
 
@@ -305,7 +305,7 @@ void send_uart_packet(struct uart_data *uart_message)
    udp_buffer[21] = DATA_RESERVED;
    udp_buffer[22] = DATA_RESERVED;
 
-   simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
+   simple_udp_sendto(&udp_connection, udp_buffer, length, &addr);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -323,7 +323,7 @@ void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const ui
       return;
    }
 
-   if (length != 11 && length != 24)
+   if (length != 10 && length != 23)
    {
       printf("DAG NODE: Incompatible data length(%" PRIu16 ")!\n", length);
       return;
@@ -337,13 +337,13 @@ void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const ui
           ((uint8_t *)addr)[12], ((uint8_t *)addr)[13], ((uint8_t *)addr)[14],
           ((uint8_t *)addr)[15]);
 
-   if (length == 11)
+   if (length == 10)
    {
       printf("%02X%02X%02X%02X%02X%02X%02X%02X%02X%02XFFFFFFFFFFFFFFFFFFFFFFFFFF",
              data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
    }
 
-   if (length == 24)
+   if (length == 23)
    {
       printf("%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
              data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9],

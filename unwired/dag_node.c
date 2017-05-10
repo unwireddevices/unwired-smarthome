@@ -302,7 +302,7 @@ void send_sensor_event(struct sensor_packet *sensor_packet)
    udp_buffer[9] = DATA_RESERVED;
 
    net_on(RADIO_ON_TIMER_OFF);
-   simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
+   simple_udp_sendto(&udp_connection, udp_buffer, length, &addr);
    led_mode_set(LED_FLASH);
 }
 
@@ -353,7 +353,7 @@ void send_uart_data(struct command_data *uart_data)
    udp_buffer[22] = DATA_RESERVED;
 
    net_on(RADIO_ON_TIMER_OFF);
-   simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
+   simple_udp_sendto(&udp_connection, udp_buffer, length, &addr);
    led_mode_set(LED_FLASH);
 }
 
@@ -404,7 +404,7 @@ void send_status_packet(const uip_ipaddr_t *parent_addr,
    udp_buffer[22] = DATA_RESERVED;
 
    net_on(RADIO_ON_TIMER_OFF);
-   simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
+   simple_udp_sendto(&udp_connection, udp_buffer, length, &addr);
    led_mode_set(LED_FLASH);
 }
 
@@ -435,7 +435,7 @@ void send_join_packet(const uip_ip6addr_t *dest_addr)
    udp_buffer[7] = CURRENT_ABILITY_3BYTE;
    udp_buffer[8] = CURRENT_ABILITY_4BYTE;
    udp_buffer[9] = DATA_RESERVED;
-   simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
+   simple_udp_sendto(&udp_connection, udp_buffer, length, &addr);
 }
 
 /*---------------------------------------------------------------------------*/
