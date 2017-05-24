@@ -109,6 +109,11 @@
 
 #define MAX_NON_ANSWERED_PINGS                  3
 
+#define HEXRAW_MODE                             0x01
+
+#define HEXVIEW_MODE                            0x00
+#define HEXRAW_MODE                             0x01
+
 /*---------------------------------------------------------------------------*/
 
 /* struct for simple_udp_send */
