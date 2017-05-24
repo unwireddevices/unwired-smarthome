@@ -142,7 +142,6 @@ void send_confirmation_packet(const uip_ip6addr_t *dest_addr)
       return;
    }
 
-   simple_udp_sendto(&udp_connection, buf, length + 1, dest_addr);
    uint8_t length = 10;
    uint8_t udp_buffer[length];
    udp_buffer[0] = PROTOCOL_VERSION_V1;
@@ -155,6 +154,7 @@ void send_confirmation_packet(const uip_ip6addr_t *dest_addr)
    udp_buffer[7] = DATA_RESERVED;
    udp_buffer[8] = DATA_RESERVED;
    udp_buffer[9] = DATA_RESERVED;
+   simple_udp_sendto(&udp_connection, udp_buffer, length, dest_addr);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -166,7 +166,6 @@ void send_pong_packet(const uip_ip6addr_t *dest_addr)
       return;
    }
 
-   simple_udp_sendto(&udp_connection, buf, length + 1, dest_addr);
    uint8_t length = 10;
    uint8_t udp_buffer[length];
    udp_buffer[0] = PROTOCOL_VERSION_V1;
@@ -179,6 +178,7 @@ void send_pong_packet(const uip_ip6addr_t *dest_addr)
    udp_buffer[7] = DATA_RESERVED;
    udp_buffer[8] = DATA_RESERVED;
    udp_buffer[9] = DATA_RESERVED;
+   simple_udp_sendto(&udp_connection, udp_buffer, length, dest_addr);
 }
 
 /*---------------------------------------------------------------------------*/
