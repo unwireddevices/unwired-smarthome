@@ -86,11 +86,12 @@ main(void)
    ti_lib_gpio_set_dio(LED_IOID);
    for (volatile int i = 0; i < 2000000; i++) { }
 
-   jump_to_image( (CURRENT_FIRMWARE<<12) );
-
 
    ti_lib_gpio_clear_dio(LED_IOID);
    print_uart("Bootloader:\t jump to main image\n\n");
+   jump_to_image( (CURRENT_FIRMWARE<<12) );
+/*
+
 
   #if CLEAR_OTA_SLOTS
   erase_ota_image( 1 );
@@ -132,9 +133,10 @@ main(void)
     ti_lib_sys_ctrl_system_reset(); // reboot
   }
 
-
+*/
 
   //  main() *should* never return - we should have rebooted or branched
   //  to other code by now.
   return 0;
+
 }
