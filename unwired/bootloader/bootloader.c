@@ -5,6 +5,7 @@
 
 #define UART_TX_IOID     IOID_3
 #define UART_SPEED       115200
+#define LED_IOID         IOID_22
 
 static void
 power_domains_on(void) {
@@ -37,6 +38,11 @@ initialize_peripherals() {
   if(!int_disabled) {
     ti_lib_int_master_enable();
   }
+
+  ti_lib_ioc_pin_type_gpio_output(LED_IOID);
+}
+
+
 void
 initialize_uart()
 {
@@ -76,15 +82,14 @@ main(void)
    initialize_peripherals();
    initialize_uart();
 
-   ti_lib_ioc_pin_type_gpio_output(IOID_22);
-   ti_lib_gpio_set_dio(IOID_22);
    print_uart("Bootloader:\t start...\n");
+   ti_lib_gpio_set_dio(LED_IOID);
    for (volatile int i = 0; i < 2000000; i++) { }
-   ti_lib_gpio_clear_dio(IOID_22);
 
    jump_to_image( (CURRENT_FIRMWARE<<12) );
 
 
+   ti_lib_gpio_clear_dio(LED_IOID);
    print_uart("Bootloader:\t jump to main image\n\n");
 
   #if CLEAR_OTA_SLOTS
