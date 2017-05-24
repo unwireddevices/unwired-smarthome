@@ -142,8 +142,6 @@ void send_confirmation_packet(const uip_ip6addr_t *dest_addr)
       return;
    }
 
-   int length = 10;
-   char buf[length];
    buf[0] = PROTOCOL_VERSION_V1;
    buf[1] = DEVICE_VERSION_V1;
    buf[2] = DATA_TYPE_JOIN_CONFIRM;
@@ -155,6 +153,8 @@ void send_confirmation_packet(const uip_ip6addr_t *dest_addr)
    buf[8] = DATA_RESERVED;
    buf[9] = DATA_RESERVED;
    simple_udp_sendto(&udp_connection, buf, length + 1, dest_addr);
+   uint8_t length = 10;
+   uint8_t udp_buffer[length];
 }
 
 /*---------------------------------------------------------------------------*/
@@ -166,8 +166,6 @@ void send_pong_packet(const uip_ip6addr_t *dest_addr)
       return;
    }
 
-   int length = 10;
-   char buf[length];
    buf[0] = PROTOCOL_VERSION_V1;
    buf[1] = DEVICE_VERSION_V1;
    buf[2] = DATA_TYPE_PONG;
@@ -179,6 +177,8 @@ void send_pong_packet(const uip_ip6addr_t *dest_addr)
    buf[8] = DATA_RESERVED;
    buf[9] = DATA_RESERVED;
    simple_udp_sendto(&udp_connection, buf, length + 1, dest_addr);
+   uint8_t length = 10;
+   uint8_t udp_buffer[length];
 }
 
 /*---------------------------------------------------------------------------*/
@@ -199,16 +199,16 @@ void send_firmware_packet(struct firmware_data *firmware_message)
    uip_ip6addr_t addr;
    uip_ip6addr_copy(&addr, &firmware_message->destination_address);
 
+   uint8_t payload_length = FIRMWARE_PAYLOAD_LENGTH;
+   uint8_t packet_length = payload_length + FIRMWARE_PAYLOAD_OFFSET;
+   uint8_t udp_buffer[packet_length];
 
-   int payload_length = FIRMWARE_PAYLOAD_LENGTH;
-   int packet_length = payload_length + 4;
-   char udp_buffer[packet_length];
    udp_buffer[0] = firmware_message->protocol_version;
    udp_buffer[1] = firmware_message->device_version;
    udp_buffer[2] = DATA_TYPE_FIRMWARE;
    udp_buffer[3] = firmware_message->firmware_command;
 
-   for (int i = 0; i < payload_length; i++)
+   for (uint16_t i = 0; i < payload_length; i++)
    {
       udp_buffer[4 + i] = firmware_message->firmware_payload.data[i];
    }
@@ -235,8 +235,8 @@ void send_command_packet(struct command_data *command_message)
    uip_ip6addr_t addr;
    uip_ip6addr_copy(&addr, &command_message->destination_address);
 
-   int length = 10;
-   char udp_buffer[length];
+   uint8_t length = 10;
+   uint8_t udp_buffer[length];
    udp_buffer[0] = command_message->protocol_version;
    udp_buffer[1] = command_message->device_version;
    udp_buffer[2] = DATA_TYPE_COMMAND;
@@ -280,8 +280,9 @@ void send_uart_packet(struct uart_data *uart_message)
    printf("\n");
 
 
-   int length = 23;
-   char udp_buffer[length];
+   uint8_t length = 23;
+   uint8_t udp_buffer[length];
+
    udp_buffer[0] = uart_message->protocol_version;
    udp_buffer[1] = uart_message->device_version;
    udp_buffer[2] = DATA_TYPE_UART;
@@ -404,7 +405,7 @@ static int uart_data_receiver(unsigned char uart_char)
       {
          if (uart_command_buf[26] == DATA_TYPE_COMMAND)
          {
-            for (int i = 0; i < 16; i++)
+            for (uint8_t i = 0; i < 16; i++)
             {
                command_message.destination_address.u8[i] = uart_command_buf[8 + i];
             }
@@ -418,14 +419,14 @@ static int uart_data_receiver(unsigned char uart_char)
 
          if (uart_command_buf[26] == DATA_TYPE_FIRMWARE)
          {
-            for (int i = 0; i < 16; i++)
+            for (uint8_t i = 0; i < 16; i++)
             {
                firmware_message.destination_address.u8[i] = uart_command_buf[8 + i];
             }
             firmware_message.protocol_version = uart_command_buf[24];
             firmware_message.device_version = uart_command_buf[25];
             firmware_message.firmware_command = uart_command_buf[27];
-            for (int i = 0; i < FIRMWARE_PAYLOAD_LENGTH; i++)
+            for (uint8_t i = 0; i < FIRMWARE_PAYLOAD_LENGTH; i++)
             {
                firmware_message.firmware_payload.data[i] = uart_command_buf[28 + i];
             }
@@ -434,7 +435,7 @@ static int uart_data_receiver(unsigned char uart_char)
 
          if (uart_command_buf[26] == DATA_TYPE_UART)
          {
-            for (int i = 0; i < 16; i++)
+            for (uint8_t i = 0; i < 16; i++)
             {
                uart_message.destination_address.u8[i] = uart_command_buf[8 + i];
             }
@@ -442,7 +443,7 @@ static int uart_data_receiver(unsigned char uart_char)
             uart_message.device_version = uart_command_buf[25];
             uart_message.data_lenth = uart_command_buf[27];
             uart_message.returned_data_lenth = uart_command_buf[28];
-            for (int i = 0; i < 16; i++)
+            for (uint8_t i = 0; i < 16; i++)
             {
                uart_message.payload[i] = uart_command_buf[29 + i];
             }
