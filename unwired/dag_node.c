@@ -602,10 +602,6 @@ void send_fw_chunk_req_packet(uint16_t chunk_num)
    uip_ip6addr_t addr;
    uip_ip6addr_copy(&addr, &root_addr);
 
-
-   printf("DAG Node: Send fw request packet to DAG-root node:");
-   uip_debug_ip6addr_print(&addr);
-   printf("\n");
    int8_t *chunk_num_uint8_t = (int8_t *)&chunk_num;
 
    uint8_t length = 10;
@@ -863,15 +859,13 @@ PROCESS_THREAD(fw_update_process, ev, data)
    if (ev == PROCESS_EVENT_EXIT)
       return 1;
 
-   static struct etimer fw_timer;
    static uint16_t chunk_num = 0;
+   static struct etimer fw_timer_deadline;
 
    while (1)
    {
-      etimer_set( &fw_timer, FW_DELAY);
-      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&fw_timer) );
 
-      if (chank_num < 500)
+      if (chunk_num < fw_chunk_quantity)
       {
          send_fw_chunk_req_packet(chunk_num);
          printf("FW OTA: Request %"PRId16"/%"PRId16" chunk\n", chunk_num + 1, fw_chunk_quantity);
@@ -879,7 +873,22 @@ PROCESS_THREAD(fw_update_process, ev, data)
       }
       else
       {
+         printf("FW OTA: End chunks, exit\n");
          process_exit(&fw_update_process);
+         chunk_num = 0;
+         return 0;
+      }
+
+      etimer_set( &fw_timer, FW_DELAY);
+      etimer_set( &fw_timer_deadline, FW_DELAY_DEADLINE);
+
+      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&fw_timer) );
+
+      if (etimer_expired(&fw_timer_deadline) && (chunk_num < fw_chunk_quantity))
+      {
+         printf("FW OTA: Not delivered chunk, exit\n");
+         process_exit(&fw_update_process);
+         chunk_num = 0;
          return 0;
       }
    }

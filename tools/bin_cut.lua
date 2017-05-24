@@ -43,6 +43,14 @@ for i = 1, #table_segments do
 		print("Error write chunks")
 		return
 	end
+
+	local diff = chunk_size - #table_segments[i]
+
+	while (diff > 0) do
+		diff = diff - 1 
+		table_segments[i] = table_segments[i].."\xFF"
+	end
+
 	handle:write(table_segments[i])
 	handle:close()
 end
