@@ -142,19 +142,19 @@ void send_confirmation_packet(const uip_ip6addr_t *dest_addr)
       return;
    }
 
-   buf[0] = PROTOCOL_VERSION_V1;
-   buf[1] = DEVICE_VERSION_V1;
-   buf[2] = DATA_TYPE_JOIN_CONFIRM;
-   buf[3] = DATA_RESERVED;
-   buf[4] = DATA_RESERVED;
-   buf[5] = DATA_RESERVED;
-   buf[6] = DATA_RESERVED;
-   buf[7] = DATA_RESERVED;
-   buf[8] = DATA_RESERVED;
-   buf[9] = DATA_RESERVED;
    simple_udp_sendto(&udp_connection, buf, length + 1, dest_addr);
    uint8_t length = 10;
    uint8_t udp_buffer[length];
+   udp_buffer[0] = PROTOCOL_VERSION_V1;
+   udp_buffer[1] = DEVICE_VERSION_V1;
+   udp_buffer[2] = DATA_TYPE_JOIN_CONFIRM;
+   udp_buffer[3] = DATA_RESERVED;
+   udp_buffer[4] = DATA_RESERVED;
+   udp_buffer[5] = DATA_RESERVED;
+   udp_buffer[6] = DATA_RESERVED;
+   udp_buffer[7] = DATA_RESERVED;
+   udp_buffer[8] = DATA_RESERVED;
+   udp_buffer[9] = DATA_RESERVED;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -166,19 +166,19 @@ void send_pong_packet(const uip_ip6addr_t *dest_addr)
       return;
    }
 
-   buf[0] = PROTOCOL_VERSION_V1;
-   buf[1] = DEVICE_VERSION_V1;
-   buf[2] = DATA_TYPE_PONG;
-   buf[3] = DATA_RESERVED;
-   buf[4] = DATA_RESERVED;
-   buf[5] = DATA_RESERVED;
-   buf[6] = DATA_RESERVED;
-   buf[7] = DATA_RESERVED;
-   buf[8] = DATA_RESERVED;
-   buf[9] = DATA_RESERVED;
    simple_udp_sendto(&udp_connection, buf, length + 1, dest_addr);
    uint8_t length = 10;
    uint8_t udp_buffer[length];
+   udp_buffer[0] = PROTOCOL_VERSION_V1;
+   udp_buffer[1] = DEVICE_VERSION_V1;
+   udp_buffer[2] = DATA_TYPE_PONG;
+   udp_buffer[3] = DATA_RESERVED;
+   udp_buffer[4] = DATA_RESERVED;
+   udp_buffer[5] = DATA_RESERVED;
+   udp_buffer[6] = DATA_RESERVED;
+   udp_buffer[7] = DATA_RESERVED;
+   udp_buffer[8] = DATA_RESERVED;
+   udp_buffer[9] = DATA_RESERVED;
 }
 
 /*---------------------------------------------------------------------------*/
