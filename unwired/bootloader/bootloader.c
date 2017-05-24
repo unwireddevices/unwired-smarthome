@@ -3,6 +3,8 @@
 
 #include "ota.h"
 
+#define UART_TX_IOID     IOID_3
+#define UART_SPEED       115200
 
 static void
 power_domains_on(void) {
@@ -35,21 +37,55 @@ initialize_peripherals() {
   if(!int_disabled) {
     ti_lib_int_master_enable();
   }
+void
+initialize_uart()
+{
+   static int (*input_handler)(unsigned char c);
+   uint32_t ctl_val = UART_CTL_UARTEN | UART_CTL_TXE;
+
+   ti_lib_prcm_power_domain_on(PRCM_DOMAIN_SERIAL);
+   while(ti_lib_prcm_power_domain_status(PRCM_DOMAIN_SERIAL) != PRCM_DOMAIN_POWER_ON);
+   ti_lib_prcm_peripheral_run_enable(PRCM_PERIPH_UART0);
+   ti_lib_prcm_load_set();
+   while(!ti_lib_prcm_load_get());
+   ti_lib_uart_disable(UART0_BASE);
+   ti_lib_ioc_pin_type_gpio_output(UART_TX_IOID);
+   ti_lib_gpio_set_dio(UART_TX_IOID);
+   ti_lib_ioc_pin_type_uart(UART0_BASE, IOID_UNUSED, UART_TX_IOID, IOID_UNUSED, IOID_UNUSED);
+   ti_lib_uart_config_set_exp_clk(UART0_BASE, ti_lib_sys_ctrl_clock_get(), UART_SPEED,
+                                  (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
+   ti_lib_uart_fifo_level_set(UART0_BASE, UART_FIFO_TX7_8, UART_FIFO_RX4_8);
+   HWREG(UART0_BASE + UART_O_LCRH) |= UART_LCRH_FEN;
+   if(input_handler) { ctl_val += UART_CTL_RXE; }
+   HWREG(UART0_BASE + UART_O_CTL) = ctl_val;
+}
+
+
+void
+print_uart(char *str)
+{
+   for (int i=0; str[i] != '\0'; i++)
+   {
+      ti_lib_uart_char_put(UART0_BASE, str[i]);
+   }
 }
 
 int
 main(void)
 {
    initialize_peripherals();
+   initialize_uart();
 
    ti_lib_ioc_pin_type_gpio_output(IOID_22);
    ti_lib_gpio_set_dio(IOID_22);
+   print_uart("Bootloader:\t start...\n");
    for (volatile int i = 0; i < 2000000; i++) { }
    ti_lib_gpio_clear_dio(IOID_22);
 
    jump_to_image( (CURRENT_FIRMWARE<<12) );
 
 
+   print_uart("Bootloader:\t jump to main image\n\n");
 
   #if CLEAR_OTA_SLOTS
   erase_ota_image( 1 );
