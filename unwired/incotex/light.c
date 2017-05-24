@@ -91,6 +91,7 @@ volatile static uint8_t uart_returned_data_buf[23];
 /* UART-data */
 struct command_data uart_data;
 
+
 /*---------------------------------------------------------------------------*/
 
 /* Register buttons sensors */

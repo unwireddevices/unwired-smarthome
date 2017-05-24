@@ -152,6 +152,23 @@
 #define PRIXPTR   PRIX16
 //uppercase hexadecimal printf format for uintptr_t
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 #define SCNd16   "d"
 //decimal scanf format for int16_t
 
