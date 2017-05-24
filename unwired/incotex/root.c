@@ -79,8 +79,22 @@ struct firmware_data
    volatile uip_ip6addr_t destination_address;
    volatile uint8_t protocol_version;
    volatile uint8_t device_version;
-   volatile uint8_t firmware_command;
    volatile firmware_packet firmware_payload;
+   volatile uint8_t chunk_number_b1;
+   volatile uint8_t chunk_number_b2;
+   volatile uint8_t reserved_b1;
+   volatile uint8_t reserved_b2;
+   volatile uint8_t ready_to_send;
+};
+
+struct firmware_cmd
+{
+   volatile uip_ip6addr_t destination_address;
+   volatile uint8_t protocol_version;
+   volatile uint8_t device_version;
+   volatile uint8_t firmware_command;
+   volatile uint8_t chunk_quantity_b1;
+   volatile uint8_t chunk_quantity_b2;
    volatile uint8_t ready_to_send;
 };
 
@@ -109,6 +123,7 @@ struct uart_data
 /* Received data via UART */
 static struct command_data command_message;
 static struct firmware_data firmware_message;
+static struct firmware_cmd firmware_cmd_message;
 static struct uart_data uart_message;
 
 
@@ -182,6 +197,38 @@ void send_pong_packet(const uip_ip6addr_t *dest_addr)
 }
 
 /*---------------------------------------------------------------------------*/
+void send_firmware_cmd_packet(struct firmware_cmd *firmware_cmd_message)
+{
+   if (&firmware_cmd_message->destination_address == NULL)
+   {
+      printf("ERROR: dest_addr in send_command_packet null\n");
+      return;
+   }
+   if (&udp_connection.udp_conn == NULL)   //указатель на что?
+   {
+      printf("ERROR: connection in send_command_packet null\n");
+      return;
+   }
+
+   uip_ip6addr_t addr;
+   uip_ip6addr_copy(&addr, &firmware_cmd_message->destination_address);
+
+   uint8_t length = 10;
+   uint8_t udp_buffer[length];
+   udp_buffer[0] = PROTOCOL_VERSION_V1;
+   udp_buffer[1] = DEVICE_VERSION_V1;
+   udp_buffer[2] = DATA_TYPE_FIRMWARE_CMD;
+   udp_buffer[3] = DATA_TYPE_FIRMWARE_COMMAND_NEW_FW;
+   udp_buffer[4] = firmware_cmd_message->chunk_quantity_b1;
+   udp_buffer[5] = firmware_cmd_message->chunk_quantity_b2;
+   udp_buffer[6] = DATA_RESERVED;
+   udp_buffer[7] = DATA_RESERVED;
+   udp_buffer[8] = DATA_RESERVED;
+   udp_buffer[9] = DATA_RESERVED;
+   simple_udp_sendto(&udp_connection, udp_buffer, length, &addr);
+}
+
+/*---------------------------------------------------------------------------*/
 
 void send_firmware_packet(struct firmware_data *firmware_message)
 {
@@ -206,11 +253,14 @@ void send_firmware_packet(struct firmware_data *firmware_message)
    udp_buffer[0] = firmware_message->protocol_version;
    udp_buffer[1] = firmware_message->device_version;
    udp_buffer[2] = DATA_TYPE_FIRMWARE;
-   udp_buffer[3] = firmware_message->firmware_command;
+   udp_buffer[3] = firmware_message->chunk_number_b1;
+   udp_buffer[4] = firmware_message->chunk_number_b2;
+   udp_buffer[5] = firmware_message->reserved_b1;
+   udp_buffer[6] = firmware_message->reserved_b2; //FIRMWARE_PAYLOAD_OFFSET
 
    for (uint16_t i = 0; i < payload_length; i++)
    {
-      udp_buffer[4 + i] = firmware_message->firmware_payload.data[i];
+      udp_buffer[FIRMWARE_PAYLOAD_OFFSET + i] = firmware_message->firmware_payload.data[i];
    }
 
    simple_udp_sendto(&udp_connection, udp_buffer, packet_length, &addr);
@@ -425,12 +475,29 @@ static int uart_data_receiver(unsigned char uart_char)
             }
             firmware_message.protocol_version = uart_command_buf[24];
             firmware_message.device_version = uart_command_buf[25];
-            firmware_message.firmware_command = uart_command_buf[27];
+            firmware_message.chunk_number_b1 = uart_command_buf[27];
+            firmware_message.chunk_number_b2 = uart_command_buf[28];
+            firmware_message.reserved_b1 = uart_command_buf[29];
+            firmware_message.reserved_b2 = uart_command_buf[30];
             for (uint8_t i = 0; i < FIRMWARE_PAYLOAD_LENGTH; i++)
             {
-               firmware_message.firmware_payload.data[i] = uart_command_buf[28 + i];
+               firmware_message.firmware_payload.data[i] = uart_command_buf[31 + i];
             }
             firmware_message.ready_to_send = 1;
+         }
+
+         if (uart_command_buf[26] == DATA_TYPE_FIRMWARE_CMD)
+         {
+            for (uint8_t i = 0; i < 16; i++)
+            {
+               firmware_cmd_message.destination_address.u8[i] = uart_command_buf[8 + i];
+            }
+            firmware_cmd_message.protocol_version = uart_command_buf[24];
+            firmware_cmd_message.device_version = uart_command_buf[25];
+            firmware_cmd_message.firmware_command = uart_command_buf[27];
+            firmware_cmd_message.chunk_quantity_b1 = uart_command_buf[28];
+            firmware_cmd_message.chunk_quantity_b2 = uart_command_buf[29];
+            firmware_cmd_message.ready_to_send = 1;
          }
 
          if (uart_command_buf[26] == DATA_TYPE_UART)
@@ -558,6 +625,14 @@ PROCESS_THREAD(send_command_process, ev, data)
          disable_interrupts();
          send_firmware_packet(&firmware_message);
          firmware_message.ready_to_send = 0;
+         enable_interrupts();
+      }
+
+      if (firmware_cmd_message.ready_to_send != 0)
+      {
+         disable_interrupts();
+         send_firmware_cmd_packet(&firmware_cmd_message);
+         firmware_cmd_message.ready_to_send = 0;
          enable_interrupts();
       }
 

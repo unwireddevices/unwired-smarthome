@@ -304,7 +304,19 @@ static void udp_receiver(struct simple_udp_connection *c,
       {
          if (data[3] == DATA_TYPE_FIRMWARE_COMMAND_NEW_FW)
          {
-            printf("DAG Node: DATA_TYPE_FIRMWARE_CMD packet received(DATA_TYPE_FIRMWARE_COMMAND_NEW_FW)\n");
+            uint8_t chunk_quantity_uint8[2];
+            chunk_quantity_uint8[0] = data[5];
+            chunk_quantity_uint8[1] = data[4];
+
+            uint16_t *chunk_quantity_uint16_t = (uint16_t *)&chunk_quantity_uint8;
+            fw_chunk_quantity = *chunk_quantity_uint16_t;
+
+            printf("DAG Node: DATA_TYPE_FIRMWARE_COMMAND_NEW_FW command received, %"PRId16" chunks\n", fw_chunk_quantity);
+            ext_flash_open();
+            //ext_flash_erase(fw_ext_flash_address, 224);
+
+            //process_exit(&fw_update_process);
+            process_start(&fw_update_process, NULL);
          }
       }
 
