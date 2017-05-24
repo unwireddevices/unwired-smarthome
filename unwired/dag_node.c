@@ -37,6 +37,7 @@
 /*---------------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 #include "contiki.h"
 #include "contiki-lib.h"
