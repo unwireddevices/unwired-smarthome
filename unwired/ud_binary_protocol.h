@@ -142,6 +142,9 @@
 #define DATA_TYPE_FIRMWARE_COMMAND_NEW_FW                       0x01 //Сообщение о наличии новой прошивки
 #define DATA_TYPE_FIRMWARE_COMMAND_CHANK_REQ                    0x02 //Запрос пакета с частью прошивки
 
+#define FIRMWARE_PAYLOAD_LENGTH                                 224
+#define FIRMWARE_PAYLOAD_OFFSET                                 7
+
 /* Devices warnings */
 #define DEVICE_WARNING_HIGH_TEMPERATYRE                         0x01
 #define DEVICE_WARNING_LOW_VOLTAGE                              0x02

@@ -67,7 +67,6 @@
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
 #define UART_DATA_POLL_INTERVAL 5 //in main timer ticks, one tick ~8ms
-#define FIRMWARE_PAYLOAD_LENGTH 224 //in main timer ticks, one tick ~8ms
 /*---------------------------------------------------------------------------*/
 
 typedef struct firmware_packet
