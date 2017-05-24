@@ -16,7 +16,7 @@ end
 
 local file = arg[1]
 local path = arg[2]
-local chank_size = tonumber(arg[3]) or 224
+local chunk_size = tonumber(arg[3]) or 224
 
 if (file == nil) then
 	print("No file name!")
@@ -34,13 +34,13 @@ end
 local bin_data = handle:read("*a")
 handle:close()
 
-local table_segments = data_cut(bin_data, chank_size)
+local table_segments = data_cut(bin_data, chunk_size)
 
 for i = 1, #table_segments do 
-	local filename = path.."/".."chank".."_"..i
+	local filename = path.."/".."chunk".."_"..i-1
 	local handle,err = io.open(filename,"w")
 	if (err ~= nil) then
-		print("Error write chanks")
+		print("Error write chunks")
 		return
 	end
 	handle:write(table_segments[i])

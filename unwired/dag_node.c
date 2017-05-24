@@ -90,7 +90,8 @@
 #define LONG_STATUS_INTERVAL            (20 * 60 * CLOCK_SECOND)
 #define ROOT_FIND_INTERVAL                    (5 * CLOCK_SECOND)
 #define ROOT_FIND_LIMIT_TIME             (2 * 60 * CLOCK_SECOND)
-#define FW_DELAY                              (1 * CLOCK_SECOND)
+#define FW_DELAY                              (3 * CLOCK_SECOND)
+#define FW_DELAY_DEADLINE                     (2 * CLOCK_SECOND)
 
 #define MODE_NORMAL                             0x01
 #define MODE_NOTROOT                            0x02
@@ -122,6 +123,11 @@ volatile uip_ip6addr_t root_addr;
 static struct command_data message_for_main_process;
 
 static struct etimer maintenance_timer;
+static struct etimer fw_timer;
+
+volatile uint16_t fw_chunk_quantity = 0;
+volatile uint16_t fw_ext_flash_address = 0;
+
 
 rpl_dag_t *rpl_probing_dag;
 
@@ -240,8 +246,6 @@ static void udp_receiver(struct simple_udp_connection *c,
          etimer_set(&maintenance_timer, 0);
          net_mode(RADIO_FREEDOM);
          net_off(RADIO_OFF_NOW);
-
-         process_start(&fw_update_process, NULL);
       }
 
       if (data[2] == DATA_TYPE_COMMAND || data[2] == DATA_TYPE_SETTINGS)
@@ -290,14 +294,26 @@ static void udp_receiver(struct simple_udp_connection *c,
 
       if (data[2] == DATA_TYPE_FIRMWARE)
       {
-
-         printf("DAG Node: DATA_TYPE_FIRMWARE packet received(%"PRId16" bytes): ", datalen-4);
-         for (int i = 4; i < datalen; i++)
+         printf("DAG Node: DATA_TYPE_FIRMWARE packet received(%"PRId16" bytes): ", datalen - FIRMWARE_PAYLOAD_OFFSET);
+         for (uint16_t i = FIRMWARE_PAYLOAD_OFFSET; i < datalen; i++)
          {
             printf(" %"PRIXX8, data[i]);
          }
          printf("\n\n");
 
+         uint8_t flash_write_buffer[FIRMWARE_PAYLOAD_LENGTH];
+
+         for (uint8_t i = 0; i < FIRMWARE_PAYLOAD_LENGTH; i++)
+         {
+            flash_write_buffer[i] = data[i + FIRMWARE_PAYLOAD_OFFSET];
+         }
+
+         ext_flash_open();
+         ext_flash_write(fw_ext_flash_address, FIRMWARE_PAYLOAD_LENGTH, flash_write_buffer);
+         ext_flash_close();
+         fw_ext_flash_address = fw_ext_flash_address + FIRMWARE_PAYLOAD_LENGTH;
+
+         etimer_set( &fw_timer, 0);
       }
 
       if (data[2] == DATA_TYPE_FIRMWARE_CMD)
@@ -575,16 +591,16 @@ void send_join_packet(const uip_ip6addr_t *dest_addr)
 
 /*---------------------------------------------------------------------------*/
 
-void send_fw_chank_req_packet(uint16_t chank_num)
+void send_fw_chunk_req_packet(uint16_t chunk_num)
 {
    uip_ip6addr_t addr;
    uip_ip6addr_copy(&addr, &root_addr);
 
-   int8_t *chank_num_uint8_t = (int8_t *)&chank_num;
 
    printf("DAG Node: Send fw request packet to DAG-root node:");
    uip_debug_ip6addr_print(&addr);
    printf("\n");
+   int8_t *chunk_num_uint8_t = (int8_t *)&chunk_num;
 
    uint8_t length = 10;
    uint8_t udp_buffer[length];
@@ -592,8 +608,8 @@ void send_fw_chank_req_packet(uint16_t chank_num)
    udp_buffer[1] = CURRENT_DEVICE_VERSION;
    udp_buffer[2] = DATA_TYPE_FIRMWARE_CMD;
    udp_buffer[3] = DATA_TYPE_FIRMWARE_COMMAND_CHANK_REQ;
-   udp_buffer[4] = *chank_num_uint8_t++;
-   udp_buffer[5] = *chank_num_uint8_t++;
+   udp_buffer[4] = *chunk_num_uint8_t++;
+   udp_buffer[5] = *chunk_num_uint8_t++;
    udp_buffer[6] = DATA_RESERVED;
    udp_buffer[7] = DATA_RESERVED;
    udp_buffer[8] = DATA_RESERVED;
@@ -842,7 +858,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
       return 1;
 
    static struct etimer fw_timer;
-   static uint16_t chank_num = 0;
+   static uint16_t chunk_num = 0;
 
    while (1)
    {
@@ -851,9 +867,9 @@ PROCESS_THREAD(fw_update_process, ev, data)
 
       if (chank_num < 500)
       {
-         send_fw_chank_req_packet(chank_num);
-         printf("Req %"PRIXX8" chank\n", chank_num);
-         chank_num++;
+         send_fw_chunk_req_packet(chunk_num);
+         printf("FW OTA: Request %"PRId16"/%"PRId16" chunk\n", chunk_num + 1, fw_chunk_quantity);
+         chunk_num++;
       }
       else
       {
