@@ -138,6 +138,89 @@ PROCESS(fw_update_process, "FW OTA update process");
 
 /*---------------------------------------------------------------------------*/
 
+void
+flash_erase(size_t offset, size_t length)
+{
+   printf("SPIFLASH: flash clean\n");
+   ext_flash_open();
+   ext_flash_erase(offset, length);
+   ext_flash_close();
+}
+
+/*---------------------------------------------------------------------------*/
+
+void
+hexraw_print(uint16_t flash_length, uint8_t *flash_read_data_buffer)
+{
+   printf("SPIFLASH DAMP: \n");
+   for (uint32_t i = 0; i < flash_length; i++)
+   {
+         printf("%"PRIXX8, flash_read_data_buffer[i]);
+   }
+   printf("\nSPIFLASH DAMP END \n");
+}
+
+/*---------------------------------------------------------------------------*/
+
+void
+hexview_print(uint16_t flash_length, uint8_t *flash_read_data_buffer)
+{
+   printf("SPIFLASH DAMP: \n");
+   for (uint32_t i = 0; i < flash_length; i = i + 16)
+   {
+      printf("0x%08"PRIX32": ", i);
+      for (int i2 = 0; i2 < 16; i2++)
+      {
+         printf("%"PRIXX8" ", flash_read_data_buffer[i2+i]);
+         if (i2 == 7) { printf(" "); }
+      }
+      printf("\n");
+   }
+   printf("\nSPIFLASH DAMP END \n");
+}
+
+/*---------------------------------------------------------------------------*/
+
+void
+flash_damp_hex(uint8_t mode)
+{
+   const uint16_t flash_length = FIRMWARE_PAYLOAD_LENGTH * 10;
+   uint8_t flash_read_data_buffer[flash_length];
+
+   ext_flash_open();
+   bool eeprom_access = ext_flash_read(0x00, flash_length, flash_read_data_buffer);
+   ext_flash_close();
+
+   if(!eeprom_access)
+   {
+      printf("SPIFLASH: Error - Could not read EEPROM\n");
+   }
+   else
+   {
+      if (mode == HEXVIEW_MODE)
+         hexview_print(flash_length, flash_read_data_buffer);
+      if (mode == HEXRAW_MODE)
+         hexraw_print(flash_length, flash_read_data_buffer);
+   }
+}
+
+/*---------------------------------------------------------------------------*/
+
+void
+uart_console(unsigned char uart_char)
+{
+   if (uart_char == 'd')
+      flash_damp_hex(HEXVIEW_MODE);
+
+   if (uart_char == 'r')
+      flash_damp_hex(HEXRAW_MODE);
+
+   if (uart_char == 'c')
+      flash_erase(0x00, FIRMWARE_PAYLOAD_LENGTH);
+}
+
+/*---------------------------------------------------------------------------*/
+
 static void udp_receiver(struct simple_udp_connection *c,
                          const uip_ipaddr_t *sender_addr,
                          uint16_t sender_port,

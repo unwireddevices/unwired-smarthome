@@ -68,6 +68,7 @@ struct sensor_packet
 
 void send_sensor_event(struct sensor_packet *sensor_packet);
 void send_uart_data(struct command_data *uart_data);
+void uart_console(unsigned char uart_char);
 
 PROCESS_NAME(dag_node_process);
 PROCESS_NAME(dag_node_button_process);

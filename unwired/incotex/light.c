@@ -91,6 +91,8 @@ volatile static uint8_t uart_returned_data_buf[23];
 /* UART-data */
 struct command_data uart_data;
 
+/* UART-flag for console commands */
+volatile uint8_t uart_flag = 0;
 
 /*---------------------------------------------------------------------------*/
 
@@ -110,6 +112,17 @@ AUTOSTART_PROCESSES(&dag_node_process, &main_process, &send_data_process);
 static int uart_data_receiver(unsigned char uart_char)
 {
    //printf("uart_data_receiver: New char(%" PRIXX8 ") in buffer: %" PRIu8 ", length: %" PRIu8 " \n", uart_char, uart_data_iterator, uart_returned_data_length);
+
+   if (uart_flag == 2)
+   {
+      uart_console(uart_char);
+      uart_flag = 0;
+   }
+
+   if (uart_char == '/')
+   {
+      uart_flag++;
+   }
 
    if (uart_returned_data_length > 0)
    {
@@ -204,8 +217,6 @@ PROCESS_THREAD(main_process, ev, data)
 
    /* set incoming uart-data handler(uart_data_receiver) */
    cc26xx_uart_set_input(&uart_data_receiver);
-
-   ext_flash_probe();
 
    while (1)
    {
