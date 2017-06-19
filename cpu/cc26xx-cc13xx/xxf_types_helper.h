@@ -7,23 +7,6 @@
 #define PRId8   "d"
 //decimal printf format for int8_t
 
-#define PRIdFAST16   "d"
-//decimal printf format for int_fast16_t
-
-#define PRIdFAST32   "ld"
-//decimal printf format for int_fast32_t
-
-#define PRIdFAST8   "d"
-//decimal printf format for int_fast8_t
-
-#define PRIdLEAST16   "d"
-//decimal printf format for int_least16_t
-
-#define PRIdLEAST32   "ld"
-//decimal printf format for int_least32_t
-
-#define PRIdLEAST8   "d"
-//decimal printf format for int_least8_t
 
 #define PRIdPTR   PRId16
 //decimal printf format for intptr_t
@@ -37,27 +20,13 @@
 #define PRIi8   "i"
 //integer printf format for int8_t
 
-#define PRIiFAST16   "i"
-//integer printf format for int_fast16_t
-
-#define PRIiFAST32   "li"
-//integer printf format for int_fast32_t
-
-#define PRIiFAST8   "i"
-//integer printf format for int_fast8_t
-
-#define PRIiLEAST16   "i"
-//integer printf format for int_least16_t
-
-#define PRIiLEAST32   "li"
-//integer printf format for int_least32_t
-
-#define PRIiLEAST8   "i"
-//integer printf format for int_least8_t
-
 #define PRIiPTR   PRIi16
 //integer printf format for intptr_t
 
+
+
+#define PRIu8   "u"
+//decimal printf format for uint8_t
 
 #define PRIu16   "u"
 //decimal printf format for uint16_t
@@ -65,86 +34,34 @@
 #define PRIu32   "lu"
 //decimal printf format for uint32_t
 
-#define PRIu8   "u"
-//decimal printf format for uint8_t
-
-#define PRIuFAST16   "u"
-//decimal printf format for uint_fast16_t
-
-#define PRIuFAST32   "lu"
-//decimal printf format for uint_fast32_t
-
-#define PRIuFAST8   "u"
-//decimal printf format for uint_fast8_t
-
-#define PRIuLEAST16   "u"
-//decimal printf format for uint_least16_t
-
-#define PRIuLEAST32   "lu"
-//decimal printf format for uint_least32_t
-
-#define PRIuLEAST8   "u"
-//decimal printf format for uint_least8_t
-
 #define PRIuPTR   PRIu16
 //decimal printf format for uintptr_t
 
-#define PRIx16   "x"
-//hexadecimal printf format for uint16_t
 
-#define PRIX16   "X"
-//uppercase hexadecimal printf format for uint16_t
-
-#define PRIx32   "lx"
-//hexadecimal printf format for uint32_t
-
-#define PRIX32   "lX"
-//uppercase hexadecimal printf format for uint32_t
 
 #define PRIx8   "x"
 //hexadecimal printf format for uint8_t
 
-#define PRIX8   "X"
-//uppercase hexadecimal printf format for uint8_t
+#define PRIx16   "x"
+//hexadecimal printf format for uint16_t
+
+#define PRIx32   "lx"
+//hexadecimal printf format for uint32_t
 
 #define PRIXX8   "02X"
 //uppercase hexadecimal printf format for uint8_t
 
-#define PRIxFAST16   "x"
-//hexadecimal printf format for uint_fast16_t
 
-#define PRIXFAST16   "X"
-//uppercase hexadecimal printf format for uint_fast16_t
 
-#define PRIxFAST32   "lx"
-//hexadecimal printf format for uint_fast32_t
+#define PRIX16   "X"
+//uppercase hexadecimal printf format for uint16_t
 
-#define PRIXFAST32   "lX"
-//uppercase hexadecimal printf format for uint_fast32_t
+#define PRIX32   "lX"
+//uppercase hexadecimal printf format for uint32_t
 
-#define PRIxFAST8   "x"
-//hexadecimal printf format for uint_fast8_t
+#define PRIX8   "X"
+//uppercase hexadecimal printf format for uint8_t
 
-#define PRIXFAST8   "X"
-//uppercase hexadecimal printf format for uint_fast8_t
-
-#define PRIxLEAST16   "x"
-//hexadecimal printf format for uint_least16_t
-
-#define PRIXLEAST16   "X"
-//uppercase hexadecimal printf format for uint_least16_t
-
-#define PRIxLEAST32   "lx"
-//hexadecimal printf format for uint_least32_t
-
-#define PRIXLEAST32   "lX"
-//uppercase hexadecimal printf format for uint_least32_t
-
-#define PRIxLEAST8   "x"
-//hexadecimal printf format for uint_least8_t
-
-#define PRIXLEAST8   "X"
-//uppercase hexadecimal printf format for uint_least8_t
 
 #define PRIxPTR   PRIx16
 //hexadecimal printf format for uintptr_t
