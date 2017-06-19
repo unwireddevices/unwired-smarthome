@@ -82,13 +82,13 @@ main(void)
    initialize_peripherals();
    initialize_uart();
 
-   print_uart("Bootloader:\t start...\n");
+   //print_uart("Bootloader:\t start...\n");
    ti_lib_gpio_set_dio(LED_IOID);
-   for (volatile int i = 0; i < 2000000; i++) { }
+   //for (volatile int i = 0; i < 2000000; i++) { }
 
 
    ti_lib_gpio_clear_dio(LED_IOID);
-   print_uart("Bootloader:\t jump to main image\n\n");
+   //print_uart("Bootloader:\t jump to main image\n\n");
    jump_to_image( (CURRENT_FIRMWARE<<12) );
 /*
 
