@@ -16,7 +16,7 @@ root-CLEAN: root clean2
 
 light-CLEAN: light clean3
 	
-root: net-bootloader
+root:
 	CONF="NOLEAF"; \
 	touch /tmp/unwired_last_conf; \
 	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean_no_hex; \
@@ -30,7 +30,7 @@ root: net-bootloader
 	srec_cat root-firmware_noboot.hex -intel -exclude 0x01FFC8 0x01FFE8 ../bootloader/uart_bootloader -intel -o root-firmware.hex -intel
 	rm root.hex root-firmware_noboot.hex
 
-light: net-bootloader
+light: 
 	CONF="NOLEAF"; \
 	touch /tmp/unwired_last_conf; \
 	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean; \
@@ -70,6 +70,9 @@ clean:
 	
 net-bootloader: 
 	cd ../bootloader && make -j5 CPU=$(CPU) bootloader.hex
+	
+net-bootloader-clean: 
+	cd ../bootloader && make clean
 	
 light-fb: light-CLEAN
 	while true; do ../../tools/backdoor-bootloader.py -e -w -v light-firmware.hex && break; done;
