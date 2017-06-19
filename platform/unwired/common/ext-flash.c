@@ -40,6 +40,8 @@
 #include "ext-flash.h"
 #include "ti-lib.h"
 #include "board-spi.h"
+#include "dev/watchdog.h"
+
 
 #include <stdint.h>
 #include <stdio.h>
@@ -86,6 +88,9 @@
 #define VERIFY_PART_ERROR           -1
 #define VERIFY_PART_POWERED_DOWN     0
 #define VERIFY_PART_OK               1
+
+#define DPRINT //printf(">ext-flash.c:%"PRIu16"\n", __LINE__);watchdog_periodic();
+
 /*---------------------------------------------------------------------------*/
 /**
  * Clear external flash CSN line
@@ -93,7 +98,7 @@
 static void
 select_on_bus(void)
 {
-  ti_lib_gpio_clear_dio(BOARD_IOID_FLASH_CS);
+  ti_lib_gpio_clear_dio(BOARD_IOID_FLASH_CS);DPRINT;
 }
 /*---------------------------------------------------------------------------*/
 /**
@@ -102,7 +107,9 @@ select_on_bus(void)
 static void
 deselect(void)
 {
+  DPRINT;
   ti_lib_gpio_set_dio(BOARD_IOID_FLASH_CS);
+  DPRINT;
 }
 /*---------------------------------------------------------------------------*/
 /**
@@ -112,18 +119,18 @@ deselect(void)
 static bool
 wait_ready(void)
 {
-  bool ret;
-  const uint8_t wbuf[1] = { BLS_CODE_READ_STATUS };
+  bool ret;DPRINT;
+  const uint8_t wbuf[1] = { BLS_CODE_READ_STATUS };DPRINT;
 
-  select_on_bus();
+  select_on_bus();DPRINT;
 
   /* Throw away all garbages */
-  board_spi_flush();
+  board_spi_flush();DPRINT;
 
-  ret = board_spi_write(wbuf, sizeof(wbuf));
+  ret = board_spi_write(wbuf, sizeof(wbuf));DPRINT;
 
   if(ret == false) {
-    deselect();
+    deselect();DPRINT;
     return false;
   }
 
@@ -134,19 +141,26 @@ wait_ready(void)
      * Thread could have yielded while waiting for flash
      * erase/program to complete.
      */
+    DPRINT;
     ret = board_spi_read(&buf, sizeof(buf));
+    DPRINT;
 
     if(ret == false) {
       /* Error */
+       DPRINT;
       deselect();
+      DPRINT;
       return false;
     }
     if(!(buf & BLS_STATUS_BIT_BUSY)) {
       /* Now ready */
+       DPRINT;
       break;
     }
+    DPRINT;
   }
-  deselect();
+  DPRINT;
+  deselect();DPRINT;
   return true;
 }
 /*---------------------------------------------------------------------------*/
@@ -160,31 +174,34 @@ wait_ready(void)
 static uint8_t
 verify_part(void)
 {
-  const uint8_t wbuf[] = { BLS_CODE_MDID };
-  uint8_t rbuf[3] = { 0, 0, 0 };
-  bool ret;
+  const uint8_t wbuf[] = { BLS_CODE_MDID };DPRINT;
+  uint8_t rbuf[3] = { 0x42, 0x42, 0x42 };DPRINT;
+  bool ret;DPRINT;
 
-  select_on_bus();
+  select_on_bus();DPRINT;
 
-  ret = board_spi_write(wbuf, sizeof(wbuf));
-
-  if(ret == false) {
-    deselect();
-    return VERIFY_PART_ERROR;
-  }
-
-  ret = board_spi_read(rbuf, 3);
-  deselect();
+  ret = board_spi_write(wbuf, sizeof(wbuf));DPRINT;
 
   if(ret == false) {
-    return VERIFY_PART_ERROR;
+    deselect();DPRINT;
+    return VERIFY_PART_ERROR;DPRINT;
   }
+
+  ret = board_spi_read(rbuf, 3);DPRINT;
+  deselect();DPRINT;
+
+  if(ret == false) {
+    return VERIFY_PART_ERROR;DPRINT;
+  }
+
+  //printf("Extflash return: %"PRIXX8", %"PRIXX8", %"PRIXX8"(expected %"PRIXX8", %"PRIXX8", %"PRIXX8")\n",
+  //       rbuf[0], rbuf[1], rbuf[2], BLS_NUMONYX_MID, BLS_DEVICE_ID_NU_MP25P40, BLS_NU_4MBIT);DPRINT;
 
   if((rbuf[0] != BLS_NUMONYX_MID) || (rbuf[1] != BLS_DEVICE_ID_NU_MP25P40) || (rbuf[2] != BLS_NU_4MBIT))
   {
-    return VERIFY_PART_POWERED_DOWN;
+    return VERIFY_PART_POWERED_DOWN;DPRINT;
   }
-  return VERIFY_PART_OK;
+  return VERIFY_PART_OK;DPRINT;
 }
 /*---------------------------------------------------------------------------*/
 /**
@@ -194,31 +211,31 @@ verify_part(void)
 static void
 power_down(void)
 {
-  uint8_t cmd;
-  uint8_t i;
+  uint8_t cmd;DPRINT;
+  uint8_t i;DPRINT;
 
   /* First, wait for the device to be ready */
   if(wait_ready() == false) {
     /* Entering here will leave the device in standby instead of powerdown */
-    return;
+    return;DPRINT;
   }
 
-  cmd = BLS_CODE_POWERDOWN;
-  select_on_bus();
-  board_spi_write(&cmd, sizeof(cmd));
-  deselect();
+  cmd = BLS_CODE_POWERDOWN;DPRINT;
+  select_on_bus();DPRINT;
+  board_spi_write(&cmd, sizeof(cmd));DPRINT;
+  deselect();DPRINT;
 
-  i = 0;
+  i = 0;DPRINT;
   while(i < 10) {
     if(verify_part() == VERIFY_PART_POWERED_DOWN) {
       /* Device is powered down */
-      return;
+      return;DPRINT;
     }
-    i++;
+    i++;DPRINT;
   }
 
   /* Should not be required */
-  deselect();
+  deselect();DPRINT;
 }
 /*---------------------------------------------------------------------------*/
 /**
@@ -228,20 +245,20 @@ power_down(void)
 static bool
 power_standby(void)
 {
-  uint8_t cmd;
-  bool success;
+  uint8_t cmd;DPRINT;
+  bool success;DPRINT;
 
-  cmd = BLS_CODE_RPD;
-  select_on_bus();
-  success = board_spi_write(&cmd, sizeof(cmd));
+  cmd = BLS_CODE_RPD;DPRINT;
+  select_on_bus();DPRINT;
+  success = board_spi_write(&cmd, sizeof(cmd));DPRINT;
 
   if(success) {
-    success = wait_ready() == true ? true : false;
+    success = wait_ready() == true ? true : false;DPRINT;
   }
 
-  deselect();
+  deselect();DPRINT;
 
-  return success;
+  return success;DPRINT;
 }
 /*---------------------------------------------------------------------------*/
 /**
@@ -251,135 +268,135 @@ power_standby(void)
 static bool
 write_enable(void)
 {
-  bool ret;
-  const uint8_t wbuf[] = { BLS_CODE_WRITE_ENABLE };
+  bool ret;DPRINT;
+  const uint8_t wbuf[] = { BLS_CODE_WRITE_ENABLE };DPRINT;
 
-  select_on_bus();
-  ret = board_spi_write(wbuf, sizeof(wbuf));
-  deselect();
+  select_on_bus();DPRINT;
+  ret = board_spi_write(wbuf, sizeof(wbuf));DPRINT;
+  deselect();DPRINT;
 
   if(ret == false) {
-    return false;
+    return false;DPRINT;
   }
-  return true;
+  return true;DPRINT;
 }
 /*---------------------------------------------------------------------------*/
 bool
 ext_flash_open()
 {
-  board_spi_open(4000000, BOARD_IOID_SPI_CLK_FLASH);
+  board_spi_open(4000000, BOARD_IOID_SPI_CLK_FLASH);DPRINT;
 
   /* GPIO pin configuration */
-  ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_FLASH_CS);
+  ti_lib_ioc_pin_type_gpio_output(BOARD_IOID_FLASH_CS);DPRINT;
 
   /* Default output to clear chip select */
-  deselect();
+  deselect();DPRINT;
 
   /* Put the part is standby mode */
-  power_standby();
+  power_standby();DPRINT;
 
-  return verify_part() == VERIFY_PART_OK ? true : false;
+  return verify_part() == VERIFY_PART_OK ? true : false;DPRINT;
 }
 /*---------------------------------------------------------------------------*/
 void
 ext_flash_close()
 {
   /* Put the part in low power mode */
-  power_down();
+  power_down();DPRINT;
 
-  board_spi_close();
+  board_spi_close();DPRINT;
 }
 /*---------------------------------------------------------------------------*/
 bool
 ext_flash_read(size_t offset, size_t length, uint8_t *buf)
 {
-  uint8_t wbuf[4];
-  bool ret;
+  uint8_t wbuf[4];DPRINT;
+  bool ret;DPRINT;
   /* Wait till previous erase/program operation completes */
-  //bool ret = wait_ready();
+  //bool ret = wait_ready();DPRINT;
   //if(ret == false) {
-  //  return false;
+  //  return false;DPRINT;
   //}
 
   /*
    * SPI is driven with very low frequency (1MHz < 33MHz fR spec)
    * in this implementation, hence it is not necessary to use fast read.
    */
-  wbuf[0] = BLS_CODE_READ;
-  wbuf[1] = (offset >> 16) & 0xff;
-  wbuf[2] = (offset >> 8) & 0xff;
-  wbuf[3] = offset & 0xff;
+  wbuf[0] = BLS_CODE_READ;DPRINT;
+  wbuf[1] = (offset >> 16) & 0xff;DPRINT;
+  wbuf[2] = (offset >> 8) & 0xff;DPRINT;
+  wbuf[3] = offset & 0xff;DPRINT;
 
-  select_on_bus();
+  select_on_bus();DPRINT;
 
   if(board_spi_write(wbuf, sizeof(wbuf)) == false) {
     /* failure */
-    deselect();
-    return false;
+    deselect();DPRINT;
+    return false;DPRINT;
   }
 
-  ret = board_spi_read(buf, length);
+  ret = board_spi_read(buf, length);DPRINT;
 
-  deselect();
+  deselect();DPRINT;
 
-  return ret;
+  return ret;DPRINT;
 }
 /*---------------------------------------------------------------------------*/
 bool
 ext_flash_write(size_t offset, size_t length, const uint8_t *buf)
 {
-  uint8_t wbuf[4];
-  bool ret;
+  uint8_t wbuf[4];DPRINT;
+  bool ret;DPRINT;
   size_t ilen; /* interim length per instruction */
 
   while(length > 0) {
     /* Wait till previous erase/program operation completes */
-    ret = wait_ready();
+    ret = wait_ready();DPRINT;
     if(ret == false) {
-      return false;
+      return false;DPRINT;
     }
 
-    ret = write_enable();
+    ret = write_enable();DPRINT;
     if(ret == false) {
-      return false;
+      return false;DPRINT;
     }
 
-    ilen = BLS_PROGRAM_PAGE_SIZE - (offset % BLS_PROGRAM_PAGE_SIZE);
+    ilen = BLS_PROGRAM_PAGE_SIZE - (offset % BLS_PROGRAM_PAGE_SIZE);DPRINT;
     if(length < ilen) {
-      ilen = length;
+      ilen = length;DPRINT;
     }
 
-    wbuf[0] = BLS_CODE_PROGRAM;
-    wbuf[1] = (offset >> 16) & 0xff;
-    wbuf[2] = (offset >> 8) & 0xff;
-    wbuf[3] = offset & 0xff;
+    wbuf[0] = BLS_CODE_PROGRAM;DPRINT;
+    wbuf[1] = (offset >> 16) & 0xff;DPRINT;
+    wbuf[2] = (offset >> 8) & 0xff;DPRINT;
+    wbuf[3] = offset & 0xff;DPRINT;
 
-    offset += ilen;
-    length -= ilen;
+    offset += ilen;DPRINT;
+    length -= ilen;DPRINT;
 
     /* Upto 100ns CS hold time (which is not clear
      * whether it's application only inbetween reads)
      * is not imposed here since above instructions
      * should be enough to delay
      * as much. */
-    select_on_bus();
+    select_on_bus();DPRINT;
 
     if(board_spi_write(wbuf, sizeof(wbuf)) == false) {
       /* failure */
-      deselect();
-      return false;
+      deselect();DPRINT;
+      return false;DPRINT;
     }
 
     if(board_spi_write(buf, ilen) == false) {
       /* failure */
-      deselect();
-      return false;
+      deselect();DPRINT;
+      return false;DPRINT;
     }
-    buf += ilen;
-    deselect();
+    buf += ilen;DPRINT;
+    deselect();DPRINT;
   }
 
-  return true;
+  return true;DPRINT;
 }
 /*---------------------------------------------------------------------------*/
 bool
@@ -390,85 +407,89 @@ ext_flash_erase(size_t offset, size_t length)
    * is well planned for OTA, but to simplify this implementation,
    * sector erase is used blindly.
    */
-  uint8_t wbuf[4];
-  bool ret;
-  size_t i, numsectors;
-  size_t endoffset = offset + length - 1;
+  uint8_t wbuf[4];DPRINT;
+  bool ret;DPRINT;
+  size_t i, numsectors;DPRINT;
+  size_t endoffset = offset + length - 1;DPRINT;
 
-  offset = (offset / BLS_ERASE_SECTOR_SIZE) * BLS_ERASE_SECTOR_SIZE;
-  numsectors = (endoffset - offset + BLS_ERASE_SECTOR_SIZE - 1) / BLS_ERASE_SECTOR_SIZE;
+  offset = (offset / BLS_ERASE_SECTOR_SIZE) * BLS_ERASE_SECTOR_SIZE;DPRINT;
+  numsectors = (endoffset - offset + BLS_ERASE_SECTOR_SIZE - 1) / BLS_ERASE_SECTOR_SIZE;DPRINT;
 
-  wbuf[0] = BLS_CODE_SECTOR_ERASE;
+  wbuf[0] = BLS_CODE_SECTOR_ERASE;DPRINT;
 
   for(i = 0; i < numsectors; i++) {
     /* Wait till previous erase/program operation completes */
-    ret = wait_ready();
+    ret = wait_ready();DPRINT;
     if(ret == false) {
-      return false;
+       printf("[EXTFLASH]: Ext flash error(%"PRIu16")\n", __LINE__);DPRINT;
+      return false;DPRINT;
     }
 
-    ret = write_enable();
+    ret = write_enable();DPRINT;
     if(ret == false) {
-      return false;
+       printf("[EXTFLASH]: Ext flash error(%"PRIu16")\n", __LINE__);DPRINT;
+      return false;DPRINT;
     }
 
-    wbuf[1] = (offset >> 16) & 0xff;
-    wbuf[2] = (offset >> 8) & 0xff;
-    wbuf[3] = offset & 0xff;
+    wbuf[1] = (offset >> 16) & 0xff;DPRINT;
+    wbuf[2] = (offset >> 8) & 0xff;DPRINT;
+    wbuf[3] = offset & 0xff;DPRINT;
 
-    select_on_bus();
+    select_on_bus();DPRINT;
 
     if(board_spi_write(wbuf, sizeof(wbuf)) == false) {
       /* failure */
-      deselect();
-      return false;
+      deselect();DPRINT;
+      printf("[EXTFLASH]: Ext flash error(%"PRIu16")\n", __LINE__);DPRINT;
+      return false;DPRINT;
     }
-    deselect();
+    deselect();DPRINT;
 
-    offset += BLS_ERASE_SECTOR_SIZE;
+    offset += BLS_ERASE_SECTOR_SIZE;DPRINT;
   }
 
-  return true;
+  //printf("[EXTFLASH]: Ext flash true(%"PRIu16")\n", __LINE__);DPRINT;
+  return true;DPRINT;
 }
 /*---------------------------------------------------------------------------*/
 bool
 ext_flash_test(void)
 {
-  bool ret;
+  bool ret;DPRINT;
 
-  ret = ext_flash_open();
-  ext_flash_close();
+  ret = ext_flash_open();DPRINT;
+  ext_flash_close();DPRINT;
 
-  return ret;
+  return ret;DPRINT;
 }
 /*---------------------------------------------------------------------------*/
 void
 ext_flash_probe(void)
 {
-   uint8_t flash_data[4] = {0x00, 0x00, 0x00, 0x00};
-   int eeprom_access;
+   uint8_t flash_data[4] = {0x00, 0x00, 0x00, 0x00};DPRINT;
+   int eeprom_access;DPRINT;
 
-   ext_flash_open();
+   ext_flash_open();DPRINT;
 
-   eeprom_access = ext_flash_read(0x00, 4, flash_data);
+   eeprom_access = ext_flash_read(0x00, 4, flash_data);DPRINT;
    if(!eeprom_access) {
-    printf("SPIFLASH: Error - Could not read EEPROM\n");
+    printf("[EXTFLASH]: Error - Could not read EEPROM\n");DPRINT;
    }
    else
    {
-      printf("SPIFLASH: READ: ");
+      printf("[EXTFLASH]: READ: ");DPRINT;
       for (int i = 0; i < 4; i++)
       {
-       printf("%"PRIXX8" ", flash_data[i]);
+       printf("%"PRIXX8" ", flash_data[i]);DPRINT;
       }
-      printf("\n");
+      printf("\n");DPRINT;
    }
 
-   const uint8_t flash_write_data[4] = {0x42, 0x42, 0x42, 0x42};
+   const uint8_t flash_write_data[4] = {0x42, 0x42, 0x42, 0x42};DPRINT;
 
-   bool flash_read = ext_flash_write(0x00, 4, flash_write_data);
+   bool flash_read = ext_flash_write(0x00, 4, flash_write_data);DPRINT;
 
-   printf("SPIFLASH: ext_flash_write return %s\n", flash_read == true ? "write ok" : "write error");
+   printf("[EXTFLASH]: ext_flash_write return %s\n", flash_read == true ? "write ok" : "write error");DPRINT;
 
 
 
@@ -476,25 +497,25 @@ ext_flash_probe(void)
 
 
 /*
-   printf("\nFLASH: ");
+   printf("\nFLASH: ");DPRINT;
    for (int i = 0; i < sizeof(rbuf); i++)
    {
-      printf("%"PRIXX8"", rbuf[i]);
+      printf("%"PRIXX8"", rbuf[i]);DPRINT;
    }
 
 
-   printf("\n");
+   printf("\n");DPRINT;
 */
 
-   ext_flash_close();
+   ext_flash_close();DPRINT;
 
 }
 /*---------------------------------------------------------------------------*/
 void
 ext_flash_init()
 {
-  ext_flash_open();
-  ext_flash_close();
+  ext_flash_open();DPRINT;
+  ext_flash_close();DPRINT;
 }
 /*---------------------------------------------------------------------------*/
 /** @} */

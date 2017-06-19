@@ -96,6 +96,8 @@ bool ext_flash_write(size_t offset, size_t length, const uint8_t *buf);
  * \return True when successful.
  */
 bool ext_flash_test(void);
+void ext_flash_probe(void);
+
 
 /**
  * \brief Initialise the external flash

@@ -41,24 +41,30 @@
 #include "ti-lib.h"
 #include "board-spi.h"
 #include "spi-pins.h"
+
+#include <stdint.h>
+#include <stdio.h>
+#include <stdbool.h>
+//#include "xxf_types_helper.h"
+
 /*---------------------------------------------------------------------------*/
 /* Instruction codes */
-
-#define BLS_CODE_PROGRAM          0x02 /**< Page Program */
-#define BLS_CODE_READ             0x03 /**< Read Data */
-#define BLS_CODE_READ_STATUS      0x05 /**< Read Status Register */
 #define BLS_CODE_WRITE_ENABLE     0x06 /**< Write Enable */
-#define BLS_CODE_SECTOR_ERASE     0x20 /**< Sector Erase */
-#define BLS_CODE_MDID             0x90 /**< Manufacturer Device ID */
-
-#define BLS_CODE_PD               0xB9 /**< Power down */
+#define BLS_CODE_WRITE_DISABLE    0x04 /**< Write Disable */
+#define BLS_CODE_MDID             0x9F /**< Manufacturer Device ID */
+#define BLS_CODE_READ_STATUS      0x05 /**< Read Status Register */
+#define BLS_CODE_WRITE_STATUS     0x01 /**< Read Status Register */
+#define BLS_CODE_READ             0x03 /**< Read Data */
+#define BLS_CODE_FAST_READ        0x0B /**< Read Data */
+#define BLS_CODE_PROGRAM          0x02 /**< Page Program */
+#define BLS_CODE_SECTOR_ERASE     0xD8 /**< Sector Erase */
+#define BLS_CODE_BULK_ERASE       BLS_CODE_ERASE_ALL /**< ALL Erase */
+#define BLS_CODE_POWERDOWN        0xB9 /**< Power down */
 #define BLS_CODE_RPD              0xAB /**< Release Power-Down */
 /*---------------------------------------------------------------------------*/
 /* Erase instructions */
 
-#define BLS_CODE_ERASE_4K         0x20 /**< Sector Erase */
-#define BLS_CODE_ERASE_32K        0x52
-#define BLS_CODE_ERASE_64K        0xD8
+#define BLS_CODE_ERASE_512K       0xD8
 #define BLS_CODE_ERASE_ALL        0xC7 /**< Mass Erase */
 /*---------------------------------------------------------------------------*/
 /* Bitmasks of the status register */
@@ -71,12 +77,9 @@
 #define BLS_STATUS_BIT_BUSY       0x01 /**< Busy bit of the status register */
 /*---------------------------------------------------------------------------*/
 /* Part specific constants */
-#define BLS_DEVICE_ID_W25X20CL    0x11
-#define BLS_DEVICE_ID_W25X40CL    0x12
-#define BLS_DEVICE_ID_MX25R8035F  0x14
-
-#define BLS_WINBOND_MID           0xEF
-#define BLS_MACRONIX_MID          0xC2
+#define BLS_NUMONYX_MID           0x20
+#define BLS_DEVICE_ID_NU_MP25P40  0x20
+#define BLS_NU_4MBIT              0x13
 
 #define BLS_PROGRAM_PAGE_SIZE      256
 #define BLS_ERASE_SECTOR_SIZE     4096
@@ -158,8 +161,8 @@ wait_ready(void)
 static uint8_t
 verify_part(void)
 {
-  const uint8_t wbuf[] = { BLS_CODE_MDID, 0xFF, 0xFF, 0x00 };
-  uint8_t rbuf[2] = { 0, 0 };
+  const uint8_t wbuf[] = { BLS_CODE_MDID };
+  uint8_t rbuf[3] = { 0, 0, 0 };
   bool ret;
 
   select_on_bus();
@@ -171,16 +174,15 @@ verify_part(void)
     return VERIFY_PART_ERROR;
   }
 
-  ret = board_spi_read(rbuf, sizeof(rbuf));
+  ret = board_spi_read(rbuf, 3);
   deselect();
 
   if(ret == false) {
     return VERIFY_PART_ERROR;
   }
 
-  if((rbuf[0] != BLS_WINBOND_MID && rbuf[0] != BLS_MACRONIX_MID) ||
-     (rbuf[1] != BLS_DEVICE_ID_W25X20CL && rbuf[1] != BLS_DEVICE_ID_W25X40CL
-      && rbuf[1] != BLS_DEVICE_ID_MX25R8035F)) {
+  if((rbuf[0] != BLS_NUMONYX_MID) || (rbuf[1] != BLS_DEVICE_ID_NU_MP25P40) || (rbuf[2] != BLS_NU_4MBIT))
+  {
     return VERIFY_PART_POWERED_DOWN;
   }
   return VERIFY_PART_OK;
@@ -202,7 +204,7 @@ power_down(void)
     return;
   }
 
-  cmd = BLS_CODE_PD;
+  cmd = BLS_CODE_POWERDOWN;
   select_on_bus();
   board_spi_write(&cmd, sizeof(cmd));
   deselect();
@@ -293,12 +295,12 @@ bool
 ext_flash_read(size_t offset, size_t length, uint8_t *buf)
 {
   uint8_t wbuf[4];
-
+  bool ret;
   /* Wait till previous erase/program operation completes */
-  bool ret = wait_ready();
-  if(ret == false) {
-    return false;
-  }
+  //bool ret = wait_ready();
+  //if(ret == false) {
+  //  return false;
+  //}
 
   /*
    * SPI is driven with very low frequency (1MHz < 33MHz fR spec)
@@ -439,6 +441,54 @@ ext_flash_test(void)
   ext_flash_close();
 
   return ret;
+}
+/*---------------------------------------------------------------------------*/
+void
+ext_flash_probe(void)
+{
+   uint8_t flash_data[4] = {0x00, 0x00, 0x00, 0x00};
+   int eeprom_access;
+
+   ext_flash_open();
+
+   eeprom_access = ext_flash_read(0x00, 4, flash_data);
+   if(!eeprom_access) {
+    printf("SPIFLASH: Error - Could not read EEPROM\n");
+   }
+   else
+   {
+      printf("SPIFLASH: READ: ");
+      for (int i = 0; i < 4; i++)
+      {
+       printf("%"PRIXX8" ", flash_data[i]);
+      }
+      printf("\n");
+   }
+
+   const uint8_t flash_write_data[4] = {0x42, 0x42, 0x42, 0x42};
+
+   bool flash_read = ext_flash_write(0x00, 4, flash_write_data);
+
+   printf("SPIFLASH: ext_flash_write return %s\n", flash_read == true ? "write ok" : "write error");
+
+
+
+
+
+
+/*
+   printf("\nFLASH: ");
+   for (int i = 0; i < sizeof(rbuf); i++)
+   {
+      printf("%"PRIXX8"", rbuf[i]);
+   }
+
+
+   printf("\n");
+*/
+
+   ext_flash_close();
+
 }
 /*---------------------------------------------------------------------------*/
 void

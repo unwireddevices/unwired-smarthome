@@ -35,6 +35,8 @@
  *
  */
 /*---------------------------------------------------------------------------*/
+#define DPRINT printf(">dag_node.c:%"PRIu16"\n", __LINE__);watchdog_periodic();
+
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>
@@ -110,6 +112,7 @@
 
 #define MAX_NON_ANSWERED_PINGS                  3
 
+#define FW_                                     0x00 //fixme
 #define HEXRAW_MODE                             0x01
 
 #define HEXVIEW_MODE                            0x00
@@ -176,12 +179,12 @@ hexraw_print(uint16_t flash_length, uint8_t *flash_read_data_buffer)
 /*---------------------------------------------------------------------------*/
 
 void
-hexview_print(uint16_t flash_length, uint8_t *flash_read_data_buffer)
+hexview_print(uint16_t flash_length, uint8_t *flash_read_data_buffer, uint32_t offset)
 {
    printf("SPIFLASH DAMP: \n");
    for (uint32_t i = 0; i < flash_length; i = i + 16)
    {
-      printf("0x%08"PRIX32": ", i);
+      printf("0x%08"PRIX32": ", i+offset);
       for (int i2 = 0; i2 < 16; i2++)
       {
          printf("%"PRIXX8" ", flash_read_data_buffer[i2+i]);
@@ -198,10 +201,11 @@ void
 flash_damp_hex(uint8_t mode)
 {
    const uint16_t flash_length = FIRMWARE_PAYLOAD_LENGTH * 10;
+   const uint32_t start_adress = 0x19000;
    uint8_t flash_read_data_buffer[flash_length];
 
    ext_flash_open();
-   bool eeprom_access = ext_flash_read(0x00, flash_length, flash_read_data_buffer);
+   bool eeprom_access = ext_flash_read(start_adress, flash_length, flash_read_data_buffer);
    ext_flash_close();
 
    if(!eeprom_access)
@@ -211,11 +215,30 @@ flash_damp_hex(uint8_t mode)
    else
    {
       if (mode == HEXVIEW_MODE)
-         hexview_print(flash_length, flash_read_data_buffer);
+         hexview_print(flash_length, flash_read_data_buffer, start_adress);
       if (mode == HEXRAW_MODE)
          hexraw_print(flash_length, flash_read_data_buffer);
    }
 }
+
+void
+verify_internal_firmware_v()
+{
+
+   //OTAMetadata_t current_firmware;
+   //get_current_metadata( &current_firmware );
+   //print_metadata(&current_firmware);
+   //verify_current_firmware( &current_firmware );
+   //backup_golden_image();
+}
+
+void
+test_extflash_t()
+{
+   backup_golden_image();
+}
+
+
 
 /*---------------------------------------------------------------------------*/
 
@@ -230,6 +253,14 @@ uart_console(unsigned char uart_char)
 
    if (uart_char == 'c')
       flash_erase(0x00, FIRMWARE_PAYLOAD_LENGTH);
+
+   if (uart_char == 'v')
+      verify_internal_firmware_v();
+
+   if (uart_char == 't')
+   {
+      test_extflash_t();
+   }
 }
 
 /*---------------------------------------------------------------------------*/
