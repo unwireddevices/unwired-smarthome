@@ -44,10 +44,10 @@ SOURCEDIRS = . ./ext-flash $(TI_XXWARE)/startup_files $(TI_XXWARE)/driverlib
 vpath %.c $(SOURCEDIRS)
 SOURCE_FILES = $(foreach dir, $(SOURCEDIRS), $(notdir $(wildcard $(dir)/*.c)))
 
-SOURCE_FILES += ota.c
+SOURCE_FILES += ../ota.c
 vpath ota.c $(OTA_SOURCE)
 
-ota_src += ota.c ota-download.c
+ota_src += ../ota.c ota-download.c
 
 CFLAGS += -mcpu=cortex-m3 -mthumb -mlittle-endian
 CFLAGS += -ffunction-sections -fdata-sections

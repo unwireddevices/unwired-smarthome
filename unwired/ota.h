@@ -9,10 +9,9 @@
 #include <stdio.h>
 
 #if DEBUG
-  
   #define PRINTF(...) printf(__VA_ARGS__)
 #else
-  #define PRINTF(...)
+  #define PRINTF(...) printf(__VA_ARGS__)
 #endif
 
 #include "ti-lib.h"
@@ -106,5 +105,8 @@ store_firmware_data( uint32_t ext_address, uint8_t *data, size_t data_length );
 
 extern void
 jump_to_image(uint32_t destination_address);
+
+int
+erase_extflash_page( uint32_t ext_address );
 
 #endif
