@@ -108,6 +108,6 @@ clean:
 	-rm -f *~ *core core *.srec \
 	*.lst *.map \
 	*.cprg *.bin *.elf *.hex *.data contiki*.a *.firmware core-labels.S *.ihex *.ini \
-	*.ce *.co
+	*.ce *.co *.o
 	rm -rf $(CLEAN)
 	-rm -rf $(OBJECTDIR)
