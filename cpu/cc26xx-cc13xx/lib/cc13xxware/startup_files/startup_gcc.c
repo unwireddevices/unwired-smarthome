@@ -48,7 +48,7 @@
 
 #include <inc/hw_types.h>
 #include <driverlib/setup.h>
-#include <stdio.h>
+//#include <stdio.h>
 
 //*****************************************************************************
 //
@@ -259,7 +259,7 @@ NmiSRHandler(void)
     //
     // Enter an infinite loop.
     //
-   printf("NmiSRHandler. Core not dump, this is embeeeeeeded!\n");
+   //printf("NmiSRHandler. Core not dump, this is embeeeeeeded!\n");
 
     while(1)
     {
@@ -279,7 +279,7 @@ FaultISRHandler(void)
     //
     // Enter an infinite loop.
     //
-   printf("FaultISRHandler. Core not dump, this is embeeeeeeded!\n");
+   //printf("FaultISRHandler. Core not dump, this is embeeeeeeded!\n");
 
     while(1)
     {
@@ -299,7 +299,7 @@ IntDefaultHandler(void)
     //
     // Go into an infinite loop.
     //
-   printf("IntDefaultHandler. Core not dump, this is embeeeeeeded!\n");
+   //printf("IntDefaultHandler. Core not dump, this is embeeeeeeded!\n");
 
     while(1)
     {
