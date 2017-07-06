@@ -587,9 +587,9 @@ void send_status_packet(const uip_ipaddr_t *parent_addr,
    udp_buffer[11] = *uptime_uint8_t++;
    udp_buffer[12] = *uptime_uint8_t++;
    udp_buffer[13] = *uptime_uint8_t++;
-   udp_buffer[14] = *uptime_uint8_t++;
+   udp_buffer[14] = *uptime_uint8_t;
    udp_buffer[15] = *rssi_parent_uint8_t++;
-   udp_buffer[16] = *rssi_parent_uint8_t++;
+   udp_buffer[16] = *rssi_parent_uint8_t;
    udp_buffer[17] = temp;
    udp_buffer[18] = voltage;
    udp_buffer[19] = DATA_RESERVED;
@@ -648,7 +648,7 @@ void send_fw_chunk_req_packet(uint16_t chunk_num)
    udp_buffer[2] = DATA_TYPE_FIRMWARE_CMD;
    udp_buffer[3] = DATA_TYPE_FIRMWARE_COMMAND_CHANK_REQ;
    udp_buffer[4] = *chunk_num_uint8_t++;
-   udp_buffer[5] = *chunk_num_uint8_t++;
+   udp_buffer[5] = *chunk_num_uint8_t;
    udp_buffer[6] = DATA_RESERVED;
    udp_buffer[7] = DATA_RESERVED;
    udp_buffer[8] = DATA_RESERVED;
