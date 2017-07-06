@@ -42,6 +42,7 @@
 #include "spi-pins.h"
 
 #include <stdbool.h>
+
 /*---------------------------------------------------------------------------*/
 static bool
 accessible(void)
