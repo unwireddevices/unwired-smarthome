@@ -15,7 +15,7 @@ SIZE    = arm-none-eabi-size
 SREC_CAT = srec_cat
 
 CONTIKI = ../..
-OTA_SOURCE = .
+OTA_SOURCE = ./ext-flash
 
 CPU_ABS_PATH = $(CONTIKI)/cpu/cc26xx-cc13xx
 TARGET=srf06-cc26xx
@@ -44,28 +44,14 @@ SOURCEDIRS = . ./ext-flash $(TI_XXWARE)/startup_files $(TI_XXWARE)/driverlib
 vpath %.c $(SOURCEDIRS)
 SOURCE_FILES = $(foreach dir, $(SOURCEDIRS), $(notdir $(wildcard $(dir)/*.c)))
 
-SOURCE_FILES += ../ota.c
+SOURCE_FILES += ota.c
 vpath ota.c $(OTA_SOURCE)
-
-ota_src += ../ota.c ota-download.c
 
 CFLAGS += -mcpu=cortex-m3 -mthumb -mlittle-endian
 CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -fshort-enums -fomit-frame-pointer -fno-strict-aliasing
 CFLAGS += -Wall -std=c99
 CFLAGS += -g
-
-#	If CLEAR_OTA_SLOTS=1, the bootloader will always delete OTA slots 1-3
-#	before executing any other code.  This can be used to clear the ext-flash.
-ifeq ($(CLEAR_OTA_SLOTS),1)
-	CFLAGS += -DCLEAR_OTA_SLOTS=1
-endif
-
-# If BURN_GOLDEN_IMAGE=1, the bootloader will backup the current firmware
-#	to OTA slot 0 before executing any other code.
-ifeq ($(BURN_GOLDEN_IMAGE),1)
-	CFLAGS += -DBURN_GOLDEN_IMAGE=1
-endif
 
 ### Are we building with code size optimisations?
 ifdef WERROR
@@ -108,6 +94,6 @@ clean:
 	-rm -f *~ *core core *.srec \
 	*.lst *.map \
 	*.cprg *.bin *.elf *.hex *.data contiki*.a *.firmware core-labels.S *.ihex *.ini \
-	*.ce *.co *.o
+	*.ce *.co
 	rm -rf $(CLEAN)
 	-rm -rf $(OBJECTDIR)
