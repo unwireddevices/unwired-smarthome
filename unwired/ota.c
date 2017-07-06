@@ -13,7 +13,7 @@
 #include <stdbool.h>
 
 
-#define DPRINT //printf(">ota.c:%"PRIu16"\n", __LINE__);watchdog_periodic();
+#define DPRINT //printf("\t\t\t\t\t>ota.c:%"PRIu16"\n", __LINE__);watchdog_periodic();
 
 
 uint8_t ota_images[3] = OTA_ADDRESSES;
