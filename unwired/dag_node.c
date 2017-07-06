@@ -227,21 +227,56 @@ flash_damp_hex(uint8_t mode)
 }
 
 void
-verify_internal_firmware_v()
+verify_int_firmware_v()
 {
+   printf("\n\n");
 
-   //OTAMetadata_t current_firmware;
-   //get_current_metadata( &current_firmware );
-   //print_metadata(&current_firmware);
-   //verify_current_firmware( &current_firmware );
-   //backup_golden_image();
+   printf("Internal firmware:\n");
+   OTAMetadata_t current_firmware;
+   get_current_metadata( &current_firmware );
+   print_metadata(&current_firmware);
+   verify_current_firmware( &current_firmware );
+
+   printf("\n\n");
+
+   printf("Golden image firmware:\n");
+   OTAMetadata_t golden_image;
+   get_ota_slot_metadata(0, &golden_image);
+   print_metadata(&golden_image);
+   int verify_result = verify_ota_slot(0);
+   if (verify_result == -2){
+      printf("OTA slot 0 non-correct CRC\n");
+   }
+   if (verify_result == -1){
+      printf("OTA slot 0 non-read flash\n");
+   }
+   if (verify_result == 0){
+      printf("OTA slot 0 correct CRC\n");
+   }
 }
+
 
 void
-test_extflash_t()
+verify_ext_firmware_e()
 {
-   backup_golden_image();
+   printf("\n\n");
+
+   printf("OTA slot 1 firmware:\n");
+   OTAMetadata_t golden_image;
+   get_ota_slot_metadata(1, &golden_image);
+   print_metadata(&golden_image);
+   int verify_result = verify_ota_slot(1);
+   if (verify_result == -2){
+      printf("OTA slot 1 non-correct CRC\n");
+   }
+   if (verify_result == -1){
+      printf("OTA slot 1 non-read flash\n");
+   }
+   if (verify_result == 0){
+      printf("OTA slot 1 correct CRC\n");
+   }
 }
+
 
 
 
@@ -256,15 +291,21 @@ uart_console(unsigned char uart_char)
    if (uart_char == 'r')
       flash_damp_hex(HEXRAW_MODE);
 
-   if (uart_char == 'c')
-      flash_erase(0x00, FIRMWARE_PAYLOAD_LENGTH);
+   if (uart_char == 'e')
+      verify_ext_firmware_e();
 
-   if (uart_char == 'v')
-      verify_internal_firmware_v();
+   if (uart_char == 'i')
+      verify_int_firmware_v();
+
+   if (uart_char == 'b')
+      backup_golden_image();
+
+   if (uart_char == 'o')
+      verify_ota_slot(1);
 
    if (uart_char == 't')
    {
-      test_extflash_t();
+
    }
 }
 
