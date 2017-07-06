@@ -166,22 +166,20 @@ flash_erase(size_t offset, size_t length)
 /*---------------------------------------------------------------------------*/
 
 void
-hexraw_print(uint16_t flash_length, uint8_t *flash_read_data_buffer)
+hexraw_print(uint32_t flash_length, uint8_t *flash_read_data_buffer)
 {
-   printf("SPIFLASH DAMP: \n");
    for (uint32_t i = 0; i < flash_length; i++)
    {
          printf("%"PRIXX8, flash_read_data_buffer[i]);
    }
-   printf("\nSPIFLASH DAMP END \n");
 }
 
 /*---------------------------------------------------------------------------*/
 
 void
-hexview_print(uint16_t flash_length, uint8_t *flash_read_data_buffer, uint32_t offset)
+hexview_print(uint32_t flash_length, uint8_t *flash_read_data_buffer, uint32_t offset)
 {
-   printf("SPIFLASH DAMP: \n");
+
    for (uint32_t i = 0; i < flash_length; i = i + 16)
    {
       printf("0x%08"PRIX32": ", i+offset);
@@ -192,7 +190,7 @@ hexview_print(uint16_t flash_length, uint8_t *flash_read_data_buffer, uint32_t o
       }
       printf("\n");
    }
-   printf("\nSPIFLASH DAMP END \n");
+
 }
 
 /*---------------------------------------------------------------------------*/
@@ -200,25 +198,32 @@ hexview_print(uint16_t flash_length, uint8_t *flash_read_data_buffer, uint32_t o
 void
 flash_damp_hex(uint8_t mode)
 {
-   const uint16_t flash_length = FIRMWARE_PAYLOAD_LENGTH * 10;
-   const uint32_t start_adress = 0x19000;
-   uint8_t flash_read_data_buffer[flash_length];
+   const uint32_t start_adress = (ota_images[1-1] << 12);
+   const uint32_t read_length = 0x400;
+   uint8_t flash_read_data_buffer[read_length];
 
-   ext_flash_open();
-   bool eeprom_access = ext_flash_read(start_adress, flash_length, flash_read_data_buffer);
-   ext_flash_close();
+   printf("SPIFLASH DAMP: \n");
+   for (uint8_t page=0; page < 100; page++ )
+   {
+      watchdog_periodic();
+      ext_flash_open();
+      bool eeprom_access = ext_flash_read(start_adress+(read_length*page), read_length, flash_read_data_buffer);
+      ext_flash_close();
 
-   if(!eeprom_access)
-   {
-      printf("SPIFLASH: Error - Could not read EEPROM\n");
+      if(!eeprom_access)
+      {
+         printf("SPIFLASH: Error - Could not read EEPROM\n");
+      }
+      else
+      {
+         if (mode == HEXVIEW_MODE)
+            hexview_print(read_length, flash_read_data_buffer, start_adress+(read_length*page));
+         if (mode == HEXRAW_MODE)
+            hexraw_print(read_length, flash_read_data_buffer);
+      }
    }
-   else
-   {
-      if (mode == HEXVIEW_MODE)
-         hexview_print(flash_length, flash_read_data_buffer, start_adress);
-      if (mode == HEXRAW_MODE)
-         hexraw_print(flash_length, flash_read_data_buffer);
-   }
+   printf("\nSPIFLASH DAMP END \n");
+
 }
 
 void
