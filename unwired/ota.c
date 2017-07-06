@@ -189,8 +189,10 @@ overwrite_ota_slot_metadata( uint8_t ota_slot, OTAMetadata_t *ota_slot_metadata 
   }
   ota_image_address <<= 12;
 
+/*
   //  (2) Get the first page of the OTA image, which contains the metadata.
   uint8_t page_data[ FLASH_PAGE_SIZE ];DPRINT;
+*/
 
   int eeprom_access = ext_flash_open();DPRINT;
   if(!eeprom_access) {
@@ -199,6 +201,7 @@ overwrite_ota_slot_metadata( uint8_t ota_slot, OTAMetadata_t *ota_slot_metadata 
     return -1;
   }
 
+/*
   eeprom_access = ext_flash_read(ota_image_address, FLASH_PAGE_SIZE, (uint8_t *)&page_data);DPRINT;
   if(!eeprom_access) {
     PRINTF("[OTA]: Error - Could not read EEPROM.(%"PRIu16")\n", __LINE__);DPRINT;
@@ -206,8 +209,10 @@ overwrite_ota_slot_metadata( uint8_t ota_slot, OTAMetadata_t *ota_slot_metadata 
     return -1;
   }
 
+
   //  (3) Overwrite the metadata section of the first page
   memcpy( page_data, (uint8_t *)ota_slot_metadata, OTA_METADATA_LENGTH );DPRINT;
+*/
 
   //  (4) Update the ext-flash with the new page data.
   eeprom_access = ext_flash_erase( ota_image_address, FLASH_PAGE_SIZE );DPRINT;
@@ -216,13 +221,14 @@ overwrite_ota_slot_metadata( uint8_t ota_slot, OTAMetadata_t *ota_slot_metadata 
     ext_flash_close();DPRINT;
     return -1;
   }
-
+/*
   eeprom_access = ext_flash_write( ota_image_address, FLASH_PAGE_SIZE, page_data );DPRINT;
   if(!eeprom_access) {
     PRINTF("[OTA]: Error - Could not write to EEPROM.(%"PRIu16")\n", __LINE__);DPRINT;
     ext_flash_close();DPRINT;
     return -1;
   }
+*/
 
   ext_flash_close();DPRINT;
 
@@ -339,7 +345,7 @@ verify_ota_slot( uint8_t ota_slot )
   //  (2) Read the metadata of the corresponding OTA slot
   OTAMetadata_t ota_metadata;DPRINT;
   while( get_ota_slot_metadata( ota_slot, &ota_metadata ) );DPRINT;
-  print_metadata( &ota_metadata );DPRINT;
+  //print_metadata( &ota_metadata );DPRINT;
 
   //  (3) Compute the CRC16 over the entire image
   uint16_t imageCRC = 0;DPRINT;
@@ -383,7 +389,10 @@ verify_ota_slot( uint8_t ota_slot )
   PRINTF("CRC Calculated: %#x\n", imageCRC);DPRINT;
 
   //  (6) Update the CRC shadow with our newly calculated value
-  ota_metadata.crc_shadow = imageCRC;DPRINT;
+
+  if (ota_metadata.crc_shadow != imageCRC){
+     return -2;
+  }
 
   //  (4) Finally, update Metadata stored in ext-flash
   //while( overwrite_ota_slot_metadata( ota_slot, &ota_metadata ) );DPRINT;
@@ -616,6 +625,8 @@ erase_extflash_page( uint32_t ext_address )
     return -1;DPRINT;
   }
 
+  ext_flash_close();
+
   return 0;DPRINT;
 }
 
@@ -776,31 +787,4 @@ store_firmware_data( uint32_t ext_address, uint8_t *data, size_t data_length )
 
   PRINTF("[OTA]: Firmware data successfully written to 0x%"PRIX32".\n", ext_address);DPRINT;
   return 0;DPRINT;
-}
-
-
-/*******************************************************************************
- * @fn      jump_to_image
- *
- * @brief   Begin executing another firmware binary located in internal flash.
- *
- * @param   destination_address - Internal flash address of the vector table for
- *                                the firmware binary that is to be booted into.
- *                                Since this OTA lib prepends metadata to each
- *                                binary, the true VTOR start address will be
- *                                OTA_METADATA_SPACE bytes past this address.
- *
- */
-void
-jump_to_image(uint32_t destination_address)
-{
-  if ( destination_address ) {
-      //Only add the metadata length offset if destination_address is NOT 0!
-      //(Jumping to 0x0 is used to reboot the device)
-    destination_address += OTA_METADATA_SPACE;DPRINT;
-  }
-  destination_address += OTA_RESET_VECTOR;DPRINT;
-  __asm("LDR R0, [%[dest]]"::[dest]"r"(destination_address)); //  Load the destination address
-  __asm("ORR R0, #1");                                        //  Make sure the Thumb State bit is set.
-  __asm("BX R0");                                             //  Branch execution
 }

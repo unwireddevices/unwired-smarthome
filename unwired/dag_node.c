@@ -138,6 +138,8 @@ static struct etimer fw_timer;
 volatile uint16_t fw_chunk_quantity = 0;
 volatile uint16_t fw_ext_flash_address = 0;
 
+uint32_t ota_image_current_offset = 0;
+
 
 rpl_dag_t *rpl_probing_dag;
 
@@ -392,10 +394,10 @@ static void udp_receiver(struct simple_udp_connection *c,
             flash_write_buffer[i] = data[i + FIRMWARE_PAYLOAD_OFFSET];
          }
 
-         ext_flash_open();
-         ext_flash_write(fw_ext_flash_address, FIRMWARE_PAYLOAD_LENGTH, flash_write_buffer);
-         ext_flash_close();
-         fw_ext_flash_address = fw_ext_flash_address + FIRMWARE_PAYLOAD_LENGTH;
+         uint32_t current_ota_ext_flash_address = (ota_images[1-1] << 12) + ota_image_current_offset;
+         PRINTF("Write ota image slot 1: write offset 0x%"PRIX32", block 0x%"PRIX16"\n", current_ota_ext_flash_address, FIRMWARE_PAYLOAD_LENGTH);
+         while(store_firmware_data(current_ota_ext_flash_address, flash_write_buffer, FIRMWARE_PAYLOAD_LENGTH));
+         ota_image_current_offset = ota_image_current_offset + FIRMWARE_PAYLOAD_LENGTH;
 
          etimer_set( &fw_timer, 0);
       }
@@ -412,10 +414,9 @@ static void udp_receiver(struct simple_udp_connection *c,
             fw_chunk_quantity = *chunk_quantity_uint16_t;
 
             printf("DAG Node: DATA_TYPE_FIRMWARE_COMMAND_NEW_FW command received, %"PRId16" chunks\n", fw_chunk_quantity);
-            ext_flash_open();
-            //ext_flash_erase(fw_ext_flash_address, 224);
 
-            //process_exit(&fw_update_process);
+            while( erase_ota_image( 1 ) );
+
             process_start(&fw_update_process, NULL);
          }
       }

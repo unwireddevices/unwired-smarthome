@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "ti-lib.h"
 
-#include "../ota.h"
+#include "ota.h"
 
 #define UART_TX_IOID     IOID_3
 #define UART_SPEED       115200
@@ -66,16 +66,6 @@ initialize_uart()
    HWREG(UART0_BASE + UART_O_CTL) = ctl_val;
 }
 
-
-void
-print_uart(char *str)
-{
-   for (int i=0; str[i] != '\0'; i++)
-   {
-      ti_lib_uart_char_put(UART0_BASE, str[i]);
-   }
-}
-
 int
 main(void)
 {
@@ -83,25 +73,41 @@ main(void)
    initialize_uart();
 
    //print_uart("Bootloader:\t start...\n");
-   ti_lib_gpio_set_dio(LED_IOID);
    //for (volatile int i = 0; i < 2000000; i++) { }
 
+   int8_t verify_result_ota_0 = verify_ota_slot( 0 );
+   if (verify_result_ota_0 == -2){
+      print_uart("Bootloader:\tOTA slot 0(GI) non-correct CRC\n");
+   }
+   if (verify_result_ota_0 == -1){
+      print_uart("Bootloader:\tOTA slot 0(GI) non-read flash\n");
+   }
+   if (verify_result_ota_0 == 0){
+      print_uart("Bootloader:\tOTA slot 0(GI) correct CRC\n");
+   }
 
-   ti_lib_gpio_clear_dio(LED_IOID);
-   //print_uart("Bootloader:\t jump to main image\n\n");
+   int8_t verify_result_ota_1 = verify_ota_slot( 1 );
+   if (verify_result_ota_1 == -2){
+      print_uart("Bootloader:\tOTA slot 1 non-correct CRC\n");
+   }
+   if (verify_result_ota_1 == -1){
+      print_uart("Bootloader:\tOTA slot 1 non-read flash\n");
+   }
+   if (verify_result_ota_1 == 0){
+      print_uart("Bootloader:\tOTA slot 1 correct CRC\n");
+      update_firmware( 1 );
+      //ti_lib_sys_ctrl_system_reset();
+   }
+
+
+
+
+
+
+
+   print_uart("Bootloader:\tjump to main image\n\n");
    jump_to_image( (CURRENT_FIRMWARE<<12) );
 /*
-
-
-  #if CLEAR_OTA_SLOTS
-  erase_ota_image( 1 );
-  erase_ota_image( 2 );
-  erase_ota_image( 3 );
-  #endif
-
-  #if BURN_GOLDEN_IMAGE
-  backup_golden_image();
-  #endif
 
   //  (1) Get the metadata of whatever firmware is currently installed
   OTAMetadata_t current_firmware;
