@@ -78,19 +78,19 @@ light-fb: light-CLEAN
 	while true; do ../../tools/backdoor-bootloader.py -e -w -v light-firmware.hex && break; done;
 
 light-f: light-CLEAN
-	/Applications/ti/Uniflash/flash_cc2650.sh light-firmware.hex
 	
 light-chunks: light
 	rm -rf ./light-ota-chunks
 	mkdir light-ota-chunks
 	lua ../../tools/bin_cut.lua light-ota-image.bin light-ota-chunks 224
 	-rm -f *~ *core core *.srec *.lst *.map *.cprg *.bin *.data contiki*.a *.firmware core-labels.S *.ihex *.ini *.ce *.co *.unwired *.elf  *.o *.d		
+	/Applications/ti/Uniflash/flash_cc1310.sh light-firmware.hex
 
 root-fb: root-CLEAN
 	while true; do ../../tools/backdoor-bootloader.py -e -w -v root-firmware.hex && break; done;
 	
 root-f: root-CLEAN
-	/Applications/ti/Uniflash/flash_cc2650.sh root-firmware.hex
+	/Applications/ti/Uniflash/flash_cc1310.sh root-firmware.hex
 
 serial:
 	../../tools/sky/serialdump-macos -b115200 /dev/tty.usbserial-* || ../../tools/sky/serialdump-macos -b115200 /dev/tty.SLAB_USBtoUART
