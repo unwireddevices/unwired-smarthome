@@ -78,12 +78,6 @@ light-fb: light-CLEAN
 	while true; do ../../tools/backdoor-bootloader.py -e -w -v light-firmware.hex && break; done;
 
 light-f: light-CLEAN
-	
-light-chunks: light
-	rm -rf ./light-ota-chunks
-	mkdir light-ota-chunks
-	lua ../../tools/bin_cut.lua light-ota-image.bin light-ota-chunks 224
-	-rm -f *~ *core core *.srec *.lst *.map *.cprg *.bin *.data contiki*.a *.firmware core-labels.S *.ihex *.ini *.ce *.co *.unwired *.elf  *.o *.d		
 	/Applications/ti/Uniflash/flash_cc1310.sh light-firmware.hex
 
 root-fb: root-CLEAN
