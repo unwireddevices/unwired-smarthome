@@ -32,13 +32,10 @@ initialize_peripherals() {
   ti_lib_prcm_load_set();
   while(!ti_lib_prcm_load_get());
 
-
-
   /* Re-enable interrupt if initially enabled. */
   if(!int_disabled) {
     ti_lib_int_master_enable();
   }
-
 
 }
 
@@ -74,9 +71,6 @@ main(void)
    print_uart("\n\n\n\n");
    print_uart_bl("Start\n");
 
-   //print_uart("Bootloader:\t start...\n");
-   //for (volatile int i = 0; i < 2000000; i++) { }
-
    ti_lib_ioc_pin_type_gpio_output(LED_IOID);
    ti_lib_gpio_set_dio(LED_IOID);
 
@@ -95,7 +89,6 @@ main(void)
    int8_t verify_result_int = verify_current_firmware( &current_firmware );
    int8_t verify_result_ota_1 = verify_ota_slot( 1 );
    int8_t verify_result_ota_0 = verify_ota_slot( 0 );
-
 
    print_uart_bl("FW flag: ");
    print_uart_byte(fw_flag);
@@ -128,7 +121,7 @@ main(void)
    /* Сброс флага после процесса обновления и прыжок на основную программу */
    if (fw_flag == FW_FLAG_PING_OK) //
    {
-      print_uart_bl("OTA Update ok(PING_OK), change flag, jump to MI\n");
+      print_uart_bl("OTA Update ok(PING_OK), change flag, jump to main image\n");
       write_fw_flag(FW_FLAG_NON_UPDATE);
       jump_to_image( (CURRENT_FIRMWARE<<12) );
    }
@@ -176,7 +169,6 @@ main(void)
       //print_uart_bl("Need reboot\n");
       ti_lib_sys_ctrl_system_reset();
    }
-
 
   //  main() *should* never return - we should have rebooted or branched
   //  to other code by now.
