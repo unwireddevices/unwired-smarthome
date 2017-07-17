@@ -119,6 +119,7 @@
 #define HEXVIEW_MODE                            0x00
 #define HEXRAW_MODE                             0x01
 
+
 /*---------------------------------------------------------------------------*/
 
 /* struct for simple_udp_send */
@@ -645,8 +646,8 @@ void send_status_packet(const uip_ipaddr_t *parent_addr,
    udp_buffer[16] = *rssi_parent_uint8_t;
    udp_buffer[17] = temp;
    udp_buffer[18] = voltage;
-   udp_buffer[19] = DATA_RESERVED;
-   udp_buffer[20] = DATA_RESERVED;
+   udp_buffer[19] = BIG_VERSION;
+   udp_buffer[20] = LITTLE_VERSION;
    udp_buffer[21] = DATA_RESERVED;
    udp_buffer[22] = DATA_RESERVED;
 
@@ -1067,9 +1068,10 @@ PROCESS_THREAD(dag_node_process, ev, data)
    //printf("Old FW!\n");
    //printf("Golden image\n");
 
-   printf("Node started, %s mode, %s class\n",
-          rpl_get_mode() == RPL_MODE_LEAF ? "leaf" : "no-leaf",
-          CLASS == CLASS_B ? "B(sleep)" : "C(non-sleep)");
+   printf("Node started, %s mode, %s class, version %"PRIu8".%"PRIu8"\n",
+                rpl_get_mode() == RPL_MODE_LEAF ? "leaf" : "no-leaf",
+                CLASS == CLASS_B ? "B(sleep)" : "C(non-sleep)",
+                BIG_VERSION, LITTLE_VERSION);
 
    process_start(&dag_node_button_process, NULL);
    process_start(&maintenance_process, NULL);

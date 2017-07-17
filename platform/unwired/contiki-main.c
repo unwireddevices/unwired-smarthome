@@ -211,7 +211,7 @@ main(void)
      fade(LED_A);
   } while(timer_expired(&start_rand_timer) == 0);
 
-  printf(BOARD_STRING ", version: %s\n", LOCAL_VERSION);
+  printf(BOARD_STRING ", version: %s\n", GIT_VERSION);
   printf("Build on: %s %s\n", __DATE__, __TIME__);
 
   printf("IEEE 802.15.4: %s, CC13xx: %s\n",

@@ -5,8 +5,7 @@ DEFINES+=PROJECT_CONF_H=\"project-conf-class-c.h\"
 DEFINES+=IF_UD_DIMMER=1
 DEFINES+=FAKEDEFINE=1
 DEFINES+=CLASS=0x0C
-GIT_VERSION := $(shell git describe --dirty --always --tags)
-DEFINES+=LOCAL_VERSION=\"$(GIT_VERSION)\"
 CONTIKI = ../..
 CONTIKI_WITH_IPV6 = 1
 include $(CONTIKI)/Makefile.include
+include $(CONTIKI)/Makefile_git_version.include
