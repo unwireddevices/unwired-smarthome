@@ -26,9 +26,8 @@ root:
 	lua ../../tools/mem_used.lua /tmp/size.tmp 125000 20000
 	../bootloader/common/generate-metadata root.bin 0x0 0xabcd1234 1
 	srec_cat firmware-metadata.bin -binary root.bin -binary -offset 0x100 -o root-ota-image.bin -binary
-	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 root-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o root-firmware_noboot.hex -intel
-	srec_cat root-firmware_noboot.hex -intel -exclude 0x01FFC8 0x01FFE8 ../bootloader/uart_bootloader -intel -o root-firmware.hex -intel
-	rm root.hex root-firmware_noboot.hex
+	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 root-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o root-firmware.hex -intel
+	rm root.hex
 
 light: 
 	CONF="NOLEAF"; \
@@ -42,10 +41,9 @@ light:
 	
 	srec_cat firmware-metadata.bin -binary light.bin -binary -offset 0x100 -o light-ota-image.bin -binary
 	
-	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 light-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o light-firmware_noboot.hex -intel
-	srec_cat light-firmware_noboot.hex -intel -exclude 0x01FFC8 0x01FFE8 ../bootloader/uart_bootloader -intel -o light-firmware.hex -intel
+	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 light-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o light-firmware.hex -intel
 
-	rm light.hex light-firmware_noboot.hex
+	rm light.hex 
 	
 clean1:
 	-rm -f *~ *core core *.srec *.lst *.map *.cprg *.bin *.data contiki*.a *.firmware core-labels.S *.ihex *.ini *.ce *.co *.unwired *.elf *.o *.d	
