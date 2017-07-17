@@ -128,8 +128,8 @@ wait_ready(void)
     return false;
   }
 
-  for(;;) {
-    uint8_t buf;
+  for(volatile uint32_t i = 0; i < 500000; i++) {
+     uint8_t buf;
     /* Note that this temporary implementation is not
      * energy efficient.
      * Thread could have yielded while waiting for flash
@@ -147,6 +147,7 @@ wait_ready(void)
       break;
     }
   }
+  ti_lib_gpio_clear_dio(IOID_22);
   deselect();
   return true;
 }
@@ -236,9 +237,11 @@ power_standby(void)
   select_on_bus();
   success = board_spi_write(&cmd, sizeof(cmd));
 
+
   if(success) {
-    success = wait_ready() == true ? true : false;
+    success = wait_ready() == true ? true : false; //<<<<
   }
+
 
   deselect();
 
@@ -279,6 +282,7 @@ ext_flash_open()
   /* Put the part is standby mode */
   power_standby();
 
+
   return verify_part() == VERIFY_PART_OK ? true : false;
 }
 /*---------------------------------------------------------------------------*/
@@ -288,6 +292,13 @@ ext_flash_close()
   /* Put the part in low power mode */
   power_down();
 
+  board_spi_close();
+}
+/*---------------------------------------------------------------------------*/
+
+void
+spi_flash_close()
+{
   board_spi_close();
 }
 /*---------------------------------------------------------------------------*/
@@ -449,11 +460,20 @@ ext_flash_probe(void)
 
 }
 /*---------------------------------------------------------------------------*/
-void
+bool
 ext_flash_init()
 {
-  ext_flash_open();
-  ext_flash_close();
+  bool status = ext_flash_open();
+
+  if (status == true)
+  {
+     ext_flash_close();
+  }
+  else
+  {
+     spi_flash_close();
+  }
+  return status;
 }
 /*---------------------------------------------------------------------------*/
 /** @} */

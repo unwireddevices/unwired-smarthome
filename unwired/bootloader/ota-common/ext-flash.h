@@ -58,6 +58,7 @@ bool ext_flash_open(void);
  * This call will put the device in its lower power mode (power down).
  */
 void ext_flash_close(void);
+void spi_flash_close(void);
 
 /**
  * \brief Read storage content
@@ -108,7 +109,7 @@ void ext_flash_probe(void);
  * In order to perform any operation, the caller must first wake the device
  * up by calling ext_flash_open()
  */
-void ext_flash_init(void);
+bool ext_flash_init(void);
 /*---------------------------------------------------------------------------*/
 #endif /* EXT_FLASH_H_ */
 /*---------------------------------------------------------------------------*/

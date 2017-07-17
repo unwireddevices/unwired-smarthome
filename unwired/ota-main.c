@@ -6,12 +6,11 @@
  *  uint16_t crc16() function is Copyright Texas Instruments
  */
 
-#include "ota.h"
+#include "ota-main.h"
 #include "string.h"
 #include "xxf_types_helper.h"
 #include "dev/watchdog.h"
 #include <stdbool.h>
-
 
 #define DPRINT //printf("\t\t\t\t\t>ota.c:%"PRIu16"\n", __LINE__);watchdog_periodic();
 

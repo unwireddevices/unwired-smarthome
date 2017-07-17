@@ -7,24 +7,43 @@
  *  uint16_t crc16() function is Copyright Texas Instruments
  */
 
-#include "ota.h"
+#include "ota-bootloader.h"
 #include "string.h"
-#include "xxf_types_helper.h"
 #include <stdbool.h>
-
 
 
 uint8_t ota_images[3] = OTA_ADDRESSES;
 
+/*---------------------------------------------------------------------------*/
 
 void
 print_uart(char *str)
 {
-   for (int i=0; str[i] != '\0'; i++)
+   for (uint8_t i=0; str[i] != '\0'; i++)
    {
       ti_lib_uart_char_put(UART0_BASE, str[i]);
    }
 }
+
+/*---------------------------------------------------------------------------*/
+
+void
+print_uart_bl(char *str)
+{
+   print_uart("Bootloader:\t ");
+   print_uart(str);
+}
+
+/*---------------------------------------------------------------------------*/
+
+void
+print_uart_byte(uint8_t byte)
+{
+   ti_lib_uart_char_put(UART0_BASE, byte);
+}
+
+
+/*---------------------------------------------------------------------------*/
 
 
 /**
@@ -265,7 +284,12 @@ verify_current_firmware( OTAMetadata_t *current_firmware_metadata )
   while(  FlashProgram( (uint8_t *)current_firmware_metadata, (CURRENT_FIRMWARE<<12), OTA_METADATA_LENGTH )
   != FAPI_STATUS_SUCCESS );
 
-  return 0;
+  if (current_firmware_metadata->crc_shadow == current_firmware_metadata->crc)
+  {
+     return CORRECT_CRC;
+  }
+
+  return NON_CORRECT_CRC;
 }
 
 /*******************************************************************************
@@ -306,7 +330,7 @@ verify_ota_slot( uint8_t ota_slot )
   int eeprom_access = ext_flash_open();
   if(!eeprom_access) {
     ext_flash_close();
-    return -1;
+    return NON_READ_FLASH;
   }
 
   //  (4) Read the firmware image, one word at a time
@@ -317,7 +341,7 @@ verify_ota_slot( uint8_t ota_slot )
     eeprom_access = ext_flash_read(ota_image_address, 4, _word);
     if(!eeprom_access) {
       ext_flash_close();
-      return -1;
+      return NON_READ_FLASH;
     }
 
     for (idx = 0; idx < 4; idx++)
@@ -338,13 +362,13 @@ verify_ota_slot( uint8_t ota_slot )
   //  (6) Update the CRC shadow with our newly calculated value
 
   if (ota_metadata.crc_shadow != imageCRC){
-     return -2;
+     return NON_CORRECT_CRC;
   }
 
   //  (4) Finally, update Metadata stored in ext-flash
   //while( overwrite_ota_slot_metadata( ota_slot, &ota_metadata ) );
 
-  return 0;
+  return CORRECT_CRC;
 }
 
 /*******************************************************************************
@@ -524,12 +548,10 @@ update_firmware( uint8_t ota_slot )
   //      Overwrite them with the corresponding image pages from
   //      external flash.
   //  Each firmware image is 25 pages big at most
-  print_uart("Bootloader:\tOTA slot 1 flash int mem, 25 all: ");
+  print_uart("Bootloader:\t flash int mem: ");
   for (uint8_t sector_num=0; sector_num<25; sector_num++) {
     while( update_firmware_page( (ota_image_address + (sector_num << 12)), ((sector_num+CURRENT_FIRMWARE) << 12) ) );
     print_uart(".");
-    ti_lib_watchdog_reload_set(0xFFFFF);
-    ti_lib_watchdog_int_clear();
   }
   print_uart("\n");
 

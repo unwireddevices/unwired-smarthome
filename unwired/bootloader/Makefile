@@ -15,7 +15,7 @@ SIZE    = arm-none-eabi-size
 SREC_CAT = srec_cat
 
 CONTIKI = ../..
-OTA_SOURCE = ./ext-flash
+OTA_SOURCE = ./ota-common
 
 CPU_ABS_PATH = $(CONTIKI)/cpu/cc26xx-cc13xx
 TARGET=srf06-cc26xx
@@ -40,18 +40,18 @@ endif
 
 TI_XXWARE = $(CPU_ABS_PATH)/$(TI_XXWARE_PATH)
 CFLAGS += -I$(CPU_ABS_PATH) -I$(OTA_SOURCE) -I./ext-flash -I$(TI_XXWARE) -I$(TI_XXWARE)/driverlib -I$(TI_XXWARE)/inc
-SOURCEDIRS = . ./ext-flash $(TI_XXWARE)/startup_files $(TI_XXWARE)/driverlib
+SOURCEDIRS = . ./ota-common $(TI_XXWARE)/startup_files $(TI_XXWARE)/driverlib
 vpath %.c $(SOURCEDIRS)
 SOURCE_FILES = $(foreach dir, $(SOURCEDIRS), $(notdir $(wildcard $(dir)/*.c)))
 
-SOURCE_FILES += ota.c
-vpath ota.c $(OTA_SOURCE)
+SOURCE_FILES += ota-bootloader.c ota-common.c
+vpath ota-bootloader.c ota-common.c $(OTA_SOURCE)
 
 CFLAGS += -mcpu=cortex-m3 -mthumb -mlittle-endian
 CFLAGS += -ffunction-sections -fdata-sections
 CFLAGS += -fshort-enums -fomit-frame-pointer -fno-strict-aliasing
 CFLAGS += -Wall -std=c99
-CFLAGS += -g
+CFLAGS += -g -Os
 
 ### Are we building with code size optimisations?
 ifdef WERROR

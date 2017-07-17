@@ -1,7 +1,7 @@
 #include <stdint.h>
 #include "ti-lib.h"
 
-#include "ota.h"
+#include "ota-bootloader.h"
 
 #define UART_TX_IOID     IOID_3
 #define UART_SPEED       115200

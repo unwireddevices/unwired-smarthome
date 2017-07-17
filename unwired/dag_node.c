@@ -64,7 +64,8 @@
 #include "board-peripherals.h"
 #include "board.h"
 #include "ti-lib.h"
-#include "ota.h"
+#include "ota-main.h"
+#include "ota-common.h"
 
 #include "flash-common.h"
 #include "xxf_types_helper.h"

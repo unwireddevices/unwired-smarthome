@@ -8,28 +8,26 @@
  
 #include <stdio.h>
 
-#if DEBUG
-  #define PRINTF(...) printf(__VA_ARGS__)
-#else
-  #define PRINTF(...) printf(__VA_ARGS__)
-#endif
-
 #include "ti-lib.h"
 #include "ext-flash.h"
 #include "driverlib/flash.h"
+
+#define PRINTF(...) printf(__VA_ARGS__)
 
 /**
  *    OTA Image Memory Map
  */
 //  Internal Flash
-#define CURRENT_FIRMWARE    0x2          //  Address where the current system firmware is stored in internal flash
+#define CURRENT_FIRMWARE               0x2          //  Address where the current system firmware is stored in internal flash
 //  External Flash
-#define GOLDEN_IMAGE        0x19           //  Address where the factory-given firmware is stored in external flash (for backup)
-#define OTA_ADDRESSES       { 0x32, 0x4B, 0x64 }
+#define GOLDEN_IMAGE                   0x19           //  Address where the factory-given firmware is stored in external flash (for backup)
+#define OTA_ADDRESSES                  { 0x32, 0x4B, 0x64 }
 extern uint8_t ota_images[3]; //  Addresses where OTA updates are stored in external flash
 
-#define OTA_RESET_VECTOR    0x4     //  RESET ISR Vector (see )
-#define FLASH_PAGE_SIZE     0x1000
+#define OTA_RESET_VECTOR               0x4     //  RESET ISR Vector (see )
+
+#define FLASH_PAGE_SIZE                0x1000
+
 
 typedef struct OTAMetadata {
   uint16_t crc;             //
@@ -52,11 +50,6 @@ typedef struct OTAMetadata {
 #define OTA_METADATA_SPACE 0x100
 #define OTA_METADATA_LENGTH sizeof(OTAMetadata_t)
 
-extern void
-FlashRead(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count);
-
-extern uint16_t
-crc16(uint16_t crc, uint8_t val);
 
 extern void
 print_metadata( OTAMetadata_t *metadata );
@@ -108,8 +101,5 @@ jump_to_image(uint32_t destination_address);
 
 int
 erase_extflash_page( uint32_t ext_address );
-
-
-void print_uart(char *str);
 
 #endif
