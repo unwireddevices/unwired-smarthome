@@ -229,6 +229,8 @@ flash_damp_hex(uint8_t mode)
 
 }
 
+/*---------------------------------------------------------------------------*/
+
 void
 verify_int_firmware_v()
 {
@@ -258,6 +260,7 @@ verify_int_firmware_v()
    }
 }
 
+/*---------------------------------------------------------------------------*/
 
 void
 verify_ext_firmware_e()
@@ -279,8 +282,6 @@ verify_ext_firmware_e()
       printf("OTA slot 1 correct CRC\n");
    }
 }
-
-
 
 
 /*---------------------------------------------------------------------------*/
@@ -387,12 +388,15 @@ static void udp_receiver(struct simple_udp_connection *c,
 
       if (data[2] == DATA_TYPE_FIRMWARE)
       {
+         /*
          printf("DAG Node: DATA_TYPE_FIRMWARE packet received(%"PRId16" bytes): ", datalen - FIRMWARE_PAYLOAD_OFFSET);
          for (uint16_t i = FIRMWARE_PAYLOAD_OFFSET; i < datalen; i++)
          {
             printf(" %"PRIXX8, data[i]);
          }
          printf("\n\n");
+         */
+         printf("DAG Node: DATA_TYPE_FIRMWARE packet received(%"PRId16" bytes)\n", datalen - FIRMWARE_PAYLOAD_OFFSET);
 
          uint8_t flash_write_buffer[FIRMWARE_PAYLOAD_LENGTH];
 
@@ -1058,6 +1062,10 @@ PROCESS_THREAD(dag_node_process, ev, data)
       rpl_set_mode(RPL_MODE_MESH);
 
    node_mode = MODE_JOIN_PROGRESS;
+
+   //printf("New FW!\n");
+   //printf("Old FW!\n");
+   //printf("Golden image\n");
 
    printf("Node started, %s mode, %s class\n",
           rpl_get_mode() == RPL_MODE_LEAF ? "leaf" : "no-leaf",
