@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "ti-lib.h"
+#include <stdbool.h>
 
 #include "ota-bootloader.h"
 
@@ -31,8 +32,6 @@ initialize_peripherals() {
   ti_lib_prcm_load_set();
   while(!ti_lib_prcm_load_get());
 
-  /* Make sure the external flash is in the lower power mode */
-  ext_flash_init();
 
 
   /* Re-enable interrupt if initially enabled. */
@@ -40,7 +39,6 @@ initialize_peripherals() {
     ti_lib_int_master_enable();
   }
 
-  ti_lib_ioc_pin_type_gpio_output(LED_IOID);
 
 }
 
@@ -79,7 +77,15 @@ main(void)
    //print_uart("Bootloader:\t start...\n");
    //for (volatile int i = 0; i < 2000000; i++) { }
 
+   ti_lib_ioc_pin_type_gpio_output(LED_IOID);
+   ti_lib_gpio_set_dio(LED_IOID);
 
+   bool spi_status = ext_flash_init();
+   if (spi_status == false)
+   {
+      print_uart_bl("SPI flash not found, jump to main image\n");
+      ti_lib_gpio_clear_dio(LED_IOID);
+      jump_to_image( (CURRENT_FIRMWARE<<12) );
    }
 
    uint8_t fw_flag = read_fw_flag();
