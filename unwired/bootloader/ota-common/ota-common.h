@@ -27,7 +27,7 @@
 #define FW_FLAG_NEW_IMG_INT_RST        0x32 //Новый образ загружен во внутреннюю память("2" в ANSCII), требуется перезагрузка
 #define FW_FLAG_NEW_IMG_INT            0x33 //Новый образ загружен во внутреннюю память("3" в ANSCII), нормальный запуск
 #define FW_FLAG_PING_OK                0x34 //Новый образ запущен, соединение с сервером проверено("4" в ANSCII)
-#define FW_FLAG_ERROR_GI_LOAD          0x35 //Ошибка обновления, загружен Golden Image("5" в ANSCII)
+#define FW_FLAG_ERROR_GI_LOADED          0x35 //Ошибка обновления, загружен Golden Image("5" в ANSCII)
 #define FW_FLAG_NONE                   0xFF //На месте флага пустая память
 
 #define FLAG_SIZE                      1

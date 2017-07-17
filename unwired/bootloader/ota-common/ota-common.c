@@ -14,7 +14,7 @@ write_fw_flag(uint8_t value)
    if (value != FW_FLAG_NON_UPDATE &&
          value != FW_FLAG_NEW_IMG_EXT &&
          value != FW_FLAG_NEW_IMG_INT &&
-         value != FW_FLAG_ERROR_GI_LOAD &&
+         value != FW_FLAG_ERROR_GI_LOADED &&
          value != FW_FLAG_NEW_IMG_INT_RST &&
          value != FW_FLAG_PING_OK)
       return;
@@ -53,7 +53,7 @@ read_fw_flag()
    if (page_data[0] != FW_FLAG_NON_UPDATE &&
          page_data[0] != FW_FLAG_NEW_IMG_EXT &&
          page_data[0] != FW_FLAG_NEW_IMG_INT &&
-         page_data[0] != FW_FLAG_ERROR_GI_LOAD &&
+         page_data[0] != FW_FLAG_ERROR_GI_LOADED &&
          page_data[0] != FW_FLAG_NEW_IMG_INT_RST &&
          page_data[0] != FW_FLAG_PING_OK)
    {

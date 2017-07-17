@@ -134,7 +134,7 @@ main(void)
    }
 
    /* Прыжок на основную программу после неудачного обновления */
-   if (fw_flag == FW_FLAG_ERROR_GI_LOAD)
+   if (fw_flag == FW_FLAG_ERROR_GI_LOADED)
    {
       print_uart_bl("Jump to main image(ERROR_GI_LOAD)\n\n");
       jump_to_image( (CURRENT_FIRMWARE<<12) );
@@ -152,7 +152,7 @@ main(void)
    if (fw_flag == FW_FLAG_NEW_IMG_INT)
    {
       print_uart_bl("Update error, set ERROR_GI_LOAD\n\n");
-      write_fw_flag(FW_FLAG_ERROR_GI_LOAD);
+      write_fw_flag(FW_FLAG_ERROR_GI_LOADED);
       print_uart_bl("Flash golden image\n");
       update_firmware( 0 );
       //print_uart_bl("Need reboot\n");
