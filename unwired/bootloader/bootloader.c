@@ -73,44 +73,103 @@ main(void)
 {
    initialize_peripherals();
    initialize_uart();
+   print_uart("\n\n\n\n");
+   print_uart_bl("Start\n");
 
    //print_uart("Bootloader:\t start...\n");
    //for (volatile int i = 0; i < 2000000; i++) { }
 
-   int8_t verify_result_ota_0 = verify_ota_slot( 0 );
-   if (verify_result_ota_0 == -2){
-      print_uart("Bootloader:\tOTA slot 0(GI) non-correct CRC\n");
-   }
-   if (verify_result_ota_0 == -1){
-      print_uart("Bootloader:\tOTA slot 0(GI) non-read flash\n");
-   }
-   if (verify_result_ota_0 == 0){
-      print_uart("Bootloader:\tOTA slot 0(GI) correct CRC\n");
+
    }
 
+   uint8_t fw_flag = read_fw_flag();
+
+   OTAMetadata_t current_firmware;
+   get_current_metadata( &current_firmware );
+   int8_t verify_result_int = verify_current_firmware( &current_firmware );
    int8_t verify_result_ota_1 = verify_ota_slot( 1 );
-   if (verify_result_ota_1 == -2){
-      print_uart("Bootloader:\tOTA slot 1 non-correct CRC\n");
+   int8_t verify_result_ota_0 = verify_ota_slot( 0 );
+
+
+   print_uart_bl("FW flag: ");
+   print_uart_byte(fw_flag);
+   print_uart("\n");
+
+   print_uart_bl("Internal firmware ");
+   if (verify_result_int == CORRECT_CRC)
+      print_uart("correct CRC\n");
+   if (verify_result_int == NON_CORRECT_CRC)
+      print_uart("non-correct CRC\n");
+
+   print_uart_bl("OTA slot 0 ");
+   if (verify_result_ota_0 == NON_CORRECT_CRC)
+      print_uart("non-correct CRC\n");
+   if (verify_result_ota_0 == NON_READ_FLASH)
+      print_uart("non-read flash\n");
+   if (verify_result_ota_0 == CORRECT_CRC)
+      print_uart("correct CRC\n");
+
+   print_uart_bl("OTA slot 1 ");
+   if (verify_result_ota_1 == NON_CORRECT_CRC)
+      print_uart("non-correct CRC\n");
+   if (verify_result_ota_1 == NON_READ_FLASH)
+      print_uart("non-read flash\n");
+   if (verify_result_ota_1 == CORRECT_CRC)
+      print_uart("correct CRC\n");
+
+   ti_lib_gpio_clear_dio(LED_IOID);
+
+   /* Сброс флага после процесса обновления и прыжок на основную программу */
+   if (fw_flag == FW_FLAG_PING_OK) //
+   {
+      print_uart_bl("OTA Update ok(PING_OK), change flag, jump to MI\n");
+      write_fw_flag(FW_FLAG_NON_UPDATE);
+      jump_to_image( (CURRENT_FIRMWARE<<12) );
    }
-   if (verify_result_ota_1 == -1){
-      print_uart("Bootloader:\tOTA slot 1 non-read flash\n");
+
+   /* Gрыжок на основную программу, если процесса обновления нет */
+   if (fw_flag == FW_FLAG_NON_UPDATE) //
+   {
+      print_uart_bl("Jump to main image(FW_FLAG_NON_UPDATE)\n\n");
+      jump_to_image( (CURRENT_FIRMWARE<<12) );
    }
-   if (verify_result_ota_1 == 0){
-      print_uart("Bootloader:\tOTA slot 1 correct CRC\n");
+
+   /* Прыжок на основную программу после неудачного обновления */
+   if (fw_flag == FW_FLAG_ERROR_GI_LOAD)
+   {
+      print_uart_bl("Jump to main image(ERROR_GI_LOAD)\n\n");
+      jump_to_image( (CURRENT_FIRMWARE<<12) );
+   }
+
+   /* Прыжок на основную программу после перезагрузки после обновления */
+   if (fw_flag == FW_FLAG_NEW_IMG_INT_RST)
+   {
+      write_fw_flag(FW_FLAG_NEW_IMG_INT);
+      print_uart_bl("Jump to main image(NEW_IMG_INT)\n\n");
+      jump_to_image( (CURRENT_FIRMWARE<<12) );
+   }
+
+   /* Шьем Golden Image, если у нас нет флага подтверждения работы */
+   if (fw_flag == FW_FLAG_NEW_IMG_INT)
+   {
+      print_uart_bl("Update error, set ERROR_GI_LOAD\n\n");
+      write_fw_flag(FW_FLAG_ERROR_GI_LOAD);
+      print_uart_bl("Flash golden image\n");
+      update_firmware( 0 );
+      //print_uart_bl("Need reboot\n");
+      ti_lib_sys_ctrl_system_reset();
+   }
+
+   /* Шьем обновление, если у нас флаг новой прошивки */
+   if (fw_flag == FW_FLAG_NEW_IMG_EXT)
+   {
+      print_uart_bl("Flash OTA image(NEW_IMG_EXT)\n");
       update_firmware( 1 );
-      //ti_lib_sys_ctrl_system_reset();
+      print_uart_bl("Set flag to FW_FLAG_NEW_IMG_INT_RST\n");
+      write_fw_flag(FW_FLAG_NEW_IMG_INT_RST);
+      //print_uart_bl("Need reboot\n");
+      ti_lib_sys_ctrl_system_reset();
    }
-
-
-
-
-
-
-
-   print_uart("Bootloader:\tjump to main image\n\n");
-   jump_to_image( (CURRENT_FIRMWARE<<12) );
-
-
 
 
   //  main() *should* never return - we should have rebooted or branched

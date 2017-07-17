@@ -333,6 +333,12 @@ static void udp_receiver(struct simple_udp_connection *c,
          etimer_set(&maintenance_timer, 0);
          net_mode(RADIO_FREEDOM);
          net_off(RADIO_OFF_NOW);
+
+         if (read_fw_flag() == FW_FLAG_NEW_IMG_INT)
+         {
+            write_fw_flag(FW_FLAG_PING_OK);
+            printf("DAG Node: OTA flag changed to FW_FLAG_PING_OK\n");
+         }
       }
 
       if (data[2] == DATA_TYPE_COMMAND || data[2] == DATA_TYPE_SETTINGS)
@@ -956,6 +962,14 @@ PROCESS_THREAD(fw_update_process, ev, data)
          printf("FW OTA: End chunks, exit\n");
          process_exit(&fw_update_process);
          chunk_num = 0;
+         if (verify_ota_slot(1) == CORRECT_CRC){
+            printf("New FW in OTA slot 1 correct CRC, set FW_FLAG_NEW_IMG_EXT, need reboot\n");
+            write_fw_flag(FW_FLAG_NEW_IMG_EXT);
+            watchdog_reboot();
+         }
+         else
+            printf("New FW in OTA slot 1 non-correct CRC\n");
+
          return 0;
       }
 
