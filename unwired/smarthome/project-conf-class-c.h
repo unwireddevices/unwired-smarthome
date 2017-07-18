@@ -36,9 +36,7 @@
  */
 /*---------------------------------------------------------------------------*/
 #include "project-conf.h"
-#define CLASS_C                                  0x0C //ext power nodes
-#define CLASS                                    CLASS_C
-
+ 
 /* Net tune option */
 #undef UIP_DS6_CONF_PERIOD
 #define UIP_DS6_CONF_PERIOD                      (CLOCK_SECOND/10)

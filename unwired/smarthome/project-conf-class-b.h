@@ -36,8 +36,6 @@
  */
 /*---------------------------------------------------------------------------*/
 #include "project-conf.h"
-#define CLASS_B                                  0x0B //battery power nodes
-#define CLASS                                    CLASS_B
 
 /* Net tune option */
 #undef UIP_DS6_CONF_PERIOD
