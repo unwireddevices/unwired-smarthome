@@ -76,6 +76,14 @@
 #define RPL_CONF_LEAF_ONLY
 #endif
 
+#ifndef BIG_VERSION
+#define BIG_VERSION
+#endif
+
+#ifndef LITTLE_VERSION
+#define LITTLE_VERSION
+#endif
+
 #ifndef CLASS
 #define CLASS
 #endif

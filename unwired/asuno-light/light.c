@@ -32,7 +32,7 @@
 /*---------------------------------------------------------------------------*/
 /*
 * \file
-*         Incotext-light service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
+*         asuno-light service for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
 * \author
 *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
 */
@@ -62,6 +62,7 @@
 #include "light.h"
 #include "../dag_node.h"
 #include "gpio-interrupt.h"
+#include "dev/cc26xx-uart.h"
 
 #include "xxf_types_helper.h"
 
@@ -72,6 +73,27 @@
 
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
+#define UART_DATA_POLL_INTERVAL 5 //in main timer ticks, one tick ~8ms
+
+
+#define MODE_NORMAL                             0x01
+#define MODE_NOTROOT                            0x02
+#define MODE_JOIN_PROGRESS                      0x03
+
+/*---------------------------------------------------------------------------*/
+/* UART char iterator */
+volatile static uint8_t uart_data_iterator = 0;
+volatile static uint8_t uart_returned_data_length = 0;
+
+/* UART-buffer */
+volatile static uint8_t uart_returned_data_buf[23];
+
+/* UART-data */
+struct command_data uart_data;
+
+/* UART-flag for console commands */
+volatile uint8_t uart_flag = 0;
+
 /*---------------------------------------------------------------------------*/
 
 /* Register buttons sensors */
@@ -80,48 +102,108 @@ SENSORS(&button_e_sensor_click,
 
 /* register dimmer process */
 PROCESS(main_process, "Incotext-light control process");
+PROCESS(send_data_process, "uart-data send process");
 
 /* set autostart processes */
-AUTOSTART_PROCESSES(&dag_node_process, &main_process);
+AUTOSTART_PROCESSES(&dag_node_process, &main_process, &send_data_process);
 
 /*---------------------------------------------------------------------------*/
 
-static void send_uart_command(struct command_data *command_dimmer)
+static int uart_data_receiver(unsigned char uart_char)
 {
-   printf("DIMMER: new command, target: %02X, state: %02X, number: %02X\n",
-          command_dimmer->ability_target,
-          command_dimmer->ability_state,
-          command_dimmer->ability_number);
+   //printf("uart_data_receiver: New char(%" PRIXX8 ") in buffer: %" PRIu8 ", length: %" PRIu8 " \n", uart_char, uart_data_iterator, uart_returned_data_length);
 
-   if (command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_1 &&
-         command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_2)
+   if (uart_flag == 2)
    {
-      printf("Not support dimmer number\n");
-      return;
+      uart_console(uart_char);
+      uart_flag = 0;
    }
 
-}
-
-
-/*---------------------------------------------------------------------------*/
-
-static void exe_dimmer_command(struct command_data *command_dimmer)
-{
-   printf("DIMMER: new command, target: %02X, state: %02X, number: %02X\n",
-          command_dimmer->ability_target,
-          command_dimmer->ability_state,
-          command_dimmer->ability_number);
-
-   if (command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_1 &&
-         command_dimmer->ability_number != DEVICE_ABILITY_DIMMER_2)
+   if (uart_char == '/')
    {
-      printf("Not support dimmer number\n");
-      return;
+      uart_flag++;
    }
 
+   if (uart_returned_data_length > 0)
+   {
+      uart_returned_data_buf[uart_data_iterator] = uart_char;
+
+      if (uart_data_iterator < uart_returned_data_length - 1)
+      {
+         uart_data_iterator++;
+      }
+      else
+      {
+         uart_data.data_type = DATA_TYPE_UART;
+         uart_data.protocol_version = PROTOCOL_VERSION_V1;
+         uart_data.device_version = DEVICE_VERSION_V1;
+         uart_data.uart_returned_data_length = 0;
+
+         for (int i = 0; i < 15; i++)
+         {
+            uart_data.payload[i] = 0xFF;
+         }
+
+         for (int i = 0; i < uart_returned_data_length; i++)
+         {
+            uart_data.payload[i] = uart_returned_data_buf[i];
+         }
+
+         uart_data.uart_data_length = uart_returned_data_length;
+         uart_data.ready_to_send = 1;
+
+         uart_returned_data_length = 0;
+         uart_data_iterator = 0;
+      }
+
+   }
+   return 1;
+}
+
+static void send_uart_command(struct command_data *uart_data)
+{
+
+   disable_interrupts();
+   enable_interrupts();
+
+   for (int i = 0; i < uart_data->uart_data_length; i++)
+   {
+      cc26xx_uart_write_byte(uart_data->payload[i]);
+   }
+   printf("\n");
+
+   uart_returned_data_length = uart_data->uart_returned_data_length;
 }
 
 /*---------------------------------------------------------------------------*/
+
+
+PROCESS_THREAD(send_data_process, ev, data)
+{
+   PROCESS_BEGIN();
+
+   static struct etimer send_data_process_timer;
+   PROCESS_PAUSE();
+
+   while (1)
+   {
+      etimer_set(&send_data_process_timer, UART_DATA_POLL_INTERVAL);
+      PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_data_process_timer));
+
+      if (uart_data.ready_to_send != 0)
+      {
+         disable_interrupts();
+         send_uart_data(&uart_data);
+         uart_data.ready_to_send = 0;
+         enable_interrupts();
+      }
+   }
+
+   PROCESS_END();
+}
+
+/*---------------------------------------------------------------------------*/
+
 
 PROCESS_THREAD(main_process, ev, data)
 {
@@ -133,18 +215,8 @@ PROCESS_THREAD(main_process, ev, data)
 
    printf("Unwired Incotext-light device. HELL-IN-CODE free. I hope.\n");
 
-
-   ext_flash_init();
-   bool flash_result = ext_flash_test();
-
-   if (flash_result == true)
-   {
-      printf("Flash test passed\n");
-   }
-   else
-   {
-      printf("Flash test failed\n");
-   }
+   /* set incoming uart-data handler(uart_data_receiver) */
+   cc26xx_uart_set_input(&uart_data_receiver);
 
    while (1)
    {
@@ -152,9 +224,17 @@ PROCESS_THREAD(main_process, ev, data)
       if (ev == PROCESS_EVENT_CONTINUE)
       {
          message_data = data;
-         if (message_data->ability_target == DEVICE_ABILITY_DIMMER)
+         if (message_data->data_type == DATA_TYPE_UART)
          {
-            exe_dimmer_command(message_data);
+            if (node_mode == MODE_NORMAL)
+               send_uart_command(message_data);
+         }
+      }
+      if (ev == sensors_event)
+      {
+         if (data == &button_e_sensor_click)
+         {
+            printf("BCP: Button E click\n");
          }
       }
    }

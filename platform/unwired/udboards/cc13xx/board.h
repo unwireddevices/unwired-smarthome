@@ -127,10 +127,25 @@
  * \name UART IOID mapping
  *
  */
-//#define BOARD_IOID_UART_RX        IOID_26 //UMDK generic UART
-//#define BOARD_IOID_UART_TX        IOID_25 //UMDK generic UART
-#define BOARD_IOID_UART_RX        IOID_2 //Unwired mesh usb adapter
-#define BOARD_IOID_UART_TX        IOID_3 //Unwired mesh usb adapter
+#define BOARD_IOID_UART_TX_INCOTEXT_LIGHT        IOID_5
+#define BOARD_IOID_UART_RX_INCOTEXT_LIGHT        IOID_2
+
+#define BOARD_IOID_UART_TX_ROOT_SMARTHOME        IOID_26
+#define BOARD_IOID_UART_RX_ROOT_SMARTHOME        IOID_27
+
+#define BOARD_IOID_UART_TX_DEFAULT               IOID_3
+#define BOARD_IOID_UART_RX_DEFAULT               IOID_2
+
+#if defined ALT_INCOTEX_UART
+   #define BOARD_IOID_UART_TX        BOARD_IOID_UART_TX_DEFAULT
+   #define BOARD_IOID_UART_RX        BOARD_IOID_UART_RX_DEFAULT
+#elif defined ALT_ROOT_SMARTGHOME_UART
+   #define BOARD_IOID_UART_TX        BOARD_IOID_UART_TX_ROOT_SMARTHOME
+   #define BOARD_IOID_UART_RX        BOARD_IOID_UART_RX_ROOT_SMARTHOME
+#else
+   #define BOARD_IOID_UART_TX        BOARD_IOID_UART_TX_DEFAULT
+   #define BOARD_IOID_UART_RX        BOARD_IOID_UART_RX_DEFAULT
+#endif
 #define BOARD_IOID_UART_CTS       IOID_UNUSED
 #define BOARD_IOID_UART_RTS       IOID_UNUSED
 #define BOARD_UART_RX             (1 << BOARD_IOID_UART_RX)
@@ -167,11 +182,11 @@
  * \name SPI IOID mapping
  *
  */
-#define BOARD_IOID_SPI_SCK        IOID_5
+#define BOARD_IOID_SPI_SCK        IOID_10
 #define BOARD_IOID_SPI_CLK_FLASH  BOARD_IOID_SPI_SCK
-#define BOARD_IOID_SPI_MOSI       IOID_25
-#define BOARD_IOID_SPI_MISO       IOID_4
-#define BOARD_IOID_FLASH_CS       IOID_24
+#define BOARD_IOID_SPI_MOSI       IOID_9
+#define BOARD_IOID_SPI_MISO       IOID_8
+#define BOARD_IOID_FLASH_CS       IOID_14
 #define BOARD_SPI_SCK             (1 << BOARD_IOID_SPI_SCK)
 #define BOARD_SPI_MOSI            (1 << BOARD_IOID_SPI_MOSI)
 #define BOARD_SPI_MISO            (1 << BOARD_IOID_SPI_MISO)

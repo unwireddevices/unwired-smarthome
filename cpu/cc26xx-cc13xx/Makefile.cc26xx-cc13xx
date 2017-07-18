@@ -25,10 +25,16 @@ TI_XXWARE_STARTUP_SRCS = ccfg.c startup_gcc.c
 ### them earlier to prevent filename clashes with Contiki core files
 CFLAGS += -I$(TI_XXWARE) -I$(CONTIKI)/$(TI_XXWARE_SRC)
 CFLAGS += -I$(TI_XXWARE)/inc
-
 MODULES += $(TI_XXWARE_SRC)
 
-LDSCRIPT = $(CONTIKI_CPU)/cc26xx.ld
+
+OTA_IMAGE_OFFSET=0x2000		#	Starts on flash page 2
+OTA_IMAGE_LENGTH=0x19000 	# 25 flash pages long
+OTADEFINES = -DOTA_IMAGE_OFFSET=$(OTA_IMAGE_OFFSET) -DOTA_IMAGE_LENGTH=$(OTA_IMAGE_LENGTH) -DOTA_METADATA_SPACE=0x100 -DOTA=1
+CFLAGS += $(OTADEFINES)
+GENERATE_LDSCRIPT = $(Q)$(LD) -P -E $(OTADEFINES) $(CONTIKI_CPU)/cc26xx-ota.c -o $(CONTIKI_CPU)/cc26xx-ota.ld
+LDSCRIPT = $(CONTIKI_CPU)/cc26xx-ota.ld
+
 
 CFLAGS += -mcpu=cortex-m3 -mthumb -mlittle-endian
 CFLAGS += -ffunction-sections -fdata-sections
@@ -116,6 +122,10 @@ $(OBJECTDIR)/ccfg.o: ccfg.c FORCE | $(OBJECTDIR)
 
 ### Compilation rules
 CUSTOM_RULE_LINK=1
+
+#	Nothing special is executed here unless OTA=1
+$(LDSCRIPT): FORCE
+	$(GENERATE_LDSCRIPT)
 
 %.elf: $(TARGET_STARTFILES) %.co $(PROJECT_OBJECTFILES) $(PROJECT_LIBRARIES) contiki-$(TARGET).a $(LDSCRIPT)
 	$(TRACE_LD)

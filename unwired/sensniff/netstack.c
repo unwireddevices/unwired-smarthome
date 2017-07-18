@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016, Unwired Devices LLC - http://www.unwireddevices.com/
+ * Copyright (c) 2010, Loughborough University - Computer Science
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,29 +25,14 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- *
  */
 /*---------------------------------------------------------------------------*/
-/**
- * \file
- *         Header file for Incotext-light service
- * \author
- *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
- */
+#include "netstack.h"
 /*---------------------------------------------------------------------------*/
-#include "contiki.h"
-#include "net/ip/uip.h"
-
-PROCESS_NAME(main_process);
-
-/*---------------------------------------------------------------------------*/
-#define CURRENT_DEVICE_SLEEP_TYPE             DEVICE_SLEEP_TYPE_NORMAL
-#define CURRENT_DEVICE_GROUP                  DEVICE_GROUP_BRIDGE_CONVERTER
-#define CURRENT_DEVICE_VERSION                DEVICE_VERSION_V1
-#define CURRENT_PROTOCOL_VERSION              PROTOCOL_VERSION_V1
-#define CURRENT_ABILITY_1BYTE                 0b00000000
-#define CURRENT_ABILITY_2BYTE                 0b00000000
-#define CURRENT_ABILITY_3BYTE                 0b00000000
-#define CURRENT_ABILITY_4BYTE                 0b00001000
-
+void
+netstack_init(void)
+{
+  NETSTACK_RADIO.init();
+  NETSTACK_RDC.init();
+}
 /*---------------------------------------------------------------------------*/

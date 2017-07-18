@@ -19,11 +19,13 @@
 #define DATA_TYPE_COMMAND                                       0x05 //Команды возможностям устройства
 #define DATA_TYPE_STATUS                                        0x06 //Пакет со статусными данными
 #define DATA_TYPE_GET_STATUS                                    0x07 //Запрос статуса(не реализовано)
-#define DATA_TYPE_SETTINGS                                      0x08 //Команда настройки параметров(не реализовано)
+#define DATA_TYPE_SETTINGS                                      0x08 //Команда настройки параметров
 #define DATA_TYPE_WARNING                                       0x09 //Ошибки и предупреждения(не реализовано)
 #define DATA_TYPE_SET_TIME                                      0x0A //Команда установки времени(не реализовано)
 #define DATA_TYPE_SET_SCHEDULE                                  0x0B //Команда установки расписания(не реализовано)
-#define DATA_TYPE_FIRMWARE                                      0x0C //Команда с данными для OTA
+#define DATA_TYPE_FIRMWARE                                      0x0C //Данные для OTA
+#define DATA_TYPE_UART                                          0x0D //Команда с данными UART
+#define DATA_TYPE_FIRMWARE_CMD                                  0x0E //Команды OTA
 
 /* Reserved data */
 #define DATA_RESERVED                                           0xFF
@@ -137,9 +139,11 @@
 
 
 /* DATA_TYPE_FIRMWARE commands  */
-#define DATA_TYPE_FIRMWARE_COMMAND_START                        0x01 //Старт процесса обновления
-#define DATA_TYPE_FIRMWARE_COMMAND_DATA                         0x02 //Данные прошивки
-#define DATA_TYPE_FIRMWARE_COMMAND_UPDATE                       0x03 //Старт обновления после передачи данных
+#define DATA_TYPE_FIRMWARE_COMMAND_NEW_FW                       0x01 //Сообщение о наличии новой прошивки
+#define DATA_TYPE_FIRMWARE_COMMAND_CHANK_REQ                    0x02 //Запрос пакета с частью прошивки
+
+#define FIRMWARE_PAYLOAD_LENGTH                                 224
+#define FIRMWARE_PAYLOAD_OFFSET                                 7
 
 /* Devices warnings */
 #define DEVICE_WARNING_HIGH_TEMPERATYRE                         0x01

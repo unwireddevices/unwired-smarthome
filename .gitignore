@@ -138,3 +138,6 @@ LOG_OPENOCD
 /.settings/language.settings.xml
 /.cproject
 *.o
+/unwired/incotex/light-ota-chanks
+/unwired/incotex/light-ota-image.binary
+/unwired/incotex/light-ota-chunks

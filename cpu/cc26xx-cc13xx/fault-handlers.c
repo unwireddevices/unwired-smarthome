@@ -31,6 +31,7 @@
 #include "inc/hw_types.h"
 #include "inc/hw_memmap.h"
 #include "inc/hw_cpu_scs.h"
+#include <stdio.h>
 /*---------------------------------------------------------------------------*/
 #define fault_handlers_hard_fault_isr FaultISR
 /*---------------------------------------------------------------------------*/
@@ -48,7 +49,7 @@ fault_handlers_hard_fault_isr(void)
     /* ToDo: Check BFARVALID and then BFAR to filter down even further */
     return;
   }
-
+  printf("FaultISR. Core not dump, this is embeeeeeeded!\n");
   while(1);
 }
 /*---------------------------------------------------------------------------*/

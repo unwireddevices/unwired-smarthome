@@ -1,0 +1,6 @@
+GIT_VERSION := $(shell git describe --dirty --always --tags)
+BIG_GIT_VERSION := $(shell git describe --dirty --always --tags | sed -r 's/v([0-9]+)\.([0-9]+).*/\1/')
+LITTLE_GIT_VERSION := $(shell git describe --dirty --always --tags | sed -r 's/v([0-9]+)\.([0-9]+).*/\2/')
+DEFINES+=BIG_VERSION=$(BIG_GIT_VERSION)
+DEFINES+=LITTLE_VERSION=$(LITTLE_GIT_VERSION)
+DEFINES+=GIT_VERSION=\"$(GIT_VERSION)\"

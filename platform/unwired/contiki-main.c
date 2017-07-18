@@ -73,8 +73,9 @@
 #include <stdio.h>
 /*---------------------------------------------------------------------------*/
 unsigned short node_id = 0;
+static struct timer start_rand_timer;
 /*---------------------------------------------------------------------------*/
-/** \brief Board specific iniatialisation */
+/** \brief Board specific initialization */
 void board_init(void);
 /*---------------------------------------------------------------------------*/
 static void
@@ -139,9 +140,7 @@ set_rf_params(void)
   printf(" RPL probing interval: %u s\n", RPL_CONF_PROBING_INTERVAL/CLOCK_SECOND);
   printf(" Min DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_MIN);
   printf(" Max DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_DOUBLINGS+RPL_CONF_DIO_INTERVAL_MIN);
-
-
-
+  printf(" Max routes: %u\n", UIP_CONF_MAX_ROUTES);
 
 }
 /*---------------------------------------------------------------------------*/
@@ -153,6 +152,8 @@ set_rf_params(void)
 int
 main(void)
 {
+  HWREG(NVIC_VTABLE) = OTA_IMAGE_OFFSET + OTA_METADATA_SPACE;
+
   /* Enable flash cache and prefetch. */
   ti_lib_vims_mode_set(VIMS_BASE, VIMS_MODE_ENABLED);
   ti_lib_vims_configure(VIMS_BASE, true, true);
@@ -178,8 +179,6 @@ main(void)
    */
   ti_lib_pwr_ctrl_io_freeze_disable();
 
-  fade(LED_A);
-
   ti_lib_int_master_enable();
 
   soc_rtc_init();
@@ -202,7 +201,17 @@ main(void)
   printf("With DriverLib v%u.%u\n", DRIVERLIB_RELEASE_GROUP,
          DRIVERLIB_RELEASE_BUILD);
   printf("\n");
-  printf(BOARD_STRING ", version: %s\n", LOCAL_VERSION);
+
+  printf("Random timer...\n");
+  // start_rand_timer
+  timer_set(&start_rand_timer, (random_rand() % (CLOCK_SECOND * 4)));
+
+  do
+  {
+     fade(LED_A);
+  } while(timer_expired(&start_rand_timer) == 0);
+
+  printf(BOARD_STRING ", version: %s\n", GIT_VERSION);
   printf("Build on: %s %s\n", __DATE__, __TIME__);
 
   printf("IEEE 802.15.4: %s, CC13xx: %s\n",
@@ -210,13 +219,12 @@ main(void)
          ti_lib_chipinfo_chip_family_is_cc13xx() == true ? "Yes" : "No");
 
 
+
   process_start(&etimer_process, NULL);
   ctimer_init();
 
   energest_init();
   ENERGEST_ON(ENERGEST_TYPE_CPU);
-
-  fade(LED_B);
 
   printf(" Net: ");
   printf("%s\n", NETSTACK_NETWORK.name);
@@ -241,15 +249,11 @@ main(void)
   process_start(&tcpip_process, NULL);
 #endif /* NETSTACK_CONF_WITH_IPV6 */
 
-  fade(LED_C);
-
   process_start(&sensors_process, NULL);
 
   autostart_start(autostart_processes);
 
   watchdog_start();
-
-  fade(LED_D);
 
   while(1) {
     uint8_t r;

@@ -45,9 +45,15 @@ volatile uint8_t node_mode;
 struct command_data
 {
    volatile uint8_t data_type;
+   volatile uint8_t protocol_version;
+   volatile uint8_t device_version;
    volatile uint8_t ability_target;
    volatile uint8_t ability_number;
    volatile uint8_t ability_state;
+   volatile uint8_t uart_returned_data_length;
+   volatile uint8_t uart_data_length;
+   volatile uint8_t ready_to_send;
+   volatile uint8_t payload[16];
 };
 
 struct sensor_packet
@@ -60,7 +66,9 @@ struct sensor_packet
    uint8_t sensor_event;
 };
 
-void send_sensor_event(struct sensor_packet *packet);
+void send_sensor_event(struct sensor_packet *sensor_packet);
+void send_uart_data(struct command_data *uart_data);
+void uart_console(unsigned char uart_char);
 
 PROCESS_NAME(dag_node_process);
 PROCESS_NAME(dag_node_button_process);
@@ -68,6 +76,9 @@ PROCESS_NAME(root_find_process);
 PROCESS_NAME(status_send_process);
 PROCESS_NAME(maintenance_process);
 PROCESS_NAME(led_process);
+PROCESS_NAME(fw_update_process);
+
+
 
 /*---------------------------------------------------------------------------*/
 

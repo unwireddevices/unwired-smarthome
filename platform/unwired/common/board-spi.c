@@ -131,7 +131,7 @@ board_spi_open(uint32_t bit_rate, uint32_t clk_pin)
   ti_lib_ssi_int_disable(SSI0_BASE, SSI_RXOR | SSI_RXFF | SSI_RXTO | SSI_TXFF);
   ti_lib_ssi_int_clear(SSI0_BASE, SSI_RXOR | SSI_RXTO);
   ti_lib_rom_ssi_config_set_exp_clk(SSI0_BASE, ti_lib_sys_ctrl_clock_get(),
-                                    SSI_FRF_MOTO_MODE_0,
+                                    SSI_FRF_MOTO_MODE_3,
                                     SSI_MODE_MASTER, bit_rate, 8);
   ti_lib_rom_ioc_pin_type_ssi_master(SSI0_BASE, BOARD_IOID_SPI_MISO,
                                      BOARD_IOID_SPI_MOSI, IOID_UNUSED, clk_pin);
