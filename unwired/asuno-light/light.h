@@ -30,7 +30,7 @@
 /*---------------------------------------------------------------------------*/
 /**
  * \file
- *         Header file for Incotext-light service
+ *         Header file for asuno-light service
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
