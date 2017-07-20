@@ -41,7 +41,7 @@
 
 #define USER_FLASH_LENGTH                       100
 
-#define START_USER_FLASH                        0x10000
+#define START_USER_FLASH                        0x1C000
 #define END_USER_FLASH                          USER_FLASH_LENGTH + START_USER_FLASH
 
 #define START_ON_LAST_STATE                     0x01
