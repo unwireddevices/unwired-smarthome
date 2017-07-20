@@ -43,6 +43,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "../ud_binary_protocol.h"
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
 /*---------------------------------------------------------------------------*/
@@ -99,10 +100,10 @@ struct uart_data
 };
 
 /* Received data via UART */
-static struct command_data command_message;
-static struct firmware_data firmware_message;
-static struct firmware_cmd firmware_cmd_message;
-static struct uart_data uart_message;
+struct command_data command_message;
+struct firmware_data firmware_message;
+struct firmware_cmd firmware_cmd_message;
+struct uart_data uart_message;
 
 
 /* main UPD connection */
