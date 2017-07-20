@@ -62,6 +62,8 @@
 #include "../ud_binary_protocol.h"
 #include "xxf_types_helper.h"
 #include "dev/watchdog.h"
+#include "root.h"
+#include "../root-node.h"
 
 
 #include "../fake_headers.h" //no move up! not "krasivo"!
@@ -69,61 +71,6 @@
 #define UART_DATA_POLL_INTERVAL 5 //in main timer ticks, one tick ~8ms
 /*---------------------------------------------------------------------------*/
 
-typedef struct firmware_packet
-{
-   uint8_t data[227];
-} firmware_packet;
-
-struct firmware_data
-{
-   volatile uip_ip6addr_t destination_address;
-   volatile uint8_t protocol_version;
-   volatile uint8_t device_version;
-   volatile uint8_t firmware_command;
-   volatile firmware_packet firmware_payload;
-   volatile uint8_t ready_to_send;
-};
-
-struct command_data
-{
-   volatile uip_ip6addr_t destination_address;
-   volatile uint8_t protocol_version;
-   volatile uint8_t device_version;
-   volatile uint8_t ability_target;
-   volatile uint8_t ability_number;
-   volatile uint8_t ability_state;
-   volatile uint8_t ready_to_send;
-};
-
-struct uart_data
-{
-   volatile uip_ip6addr_t destination_address;
-   volatile uint8_t protocol_version;
-   volatile uint8_t device_version;
-   volatile uint8_t returned_data_lenth;
-   volatile uint8_t payload[5];
-   volatile uint8_t ready_to_send;
-};
-
-/* Received data via UART */
-static struct command_data command_message;
-static struct firmware_data firmware_message;
-static struct uart_data uart_message;
-
-
-/* UART-buffer for raw command */
-volatile static uint8_t uart_command_buf[UART_DATA_LENGTH];
-
-/* UART char iterator */
-volatile static uint8_t uart_iterator = 0;
-
-/* The sequence of start and end command */
-static uint8_t uart_magic_sequence[6] = {0x01,0x16,0x16,0x16,0x16,0x10};
-
-/* UPD connection structure */
-static struct simple_udp_connection udp_connection;
-
-/*---------------------------------------------------------------------------*/
 /* Buttons on DIO 1 */
 SENSORS(&button_e_sensor_click, &button_e_sensor_long_click);
 
@@ -132,377 +79,6 @@ PROCESS(send_command_process,"UDP command sender");
 
 AUTOSTART_PROCESSES(&rpl_root_process);
 
-/*---------------------------------------------------------------------------*/
-void send_confirmation_packet(const uip_ip6addr_t *dest_addr)
-{
-   if (dest_addr == NULL)
-   {
-      printf("ERROR: dest_addr in send_confirmation_packet null\n");
-      return;
-   }
-
-   int length = 10;
-   char buf[length];
-   buf[0] = PROTOCOL_VERSION_V1;
-   buf[1] = DEVICE_VERSION_V1;
-   buf[2] = DATA_TYPE_JOIN_CONFIRM;
-   buf[3] = DATA_RESERVED;
-   buf[4] = DATA_RESERVED;
-   buf[5] = DATA_RESERVED;
-   buf[6] = DATA_RESERVED;
-   buf[7] = DATA_RESERVED;
-   buf[8] = DATA_RESERVED;
-   buf[9] = DATA_RESERVED;
-   simple_udp_sendto(&udp_connection, buf, length + 1, dest_addr);
-}
-
-/*---------------------------------------------------------------------------*/
-void send_pong_packet(const uip_ip6addr_t *dest_addr)
-{
-   if (dest_addr == NULL)
-   {
-      printf("ERROR: dest_addr in send_pong_packet null\n");
-      return;
-   }
-
-   int length = 10;
-   char buf[length];
-   buf[0] = PROTOCOL_VERSION_V1;
-   buf[1] = DEVICE_VERSION_V1;
-   buf[2] = DATA_TYPE_PONG;
-   buf[3] = DATA_RESERVED;
-   buf[4] = DATA_RESERVED;
-   buf[5] = DATA_RESERVED;
-   buf[6] = DATA_RESERVED;
-   buf[7] = DATA_RESERVED;
-   buf[8] = DATA_RESERVED;
-   buf[9] = DATA_RESERVED;
-   simple_udp_sendto(&udp_connection, buf, length + 1, dest_addr);
-}
-
-/*---------------------------------------------------------------------------*/
-
-void send_firmware_packet(struct firmware_data *firmware_message)
-{
-   if (&firmware_message->destination_address == NULL)
-   {
-      printf("ERROR: dest_addr in send_command_packet null\n");
-      return;
-   }
-   if (&udp_connection.udp_conn == NULL)   //указатель на что?
-   {
-      printf("ERROR: connection in send_command_packet null\n");
-      return;
-   }
-
-   uip_ip6addr_t addr;
-   uip_ip6addr_copy(&addr, &firmware_message->destination_address);
-
-   int length = 229;
-   char udp_buffer[length];
-   udp_buffer[0] = firmware_message->protocol_version;
-   udp_buffer[1] = firmware_message->device_version;
-   udp_buffer[2] = DATA_TYPE_FIRMWARE;
-   udp_buffer[3] = firmware_message->firmware_command;
-
-   for (int i = 0; i <= length - 4; i++)
-   {
-      udp_buffer[4 + i] = firmware_message->firmware_payload.data[i];
-   }
-
-   simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
-
-}
-
-/*---------------------------------------------------------------------------*/
-
-void send_command_packet(struct command_data *command_message)
-{
-   if (&command_message->destination_address == NULL)
-   {
-      printf("ERROR: dest_addr in send_command_packet null\n");
-      return;
-   }
-   if (&udp_connection.udp_conn == NULL)   //указатель на что?
-   {
-      printf("ERROR: connection in send_command_packet null\n");
-      return;
-   }
-
-   uip_ip6addr_t addr;
-   uip_ip6addr_copy(&addr, &command_message->destination_address);
-
-   int length = 10;
-   char udp_buffer[length];
-   udp_buffer[0] = command_message->protocol_version;
-   udp_buffer[1] = command_message->device_version;
-   udp_buffer[2] = DATA_TYPE_COMMAND;
-   udp_buffer[3] = command_message->ability_target;
-   udp_buffer[4] = command_message->ability_number;
-   udp_buffer[5] = command_message->ability_state;
-   udp_buffer[6] = DATA_RESERVED;
-   udp_buffer[7] = DATA_RESERVED;
-   udp_buffer[8] = DATA_RESERVED;
-   udp_buffer[9] = DATA_RESERVED;
-   simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
-
-}
-
-/*---------------------------------------------------------------------------*/
-
-void send_uart_packet(struct uart_data *uart_message)
-{
-   if (&uart_message->destination_address == NULL)
-   {
-      printf("ERROR: dest_addr in send_uart_packet null\n");
-      return;
-   }
-   if (&udp_connection.udp_conn == NULL)   //указатель на что?
-   {
-      printf("ERROR: connection in send_uart_packet null\n");
-      return;
-   }
-
-   uip_ip6addr_t addr;
-   uip_ip6addr_copy(&addr, &uart_message->destination_address);
-
-
-   printf("send_uart_packet: sent uart packet, returned_data_lenth 0x%" PRIXX8 "( payload 1 %" PRIu8 ")\n", uart_message->returned_data_lenth, uart_message->payload[0]);
-   int length = 10;
-   char udp_buffer[length];
-   udp_buffer[0] = uart_message->protocol_version;
-   udp_buffer[1] = uart_message->device_version;
-   udp_buffer[2] = DATA_TYPE_UART;
-   udp_buffer[3] = uart_message->returned_data_lenth;
-   udp_buffer[4] = uart_message->payload[0];
-   udp_buffer[5] = uart_message->payload[1];
-   udp_buffer[6] = uart_message->payload[2];
-   udp_buffer[7] = uart_message->payload[3];
-   udp_buffer[8] = uart_message->payload[4];
-   udp_buffer[9] = DATA_RESERVED;
-   simple_udp_sendto(&udp_connection, udp_buffer, length + 1, &addr);
-
-}
-
-/*---------------------------------------------------------------------------*/
-
-void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const uint16_t length)
-{
-   if (addr == NULL)
-   {
-      printf("ERROR: addr in dag_root_raw_print null\n");
-      return;
-   }
-   if (data == NULL)
-   {
-      printf("ERROR: data in dag_root_raw_print null\n");
-      return;
-   }
-
-   if (length != 11 && length != 24)
-   {
-      printf("DAG NODE: Incompatible data length(%" PRIu16 ")!\n", length);
-      return;
-   }
-   printf("DAGROOTRAW1");
-   printf("%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-          ((uint8_t *)addr)[0], ((uint8_t *)addr)[1], ((uint8_t *)addr)[2],
-          ((uint8_t *)addr)[3], ((uint8_t *)addr)[4], ((uint8_t *)addr)[5],
-          ((uint8_t *)addr)[6], ((uint8_t *)addr)[7], ((uint8_t *)addr)[8],
-          ((uint8_t *)addr)[9], ((uint8_t *)addr)[10], ((uint8_t *)addr)[11],
-          ((uint8_t *)addr)[12], ((uint8_t *)addr)[13], ((uint8_t *)addr)[14],
-          ((uint8_t *)addr)[15]);
-
-   if (length == 11)
-   {
-      printf("%02X%02X%02X%02X%02X%02X%02X%02X%02X%02XFFFFFFFFFFFFFFFFFFFFFFFFFF",
-             data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
-   }
-
-   if (length == 24)
-   {
-      printf("%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
-             data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9],
-             data[10],data[11],data[12],data[13],data[14],data[15],data[16],data[17],data[18],data[19],
-             data[20],data[21],data[22]);
-   }
-
-   printf("RAWEND   \n");
-}
-
-/*---------------------------------------------------------------------------*/
-
-void uart_packet_dump(volatile uint8_t *uart_command_buf)
-{
-   if (uart_command_buf == NULL)
-   {
-      printf("ERROR: uart_command_buf in uart_packet_dump null\n");
-      return;
-   }
-
-   printf("\nUART->6LP: ");
-   for (int i = 0; i < UART_DATA_LENGTH; i++)
-   {
-      printf("%"PRIXX8, uart_command_buf[i]);
-   }
-   printf("\n");
-}
-
-/*---------------------------------------------------------------------------*/
-
-static int uart_data_receiver(unsigned char uart_char)
-{
-   led_blink(LED_A);
-
-   if (uart_iterator < UART_DATA_LENGTH)
-   {
-      uart_command_buf[uart_iterator] = uart_char;
-      //printf("UDCP: New char(%" PRIXX8 ") in buffer: %" PRIu8 "\n", uart_char, uart_iterator);
-      if (uart_iterator < MAGIC_SEQUENCE_LENGTH)
-      {
-         if (uart_char != uart_magic_sequence[uart_iterator])
-         {
-            //printf("UDCP: Char 0x%" PRIXX8 "(#%" PRIu8 ") non-MQ!\n", uart_char, uart_iterator);
-            uart_iterator = 0;
-            return 1;
-         }
-      }
-      uart_iterator++;
-   }
-
-   if (uart_iterator == UART_DATA_LENGTH)
-   {
-      uart_iterator = 0;
-      uart_packet_dump(uart_command_buf);
-      if (uart_command_buf[6] == UART_PROTOCOL_VERSION_V2)
-      {
-         if (uart_command_buf[26] == DATA_TYPE_COMMAND)
-         {
-            for (int i = 0; i < 16; i++)
-            {
-               command_message.destination_address.u8[i] = uart_command_buf[8 + i];
-            }
-            command_message.protocol_version = uart_command_buf[24];
-            command_message.device_version = uart_command_buf[25];
-            command_message.ability_target = uart_command_buf[27];
-            command_message.ability_number = uart_command_buf[28];
-            command_message.ability_state = uart_command_buf[29];
-            command_message.ready_to_send = 1;
-         }
-
-         if (uart_command_buf[26] == DATA_TYPE_FIRMWARE)
-         {
-            for (int i = 0; i < 16; i++)
-            {
-               firmware_message.destination_address.u8[i] = uart_command_buf[8 + i];
-            }
-            firmware_message.protocol_version = uart_command_buf[24];
-            firmware_message.device_version = uart_command_buf[25];
-            firmware_message.firmware_command = uart_command_buf[27];
-            firmware_message.ready_to_send = 1;
-            for (int i = 0; i < 227; i++)
-            {
-               firmware_message.firmware_payload.data[i] = uart_command_buf[28 + i];
-            }
-         }
-
-         if (uart_command_buf[26] == DATA_TYPE_UART)
-         {
-            for (int i = 0; i < 16; i++)
-            {
-               uart_message.destination_address.u8[i] = uart_command_buf[8 + i];
-            }
-            uart_message.protocol_version = uart_command_buf[24];
-            uart_message.device_version = uart_command_buf[25];
-            uart_message.returned_data_lenth = uart_command_buf[27];
-            uart_message.payload[0] = uart_command_buf[28];
-            uart_message.payload[1] = uart_command_buf[29];
-            uart_message.payload[2] = uart_command_buf[30];
-            uart_message.payload[3] = uart_command_buf[31];
-            uart_message.payload[4] = uart_command_buf[32];
-            uart_message.ready_to_send = 1;
-         }
-      }
-      else
-      {
-         printf("UDCP: Incompatible protocol version: %" PRIXX8 "!\n", uart_command_buf[6]);
-      }
-
-   }
-
-   return 1;
-}
-
-/*---------------------------------------------------------------------------*/
-
-static void udp_data_receiver(struct simple_udp_connection *connection,
-                              const uip_ipaddr_t *sender_addr,
-                              uint16_t sender_port,
-                              const uip_ipaddr_t *receiver_addr,
-                              uint16_t receiver_port,
-                              const uint8_t *data,
-                              uint16_t datalen)
-{
-   led_on(LED_A);
-
-   dag_root_raw_print(sender_addr, data, datalen);
-
-   if (data[0] == PROTOCOL_VERSION_V1 && data[2] == DATA_TYPE_JOIN)
-   {
-      send_confirmation_packet(sender_addr);
-   }
-
-   if (data[0] == PROTOCOL_VERSION_V1 && (data[2] == DATA_TYPE_STATUS ||
-                                          data[2] == DATA_TYPE_SENSOR_DATA) )
-   {
-      send_pong_packet(sender_addr);
-   }
-
-   led_off(LED_A);
-}
-
-/*---------------------------------------------------------------------------*/
-
-static uip_ipaddr_t *set_global_address(void)
-{
-   static uip_ipaddr_t ipaddr;
-
-   /* Fill in the address with zeros and the local prefix */
-   uip_ip6addr(&ipaddr, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
-
-   /* Generate an address based on the chip ID */
-   uip_ds6_set_addr_iid(&ipaddr, &uip_lladdr);
-
-   /* Adding autoconfigured address as the device address */
-   uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
-
-   return &ipaddr;
-}
-
-/*---------------------------------------------------------------------------*/
-
-static void create_rpl_dag(uip_ipaddr_t *ipaddr)
-{
-   if (ipaddr == NULL)
-   {
-      printf("ERROR: ipaddr in create_rpl_dag null\n");
-      return;
-   }
-   struct uip_ds6_addr *root_if = uip_ds6_addr_lookup(ipaddr);
-   if (root_if != NULL)
-   {
-      uip_ipaddr_t prefix;
-      rpl_set_root(RPL_DEFAULT_INSTANCE, ipaddr);
-      rpl_dag_t *dag = rpl_get_any_dag();
-      uip_ip6addr(&prefix, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
-      rpl_set_prefix(dag, &prefix, 64);
-      printf("Created a new RPL DAG, i'm root!\n");
-   }
-   else
-   {
-      printf("Failed to create a new RPL DAG :(\n");
-   }
-}
 
 /*---------------------------------------------------------------------------*/
 
@@ -534,6 +110,14 @@ PROCESS_THREAD(send_command_process, ev, data)
          enable_interrupts();
       }
 
+      if (firmware_cmd_message.ready_to_send != 0)
+      {
+         disable_interrupts();
+         send_firmware_cmd_packet(&firmware_cmd_message);
+         firmware_cmd_message.ready_to_send = 0;
+         enable_interrupts();
+      }
+
       if (uart_message.ready_to_send != 0)
       {
          disable_interrupts();
@@ -545,7 +129,6 @@ PROCESS_THREAD(send_command_process, ev, data)
 
    PROCESS_END();
 }
-
 
 /*---------------------------------------------------------------------------*/
 
@@ -567,7 +150,7 @@ PROCESS_THREAD(rpl_root_process, ev, data)
    rpl_set_mode(RPL_MODE_MESH);
 
    /* set local address */
-   ipaddr = set_global_address();
+   ipaddr = set_global_address(); //не очень понятно, нафига это вообще выносить
 
    /* make local address as rpl-root */
    create_rpl_dag(ipaddr);
@@ -599,7 +182,7 @@ PROCESS_THREAD(rpl_root_process, ev, data)
          {
             led_on(LED_A);
             printf("SYSTEM: Button E long click, reboot\n");
-            ti_lib_sys_ctrl_system_reset();
+            watchdog_reboot();
          }
       }
    }

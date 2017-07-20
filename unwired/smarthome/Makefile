@@ -20,7 +20,7 @@ relay-CLEAN: relay clean3
 
 dimmer-CLEAN: dimmer clean4
 
-button: net-bootloader
+button: net-bootloader-clean
 	CONF="LEAF"; \
 	touch /tmp/unwired_last_conf; \
 	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean_no_hex; \
@@ -33,8 +33,7 @@ button: net-bootloader
 	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 button-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o button-firmware.hex -intel
 	rm button.hex
 	
-	
-root: net-bootloader
+root: net-bootloader-clean
 	CONF="NOLEAF"; \
 	touch /tmp/unwired_last_conf; \
 	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean_no_hex; \
@@ -47,7 +46,7 @@ root: net-bootloader
 	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 root-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o root-firmware.hex -intel
 	rm root.hex
 
-relay: net-bootloader
+relay: net-bootloader-clean
 	CONF="NOLEAF"; \
 	touch /tmp/unwired_last_conf; \
 	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean_no_hex; \
@@ -60,7 +59,7 @@ relay: net-bootloader
 	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 relay-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o relay-firmware.hex -intel
 	rm relay.hex
 	
-dimmer: net-bootloader
+dimmer: net-bootloader-clean
 	CONF="NOLEAF"; \
 	touch /tmp/unwired_last_conf; \
 	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean; \
@@ -75,6 +74,9 @@ dimmer: net-bootloader
 
 net-bootloader: 
 	cd ../bootloader && make -j5 CPU=$(CPU) bootloader.hex
+
+net-bootloader-clean: 
+	cd ../bootloader && make clean && make -j5 CPU=$(CPU) bootloader.hex
 	
 clean1:
 	-rm -f *~ *core core *.srec *.lst *.map *.cprg *.bin *.data contiki*.a *.firmware core-labels.S *.ihex *.ini *.ce *.co *.unwired *.elf *.o *.d	

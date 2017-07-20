@@ -324,6 +324,7 @@ static void udp_receiver(struct simple_udp_connection *c,
                          const uint8_t *data, //TODO: make "parse" function(data[0] -> data.protocol_version)
                          uint16_t datalen)
 {
+   printf("DAG Node: packet in\n");
    if (data[0] == PROTOCOL_VERSION_V1 && data[1] == CURRENT_DEVICE_VERSION)
    {
       if (data[2] == DATA_TYPE_JOIN_CONFIRM)
