@@ -109,6 +109,8 @@ struct uart_data uart_message;
 /* main UPD connection */
 struct simple_udp_connection udp_connection;
 
+PROCESS_NAME(send_command_process);
+
 /*---------------------------------------------------------------------------*/
 
 void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const uint16_t length);
@@ -117,9 +119,9 @@ void send_confirmation_packet(const uip_ip6addr_t *dest_addr);
 
 void send_pong_packet(const uip_ip6addr_t *dest_addr);
 
-void create_rpl_dag(uip_ipaddr_t *ipaddr);
+void rpl_initialize();
 
-uip_ipaddr_t *set_global_address(void);
+void root_node_initialize();
 
 void udp_data_receiver(struct simple_udp_connection *connection,
                               const uip_ipaddr_t *sender_addr,

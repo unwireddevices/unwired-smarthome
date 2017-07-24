@@ -68,123 +68,42 @@
 
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
-#define UART_DATA_POLL_INTERVAL 5 //in main timer ticks, one tick ~8ms
 /*---------------------------------------------------------------------------*/
 
 /* Buttons on DIO 1 */
 SENSORS(&button_e_sensor_click, &button_e_sensor_long_click);
 
 PROCESS(rpl_root_process,"Unwired RPL root and udp data receiver");
-PROCESS(send_command_process,"UDP command sender");
 
 AUTOSTART_PROCESSES(&rpl_root_process);
-
-
-/*---------------------------------------------------------------------------*/
-
-PROCESS_THREAD(send_command_process, ev, data)
-{
-   PROCESS_BEGIN();
-
-   static struct etimer send_command_process_timer;
-   PROCESS_PAUSE();
-
-   while (1)
-   {
-      etimer_set(&send_command_process_timer, UART_DATA_POLL_INTERVAL);
-      PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_command_process_timer));
-
-      if (command_message.ready_to_send != 0)
-      {
-         disable_interrupts();
-         send_command_packet(&command_message);
-         command_message.ready_to_send = 0;
-         enable_interrupts();
-      }
-
-      if (firmware_message.ready_to_send != 0)
-      {
-         disable_interrupts();
-         send_firmware_packet(&firmware_message);
-         firmware_message.ready_to_send = 0;
-         enable_interrupts();
-      }
-
-      if (firmware_cmd_message.ready_to_send != 0)
-      {
-         disable_interrupts();
-         send_firmware_cmd_packet(&firmware_cmd_message);
-         firmware_cmd_message.ready_to_send = 0;
-         enable_interrupts();
-      }
-
-      if (uart_message.ready_to_send != 0)
-      {
-         disable_interrupts();
-         send_uart_packet(&uart_message);
-         uart_message.ready_to_send = 0;
-         enable_interrupts();
-      }
-   }
-
-   PROCESS_END();
-}
 
 /*---------------------------------------------------------------------------*/
 
 PROCESS_THREAD(rpl_root_process, ev, data)
 {
-   static uip_ipaddr_t *ipaddr = NULL;
 
    PROCESS_BEGIN();
 
-   printf("Unwired RLP root and UDP data receiver. HELL-IN-CODE free. I hope. \n");
+   printf("Unwired RLP root. HELL-IN-CODE free. I hope.\n");
 
    /* if you do not execute "cleanall" target, rpl-root can build in "leaf" configuration. Diagnostic message */
    if (RPL_CONF_LEAF_ONLY == 1)
-   {
       printf("\nWARNING: leaf mode on rpl-root!\n");
-   }
 
-   /* Set MESH-mode for dc-power rpl-root(not leaf-mode) */
-   rpl_set_mode(RPL_MODE_MESH);
+   rpl_initialize();
 
-   /* set local address */
-   ipaddr = set_global_address(); //не очень понятно, нафига это вообще выносить
-
-   /* make local address as rpl-root */
-   create_rpl_dag(ipaddr);
-
-   /* register udp-connection, set incoming upd-data handler(udp_data_receiver) */
-   simple_udp_register(&udp_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_data_receiver);
-
-   /* set incoming uart-data handler(uart_data_receiver) */
-   cc26xx_uart_set_input(&uart_data_receiver);
-
-   /* blink-blink LED */
-   led_blink(LED_A);
-   led_blink(LED_A);
-
-   /* start flag "data for udp ready" poller process */
-   process_start(&send_command_process, NULL);
+   root_node_initialize();
 
    while (1)
    {
       PROCESS_WAIT_EVENT();
-      if (ev == sensors_event)
+      if (ev == sensors_event && data == &button_e_sensor_long_click)
       {
-         if (data == &button_e_sensor_click)
-         {
-            printf("Initiating global repair\n");
-            rpl_repair_root(RPL_DEFAULT_INSTANCE);
-         }
-         if (data == &button_e_sensor_long_click)
-         {
-            led_on(LED_A);
-            printf("SYSTEM: Button E long click, reboot\n");
-            watchdog_reboot();
-         }
+         led_on(LED_A);
+         printf("SYSTEM: Button E long click, reboot\n");
+         watchdog_reboot();
       }
    }
+
    PROCESS_END();
 }

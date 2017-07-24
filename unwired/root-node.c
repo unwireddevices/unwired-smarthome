@@ -80,6 +80,8 @@ volatile uint8_t uart_command_buf[UART_DATA_LENGTH];
 /* The sequence of start and end command */
 uint8_t uart_magic_sequence[6] = {0x01,0x16,0x16,0x16,0x16,0x10};
 
+PROCESS(send_command_process,"UDP command sender");
+
 /*---------------------------------------------------------------------------*/
 
 void send_confirmation_packet(const uip_ip6addr_t *dest_addr)
@@ -206,8 +208,12 @@ void udp_data_receiver(struct simple_udp_connection *connection,
 
 /*---------------------------------------------------------------------------*/
 
-uip_ipaddr_t *set_global_address(void)
+
+void rpl_initialize()
 {
+   /* Set MESH-mode for dc-power rpl-root(not leaf-mode) */
+   rpl_set_mode(RPL_MODE_MESH);
+
    static uip_ipaddr_t ipaddr;
 
    /* Fill in the address with zeros and the local prefix */
@@ -219,33 +225,34 @@ uip_ipaddr_t *set_global_address(void)
    /* Adding autoconfigured address as the device address */
    uip_ds6_addr_add(&ipaddr, 0, ADDR_AUTOCONF);
 
-   return &ipaddr;
+   /* make local address as rpl-root */
+   rpl_set_root(RPL_DEFAULT_INSTANCE, &ipaddr);
+   rpl_dag_t *dag = rpl_get_any_dag();
+
+   uip_ipaddr_t prefix;
+   uip_ip6addr(&prefix, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
+   rpl_set_prefix(dag, &prefix, 64);
+
+   printf("Created a new RPL DAG, i'm root!\n");
 }
 
 /*---------------------------------------------------------------------------*/
 
 
-void create_rpl_dag(uip_ipaddr_t *ipaddr)
+void root_node_initialize()
 {
-   if (ipaddr == NULL)
-   {
-      printf("ERROR: ipaddr in create_rpl_dag null\n");
-      return;
-   }
-   struct uip_ds6_addr *root_if = uip_ds6_addr_lookup(ipaddr);
-   if (root_if != NULL)
-   {
-      uip_ipaddr_t prefix;
-      rpl_set_root(RPL_DEFAULT_INSTANCE, ipaddr);
-      rpl_dag_t *dag = rpl_get_any_dag();
-      uip_ip6addr(&prefix, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
-      rpl_set_prefix(dag, &prefix, 64);
-      printf("Created a new RPL DAG, i'm root!\n");
-   }
-   else
-   {
-      printf("Failed to create a new RPL DAG :(\n");
-   }
+   /* register udp-connection, set incoming upd-data handler(udp_data_receiver) */
+   simple_udp_register(&udp_connection, UDP_DATA_PORT, NULL, UDP_DATA_PORT, udp_data_receiver);
+
+   /* set incoming uart-data handler(uart_data_receiver) */
+   cc26xx_uart_set_input(&uart_data_receiver);
+
+   /* blink-blink LED */
+   led_blink(LED_A);
+   led_blink(LED_A);
+
+   /* start flag "data for udp ready" poller process */
+   process_start(&send_command_process, NULL);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -536,4 +543,52 @@ int uart_data_receiver(unsigned char uart_char)
 
 /*---------------------------------------------------------------------------*/
 
+PROCESS_THREAD(send_command_process, ev, data)
+{
+   PROCESS_BEGIN();
 
+   static struct etimer send_command_process_timer;
+   PROCESS_PAUSE();
+
+   while (1)
+   {
+      etimer_set(&send_command_process_timer, UART_DATA_POLL_INTERVAL);
+      PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&send_command_process_timer));
+
+      if (command_message.ready_to_send != 0)
+      {
+         disable_interrupts();
+         send_command_packet(&command_message);
+         command_message.ready_to_send = 0;
+         enable_interrupts();
+      }
+
+      if (firmware_message.ready_to_send != 0)
+      {
+         disable_interrupts();
+         send_firmware_packet(&firmware_message);
+         firmware_message.ready_to_send = 0;
+         enable_interrupts();
+      }
+
+      if (firmware_cmd_message.ready_to_send != 0)
+      {
+         disable_interrupts();
+         send_firmware_cmd_packet(&firmware_cmd_message);
+         firmware_cmd_message.ready_to_send = 0;
+         enable_interrupts();
+      }
+
+      if (uart_message.ready_to_send != 0)
+      {
+         disable_interrupts();
+         send_uart_packet(&uart_message);
+         uart_message.ready_to_send = 0;
+         enable_interrupts();
+      }
+   }
+
+   PROCESS_END();
+}
+
+/*---------------------------------------------------------------------------*/
