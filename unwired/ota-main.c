@@ -80,6 +80,26 @@ crc16(uint16_t crc, uint8_t val)
 }
 
 /**
+ */
+/*******************************************************************************/
+
+uint8_t
+spi_test()
+{
+   int status = verify_ota_slot(1);
+
+   if (status == -1)
+   {
+      return SPI_EXT_FLASH_NON_ACTIVE;
+   }
+   else
+   {
+      return SPI_EXT_FLASH_ACTIVE;
+   }
+
+}
+
+/**
  *    OTA Metadata Functions
  */
 /*******************************************************************************

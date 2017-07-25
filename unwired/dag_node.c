@@ -126,6 +126,7 @@
 struct simple_udp_connection udp_connection;
 
 volatile uint8_t node_mode;
+volatile uint8_t spi_status;
 
 volatile uint8_t led_mode;
 static void led_mode_set(uint8_t mode);
@@ -427,9 +428,14 @@ static void udp_receiver(struct simple_udp_connection *c,
 
             printf("DAG Node: DATA_TYPE_FIRMWARE_COMMAND_NEW_FW command received, %"PRId16" chunks\n", fw_chunk_quantity);
 
-            while( erase_ota_image( 1 ) );
+            if (spi_status == SPI_EXT_FLASH_ACTIVE)
+            {
+               erase_ota_image(1);
+               process_start(&fw_update_process, NULL);
+            }
+            else
+               printf("DAG Node: OTA update not processed, spi flash not-active\n");
 
-            process_start(&fw_update_process, NULL);
          }
       }
 
@@ -648,7 +654,7 @@ void send_status_packet(const uip_ipaddr_t *parent_addr,
    udp_buffer[18] = voltage;
    udp_buffer[19] = BIG_VERSION;
    udp_buffer[20] = LITTLE_VERSION;
-   udp_buffer[21] = DATA_RESERVED;
+   udp_buffer[21] = spi_status;
    udp_buffer[22] = DATA_RESERVED;
 
    net_on(RADIO_ON_TIMER_OFF);
@@ -1067,10 +1073,12 @@ PROCESS_THREAD(dag_node_process, ev, data)
    //printf("New FW!\n");
    //printf("Old FW!\n");
    //printf("Golden image\n");
+   spi_status = spi_test();
 
-   printf("Node started, %s mode, %s class, version %"PRIu8".%"PRIu8"\n",
+   printf("Node started, %s mode, %s class, SPI %s, version %"PRIu8".%"PRIu8"\n",
                 rpl_get_mode() == RPL_MODE_LEAF ? "leaf" : "no-leaf",
                 CLASS == CLASS_B ? "B(sleep)" : "C(non-sleep)",
+                spi_status == SPI_EXT_FLASH_ACTIVE ? "active" : "non-active",
                 BIG_VERSION, LITTLE_VERSION);
 
    process_start(&dag_node_button_process, NULL);

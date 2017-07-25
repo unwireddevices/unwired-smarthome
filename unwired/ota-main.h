@@ -29,6 +29,10 @@ extern uint8_t ota_images[3]; //  Addresses where OTA updates are stored in exte
 #define FLASH_PAGE_SIZE                0x1000
 
 
+#define SPI_EXT_FLASH_NON_ACTIVE       0x00
+#define SPI_EXT_FLASH_ACTIVE           0x01
+
+
 typedef struct OTAMetadata {
   uint16_t crc;             //
   uint16_t crc_shadow;      //
@@ -101,5 +105,8 @@ jump_to_image(uint32_t destination_address);
 
 int
 erase_extflash_page( uint32_t ext_address );
+
+uint8_t
+spi_test();
 
 #endif
