@@ -140,6 +140,7 @@ static struct etimer fw_timer;
 
 volatile uint16_t fw_chunk_quantity = 0;
 volatile uint16_t fw_ext_flash_address = 0;
+volatile uint8_t fw_error_counter = 0;
 
 uint32_t ota_image_current_offset = 0;
 
@@ -973,6 +974,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
          printf("FW OTA: End chunks, exit\n");
          process_exit(&fw_update_process);
          chunk_num = 0;
+         fw_error_counter = 0;
          if (verify_ota_slot(1) == CORRECT_CRC){
             printf("New FW in OTA slot 1 correct CRC, set FW_FLAG_NEW_IMG_EXT, need reboot\n");
             write_fw_flag(FW_FLAG_NEW_IMG_EXT);
@@ -991,10 +993,22 @@ PROCESS_THREAD(fw_update_process, ev, data)
 
       if (etimer_expired(&fw_timer_deadline) && (chunk_num < fw_chunk_quantity))
       {
-         printf("FW OTA: Not delivered chunk, exit\n");
-         process_exit(&fw_update_process);
-         chunk_num = 0;
-         return 0;
+         if (fw_error_counter > 4)
+         {
+            printf("FW OTA: Not delivered chunk(>5 errors), exit\n");
+            process_exit(&fw_update_process);
+            chunk_num = 0;
+            fw_error_counter = 0;
+            return 0;
+         }
+         else
+         {
+            fw_error_counter++;
+            chunk_num--;
+            printf("FW OTA: Request %"PRId16"/%"PRId16" chunk again(%"PRId8" errors)\n", chunk_num + 1, fw_chunk_quantity, fw_error_counter);
+         }
+
+
       }
    }
 
