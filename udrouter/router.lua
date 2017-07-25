@@ -562,16 +562,6 @@ function fw_cmd_data_processing(ipv6_adress, data)
 	local chunk_number_c_style = tonumber(bindechex.Hex2Dec((data.b3 or 00)..(data.b2 or 00)))
 	local chunk_number_lua_style = chunk_number_c_style + 1
 
-
-	--local path = chunk_folder.."/chunk_"..chunk_number
-	--local handle, err = io.open(path,"r")
-	--if (err ~= nil) then
-	--	print("Error read chunk")
-	--	os.exit(1)
-	--end
-	--local firmware_bin_chunk_224b = handle:read("*a")
-	--handle:close()
-
 	if (#ota_image_table_segments < chunk_number_c_style) then
 		print("Bad chunk_number")
 		os.exit(0)

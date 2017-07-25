@@ -312,7 +312,7 @@ uart_console(unsigned char uart_char)
 
    if (uart_char == 't')
    {
-
+      printf("OTA: result %"PRId8" \n", verify_ota_slot(1));
    }
 }
 
