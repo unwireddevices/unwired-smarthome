@@ -408,6 +408,7 @@ static void udp_receiver(struct simple_udp_connection *c,
             flash_write_buffer[i] = data[i + FIRMWARE_PAYLOAD_OFFSET];
          }
 
+         fw_error_counter = 0;
          uint32_t current_ota_ext_flash_address = (ota_images[1-1] << 12) + ota_image_current_offset;
          printf("DAG Node: Write ota slot 1: write offset 0x%"PRIX32", block 0x%"PRIX16"\n", current_ota_ext_flash_address, FIRMWARE_PAYLOAD_LENGTH);
          while(store_firmware_data(current_ota_ext_flash_address, flash_write_buffer, FIRMWARE_PAYLOAD_LENGTH));
