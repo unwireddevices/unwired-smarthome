@@ -535,6 +535,10 @@ function status_data_processing(ipv6_adress, data)
 	local voltage = (bindechex.Hex2Dec(data.b16 or 00)*VOLTAGE_PRESCALER/1000)
 	local temp = bindechex.Hex2Dec(data.b15 or 00)
 	local parent_rssi_raw = tonumber(bindechex.Hex2Dec((data.b14 or 00)..(data.b13 or 00)))
+	local version = bindechex.Hex2Dec(data.b17 or 00).."."..bindechex.Hex2Dec(data.b18 or 00)
+	local ota_flag = data.b19
+	if ota_flag == "01" then ota_flag = "Active" else ota_flag = "Non-active" end
+
 	if parent_rssi_raw > 32768 then
 		parent_rssi_raw = parent_rssi_raw - 65536
 	end
@@ -542,6 +546,8 @@ function status_data_processing(ipv6_adress, data)
 	parent_rssi = string.format("%d, %i, %u", parent_rssi_raw, parent_rssi_raw, parent_rssi_raw) or "no rssi"
 	parent_rssi = parent_rssi_raw
 	print("SDPM: Status packet from "..ipv6_adress..":")
+	print(" Version: "..version)
+	print(" OTA: "..ota_flag)
 	print(" Parent adress: "..ipv6_adress_parent_short)
 	print(" Uptime: "..uptime.."s")
 	print(" Parent RSSI: "..parent_rssi.."dbm")
