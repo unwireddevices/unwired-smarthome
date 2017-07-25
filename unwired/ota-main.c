@@ -111,11 +111,11 @@ spi_test()
 void
 print_metadata( OTAMetadata_t *metadata )
 {
-  PRINTF("Firmware Size: %"PRIX32"\n", metadata->size);DPRINT;
-  PRINTF("Firmware Version: %"PRIX16"\n", metadata->version);DPRINT;
-  PRINTF("Firmware UUID: %"PRIX32"\n", metadata->uuid);DPRINT;
-  PRINTF("Firmware CRC: %"PRIX16"\n", metadata->crc);DPRINT;
-  PRINTF("Firmware CRC shadow: %"PRIX16"\n", metadata->crc_shadow);DPRINT;
+  PRINTF("Firmware Size: %"PRIX32"\n", metadata->size);
+  PRINTF("Firmware Version: %"PRIX16"\n", metadata->version);
+  PRINTF("Firmware UUID: %"PRIX32"\n", metadata->uuid);
+  PRINTF("Firmware CRC: %"PRIX16"\n", metadata->crc);
+  PRINTF("Firmware CRC shadow: %"PRIX16"\n", metadata->crc_shadow);
 
 }
 
@@ -130,7 +130,7 @@ print_metadata( OTAMetadata_t *metadata )
 int
 get_current_metadata( OTAMetadata_t *ota_slot_metadata  )
 {
-  FlashRead( (uint8_t *)ota_slot_metadata, (CURRENT_FIRMWARE<<12), OTA_METADATA_LENGTH );DPRINT;
+  FlashRead( (uint8_t *)ota_slot_metadata, (CURRENT_FIRMWARE<<12), OTA_METADATA_LENGTH );
 
   return 0;
 }
@@ -151,33 +151,33 @@ int
 get_ota_slot_metadata( uint8_t ota_slot, OTAMetadata_t *ota_slot_metadata )
 {
   //  (1) Determine the external flash address corresponding to the OTA slot
-  uint32_t ota_image_address;DPRINT;
+  uint32_t ota_image_address;
   if ( ota_slot ) {
     //  If ota_slot >= 1, it means we're looking for an OTA download
-    ota_image_address = ota_images[ (ota_slot-1) ];DPRINT;
+    ota_image_address = ota_images[ (ota_slot-1) ];
   } else {
     //  If ota_slot = 0, we're looking for the Golden Image
-    ota_image_address = GOLDEN_IMAGE;DPRINT;
+    ota_image_address = GOLDEN_IMAGE;
   }
-  ota_image_address <<= 12;DPRINT;
+  ota_image_address <<= 12;
 
-  int eeprom_access = ext_flash_open();DPRINT;
+  int eeprom_access = ext_flash_open();
 
   if(!eeprom_access) {
-    PRINTF("[OTA]: Error - Could not access EEPROM.(%"PRIu16")\n", __LINE__);DPRINT;
-    ext_flash_close();DPRINT;
+    PRINTF("[OTA]: Error - Could not access EEPROM.(%"PRIu16")\n", __LINE__);
+    ext_flash_close();
     return -1;
   }
 
-  eeprom_access = ext_flash_read( ota_image_address, OTA_METADATA_LENGTH, (uint8_t *)ota_slot_metadata);DPRINT;
+  eeprom_access = ext_flash_read( ota_image_address, OTA_METADATA_LENGTH, (uint8_t *)ota_slot_metadata);
 
   if(!eeprom_access) {
-    PRINTF("[OTA]: Error - Could not read EEPROM.(%"PRIu16")\n", __LINE__);DPRINT;
-    ext_flash_close();DPRINT;
+    PRINTF("[OTA]: Error - Could not read EEPROM.(%"PRIu16")\n", __LINE__);
+    ext_flash_close();
     return -1;
   }
 
-  ext_flash_close();DPRINT;
+  ext_flash_close();
 
   return 0;
 }
@@ -201,7 +201,7 @@ overwrite_ota_slot_metadata( uint8_t ota_slot, OTAMetadata_t *ota_slot_metadata 
   uint32_t ota_image_address;
   if ( ota_slot ) {
     //  If ota_slot >= 1, it means we're looking for an OTA download
-    ota_image_address = ota_images[ (ota_slot-1) ];DPRINT;
+    ota_image_address = ota_images[ (ota_slot-1) ];
   } else {
     //  If ota_slot = 0, we're looking for the Golden Image
     ota_image_address = GOLDEN_IMAGE;
@@ -210,48 +210,48 @@ overwrite_ota_slot_metadata( uint8_t ota_slot, OTAMetadata_t *ota_slot_metadata 
 
 /*
   //  (2) Get the first page of the OTA image, which contains the metadata.
-  uint8_t page_data[ FLASH_PAGE_SIZE ];DPRINT;
+  uint8_t page_data[ FLASH_PAGE_SIZE ];
 */
 
-  int eeprom_access = ext_flash_open();DPRINT;
+  int eeprom_access = ext_flash_open();
   if(!eeprom_access) {
-    PRINTF("[OTA]: Error - Could not access EEPROM.(%"PRIu16")\n", __LINE__);DPRINT;
-    ext_flash_close();DPRINT;
+    PRINTF("[OTA]: Error - Could not access EEPROM.(%"PRIu16")\n", __LINE__);
+    ext_flash_close();
     return -1;
   }
 
 /*
-  eeprom_access = ext_flash_read(ota_image_address, FLASH_PAGE_SIZE, (uint8_t *)&page_data);DPRINT;
+  eeprom_access = ext_flash_read(ota_image_address, FLASH_PAGE_SIZE, (uint8_t *)&page_data);
   if(!eeprom_access) {
-    PRINTF("[OTA]: Error - Could not read EEPROM.(%"PRIu16")\n", __LINE__);DPRINT;
-    ext_flash_close();DPRINT;
+    PRINTF("[OTA]: Error - Could not read EEPROM.(%"PRIu16")\n", __LINE__);
+    ext_flash_close();
     return -1;
   }
 
 
   //  (3) Overwrite the metadata section of the first page
-  memcpy( page_data, (uint8_t *)ota_slot_metadata, OTA_METADATA_LENGTH );DPRINT;
+  memcpy( page_data, (uint8_t *)ota_slot_metadata, OTA_METADATA_LENGTH );
 */
 
   //  (4) Update the ext-flash with the new page data.
-  eeprom_access = ext_flash_erase( ota_image_address, FLASH_PAGE_SIZE );DPRINT;
+  eeprom_access = ext_flash_erase( ota_image_address, FLASH_PAGE_SIZE );
   if(!eeprom_access) {
-    PRINTF("[OTA]: Error - Could not erase EEPROM.(%"PRIu16")\n", __LINE__);DPRINT;
-    ext_flash_close();DPRINT;
+    PRINTF("[OTA]: Error - Could not erase EEPROM.(%"PRIu16")\n", __LINE__);
+    ext_flash_close();
     return -1;
   }
 /*
-  eeprom_access = ext_flash_write( ota_image_address, FLASH_PAGE_SIZE, page_data );DPRINT;
+  eeprom_access = ext_flash_write( ota_image_address, FLASH_PAGE_SIZE, page_data );
   if(!eeprom_access) {
-    PRINTF("[OTA]: Error - Could not write to EEPROM.(%"PRIu16")\n", __LINE__);DPRINT;
-    ext_flash_close();DPRINT;
+    PRINTF("[OTA]: Error - Could not write to EEPROM.(%"PRIu16")\n", __LINE__);
+    ext_flash_close();
     return -1;
   }
 */
 
-  ext_flash_close();DPRINT;
+  ext_flash_close();
 
-  return 0;DPRINT;
+  return 0;
 }
 
 /*******************************************************************************
@@ -296,42 +296,42 @@ backup_golden_image()
 int
 verify_current_firmware( OTAMetadata_t *current_firmware_metadata )
 {
-  PRINTF("Recomputing CRC16 on internal flash image within range [0x2000, 0x1B000).\n");DPRINT;
+  PRINTF("Recomputing CRC16 on internal flash image within range [0x2000, 0x1B000).\n");
   //  (1) Determine the external flash address corresponding to the OTA slot
-  uint32_t firmware_address = 0x2000 + OTA_METADATA_SPACE;DPRINT;
-  uint32_t firmware_end_address = firmware_address + (current_firmware_metadata->size);DPRINT;
+  uint32_t firmware_address = 0x2000 + OTA_METADATA_SPACE;
+  uint32_t firmware_end_address = firmware_address + (current_firmware_metadata->size);
 
   //  (3) Compute the CRC16 over the entire image
-  uint16_t imageCRC = 0;DPRINT;
+  uint16_t imageCRC = 0;
 
   //  (4) Read the firmware image, one word at a time
-  int idx;DPRINT;
+  int idx;
   while (firmware_address < firmware_end_address) {
     uint8_t _word[4];
 
     FlashRead( _word, firmware_address, 4 );
     for (idx = 0; idx < 4; idx++)
     {
-      //PRINTF("%#x ", _word[idx]);DPRINT;
+      //PRINTF("%#x ", _word[idx]);
       imageCRC = crc16(imageCRC, _word[idx]);
     }
     firmware_address += 4; // move 4 bytes forward
-    //PRINTF("\t=>%#x\n", imageCRC);DPRINT;
+    //PRINTF("\t=>%#x\n", imageCRC);
   }
 
   //  (5) Compute two more CRC iterations using value of 0
-  imageCRC = crc16(imageCRC, 0);DPRINT;
-  imageCRC = crc16(imageCRC, 0);DPRINT;
+  imageCRC = crc16(imageCRC, 0);
+  imageCRC = crc16(imageCRC, 0);
 
-  PRINTF("CRC Calculated: %#x\n", imageCRC);DPRINT;
-  PRINTF("CRC in image: %#x\n", current_firmware_metadata->crc);DPRINT;
+  PRINTF("CRC Calculated: %#x\n", imageCRC);
+  PRINTF("CRC in image: %#x\n", current_firmware_metadata->crc);
 
   //  (6) Update the CRC shadow with our newly calculated value
-  current_firmware_metadata->crc_shadow = imageCRC;DPRINT;
+  current_firmware_metadata->crc_shadow = imageCRC;
 
   //  (4) Finally, update Metadata stored in ext-flash
   while(  FlashProgram( (uint8_t *)current_firmware_metadata, (CURRENT_FIRMWARE<<12), OTA_METADATA_LENGTH )
-  != FAPI_STATUS_SUCCESS );DPRINT;
+  != FAPI_STATUS_SUCCESS );
 
   return 0;
 }
@@ -351,31 +351,30 @@ int
 verify_ota_slot( uint8_t ota_slot )
 {
   //  (1) Determine the external flash address corresponding to the OTA slot
-  uint32_t ota_image_address;DPRINT;
+  uint32_t ota_image_address;
   if ( ota_slot ) {
     //  If ota_slot >= 1, it means we're looking for an OTA download
-    ota_image_address = ota_images[ (ota_slot-1) ];DPRINT;
+    ota_image_address = ota_images[ (ota_slot-1) ];
   } else {
     //  If ota_slot = 0, we're looking for the Golden Image
-    ota_image_address = GOLDEN_IMAGE;DPRINT;
+    ota_image_address = GOLDEN_IMAGE;
   }
-  ota_image_address <<= 12;DPRINT;
+  ota_image_address <<= 12;
 
   //  (2) Read the metadata of the corresponding OTA slot
-  OTAMetadata_t ota_metadata;DPRINT;
-  while( get_ota_slot_metadata( ota_slot, &ota_metadata ) );DPRINT;
-  //print_metadata( &ota_metadata );DPRINT;
+  OTAMetadata_t ota_metadata;
+  get_ota_slot_metadata( ota_slot, &ota_metadata );
 
   //  (3) Compute the CRC16 over the entire image
-  uint16_t imageCRC = 0;DPRINT;
+  uint16_t imageCRC = 0;
   ota_image_address += OTA_METADATA_SPACE; // this is where the OTA binary starts
-  uint32_t ota_image_end_address = ota_image_address + ota_metadata.size;DPRINT;
+  uint32_t ota_image_end_address = ota_image_address + ota_metadata.size;
 
-  int eeprom_access = ext_flash_open();DPRINT;
+  int eeprom_access = ext_flash_open();
   if(!eeprom_access) {
-    PRINTF("[OTA]: Error - Could not access EEPROM.(%"PRIu16")\n", __LINE__);DPRINT;
-    ext_flash_close();DPRINT;
-    return -1;DPRINT;
+    PRINTF("[OTA]: Error - Could not access EEPROM.(%"PRIu16")\n", __LINE__);
+    ext_flash_close();
+    return -1;
   }
 
   //  (4) Read the firmware image, one word at a time
@@ -392,20 +391,20 @@ verify_ota_slot( uint8_t ota_slot )
 
     for (idx = 0; idx < 4; idx++)
     {
-      //PRINTF("%#x ", _word[idx]);DPRINT;
+      //PRINTF("%#x ", _word[idx]);
       imageCRC = crc16(imageCRC, _word[idx]);
     }
     ota_image_address += 4; // move 4 bytes forward
-    //PRINTF("\t=>%#x\n", imageCRC);DPRINT;
+    //PRINTF("\t=>%#x\n", imageCRC);
   }
 
   //  (5) Compute two more CRC iterations using value of 0
-  imageCRC = crc16(imageCRC, 0);DPRINT;
-  imageCRC = crc16(imageCRC, 0);DPRINT;
+  imageCRC = crc16(imageCRC, 0);
+  imageCRC = crc16(imageCRC, 0);
 
-  ext_flash_close();DPRINT;
+  ext_flash_close();
 
-  PRINTF("CRC Calculated: %#x\n", imageCRC);DPRINT;
+  PRINTF("CRC Calculated: %#x\n", imageCRC);
 
   //  (6) Update the CRC shadow with our newly calculated value
 
@@ -414,9 +413,9 @@ verify_ota_slot( uint8_t ota_slot )
   }
 
   //  (4) Finally, update Metadata stored in ext-flash
-  //while( overwrite_ota_slot_metadata( ota_slot, &ota_metadata ) );DPRINT;
+  //while( overwrite_ota_slot_metadata( ota_slot, &ota_metadata ) );
 
-  return 0;DPRINT;
+  return 0;
 }
 
 /*******************************************************************************
@@ -434,30 +433,30 @@ validate_ota_metadata( OTAMetadata_t *metadata )
   //      First, we check to see if every byte in the metadata is 0xFF.
   //      If this is the case, this metadata is "erased" and therefore we assume
   //      the OTA slot to be empty.
-  bool erased = true;DPRINT;
-  uint8_t *metadata_ptr = (uint8_t *)metadata;DPRINT;
-  int b = OTA_METADATA_LENGTH;DPRINT;
+  bool erased = true;
+  uint8_t *metadata_ptr = (uint8_t *)metadata;
+  int b = OTA_METADATA_LENGTH;
   while (b--) {
-    //PRINTF("%u: %u, ", b, *(uint8_t *)metadata);DPRINT;
+    //PRINTF("%u: %u, ", b, *(uint8_t *)metadata);
     if ( *metadata_ptr++ != 0xff ) {
       //  We encountered a non-erased byte.  There's some non-trivial data here.
-      erased = false;DPRINT;
-      break;DPRINT;
+      erased = false;
+      break;
     }
   }
 
   //  If the OTA slot is erased, it's not valid!  No more work to do here.
   if (erased) {
-    return false;DPRINT;
+    return false;
   }
 
   //  (2) Check the CRC entries to validate the OTA data itself.
   if ( (metadata->crc) == (metadata->crc_shadow) ) {
-    return true;DPRINT;
+    return true;
   }
 
   //  If we get this far, all metadata bytes were cleared (0xff)
-  return false;DPRINT;
+  return false;
 }
 
 /*******************************************************************************
@@ -478,28 +477,28 @@ find_matching_ota_slot( uint16_t version )
   for ( int slot=1; slot<4 ; slot++ ) {
 
     //  (1) Get the metadata of the current OTA download slot.
-    OTAMetadata_t ota_slot_metadata;DPRINT;
-    while( get_ota_slot_metadata( slot, &ota_slot_metadata ) );DPRINT;
+    OTAMetadata_t ota_slot_metadata;
+    while( get_ota_slot_metadata( slot, &ota_slot_metadata ) );
 
     //  (2) Is this slot empty? If yes, skip.
     if ( validate_ota_metadata( &ota_slot_metadata ) == false ) {
-      continue;DPRINT;
+      continue;
     }
 
     //  (3) Does this slot's FW version match our search parameter?
     if ( ota_slot_metadata.version == version ) {
-      matching_slot = slot;DPRINT;
-      break;DPRINT;
+      matching_slot = slot;
+      break;
     }
   }
 
   if ( matching_slot == -1 ) {
-    PRINTF("No OTA slot matches Firmware v%i\n", version);DPRINT;
+    PRINTF("No OTA slot matches Firmware v%i\n", version);
   } else {
-    PRINTF("OTA slot #%i matches Firmware v%i\n", matching_slot, version);DPRINT;
+    PRINTF("OTA slot #%i matches Firmware v%i\n", matching_slot, version);
   }
 
-  return matching_slot;DPRINT;
+  return matching_slot;
 }
 
 /*******************************************************************************
@@ -518,19 +517,19 @@ find_empty_ota_slot()
   for ( int slot=1; slot<4 ; slot++ ) {
 
     //  (1) Get the metadata of the current OTA download slot.
-    OTAMetadata_t ota_slot_metadata;DPRINT;
-    while( get_ota_slot_metadata( slot, &ota_slot_metadata ) );DPRINT;
+    OTAMetadata_t ota_slot_metadata;
+    while( get_ota_slot_metadata( slot, &ota_slot_metadata ) );
 
     //  (2) Is this slot invalid? If yes, let's treat it as empty.
     if ( validate_ota_metadata( &ota_slot_metadata ) == false ) {
-      return slot;DPRINT;
+      return slot;
     }
   }
 
-  PRINTF("Could not find any empty OTA slots!\nSearching for oldest OTA slot...\n");DPRINT;
+  PRINTF("Could not find any empty OTA slots!\nSearching for oldest OTA slot...\n");
   //  If execution goes this far, no empty slot was found.  Now, we look for
   //  the oldest OTA slot instead.
-  return find_oldest_ota_image();DPRINT;
+  return find_oldest_ota_image();
 }
 
 /*******************************************************************************
@@ -546,35 +545,35 @@ int
 find_oldest_ota_image()
 {
   //  By construction, the oldest firmware should be the Golden Image, v0
-  int oldest_ota_slot = 0;DPRINT;
-  uint16_t oldest_firmware_version = 0;DPRINT;
+  int oldest_ota_slot = 0;
+  uint16_t oldest_firmware_version = 0;
 
   //  Iterate through each of the 3 OTA download slots.
   for ( int slot=1; slot<4; slot++ ) {
     //  (1) Get the metadata of the current OTA download slot.
-    OTAMetadata_t ota_slot_metadata;DPRINT;
-    while( get_ota_slot_metadata( slot, &ota_slot_metadata ) );DPRINT;
+    OTAMetadata_t ota_slot_metadata;
+    while( get_ota_slot_metadata( slot, &ota_slot_metadata ) );
 
     //  (3) Is this slot populated? If not, skip.
     if ( validate_ota_metadata( &ota_slot_metadata) == false ) {
-      continue;DPRINT;
+      continue;
     }
 
     //  (4) Is this the oldest non-Golden Image image we've found thus far?
     if ( oldest_firmware_version ) {
       if ( ota_slot_metadata.version < oldest_firmware_version ) {
-        oldest_ota_slot = slot;DPRINT;
-        oldest_firmware_version = ota_slot_metadata.version;DPRINT;
+        oldest_ota_slot = slot;
+        oldest_firmware_version = ota_slot_metadata.version;
       }
     } else {
-      oldest_ota_slot = slot;DPRINT;
-      oldest_firmware_version = ota_slot_metadata.version;DPRINT;
+      oldest_ota_slot = slot;
+      oldest_firmware_version = ota_slot_metadata.version;
     }
   }
 
-  PRINTF("Oldest OTA slot: #%u; Firmware v%u\n", oldest_ota_slot, oldest_firmware_version);DPRINT;
+  PRINTF("Oldest OTA slot: #%u; Firmware v%u\n", oldest_ota_slot, oldest_firmware_version);
 
-  return oldest_ota_slot;DPRINT;
+  return oldest_ota_slot;
 }
 
 /*******************************************************************************
@@ -589,29 +588,29 @@ int
 find_newest_ota_image()
 {
   //  At first, we only assume knowledge of the Golden Image, v0
-  int newest_ota_slot = 0;DPRINT;
-  uint16_t newest_firmware_version = 0;DPRINT;
+  int newest_ota_slot = 0;
+  uint16_t newest_firmware_version = 0;
 
   //  Iterate through each of the 3 OTA download slots.
   for ( int slot=1; slot<4 ; slot++ ) {
     //  (1) Get the metadata of the current OTA download slot.
-    OTAMetadata_t ota_slot_metadata;DPRINT;
-    while( get_ota_slot_metadata( slot, &ota_slot_metadata ) );DPRINT;
+    OTAMetadata_t ota_slot_metadata;
+    while( get_ota_slot_metadata( slot, &ota_slot_metadata ) );
 
     //  (2) Is this slot populated? If not, skip.
     if ( validate_ota_metadata( &ota_slot_metadata) == false ) {
-      continue;DPRINT;
+      continue;
     }
 
     //  (3) Is this the newest non-Golden Image image we've found thus far?
     if ( ota_slot_metadata.version > newest_firmware_version ) {
-      newest_ota_slot = slot;DPRINT;
-      newest_firmware_version = ota_slot_metadata.version;DPRINT;
+      newest_ota_slot = slot;
+      newest_firmware_version = ota_slot_metadata.version;
     }
   }
 
-  PRINTF("Newest OTA slot: #%u; Firmware v%u\n", newest_ota_slot, newest_firmware_version);DPRINT;
-  return newest_ota_slot;DPRINT;
+  PRINTF("Newest OTA slot: #%u; Firmware v%u\n", newest_ota_slot, newest_firmware_version);
+  return newest_ota_slot;
 }
 
 /*******************************************************************************
@@ -628,25 +627,25 @@ int
 erase_extflash_page( uint32_t ext_address )
 {
   //  (1) Open the external flash
-  bool eeprom_access = ext_flash_open();DPRINT;
+  bool eeprom_access = ext_flash_open();
 
   if(eeprom_access == false) {
-    ext_flash_close();DPRINT;
-    return -1;DPRINT;
+    ext_flash_close();
+    return -1;
   }
-  //PRINTF("[OTA]: Erasing flash (0x%"PRIX32",0x%"PRIX16")\n", ext_address, FLASH_PAGE_SIZE);DPRINT;
-  eeprom_access = ext_flash_erase( ext_address, FLASH_PAGE_SIZE );DPRINT;
-  //PRINTF("[OTA]: Erased flash at (0x%"PRIX32",0x%"PRIX16")\n", ext_address, FLASH_PAGE_SIZE);DPRINT;
+  //PRINTF("[OTA]: Erasing flash (0x%"PRIX32",0x%"PRIX16")\n", ext_address, FLASH_PAGE_SIZE);
+  eeprom_access = ext_flash_erase( ext_address, FLASH_PAGE_SIZE );
+  //PRINTF("[OTA]: Erased flash at (0x%"PRIX32",0x%"PRIX16")\n", ext_address, FLASH_PAGE_SIZE);
 
   if(eeprom_access == false) {
-    PRINTF("[OTA]: Error - Could not erase EEPROM.(%"PRIu16")\n", __LINE__);DPRINT;
-    ext_flash_close();DPRINT;
-    return -1;DPRINT;
+    PRINTF("[OTA]: Error - Could not erase EEPROM.(%"PRIu16")\n", __LINE__);
+    ext_flash_close();
+    return -1;
   }
 
   ext_flash_close();
 
-  return 0;DPRINT;
+  return 0;
 }
 
 /*******************************************************************************
@@ -665,56 +664,56 @@ int
 erase_ota_image( uint8_t ota_slot )
 {
   //  (1) Get page address of the ota_slot in ext-flash
-  uint8_t ota_image_base_address;DPRINT;
+  uint8_t ota_image_base_address;
   if ( ota_slot ) {
-    ota_image_base_address = ota_images[ (ota_slot-1) ];DPRINT;
+    ota_image_base_address = ota_images[ (ota_slot-1) ];
   } else {
-    ota_image_base_address = GOLDEN_IMAGE;DPRINT;
+    ota_image_base_address = GOLDEN_IMAGE;
   }
-  PRINTF("[OTA]: Erasing OTA slot %u [%#x, %#x)...\n", ota_slot, (ota_image_base_address<<12), ((ota_image_base_address+25)<<12));DPRINT;
+  PRINTF("[OTA]: Erasing OTA slot %u [%#x, %#x)...\n", ota_slot, (ota_image_base_address<<12), ((ota_image_base_address+25)<<12));
 
   //  (2) Erase each page in the OTA download slot!
   for (uint32_t page=0; page<25; page++) {
-    PRINTF("[OTA]: Erasing page %"PRIu32" at 0x%"PRIX32"..\n", page, (( ota_image_base_address + page ) << 12));DPRINT;
-    while( erase_extflash_page( (( ota_image_base_address + page ) << 12) ) );DPRINT;
-    watchdog_periodic();DPRINT;
+    PRINTF("[OTA]: Erasing page %"PRIu32" at 0x%"PRIX32"..\n", page, (( ota_image_base_address + page ) << 12));
+    while( erase_extflash_page( (( ota_image_base_address + page ) << 12) ) );
+    watchdog_periodic();
   }
 
-  return 0;DPRINT;
+  return 0;
 }
 
 static int
 update_firmware_page( uint32_t source_page, uint32_t destination_page )
 {
-  uint8_t page_data[ FLASH_PAGE_SIZE ];DPRINT;
+  uint8_t page_data[ FLASH_PAGE_SIZE ];
 
   //  Erase internal flash page
   while(  FlashSectorErase( destination_page ) !=
-          FAPI_STATUS_SUCCESS );DPRINT;
+          FAPI_STATUS_SUCCESS );
 
   //  Read one page from the new external flash image
-  int eeprom_access = ext_flash_open();DPRINT;
+  int eeprom_access = ext_flash_open();
 
   if(!eeprom_access) {
-    PRINTF("[OTA]: Error - Could not access EEPROM.(%"PRIu16")\n", __LINE__);DPRINT;
-    ext_flash_close();DPRINT;
-    return -1;DPRINT;
+    PRINTF("[OTA]: Error - Could not access EEPROM.(%"PRIu16")\n", __LINE__);
+    ext_flash_close();
+    return -1;
   }
 
-  eeprom_access = ext_flash_read( source_page, FLASH_PAGE_SIZE, (uint8_t *)&page_data);DPRINT;
+  eeprom_access = ext_flash_read( source_page, FLASH_PAGE_SIZE, (uint8_t *)&page_data);
 
   if(!eeprom_access) {
-    PRINTF("[OTA]: Error - Could not read EEPROM.(%"PRIu16")\n", __LINE__);DPRINT;
-    ext_flash_close();DPRINT;
-    return -1;DPRINT;
+    PRINTF("[OTA]: Error - Could not read EEPROM.(%"PRIu16")\n", __LINE__);
+    ext_flash_close();
+    return -1;
   }
 
-  ext_flash_close();DPRINT;
+  ext_flash_close();
 
   while(  FlashProgram( page_data, destination_page, FLASH_PAGE_SIZE )
-          != FAPI_STATUS_SUCCESS );DPRINT;
+          != FAPI_STATUS_SUCCESS );
 
-  return 0;DPRINT;
+  return 0;
 }
 
 /*******************************************************************************
@@ -733,19 +732,19 @@ int
 update_firmware( uint8_t ota_slot )
 {
   //  (1) Determine the external flash address corresponding to the OTA slot
-  uint32_t ota_image_address;DPRINT;
+  uint32_t ota_image_address;
   if ( ota_slot ) {
     //  If ota_slot >= 1, it means we want to copy over an OTA download
-    ota_image_address = ota_images[ (ota_slot-1) ];DPRINT;
+    ota_image_address = ota_images[ (ota_slot-1) ];
   } else {
     //  If ota_slot = 0, it means we want to copy over the Golden Image
-    ota_image_address = GOLDEN_IMAGE;DPRINT;
+    ota_image_address = GOLDEN_IMAGE;
   }
-  ota_image_address <<= 12;DPRINT;
+  ota_image_address <<= 12;
 
   //  (2) Get metadata about the new version
-  //OTAMetadata_t new_firmware;DPRINT;
-  //FlashRead( (uint8_t *)&new_firmware, ota_image_address, OTA_METADATA_LENGTH );DPRINT;
+  //OTAMetadata_t new_firmware;
+  //FlashRead( (uint8_t *)&new_firmware, ota_image_address, OTA_METADATA_LENGTH );
 
   //  (2) Validate the new firmware (CRC)
   //  return -1 if not valid!
@@ -756,13 +755,13 @@ update_firmware( uint8_t ota_slot )
   //      external flash.
   //  Each firmware image is 25 pages big at most
   for (uint8_t sector_num=0; sector_num<25; sector_num++) {
-    while( update_firmware_page( (ota_image_address + (sector_num << 12)), ((sector_num+CURRENT_FIRMWARE) << 12) ) );DPRINT;
+    while( update_firmware_page( (ota_image_address + (sector_num << 12)), ((sector_num+CURRENT_FIRMWARE) << 12) ) );
   }
 
   //  (4) Reboot
 
 
-  return 0;DPRINT;
+  return 0;
 }
 
 /*******************************************************************************
@@ -783,27 +782,27 @@ int
 store_firmware_data( uint32_t ext_address, uint8_t *data, size_t data_length )
 {
   //  (1) Erase external flash page first!
-  int eeprom_access;DPRINT;
-  eeprom_access = ext_flash_open();DPRINT;
+  int eeprom_access;
+  eeprom_access = ext_flash_open();
 
   if(!eeprom_access) {
-    PRINTF("[OTA]: Error - could not access EEPROM.(%"PRIu16")\n", __LINE__);DPRINT;
-    ext_flash_close();DPRINT;
-    return -1;DPRINT;
+    PRINTF("[OTA]: Error - could not access EEPROM.(%"PRIu16")\n", __LINE__);
+    ext_flash_close();
+    return -1;
   }
 
   //  (2) Copy page_data into external flash chip.
-  eeprom_access = ext_flash_write( ext_address, data_length, data );DPRINT;
+  eeprom_access = ext_flash_write( ext_address, data_length, data );
   watchdog_periodic();
 
   if(!eeprom_access) {
-    PRINTF("[OTA]: Error - Could not write to EEPROM.(%"PRIu16")\n", __LINE__);DPRINT;
-    ext_flash_close();DPRINT;
-    return -1;DPRINT;
+    PRINTF("[OTA]: Error - Could not write to EEPROM.(%"PRIu16")\n", __LINE__);
+    ext_flash_close();
+    return -1;
   }
 
-  ext_flash_close();DPRINT;
+  ext_flash_close();
 
-  //PRINTF("[OTA]: Firmware data successfully written to 0x%"PRIX32".\n", ext_address);DPRINT;
-  return 0;DPRINT;
+  //PRINTF("[OTA]: Firmware data successfully written to 0x%"PRIX32".\n", ext_address);
+  return 0;
 }
