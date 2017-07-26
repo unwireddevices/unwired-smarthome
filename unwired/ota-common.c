@@ -8,7 +8,7 @@
 #include "ota-common.h"
 #include "ext-flash.h"
 
-void
+uint8_t
 write_fw_flag(uint8_t value)
 {
    if (value != FW_FLAG_NON_UPDATE &&
@@ -17,22 +17,33 @@ write_fw_flag(uint8_t value)
          value != FW_FLAG_ERROR_GI_LOAD &&
          value != FW_FLAG_NEW_IMG_INT_RST &&
          value != FW_FLAG_PING_OK)
-      return;
+      return FLAG_ERROR_WRITE;
 
    int eeprom_access = ext_flash_open();
-   if(!eeprom_access) { ext_flash_close(); return; }
+   if(!eeprom_access) { ext_flash_close(); return FLAG_ERROR_WRITE; }
 
-   uint8_t page_data[ FLAG_SIZE ];
-   page_data[0] = value;
-
+   uint8_t data_write[ FLAG_SIZE ];
+   uint8_t data_read[ FLAG_SIZE ];
+   data_write[0] = value;
 
    eeprom_access = ext_flash_erase( FW_FLAG_ADRESS, FLASH_PAGE_SIZE );
-   if(!eeprom_access) { ext_flash_close(); return; }
+   if(!eeprom_access) { ext_flash_close(); return FLAG_ERROR_WRITE; }
 
-   eeprom_access = ext_flash_write( FW_FLAG_ADRESS, FLAG_SIZE, page_data );
-   if(!eeprom_access) { ext_flash_close(); return; }
+   eeprom_access = ext_flash_write( FW_FLAG_ADRESS, FLAG_SIZE, data_write);
+   if(!eeprom_access) { ext_flash_close(); return FLAG_ERROR_WRITE; }
+
+   eeprom_access = ext_flash_read(FW_FLAG_ADRESS, FLAG_SIZE, (uint8_t *)&data_read);
+   if(!eeprom_access) { ext_flash_close(); return FLAG_ERROR_WRITE; }
 
    ext_flash_close();
+
+   if (data_write[0] != data_read[0])
+   {
+      printf("FW OTA: Non-correct write flag to flash!");
+      return FLAG_ERROR_WRITE;
+   }
+
+   return FLAG_OK_WRITE;
 }
 
 /*---------------------------------------------------------------------------*/

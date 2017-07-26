@@ -16,6 +16,8 @@
 #define NON_READ_FLASH                 -1
 #define CORRECT_CRC                     0
 
+#define FLAG_OK_WRITE                  1
+#define FLAG_ERROR_WRITE               0
 
 /**
  *    NEW_FW_FLAG — Флаг статуса процесса обновления
@@ -34,7 +36,7 @@
 #define FLAG_SIZE                      1
 
 
-void
+uint8_t
 write_fw_flag(uint8_t value);
 
 uint8_t
