@@ -264,7 +264,7 @@ overwrite_ota_slot_metadata( uint8_t ota_slot, OTAMetadata_t *ota_slot_metadata 
 int
 backup_golden_image()
 {
-  PRINTF("Backup golden image to ext flash\n");
+  //PRINTF("Backup golden image to ext flash\n");
   while( erase_ota_image( 0 ) );
   uint32_t page;
   uint32_t chunk_size = 0x100;
@@ -276,11 +276,13 @@ backup_golden_image()
     {
        uint32_t int_flash_address = ((CURRENT_FIRMWARE + page) << 12) + chunk;
        uint32_t ext_flash_address = ((GOLDEN_IMAGE + page) << 12) + chunk;
-       PRINTF("Write GM page %"PRIu32": read offset 0x%"PRIX32", write offset 0x%"PRIX32", block 0x%"PRIX32"\n", page, int_flash_address, ext_flash_address, chunk_size);
+       //PRINTF("Write GM page %"PRIu32": read offset 0x%"PRIX32", write offset 0x%"PRIX32", block 0x%"PRIX32"\n", page, int_flash_address, ext_flash_address, chunk_size);
        FlashRead(firmware_page, int_flash_address, chunk_size);
        while(store_firmware_data(ext_flash_address, firmware_page, chunk_size));
        chunk = chunk + chunk_size;
     }
+    PRINTF("Write GM page %"PRIu32"\n", page);
+
   }
 
   return 0;
@@ -372,7 +374,7 @@ verify_ota_slot( uint8_t ota_slot )
 
   int eeprom_access = ext_flash_open();
   if(!eeprom_access) {
-    PRINTF("[OTA]: Error - Could not access EEPROM.(%"PRIu16")\n", __LINE__);
+    //PRINTF("[OTA]: Error - Could not access EEPROM.(%"PRIu16")\n", __LINE__);
     ext_flash_close();
     return VERIFY_SLOT_SPI_ERROR;
   }
@@ -384,18 +386,15 @@ verify_ota_slot( uint8_t ota_slot )
 
     eeprom_access = ext_flash_read(ota_image_address, 4, _word);
     if(!eeprom_access) {
-      PRINTF("[OTA]: Error - Could not read EEPROM.(%"PRIu16")\n", __LINE__);
       ext_flash_close();
       return VERIFY_SLOT_SPI_ERROR;
     }
 
     for (idx = 0; idx < 4; idx++)
     {
-      //PRINTF("%#x ", _word[idx]);
       imageCRC = crc16(imageCRC, _word[idx]);
     }
-    ota_image_address += 4; // move 4 bytes forward
-    //PRINTF("\t=>%#x\n", imageCRC);
+    ota_image_address += 4;
   }
 
   //  (5) Compute two more CRC iterations using value of 0
@@ -404,7 +403,7 @@ verify_ota_slot( uint8_t ota_slot )
 
   ext_flash_close();
 
-  PRINTF("CRC Calculated: %#x\n", imageCRC);
+  //PRINTF("CRC Calculated: %#x\n", imageCRC);
 
   //  (6) Update the CRC shadow with our newly calculated value
 
