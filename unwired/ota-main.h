@@ -32,6 +32,9 @@ extern uint8_t ota_images[3]; //  Addresses where OTA updates are stored in exte
 #define SPI_EXT_FLASH_NON_ACTIVE       0x00
 #define SPI_EXT_FLASH_ACTIVE           0x01
 
+#define VERIFY_SLOT_OK                 0
+#define VERIFY_SLOT_CRC_ERROR         -2
+#define VERIFY_SLOT_SPI_ERROR         -1
 
 typedef struct OTAMetadata {
   uint16_t crc;             //

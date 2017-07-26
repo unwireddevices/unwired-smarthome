@@ -1105,6 +1105,16 @@ PROCESS_THREAD(dag_node_process, ev, data)
                 spi_status == SPI_EXT_FLASH_ACTIVE ? "active" : "non-active",
                 BIG_VERSION, LITTLE_VERSION);
 
+   if (spi_status == SPI_EXT_FLASH_ACTIVE)
+   {
+      if (verify_ota_slot(0) == VERIFY_SLOT_CRC_ERROR)
+      {
+         printf("FW OTA: bad golden image, write current FW\n");
+         backup_golden_image();
+      }
+
+   }
+
    process_start(&dag_node_button_process, NULL);
    process_start(&maintenance_process, NULL);
 

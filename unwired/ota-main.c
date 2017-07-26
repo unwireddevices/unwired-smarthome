@@ -374,7 +374,7 @@ verify_ota_slot( uint8_t ota_slot )
   if(!eeprom_access) {
     PRINTF("[OTA]: Error - Could not access EEPROM.(%"PRIu16")\n", __LINE__);
     ext_flash_close();
-    return -1;
+    return VERIFY_SLOT_SPI_ERROR;
   }
 
   //  (4) Read the firmware image, one word at a time
@@ -386,7 +386,7 @@ verify_ota_slot( uint8_t ota_slot )
     if(!eeprom_access) {
       PRINTF("[OTA]: Error - Could not read EEPROM.(%"PRIu16")\n", __LINE__);
       ext_flash_close();
-      return -1;
+      return VERIFY_SLOT_SPI_ERROR;
     }
 
     for (idx = 0; idx < 4; idx++)
@@ -409,13 +409,13 @@ verify_ota_slot( uint8_t ota_slot )
   //  (6) Update the CRC shadow with our newly calculated value
 
   if (ota_metadata.crc_shadow != imageCRC){
-     return -2;
+     return VERIFY_SLOT_CRC_ERROR;
   }
 
   //  (4) Finally, update Metadata stored in ext-flash
   //while( overwrite_ota_slot_metadata( ota_slot, &ota_metadata ) );
 
-  return 0;
+  return VERIFY_SLOT_OK;
 }
 
 /*******************************************************************************
