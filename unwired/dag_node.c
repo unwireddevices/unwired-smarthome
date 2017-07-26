@@ -299,7 +299,7 @@ uart_console(unsigned char uart_char)
       flash_damp_hex(HEXRAW_MODE);
 
    if (uart_char == 'e')
-      verify_ext_firmware_e();
+      erase_ota_image(0);
 
    if (uart_char == 'i')
       verify_int_firmware_v();
