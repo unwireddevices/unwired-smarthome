@@ -14,7 +14,8 @@
 
 #define NON_CORRECT_CRC                -2
 #define NON_READ_FLASH                 -1
-#define CORRECT_CRC                    0
+#define CORRECT_CRC                     0
+
 
 /**
  *    NEW_FW_FLAG — Флаг статуса процесса обновления

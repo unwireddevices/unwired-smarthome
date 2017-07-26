@@ -977,12 +977,12 @@ PROCESS_THREAD(fw_update_process, ev, data)
          chunk_num = 0;
          fw_error_counter = 0;
          if (verify_ota_slot(1) == CORRECT_CRC){
-            printf("New FW in OTA slot 1 correct CRC, set FW_FLAG_NEW_IMG_EXT, need reboot\n");
+            printf("FW OTA: New FW in OTA slot 1 correct CRC, set FW_FLAG_NEW_IMG_EXT, reboot\n");
             write_fw_flag(FW_FLAG_NEW_IMG_EXT);
-            watchdog_reboot();
+            ti_lib_sys_ctrl_system_reset();
          }
          else
-            printf("New FW in OTA slot 1 non-correct CRC\n");
+            printf("FW OTA: New FW in OTA slot 1 non-correct CRC\n");
 
          return 0;
       }
