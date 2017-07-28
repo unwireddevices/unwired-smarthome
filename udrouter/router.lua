@@ -578,6 +578,15 @@ function status_data_processing(ipv6_adress, data)
 	update_ts_channel(ipv6_adress, "uptime", uptime/60/60/24)
 end
 
+function error_data_processing(ipv6_adress, data)
+	--print("Error status processing module")
+
+	print("EDPM: Error packet from "..ipv6_adress..":")
+
+	print(" Error: "..device_error_type[data.b1])
+	print("\n")
+end
+
 function fw_cmd_data_processing(ipv6_adress, data)
 	local chunk_number_c_style = tonumber(bindechex.Hex2Dec((data.b3 or 00)..(data.b2 or 00)))
 	local chunk_number_lua_style = chunk_number_c_style + 1
