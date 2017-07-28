@@ -514,25 +514,30 @@ print_debug_data(void)
 
 void send_confirmation_packet(const uip_ipaddr_t *dest_addr)
 {
+   if (node_mode != MODE_NORMAL)
+      return;
+
    if (dest_addr == NULL)
    {
       printf("ERROR: dest_addr in send_confirmation_packet null\n");
       return;
    }
 
-   int length = 10;
-   char buf[length];
-   buf[0] = PROTOCOL_VERSION_V1;
-   buf[1] = DEVICE_VERSION_V1;
-   buf[2] = DATA_TYPE_JOIN_CONFIRM;
-   buf[3] = DATA_RESERVED;
-   buf[4] = DATA_RESERVED;
-   buf[5] = DATA_RESERVED;
-   buf[6] = DATA_RESERVED;
-   buf[7] = DATA_RESERVED;
-   buf[8] = DATA_RESERVED;
-   buf[9] = DATA_RESERVED;
-   simple_udp_sendto(&udp_connection, buf, length, dest_addr);
+   uint8_t length = 10;
+   uint8_t udp_buffer[length];
+   udp_buffer[0] = PROTOCOL_VERSION_V1;
+   udp_buffer[1] = DEVICE_VERSION_V1;
+   udp_buffer[2] = DATA_TYPE_JOIN_CONFIRM;
+   udp_buffer[3] = DATA_RESERVED;
+   udp_buffer[4] = DATA_RESERVED;
+   udp_buffer[5] = DATA_RESERVED;
+   udp_buffer[6] = DATA_RESERVED;
+   udp_buffer[7] = DATA_RESERVED;
+   udp_buffer[8] = DATA_RESERVED;
+   udp_buffer[9] = DATA_RESERVED;
+
+   net_on(RADIO_ON_TIMER_OFF);
+   simple_udp_sendto(&udp_connection, udp_buffer, length, dest_addr);
 }
 
 /*---------------------------------------------------------------------------*/
