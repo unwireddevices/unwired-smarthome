@@ -330,20 +330,9 @@ static void udp_receiver(struct simple_udp_connection *c,
    {
       if (data[2] == DATA_TYPE_JOIN_CONFIRM)
       {
-         printf("DAG Node: DAG active, join packet confirmation received, mode set to MODE_NORMAL\n");
-         led_mode_set(LED_SLOW_BLINK);
          uip_ipaddr_copy(&root_addr, sender_addr);
-         node_mode = MODE_NORMAL;
+         process_post(&dag_node_process, PROCESS_EVENT_CONTINUE, NULL);
          etimer_set(&maintenance_timer, 0);
-         net_mode(RADIO_FREEDOM);
-         net_off(RADIO_OFF_NOW);
-
-         if (read_fw_flag() == FW_FLAG_NEW_IMG_INT)
-         {
-            uint8_t write_flag_result = write_fw_flag(FW_FLAG_PING_OK);
-            if (write_flag_result == FLAG_ERROR_WRITE) { watchdog_reboot(); }
-            printf("DAG Node: OTA flag changed to FW_FLAG_PING_OK\n");
-         }
       }
 
       if (data[2] == DATA_TYPE_COMMAND || data[2] == DATA_TYPE_SETTINGS)
@@ -1159,6 +1148,26 @@ PROCESS_THREAD(dag_node_process, ev, data)
    process_start(&maintenance_process, NULL);
 
    SENSORS_ACTIVATE(batmon_sensor);
+
+   PROCESS_YIELD();
+
+   if (ev != PROCESS_EVENT_CONTINUE)
+   {
+      PROCESS_YIELD();
+   }
+
+   printf("DAG Node: DAG active, join packet confirmation received, mode set to MODE_NORMAL\n");
+   led_mode_set(LED_SLOW_BLINK);
+   node_mode = MODE_NORMAL;
+   net_mode(RADIO_FREEDOM);
+   net_off(RADIO_OFF_NOW);
+
+   if (read_fw_flag() == FW_FLAG_NEW_IMG_INT)
+   {
+      uint8_t write_flag_result = write_fw_flag(FW_FLAG_PING_OK);
+      //if (write_flag_result == FLAG_ERROR_WRITE) { watchdog_reboot(); }
+      printf("DAG Node: OTA flag changed to FW_FLAG_PING_OK\n");
+   }
 
    PROCESS_END();
 }
