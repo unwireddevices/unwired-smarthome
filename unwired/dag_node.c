@@ -450,6 +450,7 @@ static void udp_receiver(struct simple_udp_connection *c,
                printf("DAG Node: OTA update not processed, spi flash not-active\n");
             }
 
+
          }
       }
 
@@ -1031,6 +1032,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
             send_error_packet(DEVICE_ERROR_OTA_NONCORRECT_CRC);
          }
 
+
          return 0;
       }
 
@@ -1151,7 +1153,6 @@ PROCESS_THREAD(dag_node_process, ev, data)
          printf("FW OTA: bad golden image, write current FW\n");
          backup_golden_image();
       }
-
    }
 
    process_start(&dag_node_button_process, NULL);

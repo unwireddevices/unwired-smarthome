@@ -537,6 +537,7 @@ function join_data_processing(ipv6_adress, data)
 	local device_group_name = device_group[current_device_group] or current_device_group
 	local device_sleep_name = device_sleep_type[current_sleep_type] or current_sleep_type
 	print("JDPM: Join packet from "..ipv6_adress..", device group: "..device_group_name..", sleep type: "..device_sleep_name)
+	print("\n")
 end
 
 function getu16(data, pos) -- reads a 16 bit value of the string data at position pos
@@ -546,7 +547,7 @@ function getu16(data, pos) -- reads a 16 bit value of the string data at positio
 end
 
 function status_data_processing(ipv6_adress, data)
-	--print("Join status processing module")
+	--print("Status data processing module")
 	local ipv6_adress_parent_short = data.b1..data.b2..":"..data.b3..data.b4..":"..data.b5..data.b6..":"..data.b7..data.b8
 
 	local uptime = tonumber(bindechex.Hex2Dec((data.b12 or 00)..(data.b11 or 00)..(data.b10 or 00)..(data.b9 or 00)))
@@ -571,6 +572,7 @@ function status_data_processing(ipv6_adress, data)
 	print(" Parent RSSI: "..parent_rssi.."dbm")
 	print(" Temp: "..temp.."C")
 	print(" Voltage: "..voltage.." v")
+	print("\n")
 
 	update_ts_channel(ipv6_adress, "voltage", voltage)
 	update_ts_channel(ipv6_adress, "uptime", uptime/60/60/24)
