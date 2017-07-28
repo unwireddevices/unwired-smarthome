@@ -20,12 +20,13 @@
 #define DATA_TYPE_STATUS                                        0x06 //Пакет со статусными данными
 #define DATA_TYPE_GET_STATUS                                    0x07 //Запрос статуса(не реализовано)
 #define DATA_TYPE_SETTINGS                                      0x08 //Команда настройки параметров
-#define DATA_TYPE_WARNING                                       0x09 //Ошибки и предупреждения(не реализовано)
+#define DATA_TYPE_WARNING                                       0x09 //Предупреждения(не реализовано)
 #define DATA_TYPE_SET_TIME                                      0x0A //Команда установки времени(не реализовано)
 #define DATA_TYPE_SET_SCHEDULE                                  0x0B //Команда установки расписания(не реализовано)
 #define DATA_TYPE_FIRMWARE                                      0x0C //Данные для OTA
 #define DATA_TYPE_UART                                          0x0D //Команда с данными UART
 #define DATA_TYPE_FIRMWARE_CMD                                  0x0E //Команды OTA
+#define DATA_TYPE_ERROR                                         0x0F //Ошибки
 
 /* Reserved data */
 #define DATA_RESERVED                                           0xFF
@@ -152,6 +153,14 @@
 #define DEVICE_WARNING_LOW_POWER                                0x04
 #define DEVICE_WARNING_ERROR_ON_RELAY                           0x05
 #define DEVICE_WARNING_ERROR_OFF_RELAY                          0x06
+
+/* Devices errors */
+#define DEVICE_ERROR_OTA_SPI_NOTACTIVE                          0x01
+#define DEVICE_ERROR_OTA_NOT_DELIVERED_CHUNK                    0x02
+#define DEVICE_ERROR_OTA_NONCORRECT_CRC                         0x03
+#define DEVICE_ERROR_OTA_BAD_GOLDEN_IMAGE                       0x04
+#define DEVICE_ERROR_RESERVED2                                  0x05
+#define DEVICE_ERROR_RESERVED3                                  0x06
 
 /* UART Binary data */
 #define UART_PROTOCOL_VERSION_V1                                0x01

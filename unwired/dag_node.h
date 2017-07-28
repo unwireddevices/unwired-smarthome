@@ -67,6 +67,7 @@ struct sensor_packet
 };
 
 void send_sensor_event(struct sensor_packet *sensor_packet);
+void send_error_packet(uint8_t error_type);
 void send_uart_data(struct command_data *uart_data);
 void uart_console(unsigned char uart_char);
 

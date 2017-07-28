@@ -445,7 +445,10 @@ static void udp_receiver(struct simple_udp_connection *c,
                process_start(&fw_update_process, NULL);
             }
             else
+            {
+               send_error_packet(DEVICE_ERROR_OTA_SPI_NOTACTIVE);
                printf("DAG Node: OTA update not processed, spi flash not-active\n");
+            }
 
          }
       }
@@ -538,6 +541,33 @@ void send_confirmation_packet(const uip_ipaddr_t *dest_addr)
 
    net_on(RADIO_ON_TIMER_OFF);
    simple_udp_sendto(&udp_connection, udp_buffer, length, dest_addr);
+}
+
+/*---------------------------------------------------------------------------*/
+
+void send_error_packet(uint8_t error_type)
+{
+   if (node_mode != MODE_NORMAL)
+      return;
+
+   uip_ip6addr_t addr;
+   uip_ip6addr_copy(&addr, &root_addr);
+
+   uint8_t length = 10;
+   uint8_t udp_buffer[length];
+   udp_buffer[0] = PROTOCOL_VERSION_V1;
+   udp_buffer[1] = DEVICE_VERSION_V1;
+   udp_buffer[2] = DATA_TYPE_ERROR;
+   udp_buffer[3] = error_type;
+   udp_buffer[4] = DATA_RESERVED;
+   udp_buffer[5] = DATA_RESERVED;
+   udp_buffer[6] = DATA_RESERVED;
+   udp_buffer[7] = DATA_RESERVED;
+   udp_buffer[8] = DATA_RESERVED;
+   udp_buffer[9] = DATA_RESERVED;
+
+   net_on(RADIO_ON_TIMER_OFF);
+   simple_udp_sendto(&udp_connection, udp_buffer, length, &addr);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -996,7 +1026,10 @@ PROCESS_THREAD(fw_update_process, ev, data)
             ti_lib_sys_ctrl_system_reset();
          }
          else
+         {
             printf("FW OTA: New FW in OTA slot 1 non-correct CRC\n");
+            send_error_packet(DEVICE_ERROR_OTA_NONCORRECT_CRC);
+         }
 
          return 0;
       }
@@ -1011,6 +1044,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
          if (fw_error_counter > 4)
          {
             printf("FW OTA: Not delivered chunk(>5 errors), exit\n");
+            send_error_packet(DEVICE_ERROR_OTA_NOT_DELIVERED_CHUNK);
             process_exit(&fw_update_process);
             chunk_num = 0;
             fw_error_counter = 0;
