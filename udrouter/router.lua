@@ -470,6 +470,25 @@ function send_relay_command(ipv6_adress, relay_number, state)
 	end
 end
 
+function all_relay(command)
+	if (command == "off") then
+		send_relay_command(relay_main_room, 1, "off")
+		send_relay_command(relay_main_room_table, 1, "off")
+		send_relay_command(relay_main_room_table, 2, "off")
+		send_relay_command(relay_kitchen, 1, "off")
+		send_relay_command(relay_hall, 1, "off")
+		send_relay_command(relay_bathroom, 1, "off")
+		send_relay_command(relay_wc, 1, "off")
+	elseif (command == "on") then
+		send_relay_command(relay_main_room, 1, "on")
+		send_relay_command(relay_main_room_table, 1, "on")
+		send_relay_command(relay_main_room_table, 2, "on")
+		send_relay_command(relay_kitchen, 1, "on")
+		send_relay_command(relay_hall, 1, "on")
+		send_relay_command(relay_bathroom, 1, "on")
+		send_relay_command(relay_wc, 1, "on")
+	end
+end
 
 function sensor_data_processing(ipv6_adress, data)
 	--print("Sensor data processing module")
@@ -484,52 +503,83 @@ function sensor_data_processing(ipv6_adress, data)
 	if (number_ability == DEVICE_ABILITY_BUTTON) then
 		button_name = string.upper(tostring(sensor_number):fromhex())
 		print(" BDPM: Button: "..button_name..", event: "..device_button_events[sensor_event])
+		current_switch = ipv6_adress
+		current_event = device_button_events[sensor_event]
 
-		if (button_name == "A") then
-			send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:3c84", 1, "toggle")
-		elseif (button_name == "B") then
-			if (ipv6_adress == "fd00:0000:0000:0000:0212:4b00:0c47:4b82") then
-				send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:3c84", 1, "toggle")
-			else
-				send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:3e00", 1, "toggle")
-			end
-		elseif (button_name == "C") then
-			if (device_button_events[sensor_event] == "longclick") then
-				send_firmware_to_ability("fd00:0000:0000:0000:0212:4b00:0c47:3f86", "CC")
-			elseif (device_button_events[sensor_event] == "click") then
+		if (current_switch == switch_mini_bed or current_switch == switch_mini_table) then
+
+			if (button_name == "B" and current_event == "click") then
+				all_relay("on")
+				state = 0
+
+			elseif (button_name == "C" and current_event == "click") then
 				if (state == 0) then
-					send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:4a85", 2, "off")
-					send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:4a85", 1, "off")
+					send_relay_command(relay_main_room_table, 2, "off")
+					send_relay_command(relay_main_room_table, 1, "off")
 					state = 1
 				elseif (state == 1) then
-					send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:4a85", 2, "on")
-					send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:4a85", 1, "off")
+					send_relay_command(relay_main_room_table, 2, "on")
+					send_relay_command(relay_main_room_table, 1, "off")
 					state = 2
 				elseif (state == 2) then
-					send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:4a85", 2, "off")
-					send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:4a85", 1, "on")
+					send_relay_command(relay_main_room_table, 2, "off")
+					send_relay_command(relay_main_room_table, 1, "on")
 					state = 3
 				elseif (state == 3) then
-					send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:4a85", 2, "on")
-					send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:4a85", 1, "on")
+					send_relay_command(relay_main_room_table, 2, "on")
+					send_relay_command(relay_main_room_table, 1, "on")
 					state = 0
 				end
+
+			elseif (button_name == "C" and current_event == "longclick") then
+				send_relay_command(relay_main_room, 1, "toggle")
+			elseif (button_name == "D" and current_event == "click") then
+				all_relay("off")
 			end
-		elseif (button_name == "D") then
-			if (device_button_events[sensor_event] == "longclick") then
-				send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:3c84", 1, "off")
-				send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:4a85", 1, "off")
-				send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:4a85", 2, "off")
-				send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:3e00", 1, "off")
-				send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:4a02", 1, "off")
-				state = 1
-			elseif (device_button_events[sensor_event] == "click") then
-				send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:3c84", 1, "on")
-				send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:4a85", 1, "on")
-				send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:4a85", 2, "on")
-				send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:3e00", 1, "on")
-				send_relay_command("fd00:0000:0000:0000:0212:4b00:0c47:4a02", 1, "on")
+
+		elseif (current_switch == switch_mini_hall) then
+			if (button_name == "B" and current_event == "click") then
+				all_relay("on")
 				state = 0
+			elseif (button_name == "C" and current_event == "click") then
+				send_relay_command(relay_hall, 1, "toggle")
+			elseif (button_name == "D" and current_event == "click") then
+				all_relay("off")
+				state = 1
+			end
+
+		elseif (current_switch == switch_wc) then
+			if (button_name == "A" and current_event == "click") then
+				send_relay_command(relay_bathroom, 1, "toggle")
+
+			elseif (button_name == "B" and current_event == "click") then
+				send_relay_command(relay_wc, 1, "toggle")
+
+			elseif (button_name == "C" and current_event == "click") then
+				send_relay_command(relay_hall, 1, "toggle")
+
+			elseif (button_name == "D" and current_event == "click") then
+				send_relay_command(relay_kitchen, 1, "toggle")
+
+			end
+
+		elseif (current_switch == switch_main_room) then
+			if (button_name == "A" and current_event == "click") then
+				send_relay_command(relay_main_room, 1, "toggle")
+			elseif (button_name == "A" and current_event == "longclick") then
+				send_relay_command(relay_main_room, 1, "toggle")
+			elseif (button_name == "B" and current_event == "click") then
+				send_relay_command(relay_main_room, 1, "toggle")
+			elseif (button_name == "B" and current_event == "longclick") then
+				send_relay_command(relay_main_room, 1, "toggle")
+			elseif (button_name == "C" and current_event == "click") then
+				send_relay_command(relay_main_room, 1, "toggle")
+			elseif (button_name == "C" and current_event == "longclick") then
+				send_relay_command(relay_main_room, 1, "toggle")
+			elseif (button_name == "D" and current_event == "click") then
+				send_relay_command(relay_main_room, 1, "toggle")
+			elseif (button_name == "D" and current_event == "longclick") then
+				send_relay_command(relay_main_room, 1, "toggle")
 			end
 		end
 
