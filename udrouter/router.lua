@@ -246,6 +246,19 @@ function string.tohex(str)
 end
 
 
+function console_print(data)
+	io.write(data or "")
+	io.flush()
+end
+
+function console_print_n(data)
+	io.write(data or "")
+	io.write("\n")
+	io.flush()
+end
+
+print = console_print_n
+
 function wget_data_send(api_key, value_type, value)
 	if (value_type == "voltage") then
 		local field = "field2"
@@ -763,12 +776,6 @@ function packet_parse(packet)
 	else
 		print("Not parse packet: "..packet)
 	end
-end
-
-
-function console_print(data)
-	io.write(data or "")
-	io.flush()
 end
 
 function send_uart_command(command, address, delay)
