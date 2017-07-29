@@ -212,6 +212,7 @@ switch_mini_bed = "fd00:0000:0000:0000:0212:4b00:0c47:4a82"
 switch_mini_table = "fd00:0000:0000:0000:0212:4b00:0c47:3b04"
 switch_wc = "fd00:0000:0000:0000:0212:4b00:0c47:4b05"
 switch_main_room = "fd00:0000:0000:0000:0212:4b00:0c47:3a00"
+switch_kitchen = "ffd00:0000:0000:0000:0212:4b00:0c47:4880"
 
 relay_main_room_table = "fd00:0000:0000:0000:0212:4b00:0c47:4a85"
 relay_main_room = "fd00:0000:0000:0000:0212:4b00:0c47:3e00"
@@ -248,35 +249,54 @@ end
 function wget_data_send(api_key, value_type, value)
 	if (value_type == "voltage") then
 		local field = "field2"
-		local command = 'wget --no-check-certificate -qO- "https://api.thingspeak.com/update?api_key='..api_key..'&'..field..'='..value..'" &'
+		local command = 'wget --no-check-certificate --wait=200 --random-wait --dns-timeout=5 --connect-timeout=10 --tries=0 --output-document=- "https://api.thingspeak.com/update?api_key='..api_key..'&'..field..'='..value..'" &>/dev/null &'
 		os.execute(command)
 	elseif (value_type == "uptime") then
 		local field = "field1"
-		local command = '( sleep 15; wget --no-check-certificate -qO- "https://api.thingspeak.com/update?api_key='..api_key..'&'..field..'='..value..'" ) &'
+		local command = 'wget --no-check-certificate --wait=200 --random-wait --dns-timeout=5 --connect-timeout=10 --tries=0 --output-document=- "https://api.thingspeak.com/update?api_key='..api_key..'&'..field..'='..value..'" &>/dev/null &'
 		os.execute(command)
 	end
 
 end
 
 function update_ts_channel(address, value_type, value)
-	if (address == "fd00:0000:0000:0000:0212:4b00:0c47:3a00") then
+	if (address == switch_main_room) then
 		wget_data_send("6P06S2I81X412JIR", value_type, value)
-	elseif (address == "fd00:0000:0000:0000:0212:4b00:0c47:4b05") then
+
+	elseif (address == switch_wc) then
 		wget_data_send("GHZLBBRFOFFYSUP3", value_type, value)
-	elseif (address == "fd00:0000:0000:0000:0212:4b00:0c47:4a85") then
-		wget_data_send("RB2SEV381GNAI14R", value_type, value)
-	elseif (address == "fd00:0000:0000:0000:0212:4b00:0c47:4a02") then
-		wget_data_send("6AZZVI8SFXQBFDHW", value_type, value)
-	elseif (address == "fd00:0000:0000:0000:0212:4b00:0c47:4880") then
-		wget_data_send("LSGSFREU9GHK30YR", value_type, value)
-	elseif (address == "fd00:0000:0000:0000:0212:4b00:0c47:3e00") then
-		wget_data_send("99DOTCKKCPGHYB3U", value_type, value)
-	elseif (address == "fd00:0000:0000:0000:0212:4b00:0c47:4b82") then
+
+	elseif (address == switch_mini_door) then
 		wget_data_send("9U3175EF4NWFLCHU", value_type, value)
-	elseif (address == "fd00:0000:0000:0000:0212:4b00:0c47:4a82") then
+
+	elseif (address == switch_mini_bed) then
 		wget_data_send("PCHJXTUODC0LS2PW", value_type, value)
-	elseif (address == "fd00:0000:0000:0000:0212:4b00:0c47:3b04") then
+
+	elseif (address == switch_mini_table) then
 		wget_data_send("F80QAU2U0RM47IFG", value_type, value)
+
+	elseif (address == switch_kitchen) then
+		wget_data_send("LSGSFREU9GHK30YR", value_type, value)
+
+
+	elseif (address == relay_main_room_table) then
+		wget_data_send("RB2SEV381GNAI14R", value_type, value)
+
+	elseif (address == relay_main_room) then
+		wget_data_send("99DOTCKKCPGHYB3U", value_type, value)
+
+	elseif (address == relay_kitchen) then
+		wget_data_send("6AZZVI8SFXQBFDHW", value_type, value)
+
+	elseif (address == relay_hall) then
+		wget_data_send("FKGCJJC68X5SOO7I", value_type, value)
+
+	elseif (address == relay_bathroom) then
+		wget_data_send("YTAAIPT9281MH1ZJ", value_type, value)
+
+	elseif (address == relay_wc) then
+		wget_data_send("9NTCZ3CB7CTQVMH2", value_type, value)
+
 	end
 end
 
