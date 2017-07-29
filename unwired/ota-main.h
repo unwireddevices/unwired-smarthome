@@ -12,8 +12,6 @@
 #include "ext-flash.h"
 #include "driverlib/flash.h"
 
-#define PRINTF(...) printf(__VA_ARGS__)
-
 /**
  *    OTA Image Memory Map
  */

@@ -12,8 +12,9 @@
 #include "dev/watchdog.h"
 #include <stdbool.h>
 
-#define DPRINT //printf("\t\t\t\t\t>ota.c:%"PRIu16"\n", __LINE__);watchdog_periodic();
 
+#define DPRINT //printf("\t\t\t\t\t>ota.c:%"PRIu16"\n", __LINE__);watchdog_periodic();
+#define PRINTF(...) printf(__VA_ARGS__)
 
 uint8_t ota_images[3] = OTA_ADDRESSES;
 
