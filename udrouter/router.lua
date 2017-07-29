@@ -8,7 +8,6 @@ local bindechex = require("bindechex")
 local posix = require("posix")
 local version = require("version") 
 
-
 device_group = {}
 DEVICE_GROUP_BUTTON_SWITCH     =     "00"
 device_group[DEVICE_GROUP_BUTTON_SWITCH]		   =     "Button/switch"
@@ -45,8 +44,6 @@ device_group[DEVICE_GROUP_OTHER]				   =     "Other device"
 
 -----------------------------------------------------------------------------------
 
-
------------------------------------------------------------------------------------
 device_ability = {}
 
 DEVICE_ABILITY_NONE            =     "00"
@@ -111,8 +108,6 @@ device_ability[DEVICE_ABILITY_LED] = "LED indicator"
 
 -----------------------------------------------------------------------------------
 
-
------------------------------------------------------------------------------------
 device_button_events = {}
 
 DEVICE_ABILITY_BUTTON_EVENT_CLICK        =   "01"
@@ -126,7 +121,9 @@ device_button_events[DEVICE_ABILITY_BUTTON_EVENT_ON] = "on"
 
 DEVICE_ABILITY_BUTTON_EVENT_OFF          =   "04"
 device_button_events[DEVICE_ABILITY_BUTTON_EVENT_OFF] = "off"
+
 -----------------------------------------------------------------------------------
+
 device_relay_commands = {}
 
 DEVICE_ABILITY_RELAY_COMMAND_ON        =   "01"
@@ -137,6 +134,7 @@ device_relay_commands[DEVICE_ABILITY_RELAY_COMMAND_OFF] = "off"
 
 DEVICE_ABILITY_RELAY_COMMAND_TOGGLE   =   "80"
 device_relay_commands[DEVICE_ABILITY_RELAY_COMMAND_TOGGLE] = "toggle"
+
 -----------------------------------------------------------------------------------
 
 device_sleep_type = {}
@@ -192,6 +190,7 @@ UART_NONE_26_DATA = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
 VOLTAGE_PRESCALER = 16
 
 -----------------------------------------------------------------------------------
+
 DATA_TYPE_JOIN                            =              "01" --Запрос на включение в сеть
 DATA_TYPE_SENSOR_DATA                     =              "02" --Данные с датчиков устройства
 DATA_TYPE_CONFIRM                 	      =              "03" --Подтверждение запроса на включение в сеть
@@ -432,7 +431,6 @@ function send_firmware_chunk_to_node(ipv6_adress, firmware_bin_chunk_224b)
 	uart_delay_send(bin_data)
 end
 
-
 function send_relay_command(ipv6_adress, relay_number, state)
 	--print("Relay command processing start: +"..(socket.gettime()*1000 - start_time).." ms")
 	local ability_state, ability
@@ -465,12 +463,10 @@ function sensor_data_processing(ipv6_adress, data)
 	local number_ability = data.b1 or "no number_ability"
 	local sensor_number = data.b3 or "no sensor_number"
 	local sensor_event = data.b4 or "no sensor_event"
-
-	
-
 	local sensor_name = device_ability[number_ability] or "Not found ability description: "..number_ability
 
 	print("SDPM: Adress: "..ipv6_adress..", sensor type: "..sensor_name)
+
 	if (number_ability == DEVICE_ABILITY_BUTTON) then
 		button_name = string.upper(tostring(sensor_number):fromhex())
 		print(" BDPM: Button: "..button_name..", event: "..device_button_events[sensor_event])
@@ -522,6 +518,7 @@ function sensor_data_processing(ipv6_adress, data)
 				state = 0
 			end
 		end
+
 	end
 end
 
@@ -807,9 +804,6 @@ assert(p:set_data_bits(rs232.RS232_DATA_8) == rs232.RS232_ERR_NOERROR)
 assert(p:set_parity(rs232.RS232_PARITY_NONE) == rs232.RS232_ERR_NOERROR)
 assert(p:set_stop_bits(rs232.RS232_STOP_1) == rs232.RS232_ERR_NOERROR)
 assert(p:set_flow_control(rs232.RS232_FLOW_OFF)  == rs232.RS232_ERR_NOERROR)
-
-
-
 
 if (arg[1] == "uart_incotex") then
 	if (arg[2] == nil or arg[3] == nil) then
