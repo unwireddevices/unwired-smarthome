@@ -163,10 +163,8 @@ device_error_type[DEVICE_ERROR_OTA_BAD_GOLDEN_IMAGE] 		= "OTA: Bad golden image"
 
 -----------------------------------------------------------------------------------
 
-
 DATA_TYPE_FIRMWARE_COMMAND_NEW_FW              =         "01" --Сообщение о наличии новой прошивки
 DATA_TYPE_FIRMWARE_COMMAND_chunk_REQ           =         "02" --Запрос пакета с частью прошивки
-
 
 PROTOCOL_VERSION_V1            =     "01"
 DEVICE_VERSION_V1              =     "01"
@@ -209,7 +207,7 @@ DATA_TYPE_ERROR                           =              "0F" --Ошибки
 
 -----------------------------------------------------------------------------------
 
-switch_mini_hall = "fd00:0000:0000:0000:0212:4b00:0c47:4b82"
+switch_mini_door = "fd00:0000:0000:0000:0212:4b00:0c47:4b82"
 switch_mini_bed = "fd00:0000:0000:0000:0212:4b00:0c47:4a82"
 switch_mini_table = "fd00:0000:0000:0000:0212:4b00:0c47:3b04"
 switch_wc = "fd00:0000:0000:0000:0212:4b00:0c47:4b05"
@@ -537,7 +535,7 @@ function sensor_data_processing(ipv6_adress, data)
 				all_relay("off")
 			end
 
-		elseif (current_switch == switch_mini_hall) then
+		elseif (current_switch == switch_mini_door) then
 			if (button_name == "B" and current_event == "click") then
 				all_relay("on")
 				state = 0
