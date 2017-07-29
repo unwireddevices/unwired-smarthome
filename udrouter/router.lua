@@ -392,7 +392,7 @@ function send_uart_data_to_ability(ipv6_adress, returned_data_lenth, data_lenth,
 	uart_delay_send(bin_data)
 end
 
-function 	send_firmware_new_fw_cmd_to_node(ipv6_adress, table_segments)
+function send_firmware_new_fw_cmd_to_node(ipv6_adress, table_segments)
 	local adress = ipv6_adress_parse(ipv6_adress)
 	local chunk_quantity = #table_segments
 
@@ -479,7 +479,7 @@ function sensor_data_processing(ipv6_adress, data)
 	local sensor_event = data.b4 or "no sensor_event"
 	local sensor_name = device_ability[number_ability] or "Not found ability description: "..number_ability
 
-	print("SDPM: Adress: "..ipv6_adress..", sensor type: "..sensor_name)
+	print("\nSDPM: Adress: "..ipv6_adress..", sensor type: "..sensor_name)
 
 	if (number_ability == DEVICE_ABILITY_BUTTON) then
 		button_name = string.upper(tostring(sensor_number):fromhex())
