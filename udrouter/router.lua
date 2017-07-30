@@ -231,6 +231,21 @@ relay_kitchen = "fd00:0000:0000:0000:0212:4b00:0c47:4a02"
 relay_bathroom = "fd00:0000:0000:0000:0212:4b00:0c47:4802"
 relay_wc = "fd00:0000:0000:0000:0212:4b00:0c47:4886"
 
+api_keys = {} -- keys for thingspeak
+api_keys[switch_mini_door] = "9U3175EF4NWFLCHU"
+api_keys[switch_mini_bed] = "PCHJXTUODC0LS2PW"
+api_keys[switch_mini_table] = "F80QAU2U0RM47IFG"
+api_keys[switch_wc] = "GHZLBBRFOFFYSUP3"
+api_keys[switch_main_room] = "6P06S2I81X412JIR"
+api_keys[switch_kitchen] = "LSGSFREU9GHK30YR"
+
+api_keys[relay_main_room_table] = "RB2SEV381GNAI14R"
+api_keys[relay_main_room] = "99DOTCKKCPGHYB3U"
+api_keys[relay_hall] = "FKGCJJC68X5SOO7I"
+api_keys[relay_kitchen] = "6AZZVI8SFXQBFDHW"
+api_keys[relay_bathroom] = "YTAAIPT9281MH1ZJ"
+api_keys[relay_wc] = "9NTCZ3CB7CTQVMH2"
+
 -----------------------------------------------------------------------------------
 
 local ver = version.git
@@ -239,7 +254,7 @@ local pid_file = "/tmp/run/unwired_router.pid"
 local port_name = "/dev/ttyATH0"
 local pid = posix.getpid()
 local start_time = 0
-local state = 0 --?
+local state = "all_on"
 local main_cycle_permit = 1
 
 function string.fromhex(str)
@@ -269,57 +284,18 @@ end
 
 print = console_print_n
 
-function wget_data_send(api_key, value_type, value)
+function update_ts_channel(address, value_type, value)
+	api_key = api_keys[address] 
+
 	if (value_type == "voltage") then
 		local field = "field2"
-		local command = 'wget --no-check-certificate --wait=200 --random-wait --dns-timeout=5 --connect-timeout=10 --tries=0 --output-document=- "https://api.thingspeak.com/update?api_key='..api_key..'&'..field..'='..value..'" &>/dev/null &'
+		local command = 'wget --no-check-certificate --wait=20 --random-wait --dns-timeout=5 --connect-timeout=10 --tries=0 --output-document=- "https://api.thingspeak.com/update?api_key='..api_key..'&'..field..'='..value..'" &>/dev/null &'
 		os.execute(command)
+		--https://api.thingspeak.com/update?api_key=NCX7ITKYRBNHFO39&field2=1&field3=1
 	elseif (value_type == "uptime") then
 		local field = "field1"
-		local command = 'wget --no-check-certificate --wait=200 --random-wait --dns-timeout=5 --connect-timeout=10 --tries=0 --output-document=- "https://api.thingspeak.com/update?api_key='..api_key..'&'..field..'='..value..'" &>/dev/null &'
+		local command = 'wget --no-check-certificate --wait=20 --random-wait --dns-timeout=5 --connect-timeout=10 --tries=0 --output-document=- "https://api.thingspeak.com/update?api_key='..api_key..'&'..field..'='..value..'" &>/dev/null &'
 		os.execute(command)
-	end
-
-end
-
-function update_ts_channel(address, value_type, value)
-	if (address == switch_main_room) then
-		wget_data_send("6P06S2I81X412JIR", value_type, value)
-
-	elseif (address == switch_wc) then
-		wget_data_send("GHZLBBRFOFFYSUP3", value_type, value)
-
-	elseif (address == switch_mini_door) then
-		wget_data_send("9U3175EF4NWFLCHU", value_type, value)
-
-	elseif (address == switch_mini_bed) then
-		wget_data_send("PCHJXTUODC0LS2PW", value_type, value)
-
-	elseif (address == switch_mini_table) then
-		wget_data_send("F80QAU2U0RM47IFG", value_type, value)
-
-	elseif (address == switch_kitchen) then
-		wget_data_send("LSGSFREU9GHK30YR", value_type, value)
-
-
-	elseif (address == relay_main_room_table) then
-		wget_data_send("RB2SEV381GNAI14R", value_type, value)
-
-	elseif (address == relay_main_room) then
-		wget_data_send("99DOTCKKCPGHYB3U", value_type, value)
-
-	elseif (address == relay_kitchen) then
-		wget_data_send("6AZZVI8SFXQBFDHW", value_type, value)
-
-	elseif (address == relay_hall) then
-		wget_data_send("FKGCJJC68X5SOO7I", value_type, value)
-
-	elseif (address == relay_bathroom) then
-		wget_data_send("YTAAIPT9281MH1ZJ", value_type, value)
-
-	elseif (address == relay_wc) then
-		wget_data_send("9NTCZ3CB7CTQVMH2", value_type, value)
-
 	end
 end
 
