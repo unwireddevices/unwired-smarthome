@@ -363,8 +363,8 @@ function send_command_to_ability(ipv6_adress, ability_target, ability_number, ab
 
 	uart_delay_send(bin_data)
 
-	print("Processing time "..(math.ceil(socket.gettime()*1000 - start_time)).." ms")
-	start_time = socket.gettime()*1000
+	--print("Processing time "..(math.ceil(socket.gettime()*1000 - start_time)).." ms")
+	--start_time = socket.gettime()*1000
 	socket.sleep(0.08)
 end
 
