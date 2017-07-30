@@ -95,6 +95,10 @@
 #define DEVICE_ABILITY_BUTTON_EVENT_ON                          0x03
 #define DEVICE_ABILITY_BUTTON_EVENT_OFF                         0x04
 
+/* DEVICE_ABILITY_MOTION_SENSOR events */
+#define DEVICE_ABILITY_MOTION_SENSOR_EVENT_MOTION               0x01
+#define DEVICE_ABILITY_MOTION_SENSOR_EVENT_NO_MOTION            0x02
+
 /* DEVICE_ABILITY_LED commands */
 #define DEVICE_ABILITY_LED_COMMAND_OFF                          0x00
 #define DEVICE_ABILITY_LED_COMMAND_ON                           0x01

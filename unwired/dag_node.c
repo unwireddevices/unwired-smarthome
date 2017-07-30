@@ -89,6 +89,10 @@
 #  include "asuno-light/light.h"
 #endif
 
+#ifdef IF_UD_MOTIONSENSOR
+#  include "smarthome/motionsensor.h"
+#endif
+
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
 #define SHORT_STATUS_INTERVAL           (10 * 60 * CLOCK_SECOND)

@@ -1,0 +1,11 @@
+all: motionsensor
+
+PROJECT_SOURCEFILES += ../dag_node.c ../flash-common.c ../ota-main.c ../ota-common.c
+DEFINES+=PROJECT_CONF_H=\"project-conf-class-c.h\"
+DEFINES+=IF_UD_MOTIONSENSOR=1
+DEFINES+=FAKEDEFINE=1
+DEFINES+=CLASS=0x0C
+CONTIKI = ../..
+CONTIKI_WITH_IPV6 = 1
+include $(CONTIKI)/Makefile.include
+include $(CONTIKI)/Makefile_git_version.include

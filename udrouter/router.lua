@@ -124,6 +124,16 @@ device_button_events[DEVICE_ABILITY_BUTTON_EVENT_OFF] = "off"
 
 -----------------------------------------------------------------------------------
 
+device_motionsensor_events = {}
+
+DEVICE_ABILITY_MOTION_SENSOR_EVENT_MOTION        =   "01"
+device_motionsensor_events[DEVICE_ABILITY_MOTION_SENSOR_EVENT_MOTION] = "motion"
+
+DEVICE_ABILITY_MOTION_SENSOR_EVENT_NO_MOTION   =   "02"
+device_motionsensor_events[DEVICE_ABILITY_MOTION_SENSOR_EVENT_NO_MOTION] = "nomotion"
+
+-----------------------------------------------------------------------------------
+
 device_relay_commands = {}
 
 DEVICE_ABILITY_RELAY_COMMAND_ON        =   "01"
@@ -530,6 +540,17 @@ function sensor_data_processing(ipv6_adress, data)
 	local sensor_name = device_ability[number_ability] or "Not found ability description: "..number_ability
 
 	print("\nSDPM: Adress: "..ipv6_adress..", sensor type: "..sensor_name)
+
+	if (number_ability == DEVICE_ABILITY_MOTION_SENSOR) then
+		current_event = device_motionsensor_events[sensor_event]
+		print(" MDPM: Motion sensor: "..sensor_number..", event: "..current_event)
+
+		if (current_event == "motion") then
+			send_relay_command(relay_hall, 1, "on")
+		elseif (current_event == "nomotion") then
+			--send_relay_command(relay_hall, 1, "off")
+		end
+	end
 
 	if (number_ability == DEVICE_ABILITY_BUTTON) then
 		button_name = string.upper(tostring(sensor_number):fromhex())
