@@ -308,11 +308,8 @@ end
 print = console_print_n
 
 function update_ts_channels(address, voltage, uptime)
-	api_key = api_keys[address] 
-	if api_key == nil then return end
-	local command = 'wget --no-check-certificate --wait=20 --random-wait --dns-timeout=5 --connect-timeout=10 --tries=0 --output-document=- "https://api.thingspeak.com/update?api_key='..api_key..'&field2='..voltage..'&field1='..uptime..'" &>/dev/null &'
-	print("\n")
-	--print(command)
+	if api_keys[address] == nil then return end
+	local command = 'wget --no-check-certificate --wait=20 --random-wait --dns-timeout=5 --connect-timeout=10 --tries=0 --output-document=- "https://api.thingspeak.com/update?api_key='..api_keys[address]..'&field2='..voltage..'&field1='..uptime..'" &>/dev/null &'
 	os.execute(command)
 end
 
