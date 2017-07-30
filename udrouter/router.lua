@@ -532,43 +532,43 @@ function sensor_data_processing(ipv6_adress, data)
 
 			if (button_name == "B" and current_event == "click") then
 				all_relay("on")
-				state = 3
+				state = "all_on"
 
 			elseif (button_name == "C" and current_event == "click") then
-				if (state == 3) then
+				if (state == "all_on") then
 					send_relay_command(relay_main_room_table, 2, "off")
 					send_relay_command(relay_main_room_table, 1, "off")
-					state = 0
-				elseif (state == 0) then
+					state = "all_off"
+				elseif (state == "all_off") then
 					send_relay_command(relay_main_room_table, 2, "on")
 					send_relay_command(relay_main_room_table, 1, "off")
-					state = 1
-				elseif (state == 1) then
+					state = "2_on"
+				elseif (state == "2_on") then
 					send_relay_command(relay_main_room_table, 2, "off")
 					send_relay_command(relay_main_room_table, 1, "on")
-					state = 2
-				elseif (state == 2) then
+					state = "1_on"
+				elseif (state == "1_on") then
 					send_relay_command(relay_main_room_table, 2, "on")
 					send_relay_command(relay_main_room_table, 1, "on")
-					state = 3
+					state = "all_on"
 				end
 
 			elseif (button_name == "C" and current_event == "longclick") then
 				send_relay_command(relay_main_room, 1, "toggle")
 			elseif (button_name == "D" and current_event == "click") then
 				all_relay("off")
-				state = 0
+				state = "all_off"
 			end
 
 		elseif (current_switch == switch_mini_door) then
 			if (button_name == "B" and current_event == "click") then
 				all_relay("on")
-				state = 3
+				state = "all_on"
 			elseif (button_name == "C" and current_event == "click") then
 				send_relay_command(relay_hall, 1, "toggle")
 			elseif (button_name == "D" and current_event == "click") then
 				all_relay("off")
-				state = 0
+				state = "all_off"
 
 				send_relay_command(relay_hall, 1, "on")
 				socket.sleep(10)
