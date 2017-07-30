@@ -231,6 +231,29 @@ relay_kitchen = "fd00:0000:0000:0000:0212:4b00:0c47:4a02"
 relay_bathroom = "fd00:0000:0000:0000:0212:4b00:0c47:4802"
 relay_wc = "fd00:0000:0000:0000:0212:4b00:0c47:4886"
 
+motion_sensor_hall = "fd00:0000:0000:0000:0212:4b00:0c47:4602"
+
+-----------------------------------------------------------------------------------
+
+devices_names = {}
+devices_names[switch_mini_door] = "switch_mini_door"
+devices_names[switch_mini_bed] = "switch_mini_bed"
+devices_names[switch_mini_table] = "switch_mini_table"
+devices_names[switch_wc] = "switch_wc"
+devices_names[switch_main_room] = "switch_main_room"
+devices_names[switch_kitchen] = "switch_kitchen"
+
+devices_names[relay_main_room_table] = "relay_main_room_table"
+devices_names[relay_main_room] = "relay_main_room"
+devices_names[relay_hall] = "relay_hall"
+devices_names[relay_kitchen] = "relay_kitchen"
+devices_names[relay_bathroom] = "relay_bathroom"
+devices_names[relay_wc] = "relay_wc"
+
+devices_names[motion_sensor_hall] = "motion_sensor_hall"
+
+-----------------------------------------------------------------------------------
+
 api_keys = {} -- keys for thingspeak
 api_keys[switch_mini_door] = "9U3175EF4NWFLCHU"
 api_keys[switch_mini_bed] = "PCHJXTUODC0LS2PW"
@@ -458,6 +481,9 @@ end
 
 function send_relay_command(ipv6_adress, relay_number, state)
 	--print("Relay command processing start: +"..(socket.gettime()*1000 - start_time).." ms")
+
+	local device_name = devices_names[ipv6_adress] or ipv6_adress
+	print("Send command to device: "..device_name..", relay:"..relay_number..", state:"..state)
 	local ability_state, ability
 
 	if (state == device_relay_commands[DEVICE_ABILITY_RELAY_COMMAND_ON]) then
@@ -509,7 +535,8 @@ function sensor_data_processing(ipv6_adress, data)
 	local sensor_event = data.b4 or "no sensor_event"
 	local sensor_name = device_ability[number_ability] or "Not found ability description: "..number_ability
 
-	print("\nSDPM: Adress: "..ipv6_adress..", sensor type: "..sensor_name)
+	local device_name = devices_names[ipv6_adress] or ipv6_adress
+	print("\nSDPM: Device: "..device_name..", sensor type: "..sensor_name)
 
 	if (number_ability == DEVICE_ABILITY_MOTION_SENSOR) then
 		current_event = device_motionsensor_events[sensor_event]
@@ -624,7 +651,8 @@ function join_data_processing(ipv6_adress, data)
 
 	local device_group_name = device_group[current_device_group] or current_device_group
 	local device_sleep_name = device_sleep_type[current_sleep_type] or current_sleep_type
-	print("JDPM: Join packet from "..ipv6_adress..", device group: "..device_group_name..", sleep type: "..device_sleep_name)
+	local device_name = devices_names[ipv6_adress] or ipv6_adress
+	print("JDPM: Join packet from "..device_name..", device group: "..device_group_name..", sleep type: "..device_sleep_name)
 	print("\n")
 end
 
@@ -652,7 +680,8 @@ function status_data_processing(ipv6_adress, data)
 
 	parent_rssi = string.format("%d, %i, %u", parent_rssi_raw, parent_rssi_raw, parent_rssi_raw) or "no rssi"
 	parent_rssi = parent_rssi_raw
-	print("SDPM: Status packet from "..ipv6_adress..":")
+	local device_name = devices_names[ipv6_adress] or ipv6_adress
+	print("SDPM: Status packet from "..device_name..":")
 	print(" Version: "..version)
 	print(" OTA: "..ota_flag)
 	print(" Parent adress: "..ipv6_adress_parent_short)
