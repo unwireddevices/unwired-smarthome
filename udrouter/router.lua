@@ -222,7 +222,7 @@ switch_mini_bed = "fd00:0000:0000:0000:0212:4b00:0c47:4a82"
 switch_mini_table = "fd00:0000:0000:0000:0212:4b00:0c47:3b04"
 switch_wc = "fd00:0000:0000:0000:0212:4b00:0c47:4b05"
 switch_main_room = "fd00:0000:0000:0000:0212:4b00:0c47:3a00"
-switch_kitchen = "ffd00:0000:0000:0000:0212:4b00:0c47:4880"
+switch_kitchen = "fd00:0000:0000:0000:0212:4b00:0c47:4880"
 
 relay_main_room_table = "fd00:0000:0000:0000:0212:4b00:0c47:4a85"
 relay_main_room = "fd00:0000:0000:0000:0212:4b00:0c47:3e00"
@@ -632,6 +632,26 @@ function sensor_data_processing(ipv6_adress, data)
 			elseif (button_name == "D" and current_event == "longclick") then
 				send_relay_command(relay_main_room, 1, "toggle")
 			end
+
+		elseif (current_switch == switch_kitchen) then
+			if (button_name == "A" and current_event == "click") then
+				send_relay_command(relay_kitchen, 1, "toggle")
+			elseif (button_name == "A" and current_event == "longclick") then
+				send_relay_command(relay_kitchen, 1, "toggle")
+			elseif (button_name == "B" and current_event == "click") then
+				send_relay_command(relay_kitchen, 1, "toggle")
+			elseif (button_name == "B" and current_event == "longclick") then
+				send_relay_command(relay_kitchen, 1, "toggle")
+			elseif (button_name == "C" and current_event == "click") then
+				send_relay_command(relay_kitchen, 1, "toggle")
+			elseif (button_name == "C" and current_event == "longclick") then
+				send_relay_command(relay_kitchen, 1, "toggle")
+			elseif (button_name == "D" and current_event == "click") then
+				send_relay_command(relay_kitchen, 1, "toggle")
+			elseif (button_name == "D" and current_event == "longclick") then
+				send_relay_command(relay_kitchen, 1, "toggle")
+			end
+
 		end
 
 	end
@@ -693,9 +713,7 @@ end
 
 function error_data_processing(ipv6_adress, data)
 	--print("Error status processing module")
-
 	print("EDPM: Error packet from "..ipv6_adress..":")
-
 	print(" Error: "..device_error_type[data.b1])
 	print("\n")
 end
@@ -733,21 +751,10 @@ function packet_processing(a, data)
 	local ipv6_adress = a[1]..a[2]..":"..a[3]..a[4]..":"..a[5]..a[6]..":"..a[7]..a[8]..":"..a[9]..a[10]..":"..a[11]..a[12]..":"..a[13]..a[14]..":"..a[15]..a[16]
 	if (data.p_version == PROTOCOL_VERSION_V1 and data.dev_version == DEVICE_VERSION_V1) then
 		if data.d_type == DATA_TYPE_JOIN then
-		 	--print("PPM: Join packet from "..ipv6_adress)
 		 	join_data_processing(ipv6_adress, data)
 
 		elseif data.d_type == DATA_TYPE_SENSOR_DATA then
-			--print("PPM: Data from sensor")
 			sensor_data_processing(ipv6_adress, data)
-
-		elseif data.d_type == DATA_TYPE_CONFIRM then
-			print("PPM: Data type: DATA_TYPE_CONFIRM from "..ipv6_adress)
-
-		elseif data.d_type == DATA_TYPE_PING then
-			print("PPM: Data type: DATA_TYPE_PING from "..ipv6_adress)
-
-		elseif data.d_type == DATA_TYPE_COMMAND then
-			print("PPM: Data type: DATA_TYPE_COMMAND from "..ipv6_adress)
 
 		elseif data.d_type == DATA_TYPE_STATUS then
 			status_data_processing(ipv6_adress, data)
@@ -757,6 +764,15 @@ function packet_processing(a, data)
 
 		elseif data.d_type == DATA_TYPE_FIRMWARE_CMD then
 			fw_cmd_data_processing(ipv6_adress, data)
+
+		elseif data.d_type == DATA_TYPE_CONFIRM then
+			print("PPM: Data type: DATA_TYPE_CONFIRM from "..ipv6_adress)
+
+		elseif data.d_type == DATA_TYPE_PING then
+			print("PPM: Data type: DATA_TYPE_PING from "..ipv6_adress)
+
+		elseif data.d_type == DATA_TYPE_COMMAND then
+			print("PPM: Data type: DATA_TYPE_COMMAND from "..ipv6_adress)
 
 		else
 			print(string.format("Unsupported protocol type(%s)", tostring(data.d_type)))
@@ -915,9 +931,9 @@ assert(p:set_parity(rs232.RS232_PARITY_NONE) == rs232.RS232_ERR_NOERROR)
 assert(p:set_stop_bits(rs232.RS232_STOP_1) == rs232.RS232_ERR_NOERROR)
 assert(p:set_flow_control(rs232.RS232_FLOW_OFF)  == rs232.RS232_ERR_NOERROR)
 
-if (arg[1] == "uart_incotex") then
+if (arg[1] == "uart_asuno_test") then
 	if (arg[2] == nil or arg[3] == nil) then
-		print("use:\trouter.lua uart_command fd00:0000:0000:0000:0212:4b00:0c47:4a85 on/off/on_off 5(on_off cycle delay in sec, default 10)")
+		print("use:\trouter.lua uart_asuno_test fd00:0000:0000:0000:0212:4b00:0c47:4a85 on/off/on_off 5(on_off cycle delay in sec, default 10)")
 		return
 	end
 	local command = arg[3]
@@ -959,6 +975,6 @@ elseif (arg[1] == "main") then
 elseif (arg[1] == "monitor") then
 	port_monitor()
 else
-	print("Use:\trouter.lua main \t\tstart main loop(data parse/show)\n\trouter.lua firmware_update \tsend firmware file to node\n\trouter.lua uart_incotex \tsend uart incotex command to node\n\trouter.lua monitor \t\tstart port monitor\n")
+	print("Use:\trouter.lua main \t\tstart main loop(data parse/show)\n\trouter.lua firmware_update \tsend firmware file to node\n\trouter.lua uart_asuno_test \tsend uart asuno command to node\n\trouter.lua monitor \t\tstart port monitor\n")
 end
 
