@@ -117,7 +117,6 @@
 
 #define MAX_NON_ANSWERED_PINGS                  3
 
-#define FW_                                     0x00 //fixme
 #define HEXRAW_MODE                             0x01
 
 #define HEXVIEW_MODE                            0x00
