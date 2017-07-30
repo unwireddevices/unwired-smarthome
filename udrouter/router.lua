@@ -284,19 +284,13 @@ end
 
 print = console_print_n
 
-function update_ts_channel(address, value_type, value)
+function update_ts_channels(address, voltage, uptime)
 	api_key = api_keys[address] 
-
-	if (value_type == "voltage") then
-		local field = "field2"
-		local command = 'wget --no-check-certificate --wait=20 --random-wait --dns-timeout=5 --connect-timeout=10 --tries=0 --output-document=- "https://api.thingspeak.com/update?api_key='..api_key..'&'..field..'='..value..'" &>/dev/null &'
-		os.execute(command)
-		--https://api.thingspeak.com/update?api_key=NCX7ITKYRBNHFO39&field2=1&field3=1
-	elseif (value_type == "uptime") then
-		local field = "field1"
-		local command = 'wget --no-check-certificate --wait=20 --random-wait --dns-timeout=5 --connect-timeout=10 --tries=0 --output-document=- "https://api.thingspeak.com/update?api_key='..api_key..'&'..field..'='..value..'" &>/dev/null &'
-		os.execute(command)
-	end
+	if api_key == nil then return end
+	local command = 'wget --no-check-certificate --wait=20 --random-wait --dns-timeout=5 --connect-timeout=10 --tries=0 --output-document=- "https://api.thingspeak.com/update?api_key='..api_key..'&field2='..voltage..'&field1='..uptime..'" &>/dev/null &'
+	print("\n")
+	--print(command)
+	os.execute(command)
 end
 
 
@@ -668,8 +662,7 @@ function status_data_processing(ipv6_adress, data)
 	print(" Voltage: "..voltage.." v")
 	print("\n")
 
-	update_ts_channel(ipv6_adress, "voltage", voltage)
-	update_ts_channel(ipv6_adress, "uptime", uptime/60/60/24)
+	update_ts_channels(ipv6_adress, voltage, uptime/60/60/24)
 end
 
 function error_data_processing(ipv6_adress, data)
