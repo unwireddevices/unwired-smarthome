@@ -299,18 +299,12 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function console_print(data)
-	io.write(data or "")
-	io.flush()
-end
-
-function console_print_n(data)
+function print(data)
 	io.write(data or "")
 	io.write("\n")
 	io.flush()
 end
 
-print = console_print_n
 --/*---------------------------------------------------------------------------*/--
 
 function update_ts_channels(address, voltage, uptime)
@@ -883,8 +877,9 @@ end
 function port_monitor()
  	while 1 do
 		_, data_read = p:read(1, 200)
-		if (data_read ~= nil) then			
-			console_print(data_read)
+		if (data_read ~= nil) then	
+			io.write(data_read)
+			io.flush()		
 		end
 	end
 end
@@ -924,7 +919,7 @@ function main_cycle(limit)
 			local buffer_state = get_buffer(buffer)
 			_, _, packet = string.find(buffer_state, "(DAGROOTRAW1..............................................................................RAWEND)")
 			if (packet ~= nil) then
-				--console_print(packet.."\n\n")
+				--print(packet.."\n\n")
 				led("on")
 				packet_parse(packet)
 				led("off")
