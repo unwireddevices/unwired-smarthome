@@ -8,6 +8,8 @@ local bindechex = require("bindechex")
 local posix = require("posix")
 local version = require("version") 
 
+--/*---------------------------------------------------------------------------*/--
+
 device_group = {}
 DEVICE_GROUP_BUTTON_SWITCH     =     "00"
 device_group[DEVICE_GROUP_BUTTON_SWITCH]		   =     "Button/switch"
@@ -42,7 +44,7 @@ device_group[DEVICE_GROUP_BRIDGE_CONVERTER]		   =     "Bridge/Converter"
 DEVICE_GROUP_OTHER             =     "FF"
 device_group[DEVICE_GROUP_OTHER]				   =     "Other device"
 
------------------------------------------------------------------------------------
+--/*---------------------------------------------------------------------------*/--
 
 device_ability = {}
 
@@ -106,7 +108,7 @@ DEVICE_ABILITY_RESERVED10      =     "17"
 DEVICE_ABILITY_LED             =     "18"
 device_ability[DEVICE_ABILITY_LED] = "LED indicator"
 
------------------------------------------------------------------------------------
+--/*---------------------------------------------------------------------------*/--
 
 device_button_events = {}
 
@@ -122,7 +124,7 @@ device_button_events[DEVICE_ABILITY_BUTTON_EVENT_ON] = "on"
 DEVICE_ABILITY_BUTTON_EVENT_OFF          =   "04"
 device_button_events[DEVICE_ABILITY_BUTTON_EVENT_OFF] = "off"
 
------------------------------------------------------------------------------------
+--/*---------------------------------------------------------------------------*/--
 
 device_motionsensor_events = {}
 
@@ -132,7 +134,7 @@ device_motionsensor_events[DEVICE_ABILITY_MOTION_SENSOR_EVENT_MOTION] = "motion"
 DEVICE_ABILITY_MOTION_SENSOR_EVENT_NO_MOTION   =   "02"
 device_motionsensor_events[DEVICE_ABILITY_MOTION_SENSOR_EVENT_NO_MOTION] = "nomotion"
 
------------------------------------------------------------------------------------
+--/*---------------------------------------------------------------------------*/--
 
 device_relay_commands = {}
 
@@ -145,7 +147,7 @@ device_relay_commands[DEVICE_ABILITY_RELAY_COMMAND_OFF] = "off"
 DEVICE_ABILITY_RELAY_COMMAND_TOGGLE   =   "80"
 device_relay_commands[DEVICE_ABILITY_RELAY_COMMAND_TOGGLE] = "toggle"
 
------------------------------------------------------------------------------------
+--/*---------------------------------------------------------------------------*/--
 
 device_sleep_type = {}
 
@@ -155,7 +157,7 @@ device_sleep_type[DEVICE_SLEEP_TYPE_NORMAL] = "Non-sleep"
 DEVICE_SLEEP_TYPE_LEAF               =           "02"
 device_sleep_type[DEVICE_SLEEP_TYPE_LEAF] = "Leaf mode"
 
------------------------------------------------------------------------------------
+--/*---------------------------------------------------------------------------*/--
 
 device_error_type = {}
 
@@ -171,7 +173,7 @@ device_error_type[DEVICE_ERROR_OTA_NONCORRECT_CRC] 			= "OTA: Non-correct image 
 DEVICE_ERROR_OTA_BAD_GOLDEN_IMAGE               			=           "04"
 device_error_type[DEVICE_ERROR_OTA_BAD_GOLDEN_IMAGE] 		= "OTA: Bad golden image"
 
------------------------------------------------------------------------------------
+--/*---------------------------------------------------------------------------*/--
 
 DATA_TYPE_FIRMWARE_COMMAND_NEW_FW              =         "01" --Сообщение о наличии новой прошивки
 DATA_TYPE_FIRMWARE_COMMAND_chunk_REQ           =         "02" --Запрос пакета с частью прошивки
@@ -197,7 +199,7 @@ UART_NONE_26_DATA = "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF"
 
 VOLTAGE_PRESCALER = 16
 
------------------------------------------------------------------------------------
+--/*---------------------------------------------------------------------------*/--
 
 DATA_TYPE_JOIN                            =              "01" --Запрос на включение в сеть
 DATA_TYPE_SENSOR_DATA                     =              "02" --Данные с датчиков устройства
@@ -215,7 +217,7 @@ DATA_TYPE_UART                            =              "0D" --Команда �
 DATA_TYPE_FIRMWARE_CMD                    =              "0E" --Команды OTA
 DATA_TYPE_ERROR                           =              "0F" --Ошибки
 
------------------------------------------------------------------------------------
+--/*---------------------------------------------------------------------------*/--
 
 switch_mini_door = "fd00:0000:0000:0000:0212:4b00:0c47:4b82"
 switch_mini_bed = "fd00:0000:0000:0000:0212:4b00:0c47:4a82"
@@ -233,7 +235,7 @@ relay_wc = "fd00:0000:0000:0000:0212:4b00:0c47:4886"
 
 motion_sensor_hall = "fd00:0000:0000:0000:0212:4b00:0c47:4602"
 
------------------------------------------------------------------------------------
+--/*---------------------------------------------------------------------------*/--
 
 devices_names = {}
 devices_names[switch_mini_door] = "switch_mini_door"
@@ -252,7 +254,7 @@ devices_names[relay_wc] = "relay_wc"
 
 devices_names[motion_sensor_hall] = "motion_sensor_hall"
 
------------------------------------------------------------------------------------
+--/*---------------------------------------------------------------------------*/--
 
 api_keys = {} -- keys for thingspeak
 api_keys[switch_mini_door] = "9U3175EF4NWFLCHU"
@@ -269,7 +271,7 @@ api_keys[relay_kitchen] = "6AZZVI8SFXQBFDHW"
 api_keys[relay_bathroom] = "YTAAIPT9281MH1ZJ"
 api_keys[relay_wc] = "9NTCZ3CB7CTQVMH2"
 
------------------------------------------------------------------------------------
+--/*---------------------------------------------------------------------------*/--
 
 local ver = version.git
 local uart_version = UART_PROTOCOL_VERSION_V1
@@ -279,6 +281,8 @@ local pid = posix.getpid()
 local start_time = 0
 local state = "all_on"
 local main_cycle_permit = 1
+
+--/*---------------------------------------------------------------------------*/--
 
 function string.fromhex(str)
     local str = string.gsub(str, " ", "") 
@@ -293,6 +297,7 @@ function string.tohex(str)
     end))
 end
 
+--/*---------------------------------------------------------------------------*/--
 
 function console_print(data)
 	io.write(data or "")
@@ -306,6 +311,7 @@ function console_print_n(data)
 end
 
 print = console_print_n
+--/*---------------------------------------------------------------------------*/--
 
 function update_ts_channels(address, voltage, uptime)
 	if api_keys[address] == nil then return end
@@ -313,6 +319,7 @@ function update_ts_channels(address, voltage, uptime)
 	os.execute(command)
 end
 
+--/*---------------------------------------------------------------------------*/--
 
 function led(state)
 	if (state == "on") then
@@ -322,6 +329,7 @@ function led(state)
 	end
 end
 
+--/*---------------------------------------------------------------------------*/--
 
 function ipv6_adress_parse(ipv6_adress)
 	local adress_capturing = "(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w)"
@@ -336,6 +344,8 @@ function ipv6_adress_parse(ipv6_adress)
 		return nil
 	end
 end
+
+--/*---------------------------------------------------------------------------*/--
 
 function data_cut(all_data, segment_len)
   local max_len = segment_len
@@ -352,6 +362,8 @@ function data_cut(all_data, segment_len)
   return data
 end
 
+--/*---------------------------------------------------------------------------*/--
+
 function uart_delay_send(bin_data)
 	--print("Send packet:"..bin_data:tohex())
 	local table_segments = data_cut(bin_data, 25)
@@ -360,6 +372,8 @@ function uart_delay_send(bin_data)
 		socket.sleep(0.006)
 	end
 end
+
+--/*---------------------------------------------------------------------------*/--
 
 function send_command_to_ability(ipv6_adress, ability_target, ability_number, ability_state)
 	local adress = ipv6_adress_parse(ipv6_adress)
@@ -370,24 +384,20 @@ function send_command_to_ability(ipv6_adress, ability_target, ability_number, ab
 	bin_data = bin_data..adress:fromhex()
 	bin_data = bin_data..PROTOCOL_VERSION_V1:fromhex()
 	bin_data = bin_data..DEVICE_VERSION_V1:fromhex()
-
 	bin_data = bin_data..DATA_TYPE_COMMAND:fromhex()
 	bin_data = bin_data..ability_target:fromhex()
 	bin_data = bin_data..ability_number:fromhex()
 	bin_data = bin_data..ability_state:fromhex()
-
 	bin_data = bin_data..UART_NONE_100_DATA:fromhex()
 	bin_data = bin_data..UART_NONE_100_DATA:fromhex()
-
 	bin_data = bin_data..UART_NONE_25_DATA:fromhex()
-
 	uart_delay_send(bin_data)
-
 	--print("Processing time "..(math.ceil(socket.gettime()*1000 - start_time)).." ms")
 	--start_time = socket.gettime()*1000
 	socket.sleep(0.08)
 end
 
+--/*---------------------------------------------------------------------------*/--
 
 function send_uart_data_to_ability(ipv6_adress, returned_data_lenth, data_lenth, payload)
 	local adress = ipv6_adress_parse(ipv6_adress)
@@ -423,6 +433,8 @@ function send_uart_data_to_ability(ipv6_adress, returned_data_lenth, data_lenth,
 	uart_delay_send(bin_data)
 end
 
+--/*---------------------------------------------------------------------------*/--
+
 function send_firmware_new_fw_cmd_to_node(ipv6_adress, table_segments)
 	local adress = ipv6_adress_parse(ipv6_adress)
 	local chunk_quantity = #table_segments
@@ -452,6 +464,7 @@ function send_firmware_new_fw_cmd_to_node(ipv6_adress, table_segments)
 	uart_delay_send(bin_data)
 end
 
+--/*---------------------------------------------------------------------------*/--
 
 function send_firmware_chunk_to_node(ipv6_adress, firmware_bin_chunk_224b)
 	local adress = ipv6_adress_parse(ipv6_adress)
@@ -475,6 +488,8 @@ function send_firmware_chunk_to_node(ipv6_adress, firmware_bin_chunk_224b)
 
 	uart_delay_send(bin_data)
 end
+
+--/*---------------------------------------------------------------------------*/--
 
 function send_relay_command(ipv6_adress, relay_number, state)
 	--print("Relay command processing start: +"..(socket.gettime()*1000 - start_time).." ms")
@@ -504,6 +519,8 @@ function send_relay_command(ipv6_adress, relay_number, state)
 	end
 end
 
+--/*---------------------------------------------------------------------------*/--
+
 function all_relay(command)
 	if (command == "off") then
 		send_relay_command(relay_main_room, 1, "off")
@@ -513,6 +530,7 @@ function all_relay(command)
 		send_relay_command(relay_hall, 1, "off")
 		send_relay_command(relay_bathroom, 1, "off")
 		send_relay_command(relay_wc, 1, "off")
+
 	elseif (command == "on") then
 		send_relay_command(relay_main_room, 1, "on")
 		send_relay_command(relay_main_room_table, 1, "on")
@@ -673,11 +691,15 @@ function join_data_processing(ipv6_adress, data)
 	print("\n")
 end
 
+--/*---------------------------------------------------------------------------*/--
+
 function getu16(data, pos) -- reads a 16 bit value of the string data at position pos
 	local high, low = string.byte(data, pos, pos+1)
 	local val = high*256 + low -- no bit fiddling in lua since everything is a double internally
 	return val
 end
+
+--/*---------------------------------------------------------------------------*/--
 
 function status_data_processing(ipv6_adress, data)
 	--print("Status data processing module")
@@ -711,12 +733,16 @@ function status_data_processing(ipv6_adress, data)
 	update_ts_channels(ipv6_adress, voltage, uptime/60/60/24)
 end
 
+--/*---------------------------------------------------------------------------*/--
+
 function error_data_processing(ipv6_adress, data)
 	--print("Error status processing module")
 	print("EDPM: Error packet from "..ipv6_adress..":")
 	print(" Error: "..device_error_type[data.b1])
 	print("\n")
 end
+
+--/*---------------------------------------------------------------------------*/--
 
 function fw_cmd_data_processing(ipv6_adress, data)
 	local chunk_number_c_style = tonumber(bindechex.Hex2Dec((data.b3 or 00)..(data.b2 or 00)))
@@ -744,6 +770,7 @@ function fw_cmd_data_processing(ipv6_adress, data)
 	end
 end
 
+--/*---------------------------------------------------------------------------*/--
 
 function packet_processing(a, data)
 	--print("Packet processing module")
@@ -784,6 +811,7 @@ function packet_processing(a, data)
 	end
 end
 
+--/*---------------------------------------------------------------------------*/--
 
 function packet_parse(packet)
 	--print("Packet parse module")
@@ -815,6 +843,8 @@ function packet_parse(packet)
 	end
 end
 
+--/*---------------------------------------------------------------------------*/--
+
 function send_uart_command(command, address, delay)
 	local cmd_on = {"1B", "31", "32", "33", "2B"}
 
@@ -834,6 +864,7 @@ function send_uart_command(command, address, delay)
 	end
 end
 
+--/*---------------------------------------------------------------------------*/--
 
 function add_byte_to_buffer(buffer, byte)
 	table.insert(buffer, byte)
@@ -847,6 +878,8 @@ function get_buffer(buffer)
 	return table.concat(buffer)
 end
 
+--/*---------------------------------------------------------------------------*/--
+
 function port_monitor()
  	while 1 do
 		_, data_read = p:read(1, 200)
@@ -856,6 +889,7 @@ function port_monitor()
 	end
 end
 
+--/*---------------------------------------------------------------------------*/--
 
 function data_cut(all_data, segment_len)
   local max_len = segment_len
@@ -872,6 +906,7 @@ function data_cut(all_data, segment_len)
   return data
 end
 	
+--/*---------------------------------------------------------------------------*/--
 
 function main_cycle(limit)
 	local _, data_read, packet
@@ -881,7 +916,6 @@ function main_cycle(limit)
 		now_time = socket.gettime()*1000
 		end_time = now_time+(limit*1000)
 	end
-
 
  	while (main_cycle_permit == 1) do
 		_, data_read = p:read(1, 200)
@@ -905,8 +939,9 @@ function main_cycle(limit)
 	end
 end
 
-------------------------------------------------------
+--/*---------------------------------------------------------------------------*/--
 
+--/*---------------------------------------------------------------------------*/--
 
 local f,err = io.open(pid_file,"w")
 if not f then
@@ -930,6 +965,8 @@ assert(p:set_data_bits(rs232.RS232_DATA_8) == rs232.RS232_ERR_NOERROR)
 assert(p:set_parity(rs232.RS232_PARITY_NONE) == rs232.RS232_ERR_NOERROR)
 assert(p:set_stop_bits(rs232.RS232_STOP_1) == rs232.RS232_ERR_NOERROR)
 assert(p:set_flow_control(rs232.RS232_FLOW_OFF)  == rs232.RS232_ERR_NOERROR)
+
+--/*---------------------------------------------------------------------------*/--
 
 if (arg[1] == "uart_asuno_test") then
 	if (arg[2] == nil or arg[3] == nil) then
