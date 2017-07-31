@@ -536,6 +536,133 @@ function all_relay(command)
 	end
 end
 
+--/*---------------------------------------------------------------------------*/--
+
+function motion_sensor_data_processing(ipv6_adress, sensor_number, sensor_event)
+	local current_event = device_motionsensor_events[sensor_event]
+	print(" MDPM: Motion sensor: "..sensor_number..", event: "..current_event)
+
+	if (current_event == "motion") then
+		send_relay_command(relay_hall, 1, "on")
+	elseif (current_event == "nomotion") then
+		--send_relay_command(relay_hall, 1, "off")
+	end
+end
+
+
+--/*---------------------------------------------------------------------------*/--
+
+function button_data_processing(ipv6_adress, sensor_number, sensor_event)
+	local button_name = string.upper(tostring(sensor_number):fromhex())
+	print(" BDPM: Button: "..button_name..", event: "..device_button_events[sensor_event])
+	local current_switch = ipv6_adress
+	local current_event = device_button_events[sensor_event]
+
+	if (current_switch == switch_mini_bed or current_switch == switch_mini_table) then
+
+		if (button_name == "B" and current_event == "click") then
+			all_relay("on")
+			state = "all_on"
+
+		elseif (button_name == "C" and current_event == "click") then
+			if (state == "all_on") then
+				send_relay_command(relay_main_room_table, 2, "off")
+				send_relay_command(relay_main_room_table, 1, "off")
+				state = "all_off"
+			elseif (state == "all_off") then
+				send_relay_command(relay_main_room_table, 2, "on")
+				send_relay_command(relay_main_room_table, 1, "off")
+				state = "2_on"
+			elseif (state == "2_on") then
+				send_relay_command(relay_main_room_table, 2, "off")
+				send_relay_command(relay_main_room_table, 1, "on")
+				state = "1_on"
+			elseif (state == "1_on") then
+				send_relay_command(relay_main_room_table, 2, "on")
+				send_relay_command(relay_main_room_table, 1, "on")
+				state = "all_on"
+			end
+
+		elseif (button_name == "C" and current_event == "longclick") then
+			send_relay_command(relay_main_room, 1, "toggle")
+		elseif (button_name == "D" and current_event == "click") then
+			all_relay("off")
+			state = "all_off"
+		end
+
+	elseif (current_switch == switch_mini_door) then
+		if (button_name == "B" and current_event == "click") then
+			all_relay("on")
+			state = "all_on"
+		elseif (button_name == "C" and current_event == "click") then
+			send_relay_command(relay_hall, 1, "toggle")
+		elseif (button_name == "D" and current_event == "click") then
+			all_relay("off")
+			state = "all_off"
+
+			send_relay_command(relay_hall, 1, "on")
+			socket.sleep(10)
+			send_relay_command(relay_hall, 1, "off")
+		end
+
+	elseif (current_switch == switch_wc) then
+		if (button_name == "A" and current_event == "click") then
+			send_relay_command(relay_bathroom, 1, "toggle")
+
+		elseif (button_name == "B" and current_event == "click") then
+			send_relay_command(relay_wc, 1, "toggle")
+
+		elseif (button_name == "C" and current_event == "click") then
+			send_relay_command(relay_hall, 1, "toggle")
+
+		elseif (button_name == "D" and current_event == "click") then
+			send_relay_command(relay_kitchen, 1, "toggle")
+
+		end
+
+	elseif (current_switch == switch_main_room) then
+		if (button_name == "A" and current_event == "click") then
+			send_relay_command(relay_main_room, 1, "toggle")
+		elseif (button_name == "A" and current_event == "longclick") then
+			send_relay_command(relay_main_room, 1, "toggle")
+		elseif (button_name == "B" and current_event == "click") then
+			send_relay_command(relay_main_room, 1, "toggle")
+		elseif (button_name == "B" and current_event == "longclick") then
+			send_relay_command(relay_main_room, 1, "toggle")
+		elseif (button_name == "C" and current_event == "click") then
+			send_relay_command(relay_main_room, 1, "toggle")
+		elseif (button_name == "C" and current_event == "longclick") then
+			send_relay_command(relay_main_room, 1, "toggle")
+		elseif (button_name == "D" and current_event == "click") then
+			send_relay_command(relay_main_room, 1, "toggle")
+		elseif (button_name == "D" and current_event == "longclick") then
+			send_relay_command(relay_main_room, 1, "toggle")
+		end
+
+	elseif (current_switch == switch_kitchen) then
+		if (button_name == "A" and current_event == "click") then
+			send_relay_command(relay_kitchen, 1, "toggle")
+		elseif (button_name == "A" and current_event == "longclick") then
+			send_relay_command(relay_kitchen, 1, "toggle")
+		elseif (button_name == "B" and current_event == "click") then
+			send_relay_command(relay_kitchen, 1, "toggle")
+		elseif (button_name == "B" and current_event == "longclick") then
+			send_relay_command(relay_kitchen, 1, "toggle")
+		elseif (button_name == "C" and current_event == "click") then
+			send_relay_command(relay_kitchen, 1, "toggle")
+		elseif (button_name == "C" and current_event == "longclick") then
+			send_relay_command(relay_kitchen, 1, "toggle")
+		elseif (button_name == "D" and current_event == "click") then
+			send_relay_command(relay_kitchen, 1, "toggle")
+		elseif (button_name == "D" and current_event == "longclick") then
+			send_relay_command(relay_kitchen, 1, "toggle")
+		end
+
+	end
+end
+
+--/*---------------------------------------------------------------------------*/--
+
 function sensor_data_processing(ipv6_adress, data)
 	--print("Sensor data processing module")
 	--print("Sensor data processing start: +"..(socket.gettime()*1000 - start_time).." ms")
@@ -548,126 +675,15 @@ function sensor_data_processing(ipv6_adress, data)
 	print("\nSDPM: Device: "..device_name..", sensor type: "..sensor_name)
 
 	if (number_ability == DEVICE_ABILITY_MOTION_SENSOR) then
-		current_event = device_motionsensor_events[sensor_event]
-		print(" MDPM: Motion sensor: "..sensor_number..", event: "..current_event)
-
-		if (current_event == "motion") then
-			send_relay_command(relay_hall, 1, "on")
-		elseif (current_event == "nomotion") then
-			--send_relay_command(relay_hall, 1, "off")
-		end
+		motion_sensor_data_processing(ipv6_adress, sensor_number, sensor_event)
 	end
 
 	if (number_ability == DEVICE_ABILITY_BUTTON) then
-		button_name = string.upper(tostring(sensor_number):fromhex())
-		print(" BDPM: Button: "..button_name..", event: "..device_button_events[sensor_event])
-		current_switch = ipv6_adress
-		current_event = device_button_events[sensor_event]
-
-		if (current_switch == switch_mini_bed or current_switch == switch_mini_table) then
-
-			if (button_name == "B" and current_event == "click") then
-				all_relay("on")
-				state = "all_on"
-
-			elseif (button_name == "C" and current_event == "click") then
-				if (state == "all_on") then
-					send_relay_command(relay_main_room_table, 2, "off")
-					send_relay_command(relay_main_room_table, 1, "off")
-					state = "all_off"
-				elseif (state == "all_off") then
-					send_relay_command(relay_main_room_table, 2, "on")
-					send_relay_command(relay_main_room_table, 1, "off")
-					state = "2_on"
-				elseif (state == "2_on") then
-					send_relay_command(relay_main_room_table, 2, "off")
-					send_relay_command(relay_main_room_table, 1, "on")
-					state = "1_on"
-				elseif (state == "1_on") then
-					send_relay_command(relay_main_room_table, 2, "on")
-					send_relay_command(relay_main_room_table, 1, "on")
-					state = "all_on"
-				end
-
-			elseif (button_name == "C" and current_event == "longclick") then
-				send_relay_command(relay_main_room, 1, "toggle")
-			elseif (button_name == "D" and current_event == "click") then
-				all_relay("off")
-				state = "all_off"
-			end
-
-		elseif (current_switch == switch_mini_door) then
-			if (button_name == "B" and current_event == "click") then
-				all_relay("on")
-				state = "all_on"
-			elseif (button_name == "C" and current_event == "click") then
-				send_relay_command(relay_hall, 1, "toggle")
-			elseif (button_name == "D" and current_event == "click") then
-				all_relay("off")
-				state = "all_off"
-
-				send_relay_command(relay_hall, 1, "on")
-				socket.sleep(10)
-				send_relay_command(relay_hall, 1, "off")
-			end
-
-		elseif (current_switch == switch_wc) then
-			if (button_name == "A" and current_event == "click") then
-				send_relay_command(relay_bathroom, 1, "toggle")
-
-			elseif (button_name == "B" and current_event == "click") then
-				send_relay_command(relay_wc, 1, "toggle")
-
-			elseif (button_name == "C" and current_event == "click") then
-				send_relay_command(relay_hall, 1, "toggle")
-
-			elseif (button_name == "D" and current_event == "click") then
-				send_relay_command(relay_kitchen, 1, "toggle")
-
-			end
-
-		elseif (current_switch == switch_main_room) then
-			if (button_name == "A" and current_event == "click") then
-				send_relay_command(relay_main_room, 1, "toggle")
-			elseif (button_name == "A" and current_event == "longclick") then
-				send_relay_command(relay_main_room, 1, "toggle")
-			elseif (button_name == "B" and current_event == "click") then
-				send_relay_command(relay_main_room, 1, "toggle")
-			elseif (button_name == "B" and current_event == "longclick") then
-				send_relay_command(relay_main_room, 1, "toggle")
-			elseif (button_name == "C" and current_event == "click") then
-				send_relay_command(relay_main_room, 1, "toggle")
-			elseif (button_name == "C" and current_event == "longclick") then
-				send_relay_command(relay_main_room, 1, "toggle")
-			elseif (button_name == "D" and current_event == "click") then
-				send_relay_command(relay_main_room, 1, "toggle")
-			elseif (button_name == "D" and current_event == "longclick") then
-				send_relay_command(relay_main_room, 1, "toggle")
-			end
-
-		elseif (current_switch == switch_kitchen) then
-			if (button_name == "A" and current_event == "click") then
-				send_relay_command(relay_kitchen, 1, "toggle")
-			elseif (button_name == "A" and current_event == "longclick") then
-				send_relay_command(relay_kitchen, 1, "toggle")
-			elseif (button_name == "B" and current_event == "click") then
-				send_relay_command(relay_kitchen, 1, "toggle")
-			elseif (button_name == "B" and current_event == "longclick") then
-				send_relay_command(relay_kitchen, 1, "toggle")
-			elseif (button_name == "C" and current_event == "click") then
-				send_relay_command(relay_kitchen, 1, "toggle")
-			elseif (button_name == "C" and current_event == "longclick") then
-				send_relay_command(relay_kitchen, 1, "toggle")
-			elseif (button_name == "D" and current_event == "click") then
-				send_relay_command(relay_kitchen, 1, "toggle")
-			elseif (button_name == "D" and current_event == "longclick") then
-				send_relay_command(relay_kitchen, 1, "toggle")
-			end
-
-		end
-
+		button_data_processing(ipv6_adress, sensor_number, sensor_event)
 	end
 end
+
+--/*---------------------------------------------------------------------------*/--
 
 function join_data_processing(ipv6_adress, data)
 	--print("Join data processing module")
@@ -936,6 +952,32 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
+function firmware_update()	
+	local address = arg[2]
+	local image_file = arg[3]
+
+	local handle, err = io.open(image_file,"r")
+	if (err ~= nil) then
+		print("Error open file")
+		return
+	end
+	local image_file_bin_data = handle:read("*a")
+	handle:close()
+	local chunk_size = 224
+	ota_image_table_segments = data_cut(image_file_bin_data, chunk_size)
+	chunk_quantity = #ota_image_table_segments
+
+	local diff = chunk_size - #ota_image_table_segments[chunk_quantity]
+	while (diff > 0) do
+		diff = diff - 1 
+		ota_image_table_segments[chunk_quantity] = ota_image_table_segments[chunk_quantity].."\xFF"
+	end
+
+	send_firmware_new_fw_cmd_to_node(address, ota_image_table_segments)
+	print("Send DATA_TYPE_FIRMWARE_COMMAND_NEW_FW command, "..chunk_quantity.." chunks")
+	main_cycle()
+end
+
 --/*---------------------------------------------------------------------------*/--
 
 local f,err = io.open(pid_file,"w")
@@ -968,40 +1010,14 @@ if (arg[1] == "uart_asuno_test") then
 		print("use:\trouter.lua uart_asuno_test fd00:0000:0000:0000:0212:4b00:0c47:4a85 on/off/on_off 5(on_off cycle delay in sec, default 10)")
 		return
 	end
-	local command = arg[3]
-	local address = arg[2]
-	local delay = arg[4]
+	local command, address, delay = arg[3], arg[2], arg[4]
 	send_uart_command(command, address, delay)
 elseif (arg[1] == "firmware_update") then
 	if (arg[2] == nil or arg[3] == nil) then
 		print("use:\trouter.lua firmware_update fd00:0000:0000:0000:0212:4b00:0f0a:8b9b image_file")
 		return
 	end
-	
-	local address = arg[2]
-	local image_file = arg[3]
-
-	local handle,err = io.open(image_file,"r")
-	if (err ~= nil) then
-		print("Error open file")
-		return
-	end
-	local image_file_bin_data = handle:read("*a")
-	handle:close()
-	local chunk_size = 224
-	ota_image_table_segments = data_cut(image_file_bin_data, chunk_size)
-	chunk_quantity = #ota_image_table_segments
-
-	local diff = chunk_size - #ota_image_table_segments[chunk_quantity]
-	while (diff > 0) do
-		diff = diff - 1 
-		ota_image_table_segments[chunk_quantity] = ota_image_table_segments[chunk_quantity].."\xFF"
-	end
-
-	send_firmware_new_fw_cmd_to_node(address, ota_image_table_segments)
-	print("Send DATA_TYPE_FIRMWARE_COMMAND_NEW_FW command, "..chunk_quantity.." chunks")
-	main_cycle()
-
+	firmware_update()
 elseif (arg[1] == "main") then
 	main_cycle()
 elseif (arg[1] == "monitor") then
