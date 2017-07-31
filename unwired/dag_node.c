@@ -117,11 +117,8 @@
 
 #define MAX_NON_ANSWERED_PINGS                  3
 
-#define HEXRAW_MODE                             0x01
-
 #define HEXVIEW_MODE                            0x00
 #define HEXRAW_MODE                             0x01
-
 
 /*---------------------------------------------------------------------------*/
 
@@ -1023,8 +1020,6 @@ PROCESS_THREAD(fw_update_process, ev, data)
             printf("FW OTA: New FW in OTA slot 1 non-correct CRC\n");
             send_error_packet(DEVICE_ERROR_OTA_NONCORRECT_CRC);
          }
-
-
          return 0;
       }
 
@@ -1032,6 +1027,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
       etimer_set( &fw_timer_deadline, FW_DELAY_DEADLINE);
 
       PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&fw_timer) );
+
 
       if (etimer_expired(&fw_timer_deadline) && (chunk_num < fw_chunk_quantity))
       {
