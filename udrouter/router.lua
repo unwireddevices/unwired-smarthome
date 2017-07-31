@@ -730,7 +730,7 @@ function status_data_processing(ipv6_adress, data)
 	parent_rssi = string.format("%d, %i, %u", parent_rssi_raw, parent_rssi_raw, parent_rssi_raw) or "no rssi"
 	parent_rssi = parent_rssi_raw
 	local device_name = devices_names[ipv6_adress] or ipv6_adress
-	print("SDPM: Status packet from "..device_name..":")
+	print("\nSDPM: Status packet from "..device_name..":")
 	print(" Version: "..version)
 	print(" OTA: "..ota_flag)
 	print(" Parent adress: "..ipv6_adress_parent_short)
@@ -738,7 +738,7 @@ function status_data_processing(ipv6_adress, data)
 	print(" Parent RSSI: "..parent_rssi.."dbm")
 	print(" Temp: "..temp.."C")
 	print(" Voltage: "..voltage.." v")
-	print("\n")
+	--print("\n")
 
 	update_ts_channels(ipv6_adress, voltage, uptime/60/60/24)
 end
