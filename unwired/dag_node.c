@@ -994,6 +994,21 @@ PROCESS_THREAD(fw_update_process, ev, data)
 
    static uint16_t chunk_num = 0;
    static struct etimer fw_timer_deadline;
+   static struct etimer fw_timer_delay_chunk;
+   static struct etimer ota_image_erase_timer;
+   static uint32_t page;
+
+   printf("[OTA]: Erasing OTA slot 1 [%#x, %#x)...\n", (ota_images[0]<<12), ((ota_images[0]+25)<<12));
+   for (page=0; page<25; page++)
+   {
+     printf("[OTA]: Erasing page %"PRIu32" at 0x%"PRIX32"..\n", page, (( ota_images[0] + page ) << 12));
+     while( erase_extflash_page( (( ota_images[0] + page ) << 12) ) );
+
+     etimer_set( &ota_image_erase_timer, (CLOCK_SECOND/3) );
+     PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&ota_image_erase_timer) );
+   }
+   printf("[OTA]: OTA slot 1 erased\n");
+
 
    while (1)
    {
@@ -1007,7 +1022,6 @@ PROCESS_THREAD(fw_update_process, ev, data)
       else
       {
          printf("FW OTA: End chunks, exit\n");
-         process_exit(&fw_update_process);
          chunk_num = 0;
          fw_error_counter = 0;
          if (verify_ota_slot(1) == CORRECT_CRC){
@@ -1020,6 +1034,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
             printf("FW OTA: New FW in OTA slot 1 non-correct CRC\n");
             send_error_packet(DEVICE_ERROR_OTA_NONCORRECT_CRC);
          }
+         process_exit(&fw_update_process);
          return 0;
       }
 
@@ -1028,6 +1043,8 @@ PROCESS_THREAD(fw_update_process, ev, data)
 
       PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&fw_timer) );
 
+      etimer_set( &fw_timer_delay_chunk, (CLOCK_SECOND/3) );
+      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&fw_timer_delay_chunk) );
 
       if (etimer_expired(&fw_timer_deadline) && (chunk_num < fw_chunk_quantity))
       {
