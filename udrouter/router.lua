@@ -720,8 +720,8 @@ function join_data_processing(ipv6_adress, data)
 	local device_group_name = device_group[current_device_group] or current_device_group
 	local device_sleep_name = device_sleep_type[current_sleep_type] or current_sleep_type
 	local device_name = devices_names[ipv6_adress] or ipv6_adress
-	print("JDPM: Join packet from "..device_name..", device group: "..device_group_name..", sleep type: "..device_sleep_name)
-	print("\n")
+	print("\nJDPM: Join packet from "..device_name..", device group: "..device_group_name..", sleep type: "..device_sleep_name)
+	--print("\n")
 end
 
 --/*---------------------------------------------------------------------------*/--
