@@ -159,19 +159,43 @@ device_sleep_type[DEVICE_SLEEP_TYPE_LEAF] = "Leaf mode"
 
 --/*---------------------------------------------------------------------------*/--
 
-device_error_type = {}
+device_message_type = {}
 
-DEVICE_ERROR_OTA_SPI_NOTACTIVE             					=           "01"
-device_error_type[DEVICE_ERROR_OTA_SPI_NOTACTIVE] 			= "OTA: Spi not active"
+DEVICE_MESSAGE_HIGH_TEMPERATYRE             					=           "01"
+device_message_type[DEVICE_MESSAGE_HIGH_TEMPERATYRE] 			= "Warning: high temperature"
 
-DEVICE_ERROR_OTA_NOT_DELIVERED_CHUNK               			=           "02"
-device_error_type[DEVICE_ERROR_OTA_NOT_DELIVERED_CHUNK] 	= "OTA: Chunk not delivered"
+DEVICE_MESSAGE_LOW_VOLTAGE               			            =           "02"
+device_message_type[DEVICE_MESSAGE_LOW_VOLTAGE] 	            = "Warning: low voltage"
 
-DEVICE_ERROR_OTA_NONCORRECT_CRC               				=           "03"
-device_error_type[DEVICE_ERROR_OTA_NONCORRECT_CRC] 			= "OTA: Non-correct image CRC"
+DEVICE_MESSAGE_HIGH_CURRENT               			         	=           "03"
+device_message_type[DEVICE_MESSAGE_HIGH_CURRENT] 		     	= "Warning: high current"
 
-DEVICE_ERROR_OTA_BAD_GOLDEN_IMAGE               			=           "04"
-device_error_type[DEVICE_ERROR_OTA_BAD_GOLDEN_IMAGE] 		= "OTA: Bad golden image"
+DEVICE_MESSAGE_LOW_POWER               			                =           "04"
+device_message_type[DEVICE_MESSAGE_LOW_POWER] 	             	= "Warning: low power"
+
+DEVICE_MESSAGE_ERROR_ON_RELAY               		      	    =           "05"
+device_message_type[DEVICE_MESSAGE_ERROR_ON_RELAY] 	         	= "Warning: error on relay"
+
+DEVICE_MESSAGE_ERROR_OFF_RELAY               		      	    =           "06"
+device_message_type[DEVICE_MESSAGE_ERROR_OFF_RELAY] 	     	= "Warning: error off relay"
+ 
+DEVICE_MESSAGE_OTA_SPI_NOTACTIVE             					=           "07"
+device_message_type[DEVICE_MESSAGE_OTA_SPI_NOTACTIVE] 			= "OTA: External flash not active"
+
+DEVICE_MESSAGE_OTA_NOT_DELIVERED_CHUNK               			=           "08"
+device_message_type[DEVICE_MESSAGE_OTA_NOT_DELIVERED_CHUNK] 	= "OTA: Chunk not delivered"
+
+DEVICE_MESSAGE_OTA_NONCORRECT_CRC               				=           "09"
+device_message_type[DEVICE_MESSAGE_OTA_NONCORRECT_CRC] 			= "OTA: Non-correct image CRC"
+
+DEVICE_MESSAGE_OTA_BAD_GOLDEN_IMAGE               			    =           "0A"
+device_message_type[DEVICE_MESSAGE_OTA_BAD_GOLDEN_IMAGE] 		= "OTA: Bad golden image"
+
+DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS               		    =           "0B"
+device_message_type[DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS] 	= "OTA: SPI flash erase in progress"
+
+DEVICE_MESSAGE_OTA_UPDATE_SUCCESS               		        =           "0C"
+device_message_type[DEVICE_MESSAGE_OTA_UPDATE_SUCCESS] 	        = "OTA: Update success"
 
 --/*---------------------------------------------------------------------------*/--
 
@@ -209,13 +233,12 @@ DATA_TYPE_COMMAND                         =              "05" --Команды �
 DATA_TYPE_STATUS                          =              "06" --Пакет со статусными данными
 DATA_TYPE_GET_STATUS                      =              "07" --Запрос статуса(не реализовано)
 DATA_TYPE_SETTINGS                        =              "08" --Команда настройки параметров
-DATA_TYPE_WARNING                         =              "09" --Предупреждения(не реализовано)
+DATA_TYPE_MESSAGE                         =              "09" --Сообщения
 DATA_TYPE_SET_TIME                        =              "0A" --Команда установки времени(не реализовано)
 DATA_TYPE_SET_SCHEDULE                    =              "0B" --Команда установки расписания(не реализовано)
 DATA_TYPE_FIRMWARE                        =              "0C" --Данные для OTA
 DATA_TYPE_UART                            =              "0D" --Команда с данными UART
 DATA_TYPE_FIRMWARE_CMD                    =              "0E" --Команды OTA
-DATA_TYPE_ERROR                           =              "0F" --Ошибки
 
 --/*---------------------------------------------------------------------------*/--
 
@@ -745,10 +768,10 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function error_data_processing(ipv6_adress, data)
+function message_data_processing(ipv6_adress, data)
 	--print("Error status processing module")
-	print("EDPM: Error packet from "..ipv6_adress..":")
-	print(" Error: "..device_error_type[data.b1])
+	print("MDPM: message packet from "..ipv6_adress..":")
+	print(" Message: "..device_message_type[data.b1])
 	print("\n")
 end
 
@@ -796,8 +819,8 @@ function packet_processing(a, data)
 		elseif data.d_type == DATA_TYPE_STATUS then
 			status_data_processing(ipv6_adress, data)
 
-		elseif data.d_type == DATA_TYPE_ERROR then
-			error_data_processing(ipv6_adress, data)
+		elseif data.d_type == DATA_TYPE_MESSAGE then
+			message_data_processing(ipv6_adress, data)
 
 		elseif data.d_type == DATA_TYPE_FIRMWARE_CMD then
 			fw_cmd_data_processing(ipv6_adress, data)

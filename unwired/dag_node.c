@@ -435,7 +435,7 @@ static void udp_receiver(struct simple_udp_connection *c,
             }
             else
             {
-               send_error_packet(DEVICE_ERROR_OTA_SPI_NOTACTIVE);
+               send_message_packet(DEVICE_MESSAGE_OTA_SPI_NOTACTIVE);
                printf("DAG Node: OTA update not processed, spi flash not-active\n");
             }
 
@@ -535,7 +535,7 @@ void send_confirmation_packet(const uip_ipaddr_t *dest_addr)
 
 /*---------------------------------------------------------------------------*/
 
-void send_error_packet(uint8_t error_type)
+void send_message_packet(uint8_t message_type)
 {
    if (node_mode != MODE_NORMAL)
       return;
@@ -547,8 +547,8 @@ void send_error_packet(uint8_t error_type)
    uint8_t udp_buffer[length];
    udp_buffer[0] = PROTOCOL_VERSION_V1;
    udp_buffer[1] = DEVICE_VERSION_V1;
-   udp_buffer[2] = DATA_TYPE_ERROR;
-   udp_buffer[3] = error_type;
+   udp_buffer[2] = DATA_TYPE_MESSAGE;
+   udp_buffer[3] = message_type;
    udp_buffer[4] = DATA_RESERVED;
    udp_buffer[5] = DATA_RESERVED;
    udp_buffer[6] = DATA_RESERVED;
@@ -1032,7 +1032,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
          else
          {
             printf("FW OTA: New FW in OTA slot 1 non-correct CRC\n");
-            send_error_packet(DEVICE_ERROR_OTA_NONCORRECT_CRC);
+            send_message_packet(DEVICE_MESSAGE_OTA_NONCORRECT_CRC);
          }
          process_exit(&fw_update_process);
          return 0;
@@ -1051,7 +1051,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
          if (fw_error_counter > 4)
          {
             printf("FW OTA: Not delivered chunk(>5 errors), exit\n");
-            send_error_packet(DEVICE_ERROR_OTA_NOT_DELIVERED_CHUNK);
+            send_message_packet(DEVICE_MESSAGE_OTA_NOT_DELIVERED_CHUNK);
             process_exit(&fw_update_process);
             chunk_num = 0;
             fw_error_counter = 0;
@@ -1174,8 +1174,8 @@ PROCESS_THREAD(dag_node_process, ev, data)
       if (verify_ota_slot(0) == VERIFY_SLOT_CRC_ERROR)
       {
          printf("FW OTA: bad golden image, write current FW\n");
-         send_error_packet(DEVICE_ERROR_OTA_BAD_GOLDEN_IMAGE);
          backup_golden_image();
+         send_message_packet(DEVICE_MESSAGE_OTA_BAD_GOLDEN_IMAGE);
       }
    }
 
@@ -1184,6 +1184,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
       uint8_t write_flag_result = write_fw_flag(FW_FLAG_PING_OK);
       //if (write_flag_result == FLAG_ERROR_WRITE) { watchdog_reboot(); }
       printf("DAG Node: OTA flag changed to FW_FLAG_PING_OK\n");
+      send_message_packet(DEVICE_MESSAGE_OTA_UPDATE_SUCCESS);
    }
 
    PROCESS_END();
