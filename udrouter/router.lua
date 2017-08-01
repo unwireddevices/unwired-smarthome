@@ -781,6 +781,10 @@ function fw_cmd_data_processing(ipv6_adress, data)
 	local chunk_number_c_style = tonumber(bindechex.Hex2Dec((data.b3 or 00)..(data.b2 or 00)))
 	local chunk_number_lua_style = chunk_number_c_style + 1
 
+	if (ota_image_table_segments == nil) then
+		return
+	end
+
 	if (#ota_image_table_segments < chunk_number_c_style) then
 		print("Bad chunk_number")
 		os.exit(0)
@@ -799,7 +803,7 @@ function fw_cmd_data_processing(ipv6_adress, data)
 
 	if (tonumber(chunk_number_lua_style) == tonumber(chunk_quantity)) then
 		print("End chunks")
-		os.exit(0)
+		--os.exit(0)
 	end
 end
 
