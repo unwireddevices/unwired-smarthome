@@ -124,7 +124,7 @@
 #define DEVICE_ABILITY_DIMMER_SETTINGS_FADE_TIME                0x01
 #define DEVICE_ABILITY_DIMMER_SETTINGS_RISE_TIME                0x02
 #define DEVICE_ABILITY_DIMMER_1_SETTINGS_START_STATE            0x03
-#define DEVICE_ABILITY_DIMMER_2_SETTINGS_START_STATE            0x03
+#define DEVICE_ABILITY_DIMMER_2_SETTINGS_START_STATE            0x04
 
 #define DEVICE_ABILITY_DIMMER_1                                 0x01
 #define DEVICE_ABILITY_DIMMER_2                                 0x02
