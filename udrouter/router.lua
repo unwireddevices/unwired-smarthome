@@ -787,15 +787,15 @@ function fw_cmd_data_processing(ipv6_adress, data)
 		os.exit(0)
 	end
 
-	firmware_bin_chunk_224b = ota_image_table_segments[chunk_number_lua_style]
+	firmware_bin_chunk = ota_image_table_segments[chunk_number_lua_style]
 
-	if (firmware_bin_chunk_224b == null) then
+	if (firmware_bin_chunk == null) then
 		print("Chunk null")
 		os.exit(0)
 	end
 
 	local chunk_quantity = #ota_image_table_segments
-	send_firmware_chunk_to_node(ipv6_adress, firmware_bin_chunk_224b)
+	send_firmware_chunk_to_node(ipv6_adress, firmware_bin_chunk)
 	print("FW OTA processing module: send to node chunk "..chunk_number_lua_style.."/"..chunk_quantity.." (c-iter: "..chunk_number_c_style..")")
 
 	if (tonumber(chunk_number_lua_style) == tonumber(chunk_quantity)) then
@@ -987,7 +987,7 @@ function firmware_update()
 	end
 	local image_file_bin_data = handle:read("*a")
 	handle:close()
-	local chunk_size = 224
+	local chunk_size = 100--224
 	ota_image_table_segments = data_cut(image_file_bin_data, chunk_size)
 	chunk_quantity = #ota_image_table_segments
 
