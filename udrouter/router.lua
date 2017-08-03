@@ -998,7 +998,7 @@ function firmware_update()
 	end
 
 	send_firmware_new_fw_cmd_to_node(address, ota_image_table_segments)
-	print("Send DATA_TYPE_FIRMWARE_COMMAND_NEW_FW command, "..chunk_quantity.." chunks")
+	print("Send DATA_TYPE_FIRMWARE_COMMAND_NEW_FW command, "..chunk_quantity.." chunks, size "..chunk_size)
 	main_cycle()
 end
 
