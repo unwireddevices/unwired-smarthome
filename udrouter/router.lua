@@ -383,8 +383,24 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function uart_delay_send(bin_data)
+function uart_send(bin_data)
 	--print("Send packet:"..bin_data:tohex())
+
+	bin_data = UART_PV2_START_MQ:fromhex()..UART_PROTOCOL_VERSION_V2:fromhex()..UART_FF_DATA:fromhex()..bin_data
+
+	local packet_size = 255
+
+	if (#bin_data > packet_size) then
+		print("Too big packet size")
+		return
+	end
+
+	local diff = packet_size - #bin_data
+	while (diff > 0) do
+		diff = diff - 1 
+		bin_data = bin_data.."\xFF"
+	end
+
 	local table_segments = data_cut(bin_data, 25)
 	for i = 1, #table_segments do 
 		p:write(table_segments[i])
@@ -397,9 +413,7 @@ end
 function send_command_to_ability(ipv6_adress, ability_target, ability_number, ability_state)
 	local adress = ipv6_adress_parse(ipv6_adress)
 	local bin_data = ""
-	bin_data = bin_data..UART_PV2_START_MQ:fromhex()
-	bin_data = bin_data..UART_PROTOCOL_VERSION_V2:fromhex()
-	bin_data = bin_data..UART_FF_DATA:fromhex()
+
 	bin_data = bin_data..adress:fromhex()
 	bin_data = bin_data..PROTOCOL_VERSION_V1:fromhex()
 	bin_data = bin_data..DEVICE_VERSION_V1:fromhex()
@@ -407,10 +421,7 @@ function send_command_to_ability(ipv6_adress, ability_target, ability_number, ab
 	bin_data = bin_data..ability_target:fromhex()
 	bin_data = bin_data..ability_number:fromhex()
 	bin_data = bin_data..ability_state:fromhex()
-	bin_data = bin_data..UART_NONE_100_DATA:fromhex()
-	bin_data = bin_data..UART_NONE_100_DATA:fromhex()
-	bin_data = bin_data..UART_NONE_25_DATA:fromhex()
-	uart_delay_send(bin_data)
+	uart_send(bin_data)
 	--print("Processing time "..(math.ceil(socket.gettime()*1000 - start_time)).." ms")
 	--start_time = socket.gettime()*1000
 	socket.sleep(0.08)
@@ -421,9 +432,6 @@ end
 function send_uart_data_to_ability(ipv6_adress, returned_data_lenth, data_lenth, payload)
 	local adress = ipv6_adress_parse(ipv6_adress)
 	local bin_data = ""
-	bin_data = bin_data..UART_PV2_START_MQ:fromhex()
-	bin_data = bin_data..UART_PROTOCOL_VERSION_V2:fromhex()
-	bin_data = bin_data..UART_FF_DATA:fromhex()
 	bin_data = bin_data..adress:fromhex()
 	bin_data = bin_data..PROTOCOL_VERSION_V1:fromhex()
 	bin_data = bin_data..DEVICE_VERSION_V1:fromhex()
@@ -446,10 +454,7 @@ function send_uart_data_to_ability(ipv6_adress, returned_data_lenth, data_lenth,
 	bin_data = bin_data..(payload[14] or "FF"):fromhex()
 	bin_data = bin_data..(payload[15] or "FF"):fromhex()
 	bin_data = bin_data..(payload[16] or "FF"):fromhex()
-	bin_data = bin_data..UART_NONE_10_DATA:fromhex()
-	bin_data = bin_data..UART_NONE_100_DATA:fromhex()
-	bin_data = bin_data..UART_NONE_100_DATA:fromhex()
-	uart_delay_send(bin_data)
+	uart_send(bin_data)
 end
 
 --/*---------------------------------------------------------------------------*/--
@@ -465,9 +470,6 @@ function send_firmware_new_fw_cmd_to_node(ipv6_adress, table_segments)
 	end
 
 	local bin_data = ""
-	bin_data = bin_data..UART_PV2_START_MQ:fromhex()
-	bin_data = bin_data..UART_PROTOCOL_VERSION_V2:fromhex()
-	bin_data = bin_data..UART_FF_DATA:fromhex()
 	bin_data = bin_data..adress:fromhex()
 	bin_data = bin_data..PROTOCOL_VERSION_V1:fromhex()
 	bin_data = bin_data..DEVICE_VERSION_V1:fromhex()
@@ -475,23 +477,16 @@ function send_firmware_new_fw_cmd_to_node(ipv6_adress, table_segments)
 	bin_data = bin_data..DATA_TYPE_FIRMWARE_COMMAND_NEW_FW:fromhex()
 
 	bin_data = bin_data..chunk_quantity_hex:fromhex() --2 bytes
-	
-	bin_data = bin_data..UART_NONE_100_DATA:fromhex()
-	bin_data = bin_data..UART_NONE_100_DATA:fromhex()
-	bin_data = bin_data..UART_NONE_25_DATA:fromhex()
 
-	uart_delay_send(bin_data)
+	uart_send(bin_data)
 end
 
 --/*---------------------------------------------------------------------------*/--
 
-function send_firmware_chunk_to_node(ipv6_adress, firmware_bin_chunk_224b)
+function send_firmware_chunk_to_node(ipv6_adress, firmware_bin_chunk)
 	local adress = ipv6_adress_parse(ipv6_adress)
 
 	local bin_data = ""
-	bin_data = bin_data..UART_PV2_START_MQ:fromhex()
-	bin_data = bin_data..UART_PROTOCOL_VERSION_V2:fromhex()
-	bin_data = bin_data..UART_FF_DATA:fromhex()
 	bin_data = bin_data..adress:fromhex()
 	bin_data = bin_data..PROTOCOL_VERSION_V1:fromhex()
 	bin_data = bin_data..DEVICE_VERSION_V1:fromhex()
@@ -503,9 +498,9 @@ function send_firmware_chunk_to_node(ipv6_adress, firmware_bin_chunk_224b)
 	bin_data = bin_data..UART_FF_DATA:fromhex() --reserved
 	bin_data = bin_data..UART_FF_DATA:fromhex() --reserved
 	
-	bin_data = bin_data..firmware_bin_chunk_224b
+	bin_data = bin_data..firmware_bin_chunk
 
-	uart_delay_send(bin_data)
+	uart_send(bin_data)
 end
 
 --/*---------------------------------------------------------------------------*/--
