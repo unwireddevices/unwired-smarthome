@@ -322,6 +322,8 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
+raw_print = print
+
 function print(data)
 	io.write(data or "")
 	io.write("\n")
