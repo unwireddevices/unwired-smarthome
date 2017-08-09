@@ -1013,6 +1013,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
 
      etimer_set( &ota_image_erase_timer, (CLOCK_SECOND/3) );
      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&ota_image_erase_timer) );
+
    }
    printf("[OTA]: OTA slot 1 erased\n");
 
@@ -1181,6 +1182,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
          printf("FW OTA: bad golden image, write current FW\n");
          backup_golden_image();
          send_message_packet(DEVICE_MESSAGE_OTA_BAD_GOLDEN_IMAGE);
+
       }
    }
 
