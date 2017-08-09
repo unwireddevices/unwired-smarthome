@@ -780,6 +780,11 @@ function add_byte_to_buffer(buffer, byte)
 	end
 end
 
+function clean_buffer(buffer)
+	for i = 1, #buffer do 
+		table.insert(buffer, 0)
+	end
+end
 
 function get_buffer(buffer)
 	return table.concat(buffer)
@@ -827,14 +832,20 @@ function main_cycle(limit)
 
  	while (main_cycle_permit == 1) do
 		_, data_read = p:read(1, 200)
-		if (data_read ~= nil and data_read ~= "\n" and data_read ~= " ") then			
+		if (data_read ~= nil) then			
 			add_byte_to_buffer(buffer, data_read)
 			local buffer_state = get_buffer(buffer)
-			_, _, packet = string.find(buffer_state, "(DAGROOTRAW1..............................................................................RAWEND)")
+			_, _, packet = string.find(buffer_state, "(DAGROOTRAW1"..('.'):rep(78).."RAWEND)")
 			if (packet ~= nil) then
-				--print(packet.."\n\n")
 				led("on")
 				packet_parse(packet)
+				led("off")
+			end
+			_, _, message = string.find(buffer_state, "(UDM:.+\n)")
+			if (message ~= nil) then
+				led("on")
+				print(message)
+				clean_buffer(buffer)
 				led("off")
 			end
 		end
