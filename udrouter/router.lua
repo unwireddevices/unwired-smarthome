@@ -470,6 +470,7 @@ function send_firmware_new_fw_cmd_to_node(ipv6_adress, table_segments)
 	elseif (#chunk_quantity_hex == 3) then chunk_quantity_hex = "0"..chunk_quantity_hex
 	end
 
+
 	local bin_data = ""
 	bin_data = bin_data..adress:fromhex()
 	bin_data = bin_data..PROTOCOL_VERSION_V1:fromhex()

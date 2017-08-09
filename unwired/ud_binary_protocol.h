@@ -75,7 +75,7 @@
 #define DEVICE_ABILITY_RESERVED10                               23
 #define DEVICE_ABILITY_LED                                      24
 
-#define DEVICE_ABILITY_RESERVED11                               25
+#define DEVICE_ABILITY_OTA                               25 //использовать для определения поддержки OTA
 #define DEVICE_ABILITY_RESERVED12                               26
 #define DEVICE_ABILITY_RESERVED13                               27
 #define DEVICE_ABILITY_RESERVED14                               28
