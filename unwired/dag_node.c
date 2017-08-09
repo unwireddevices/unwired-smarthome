@@ -299,7 +299,9 @@ uart_console(unsigned char uart_char)
       flash_damp_hex(HEXRAW_MODE);
 
    if (uart_char == 'e')
-      erase_ota_image(0);
+   {
+      erase_ota_image(1);
+   }
 
    if (uart_char == 'i')
       verify_int_firmware_v();
@@ -1140,9 +1142,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
 
    node_mode = MODE_JOIN_PROGRESS;
 
-   //printf("New FW!\n");
-   //printf("Old FW!\n");
-   //printf("Golden image\n");
+   //printf("------------------->New FW!<-------------------\n");
    spi_status = spi_test();
 
    printf("Node started, %s mode, %s class, SPI %s, version %"PRIu8".%"PRIu8"\n",
