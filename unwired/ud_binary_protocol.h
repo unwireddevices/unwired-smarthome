@@ -141,7 +141,6 @@
 
 #define DEVICE_ABILITY_0_10V_ANALOG_CHANNEL_1                   0x01
 
-
 /* DATA_TYPE_FIRMWARE commands  */
 #define DATA_TYPE_FIRMWARE_COMMAND_NEW_FW                       0x01 //Сообщение о наличии новой прошивки
 #define DATA_TYPE_FIRMWARE_COMMAND_CHANK_REQ                    0x02 //Запрос пакета с частью прошивки
