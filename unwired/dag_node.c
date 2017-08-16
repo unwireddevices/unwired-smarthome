@@ -447,12 +447,12 @@ static void udp_receiver(struct simple_udp_connection *c,
       }
 
       if (data[2] != DATA_TYPE_COMMAND &&
-            data[2] != DATA_TYPE_JOIN_CONFIRM &&
-            data[2] != DATA_TYPE_SETTINGS &&
-            data[2] != DATA_TYPE_FIRMWARE &&
-            data[2] != DATA_TYPE_FIRMWARE_CMD &&
-            data[2] != DATA_TYPE_PONG &&
-            data[2] != DATA_TYPE_UART)
+          data[2] != DATA_TYPE_JOIN_CONFIRM &&
+          data[2] != DATA_TYPE_SETTINGS &&
+          data[2] != DATA_TYPE_FIRMWARE &&
+          data[2] != DATA_TYPE_FIRMWARE_CMD &&
+          data[2] != DATA_TYPE_PONG &&
+          data[2] != DATA_TYPE_UART)
       {
          printf("DAG Node: Incompatible data type UDP packer from");
          uip_debug_ip6addr_print(sender_addr);
@@ -464,7 +464,7 @@ static void udp_receiver(struct simple_udp_connection *c,
    {
       printf("DAG Node: Incompatible device or protocol version UDP packer from");
       uip_debug_ip6addr_print(sender_addr);
-      printf("(%02x%02x%02x)\n", data[0],data[1],data[2]);
+      printf("(%02x%02x%02x)\n", data[0], data[1], data[2]);
    }
 
    led_mode_set(LED_FLASH);
@@ -967,6 +967,9 @@ PROCESS_THREAD(status_send_process, ev, data)
          }
          non_answered_packet++;
          printf("DAG Node: Non-answered packet counter increase(status message): %"PRId8" \n", non_answered_packet);
+
+         //printf("DAG Node: TEST REBOOT. WARNING!\n"); // <<<<<<==================================================!!!!
+         //watchdog_reboot(); // <<<<<<==================================================!!!!
       }
 
       if (CLASS == CLASS_B)
