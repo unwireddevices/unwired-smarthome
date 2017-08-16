@@ -12,11 +12,17 @@
 #include "dev/watchdog.h"
 #include <stdbool.h>
 
+#include "contiki.h"
+#include "contiki-lib.h"
 
 #define DPRINT //printf("\t\t\t\t\t>ota.c:%"PRIu16"\n", __LINE__);watchdog_periodic();
 #define PRINTF(...) printf(__VA_ARGS__)
 
 uint8_t ota_images[3] = OTA_ADDRESSES;
+uint8_t ota_slot_for_erase = 0;
+
+PROCESS(ota_image_erase_process, "Ota image erase process");
+
 
 /**
  *    OTA Flash-specific Functions
@@ -660,24 +666,44 @@ erase_extflash_page( uint32_t ext_address )
  *
  * @return  0 or error code
  */
+
+PROCESS_THREAD(ota_image_erase_process, ev, data)
+{
+   PROCESS_BEGIN();
+
+   if (ev == PROCESS_EVENT_EXIT)
+      return 1;
+
+   //static struct etimer ota_image_erase_timer;
+
+
+   PROCESS_END();
+}
+
+
+
 int
 erase_ota_image( uint8_t ota_slot )
 {
+  ota_slot_for_erase = ota_slot;
+
+  static uint32_t page;
+
   //  (1) Get page address of the ota_slot in ext-flash
-  uint8_t ota_image_base_address;
-  if ( ota_slot ) {
-    ota_image_base_address = ota_images[ (ota_slot-1) ];
+  static uint8_t ota_image_base_address;
+  if ( ota_slot_for_erase ) {
+    ota_image_base_address = ota_images[ (ota_slot_for_erase-1) ];
   } else {
     ota_image_base_address = GOLDEN_IMAGE;
   }
-  PRINTF("[OTA]: Erasing OTA slot %u [%#x, %#x)...\n", ota_slot, (ota_image_base_address<<12), ((ota_image_base_address+25)<<12));
+  PRINTF("[OTA]: Erasing OTA slot %u [%#x, %#x)...\n", ota_slot_for_erase, (ota_image_base_address<<12), ((ota_image_base_address+25)<<12));
 
   //  (2) Erase each page in the OTA download slot!
-  for (uint32_t page=0; page<25; page++) {
+  for (page=0; page<25; page++) {
     PRINTF("[OTA]: Erasing page %"PRIu32" at 0x%"PRIX32"..\n", page, (( ota_image_base_address + page ) << 12));
     while( erase_extflash_page( (( ota_image_base_address + page ) << 12) ) );
-    watchdog_periodic();
   }
+  PRINTF("[OTA]: OTA slot erased");
 
   return 0;
 }

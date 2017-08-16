@@ -7,6 +7,7 @@
 #include <stdbool.h>
 #include "ota-common.h"
 #include "ext-flash.h"
+#include "xxf_types_helper.h"
 
 uint8_t
 write_fw_flag(uint8_t value)
@@ -32,7 +33,10 @@ write_fw_flag(uint8_t value)
    eeprom_access = ext_flash_write( FW_FLAG_ADRESS, FLAG_SIZE, data_write);
    if(!eeprom_access) { ext_flash_close(); return FLAG_ERROR_WRITE; }
 
+   ext_flash_close();
 
+   eeprom_access = ext_flash_open();
+   if(!eeprom_access) { ext_flash_close(); return FLAG_ERROR_WRITE; }
 
    eeprom_access = ext_flash_read(FW_FLAG_ADRESS, FLAG_SIZE, (uint8_t *)&data_read);
    if(!eeprom_access) { ext_flash_close(); return FLAG_ERROR_WRITE; }
@@ -41,7 +45,7 @@ write_fw_flag(uint8_t value)
 
    if (data_write[0] != data_read[0])
    {
-      printf("FW OTA: Non-correct write flag to flash!");
+      printf("FW OTA: Non-correct write flag to flash: 0x%"PRIXX8",0x%"PRIXX8" (w,r)\n", data_write[0], data_read[0]);
       return FLAG_ERROR_WRITE;
    }
 
