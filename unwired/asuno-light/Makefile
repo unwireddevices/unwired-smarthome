@@ -70,13 +70,21 @@ light-fb: light-CLEAN
 	while true; do ../../tools/backdoor-bootloader.py -e -w -v light-firmware.hex && break; done;
 
 light-f: light-CLEAN
-	/Applications/ti/Uniflash/flash_cc1310.sh light-firmware.hex
+	/Applications/ti/Uniflash/flash_cc1310.sh light-firmware.hex && \
+	osascript -e 'display notification with title "Flash asuno/light" subtitle "Success"' || \
+	osascript -e 'display notification with title "Flash asuno/light" subtitle "FAIL"'
+
+light-ota: light
+	scp light-ota-image.bin root@192.168.20.187:/root/unwired_smarthome
+	
 
 root-fb: root-CLEAN
 	while true; do ../../tools/backdoor-bootloader.py -e -w -v root-firmware.hex && break; done;
 	
 root-f: root-CLEAN
-	/Applications/ti/Uniflash/flash_cc1310.sh root-firmware.hex
+	/Applications/ti/Uniflash/flash_cc1310.sh root-firmware.hex && \
+	osascript -e 'display notification with title "Flash asuno/root" subtitle "Success"' || \
+	osascript -e 'display notification with title "Flash asuno/root" subtitle "FAIL"'
 
 serial:
 	../../tools/sky/serialdump-macos -b115200 /dev/tty.usbserial-* || ../../tools/sky/serialdump-macos -b115200 /dev/tty.SLAB_USBtoUART
