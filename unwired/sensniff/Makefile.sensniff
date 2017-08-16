@@ -14,9 +14,8 @@ ifeq ($(TARGET),)
 endif
 
 CONTIKI_WITH_RIME = 1
-GIT_VERSION := $(shell git describe --dirty --always --tags)
-DEFINES+=LOCAL_VERSION=\"$(GIT_VERSION)\"
 DEFINES+=CLASS=0x0C
+
 
 ### Optionally, the target can add its own Makefile, to do things like e.g.
 ### add more source files to the build or define make variables.
@@ -26,6 +25,7 @@ all: $(CONTIKI_PROJECT)
 
 CONTIKI = ../..
 include $(CONTIKI)/Makefile.include
+include $(CONTIKI)/Makefile_git_version.include
 
 PYTHON ?= python
 SENSNIFF = $(CONTIKI)/tools/sensniff/sensniff.py
