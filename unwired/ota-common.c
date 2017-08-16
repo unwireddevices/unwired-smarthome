@@ -32,6 +32,8 @@ write_fw_flag(uint8_t value)
    eeprom_access = ext_flash_write( FW_FLAG_ADRESS, FLAG_SIZE, data_write);
    if(!eeprom_access) { ext_flash_close(); return FLAG_ERROR_WRITE; }
 
+
+
    eeprom_access = ext_flash_read(FW_FLAG_ADRESS, FLAG_SIZE, (uint8_t *)&data_read);
    if(!eeprom_access) { ext_flash_close(); return FLAG_ERROR_WRITE; }
 

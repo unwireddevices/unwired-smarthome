@@ -38,11 +38,8 @@ light: net-bootloader-clean
 	arm-none-eabi-size light.elf | grep -v text > /tmp/size.tmp 
 	lua ../../tools/mem_used.lua /tmp/size.tmp 125000 20000
 	../bootloader/generate-metadata/generate-metadata light.bin 0x0 0xabcd1234 1
-	
 	srec_cat firmware-metadata.bin -binary light.bin -binary -offset 0x100 -o light-ota-image.bin -binary
-	
 	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 light-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o light-firmware.hex -intel
-
 	rm light.hex 
 	
 clean1:

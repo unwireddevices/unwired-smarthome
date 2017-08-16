@@ -330,6 +330,7 @@ static void udp_receiver(struct simple_udp_connection *c,
 {
    if (data[0] == PROTOCOL_VERSION_V1 && data[1] == CURRENT_DEVICE_VERSION)
    {
+
       if (data[2] == DATA_TYPE_JOIN_CONFIRM)
       {
          uip_ipaddr_copy(&root_addr, sender_addr);
@@ -1000,6 +1001,8 @@ PROCESS_THREAD(fw_update_process, ev, data)
    static struct etimer ota_image_erase_timer;
    static uint32_t page;
 
+   /* Стираем память */
+
    printf("[OTA]: Erasing OTA slot 1 [%#x, %#x)...\n", (ota_images[0]<<12), ((ota_images[0]+25)<<12));
    for (page=0; page<25; page++)
    {
@@ -1018,16 +1021,18 @@ PROCESS_THREAD(fw_update_process, ev, data)
    printf("[OTA]: OTA slot 1 erased\n");
 
 
+   /* Начинаем процесс обновления */
+
    while (1)
    {
 
-      if (chunk_num < fw_chunk_quantity)
+      if (chunk_num < fw_chunk_quantity) //Если остались незапрошенные пакеты
       {
          send_fw_chunk_req_packet(chunk_num);
          printf("FW OTA: Request %"PRId16"/%"PRId16" chunk\n", chunk_num + 1, fw_chunk_quantity);
          chunk_num++;
       }
-      else
+      else //Если все пакеты запрошены
       {
          printf("FW OTA: End chunks, exit\n");
          chunk_num = 0;
@@ -1046,15 +1051,14 @@ PROCESS_THREAD(fw_update_process, ev, data)
          return 0;
       }
 
-      etimer_set( &fw_timer, FW_DELAY);
-      etimer_set( &fw_timer_deadline, FW_DELAY_DEADLINE);
-
-      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&fw_timer) );
+      etimer_set( &fw_timer, FW_DELAY); //Таймер, который сбрасывается при получении пакета
+      etimer_set( &fw_timer_deadline, FW_DELAY_DEADLINE); //Таймер максимального ожидания
 
       etimer_set( &fw_timer_delay_chunk, (CLOCK_SECOND/3) );
       PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&fw_timer_delay_chunk) );
+      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&fw_timer) ); //Ждем сброса таймера после получения пакета или истечения времени ожидания пакета
 
-      if (etimer_expired(&fw_timer_deadline) && (chunk_num < fw_chunk_quantity))
+      if (etimer_expired(&fw_timer_deadline) && (chunk_num < fw_chunk_quantity)) //Если истек таймер максимального ожидания(fw_timer_deadline)
       {
          if (fw_error_counter > 4)
          {
@@ -1074,6 +1078,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
 
 
       }
+
    }
 
    PROCESS_END();
@@ -1149,6 +1154,8 @@ PROCESS_THREAD(dag_node_process, ev, data)
    node_mode = MODE_JOIN_PROGRESS;
 
    //printf("------------------->New FW!<-------------------\n");
+   //printf("------------->Hey, look! Boobs! (.Y.)<---------\n");
+
    spi_status = spi_test();
 
    printf("Node started, %s mode, %s class, SPI %s, version %"PRIu8".%"PRIu8"\n",
