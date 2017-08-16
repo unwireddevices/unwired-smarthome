@@ -83,7 +83,7 @@ void send_confirmation_packet(const uip_ip6addr_t *dest_addr)
 {
    if (dest_addr == NULL)
    {
-      printf("ERROR: dest_addr in send_confirmation_packet null\n");
+      printf("UDM: dest_addr in send_confirmation_packet null\n");
       return;
    }
 
@@ -108,7 +108,7 @@ void send_pong_packet(const uip_ip6addr_t *dest_addr)
 {
    if (dest_addr == NULL)
    {
-      printf("ERROR: dest_addr in send_pong_packet null\n");
+      printf("UDM: dest_addr in send_pong_packet null\n");
       return;
    }
 
@@ -133,18 +133,18 @@ void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const ui
 {
    if (addr == NULL)
    {
-      printf("ERROR: addr in dag_root_raw_print null\n");
+      printf("UDM: addr in dag_root_raw_print null\n");
       return;
    }
    if (data == NULL)
    {
-      printf("ERROR: data in dag_root_raw_print null\n");
+      printf("UDM: data in dag_root_raw_print null\n");
       return;
    }
 
    if (length != 10 && length != 23)
    {
-      printf("DAG NODE: Incompatible data length(%" PRIu16 ")!\n", length);
+      printf("UDM: Incompatible data length(%" PRIu16 ")!\n", length);
       return;
    }
    printf("DAGROOTRAW1");
@@ -228,7 +228,7 @@ void rpl_initialize()
    uip_ip6addr(&prefix, UIP_DS6_DEFAULT_PREFIX, 0, 0, 0, 0, 0, 0, 0);
    rpl_set_prefix(dag, &prefix, 64);
 
-   printf("Created a new RPL DAG, i'm root!\n");
+   printf("UDM: Created a new RPL DAG, i'm root!\n");
 }
 
 /*---------------------------------------------------------------------------*/
@@ -256,12 +256,12 @@ void send_uart_packet(struct uart_data *uart_message)
 {
    if (&uart_message->destination_address == NULL)
    {
-      printf("ERROR: dest_addr in send_uart_packet null\n");
+      printf("UDM: dest_addr in send_uart_packet null\n");
       return;
    }
    if (&udp_connection.udp_conn == NULL)   //указатель на что?
    {
-      printf("ERROR: connection in send_uart_packet null\n");
+      printf("UDM: connection in send_uart_packet null\n");
       return;
    }
 
@@ -269,9 +269,9 @@ void send_uart_packet(struct uart_data *uart_message)
    uip_ip6addr_copy(&addr, &uart_message->destination_address);
 
 
-   printf("UART: returned_data_lenth: %" PRIXX8 "\n", uart_message->returned_data_lenth);
-   printf("UART: data_lenth: %" PRIXX8 "\n", uart_message->data_lenth);
-   printf("UART: payload: ");
+   printf("UDM: returned_data_lenth: %" PRIXX8 "\n", uart_message->returned_data_lenth);
+   printf("UDM: data_lenth: %" PRIXX8 "\n", uart_message->data_lenth);
+   printf("UDM: payload: ");
    for (int i = 0; i < uart_message->data_lenth; i++)
    {
       printf("0x%" PRIXX8 " ", uart_message->payload[i]);
@@ -316,12 +316,12 @@ void send_firmware_cmd_packet(struct firmware_cmd *firmware_cmd_message)
 {
    if (&firmware_cmd_message->destination_address == NULL)
    {
-      printf("ERROR: dest_addr in send_command_packet null\n");
+      printf("UDM: dest_addr in send_command_packet null\n");
       return;
    }
    if (&udp_connection.udp_conn == NULL)   //указатель на что?
    {
-      printf("ERROR: connection in send_command_packet null\n");
+      printf("UDM: connection in send_command_packet null\n");
       return;
    }
 
@@ -349,12 +349,12 @@ void send_firmware_packet(struct firmware_data *firmware_message)
 {
    if (&firmware_message->destination_address == NULL)
    {
-      printf("ERROR: dest_addr in send_command_packet null\n");
+      printf("UDM: dest_addr in send_command_packet null\n");
       return;
    }
    if (&udp_connection.udp_conn == NULL)   //указатель на что?
    {
-      printf("ERROR: connection in send_command_packet null\n");
+      printf("UDM: connection in send_command_packet null\n");
       return;
    }
 
@@ -387,12 +387,12 @@ void send_command_packet(struct command_data *command_message)
 {
    if (&command_message->destination_address == NULL)
    {
-      printf("ERROR: dest_addr in send_command_packet null\n");
+      printf("UDM: dest_addr in send_command_packet null\n");
       return;
    }
    if (&udp_connection.udp_conn == NULL)   //указатель на что?
    {
-      printf("ERROR: connection in send_command_packet null\n");
+      printf("UDM: connection in send_command_packet null\n");
       return;
    }
 
@@ -421,11 +421,11 @@ void uart_packet_dump(uint8_t *uart_buf, uint16_t uart_data_size)
 {
    if (uart_buf == NULL)
    {
-      printf("ERROR: uart_command_buf in uart_packet_dump null\n");
+      printf("UDM: uart_command_buf in uart_packet_dump null\n");
       return;
    }
 
-   printf("\nUART->6LP: ");
+   printf("UDM: UART->6LP: ");
    for (uint16_t i = 0; i < uart_data_size; i++)
    {
       printf("%"PRIXX8, uart_buf[i]);
