@@ -64,6 +64,7 @@ struct firmware_data
    volatile uint8_t reserved_b1;
    volatile uint8_t reserved_b2;
    volatile uint8_t ready_to_send;
+   volatile uint16_t chunk_size;
 };
 
 struct firmware_cmd
@@ -141,7 +142,7 @@ void send_command_packet(struct command_data *command_message);
 
 int uart_data_receiver(unsigned char uart_char);
 
-void uart_packet_dump(volatile uint8_t *uart_command_buf);
+void uart_packet_dump(uint8_t *uart_buf, uint16_t uart_data_size);
 
 /*---------------------------------------------------------------------------*/
 

@@ -145,7 +145,7 @@
 #define DATA_TYPE_FIRMWARE_COMMAND_NEW_FW                       0x01 //Сообщение о наличии новой прошивки
 #define DATA_TYPE_FIRMWARE_COMMAND_CHANK_REQ                    0x02 //Запрос пакета с частью прошивки
 
-#define FIRMWARE_PAYLOAD_LENGTH                                 100 //224
+#define FIRMWARE_PAYLOAD_LENGTH                                 600
 #define FIRMWARE_PAYLOAD_OFFSET                                 7
 
 /* Devices messages */
@@ -165,9 +165,12 @@
 /* UART Binary data */
 #define UART_PROTOCOL_VERSION_V1                                0x01
 #define UART_PROTOCOL_VERSION_V2                                0x02
-#define UART_DATA_LENGTH                                        255
 #define UART_PROTOCOL_VERSION_V3                                0x03
+#define MAX_UART_DATA_LENGTH                                    1500
 #define MAGIC_SEQUENCE_LENGTH                                   6
+#define MAGIC_SEQUENCE                                          0x01,0x16,0x16,0x16,0x16,0x10
+
+#define PACKET_HEADER_LENGTH                                    10
 
 /* Defines */
 

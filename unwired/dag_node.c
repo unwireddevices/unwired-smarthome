@@ -392,11 +392,11 @@ static void udp_receiver(struct simple_udp_connection *c,
          }
          printf("\n\n");
          */
-         printf("DAG Node: DATA_TYPE_FIRMWARE packet received(%"PRId16" bytes)\n", datalen - FIRMWARE_PAYLOAD_OFFSET);
+         printf("DAG Node: DATA_TYPE_FIRMWARE packet received(%"PRIu16" bytes)\n", datalen - FIRMWARE_PAYLOAD_OFFSET);
 
          uint8_t flash_write_buffer[FIRMWARE_PAYLOAD_LENGTH];
 
-         for (uint8_t i = 0; i < FIRMWARE_PAYLOAD_LENGTH; i++)
+         for (uint16_t i = 0; i < FIRMWARE_PAYLOAD_LENGTH; i++)
          {
             flash_write_buffer[i] = data[i + FIRMWARE_PAYLOAD_OFFSET];
          }
@@ -407,7 +407,7 @@ static void udp_receiver(struct simple_udp_connection *c,
          while(store_firmware_data(current_ota_ext_flash_address, flash_write_buffer, FIRMWARE_PAYLOAD_LENGTH));
          ota_image_current_offset = ota_image_current_offset + FIRMWARE_PAYLOAD_LENGTH;
 
-         etimer_set( &fw_timer, 0);
+         etimer_set( &fw_timer, 0 );
       }
 
       if (data[2] == DATA_TYPE_FIRMWARE_CMD)
@@ -417,23 +417,23 @@ static void udp_receiver(struct simple_udp_connection *c,
             uint8_t chunk_quantity_uint8[2];
             chunk_quantity_uint8[0] = data[5];
             chunk_quantity_uint8[1] = data[4];
+            ota_image_current_offset = 0;
 
             uint16_t *chunk_quantity_uint16_t = (uint16_t *)&chunk_quantity_uint8;
             fw_chunk_quantity = *chunk_quantity_uint16_t;
 
-            printf("DAG Node: DATA_TYPE_FIRMWARE_COMMAND_NEW_FW command received, %"PRId16" chunks\n", fw_chunk_quantity);
-
+            printf("DAG Node: DATA_TYPE_FIRMWARE_COMMAND_NEW_FW command received, %"PRIu16"(0x%"PRIXX8" 0x%"PRIXX8") chunks\n", fw_chunk_quantity, data[5], data[4]);
+/*
             uint8_t old_flag = read_fw_flag();
-
             uint8_t write_flag_result = write_fw_flag(FW_FLAG_NEW_IMG_EXT);
-            if (write_flag_result == FLAG_ERROR_WRITE)
-               watchdog_reboot();
-
             write_fw_flag(old_flag);
 
+            if (write_flag_result == FLAG_ERROR_WRITE)
+               watchdog_reboot();
+*/
             if (spi_status == SPI_EXT_FLASH_ACTIVE)
             {
-               erase_ota_image(1);
+               printf("DAG Node: OTA update process start\n");
                process_start(&fw_update_process, NULL);
             }
             else
@@ -1054,8 +1054,6 @@ PROCESS_THREAD(fw_update_process, ev, data)
       etimer_set( &fw_timer, FW_DELAY); //Таймер, который сбрасывается при получении пакета
       etimer_set( &fw_timer_deadline, FW_DELAY_DEADLINE); //Таймер максимального ожидания
 
-      etimer_set( &fw_timer_delay_chunk, (CLOCK_SECOND/3) );
-      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&fw_timer_delay_chunk) );
       PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&fw_timer) ); //Ждем сброса таймера после получения пакета или истечения времени ожидания пакета
 
       if (etimer_expired(&fw_timer_deadline) && (chunk_num < fw_chunk_quantity)) //Если истек таймер максимального ожидания(fw_timer_deadline)
@@ -1079,6 +1077,8 @@ PROCESS_THREAD(fw_update_process, ev, data)
 
       }
 
+      etimer_set( &fw_timer_delay_chunk, (CLOCK_SECOND*2) ); //Таймер задержки перед запросом следующего чанка
+      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&fw_timer_delay_chunk) );
    }
 
    PROCESS_END();
@@ -1195,7 +1195,8 @@ PROCESS_THREAD(dag_node_process, ev, data)
 
    if (read_fw_flag() == FW_FLAG_NEW_IMG_INT)
    {
-      uint8_t write_flag_result = write_fw_flag(FW_FLAG_PING_OK);
+      write_fw_flag(FW_FLAG_PING_OK);
+      //uint8_t write_flag_result = write_fw_flag(FW_FLAG_PING_OK);
       //if (write_flag_result == FLAG_ERROR_WRITE) { watchdog_reboot(); }
       printf("DAG Node: OTA flag changed to FW_FLAG_PING_OK\n");
       send_message_packet(DEVICE_MESSAGE_OTA_UPDATE_SUCCESS);

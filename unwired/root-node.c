@@ -71,14 +71,9 @@
 
 /*---------------------------------------------------------------------------*/
 
-/* UART char iterator */
-volatile uint8_t uart_iterator = 0;
-
-/* UART-buffer for raw command */
-volatile uint8_t uart_command_buf[UART_DATA_LENGTH];
-
 /* The sequence of start and end command */
-uint8_t uart_magic_sequence[6] = {0x01,0x16,0x16,0x16,0x16,0x10};
+uint8_t uart_magic_sequence[MAGIC_SEQUENCE_LENGTH] = {MAGIC_SEQUENCE};
+uint8_t uart_data[MAX_UART_DATA_LENGTH];
 
 PROCESS(send_command_process,"UDP command sender");
 
@@ -366,8 +361,8 @@ void send_firmware_packet(struct firmware_data *firmware_message)
    uip_ip6addr_t addr;
    uip_ip6addr_copy(&addr, &firmware_message->destination_address);
 
-   uint8_t payload_length = FIRMWARE_PAYLOAD_LENGTH;
-   uint8_t packet_length = payload_length + FIRMWARE_PAYLOAD_OFFSET;
+   uint16_t payload_length = firmware_message->chunk_size;
+   uint16_t packet_length = payload_length + FIRMWARE_PAYLOAD_OFFSET;
    uint8_t udp_buffer[packet_length];
 
    udp_buffer[0] = firmware_message->protocol_version;
@@ -376,15 +371,14 @@ void send_firmware_packet(struct firmware_data *firmware_message)
    udp_buffer[3] = firmware_message->chunk_number_b1;
    udp_buffer[4] = firmware_message->chunk_number_b2;
    udp_buffer[5] = firmware_message->reserved_b1;
-   udp_buffer[6] = firmware_message->reserved_b2; //FIRMWARE_PAYLOAD_OFFSET
+   udp_buffer[6] = firmware_message->reserved_b2; //7 = FIRMWARE_PAYLOAD_OFFSET
 
    for (uint16_t i = 0; i < payload_length; i++)
    {
       udp_buffer[FIRMWARE_PAYLOAD_OFFSET + i] = firmware_message->firmware_payload.data[i];
    }
-
+   //printf("UDM: send fw packet %" PRIu16 " b\n", payload_length);
    simple_udp_sendto(&udp_connection, udp_buffer, packet_length, &addr);
-
 }
 
 /*---------------------------------------------------------------------------*/
@@ -423,120 +417,197 @@ void send_command_packet(struct command_data *command_message)
 
 /*---------------------------------------------------------------------------*/
 
-void uart_packet_dump(volatile uint8_t *uart_command_buf)
+void uart_packet_dump(uint8_t *uart_buf, uint16_t uart_data_size)
 {
-   if (uart_command_buf == NULL)
+   if (uart_buf == NULL)
    {
       printf("ERROR: uart_command_buf in uart_packet_dump null\n");
       return;
    }
 
    printf("\nUART->6LP: ");
-   for (int i = 0; i < UART_DATA_LENGTH; i++)
+   for (uint16_t i = 0; i < uart_data_size; i++)
    {
-      printf("%"PRIXX8, uart_command_buf[i]);
+      printf("%"PRIXX8, uart_buf[i]);
    }
    printf("\n");
 }
 
 /*---------------------------------------------------------------------------*/
 
+void uart_packet_processed(uint8_t *uart_data, uint16_t uart_data_length)
+{
+   if (uart_data[18] == DATA_TYPE_COMMAND)
+      {
+         for (uint8_t i = 0; i < 16; i++)
+            command_message.destination_address.u8[i] = uart_data[i];
+
+         command_message.protocol_version = uart_data[16];
+         command_message.device_version = uart_data[17];
+
+         command_message.ability_target = uart_data[19];
+         command_message.ability_number = uart_data[20];
+         command_message.ability_state = uart_data[21];
+         command_message.ready_to_send = 1;
+      }
+
+   if (uart_data[18] == DATA_TYPE_FIRMWARE)
+      {
+         uint16_t fw_payload_lenght = uart_data_length-23; // 23 = 16(address) + 7(packet header)
+         for (uint8_t i = 0; i < 16; i++)
+            firmware_message.destination_address.u8[i] = uart_data[i];
+
+         firmware_message.protocol_version = uart_data[16];
+         firmware_message.device_version = uart_data[17];
+
+         firmware_message.chunk_number_b1 = uart_data[19];
+         firmware_message.chunk_number_b2 = uart_data[20];
+         firmware_message.reserved_b1 = uart_data[21];
+         firmware_message.reserved_b2 = uart_data[22];
+         firmware_message.chunk_size = fw_payload_lenght;
+
+         for (uint16_t i = 0; i < fw_payload_lenght; i++)
+            firmware_message.firmware_payload.data[i] = uart_data[23 + i];
+
+         firmware_message.ready_to_send = 1;
+      }
+
+   if (uart_data[18] == DATA_TYPE_FIRMWARE_CMD)
+      {
+         for (uint8_t i = 0; i < 16; i++)
+            firmware_cmd_message.destination_address.u8[i] = uart_data[i];
+
+         firmware_cmd_message.protocol_version = uart_data[16];
+         firmware_cmd_message.device_version = uart_data[17];
+
+         firmware_cmd_message.firmware_command = uart_data[19];
+         firmware_cmd_message.chunk_quantity_b1 = uart_data[20];
+         firmware_cmd_message.chunk_quantity_b2 = uart_data[21];
+         firmware_cmd_message.ready_to_send = 1;
+         //printf("UDM: chunk_quantity: 0x%" PRIXX8 " 0x%" PRIXX8 "\n", uart_data[20], uart_data[21]);
+      }
+
+   if (uart_data[26] == DATA_TYPE_UART)
+      {
+         for (uint8_t i = 0; i < 16; i++)
+            uart_message.destination_address.u8[i] = uart_data[i];
+
+         uart_message.protocol_version = uart_data[16];
+         uart_message.device_version = uart_data[17];
+
+         uart_message.data_lenth = uart_data[19];
+         uart_message.returned_data_lenth = uart_data[20];
+         for (uint8_t i = 0; i < 16; i++)
+            uart_message.payload[i] = uart_data[21 + i];
+
+         uart_message.ready_to_send = 1;
+      }
+}
+
+/*---------------------------------------------------------------------------*/
 int uart_data_receiver(unsigned char uart_char)
 {
    led_blink(LED_A);
 
-   if (uart_iterator < UART_DATA_LENGTH)
+   static uint8_t uart_header_iterator = 0;
+   static uint8_t uart_header_data[PACKET_HEADER_LENGTH-MAGIC_SEQUENCE_LENGTH];
+   static uint16_t uart_data_iterator = 0;
+   static uint16_t uart_data_length = 0;
+
+   static uint8_t uart_packet_crc = 0;
+
+
+   if (uart_header_iterator < PACKET_HEADER_LENGTH &&
+       uart_header_iterator < MAGIC_SEQUENCE_LENGTH) //Read and verify magic seq
    {
-      uart_command_buf[uart_iterator] = uart_char;
-      //printf("UDCP: New char(%" PRIXX8 ") in buffer: %" PRIu8 "\n", uart_char, uart_iterator);
-      if (uart_iterator < MAGIC_SEQUENCE_LENGTH)
+      //printf("UDM: New char(%" PRIXX8 ") in mq: %" PRIu16 "\n", uart_char, uart_header_iterator);
+      if (uart_char != uart_magic_sequence[uart_header_iterator])
       {
-         if (uart_char != uart_magic_sequence[uart_iterator])
+         uart_header_iterator = 0;
+         uart_data_iterator = 0;
+         uart_data_length = 0;
+         uart_packet_crc = 0;
+         return 1;
+      }
+      uart_header_iterator++;
+      return 1;
+   }
+
+   if (uart_header_iterator < PACKET_HEADER_LENGTH &&
+       uart_header_iterator >= MAGIC_SEQUENCE_LENGTH) //Read header data
+   {
+      //printf("UDM: New char(%" PRIXX8 ") in data header buffer: %" PRIu16 "\n", uart_char, uart_header_iterator);
+      uart_header_data[uart_header_iterator-MAGIC_SEQUENCE_LENGTH] = uart_char;
+
+      uart_header_iterator++;
+   }
+
+
+   if (uart_header_iterator == PACKET_HEADER_LENGTH)
          {
-            //printf("UDCP: Char 0x%" PRIXX8 "(#%" PRIu8 ") non-MQ!\n", uart_char, uart_iterator);
-            uart_iterator = 0;
+            //printf("UDM: check uart header data\n");
+            if (uart_header_data[0] != UART_PROTOCOL_VERSION_V3) //Check uart protocol version
+            {
+               printf("UDM: Incompatible protocol version: %" PRIXX8 "!\n", uart_header_data[0]);
+               uart_header_iterator = 0;
+               uart_data_iterator = 0;
+               uart_data_length = 0;
+               uart_packet_crc = 0;
+               return 1;
+            }
+            uint8_t uart_data_length_uint8[2];
+            uart_data_length_uint8[0] = uart_header_data[1];
+            uart_data_length_uint8[1] = uart_header_data[2];
+            uint16_t *uart_data_length_uint16_t = (uint16_t *)&uart_data_length_uint8; //Convert data length
+            uart_data_length = *uart_data_length_uint16_t;
+            if (uart_data_length > MAX_UART_DATA_LENGTH)
+            {
+               printf("UDM: too big packet size: %" PRIu16 "\n", uart_data_length);
+               uart_header_iterator = 0;
+               uart_data_iterator = 0;
+               uart_data_length = 0;
+               uart_packet_crc = 0;
+               return 1;
+            }
+            uart_packet_crc = uart_header_data[3];
+            uart_header_iterator++;
+            //printf("UDM: new buffer %" PRIu16 " bytes, uart version %" PRIXX8 ", crc %" PRIXX8 "\n", uart_data_length, uart_header_data[0], uart_packet_crc);
             return 1;
          }
-      }
-      uart_iterator++;
-   }
 
-   if (uart_iterator == UART_DATA_LENGTH)
+   if (uart_data_iterator >= MAX_UART_DATA_LENGTH)
    {
-      uart_iterator = 0;
-      uart_packet_dump(uart_command_buf);
-      if (uart_command_buf[6] == UART_PROTOCOL_VERSION_V2)
-      {
-         if (uart_command_buf[26] == DATA_TYPE_COMMAND)
-         {
-            for (uint8_t i = 0; i < 16; i++)
-            {
-               command_message.destination_address.u8[i] = uart_command_buf[8 + i];
-            }
-            command_message.protocol_version = uart_command_buf[24];
-            command_message.device_version = uart_command_buf[25];
-            command_message.ability_target = uart_command_buf[27];
-            command_message.ability_number = uart_command_buf[28];
-            command_message.ability_state = uart_command_buf[29];
-            command_message.ready_to_send = 1;
-         }
-
-         if (uart_command_buf[26] == DATA_TYPE_FIRMWARE)
-         {
-            for (uint8_t i = 0; i < 16; i++)
-            {
-               firmware_message.destination_address.u8[i] = uart_command_buf[8 + i];
-            }
-            firmware_message.protocol_version = uart_command_buf[24];
-            firmware_message.device_version = uart_command_buf[25];
-            firmware_message.chunk_number_b1 = uart_command_buf[27];
-            firmware_message.chunk_number_b2 = uart_command_buf[28];
-            firmware_message.reserved_b1 = uart_command_buf[29];
-            firmware_message.reserved_b2 = uart_command_buf[30];
-            for (uint8_t i = 0; i < FIRMWARE_PAYLOAD_LENGTH; i++)
-            {
-               firmware_message.firmware_payload.data[i] = uart_command_buf[31 + i];
-            }
-            firmware_message.ready_to_send = 1;
-         }
-
-         if (uart_command_buf[26] == DATA_TYPE_FIRMWARE_CMD)
-         {
-            for (uint8_t i = 0; i < 16; i++)
-            {
-               firmware_cmd_message.destination_address.u8[i] = uart_command_buf[8 + i];
-            }
-            firmware_cmd_message.protocol_version = uart_command_buf[24];
-            firmware_cmd_message.device_version = uart_command_buf[25];
-            firmware_cmd_message.firmware_command = uart_command_buf[27];
-            firmware_cmd_message.chunk_quantity_b1 = uart_command_buf[28];
-            firmware_cmd_message.chunk_quantity_b2 = uart_command_buf[29];
-            firmware_cmd_message.ready_to_send = 1;
-         }
-
-         if (uart_command_buf[26] == DATA_TYPE_UART)
-         {
-            for (uint8_t i = 0; i < 16; i++)
-            {
-               uart_message.destination_address.u8[i] = uart_command_buf[8 + i];
-            }
-            uart_message.protocol_version = uart_command_buf[24];
-            uart_message.device_version = uart_command_buf[25];
-            uart_message.data_lenth = uart_command_buf[27];
-            uart_message.returned_data_lenth = uart_command_buf[28];
-            for (uint8_t i = 0; i < 16; i++)
-            {
-               uart_message.payload[i] = uart_command_buf[29 + i];
-            }
-            uart_message.ready_to_send = 1;
-         }
-      }
-      else
-      {
-         printf("UDCP: Incompatible protocol version: %" PRIXX8 "!\n", uart_command_buf[6]);
-      }
-
+      printf("UDM: too big packet size\n");
+      uart_header_iterator = 0;
+      uart_data_iterator = 0;
+      uart_data_length = 0;
+      uart_packet_crc = 0;
+      return 1;
    }
+
+   if (uart_data_length > 0) //Read uart data
+   {
+      //printf("UDM: New byte(%"PRIu16"/%"PRIu16") in buffer: %" PRIXX8 "\n", uart_data_iterator, uart_data_length, uart_char);
+      uart_data[uart_data_iterator] = uart_char;
+      uart_data_iterator++;
+   }
+
+   if (uart_data_length > 0 && uart_data_iterator == uart_data_length) //Convert uart data after full buffer
+   {
+      //printf("UDM: end packet\n");
+      //uart_packet_dump(uart_data, uart_data_length);
+
+      uart_packet_processed(uart_data, uart_data_length);
+
+      uart_header_iterator = 0;
+      uart_data_iterator = 0;
+      uart_data_length = 0;
+      uart_packet_crc = 0;
+      return 1;
+   }
+
+
+
 
    return 1;
 }

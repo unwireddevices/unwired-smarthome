@@ -385,28 +385,35 @@ end
 --/*---------------------------------------------------------------------------*/--
 
 function uart_send(bin_data)
-	--print("Send packet:"..bin_data:tohex())
+	local packet_data = bin_data
 
-	bin_data = UART_PV2_START_MQ:fromhex()..UART_PROTOCOL_VERSION_V2:fromhex()..UART_FF_DATA:fromhex()..bin_data
+	local uart_packet_size = #bin_data
+	local max_packet_size = 1500
 
-	local packet_size = 255
-
-	if (#bin_data > packet_size) then
+	if (#bin_data > max_packet_size) then
 		print("Too big packet size")
 		return
 	end
 
-	local diff = packet_size - #bin_data
-	while (diff > 0) do
-		diff = diff - 1 
-		bin_data = bin_data.."\xFF"
+	local uart_packet_size_hex = bindechex.Dec2Hex(uart_packet_size)
+	if (#uart_packet_size_hex == 1) then uart_packet_size_hex = "000"..uart_packet_size_hex
+	elseif (#uart_packet_size_hex == 2) then uart_packet_size_hex = "00"..uart_packet_size_hex
+	elseif (#uart_packet_size_hex == 3) then uart_packet_size_hex = "0"..uart_packet_size_hex
 	end
+
+	uart_packet_size_hex_b1 = string.sub(uart_packet_size_hex, 1, 2)
+	uart_packet_size_hex_b2 = string.sub(uart_packet_size_hex, 3, 4)
+
+	local preamble = UART_PV2_START_MQ:fromhex()..UART_PROTOCOL_VERSION_V3:fromhex()..uart_packet_size_hex_b2:fromhex()..uart_packet_size_hex_b1:fromhex()..UART_FF_DATA:fromhex()
+	bin_data = preamble..bin_data
+
+	--print("Send packet:\n"..preamble:tohex().."\n"..packet_data:tohex().."\nPacket size: "..#packet_data..", uart packet size: "..#bin_data.."\n")
 
 	local table_segments = data_cut(bin_data, 25)
 	for i = 1, #table_segments do 
 		p:write(table_segments[i])
 		socket.sleep(0.006)
-	end
+	end 
 end
 
 --/*---------------------------------------------------------------------------*/--
@@ -470,6 +477,7 @@ function send_firmware_new_fw_cmd_to_node(ipv6_adress, table_segments)
 	elseif (#chunk_quantity_hex == 3) then chunk_quantity_hex = "0"..chunk_quantity_hex
 	end
 
+	--raw_print(chunk_quantity_hex, chunk_quantity)
 
 	local bin_data = ""
 	bin_data = bin_data..adress:fromhex()
@@ -669,8 +677,8 @@ function fw_cmd_data_processing(ipv6_adress, data)
 	end
 
 	local chunk_quantity = #ota_image_table_segments
-	send_firmware_chunk_to_node(ipv6_adress, firmware_bin_chunk)
 	print("FW OTA processing module: send to node chunk "..chunk_number_lua_style.."/"..chunk_quantity.." (c-iter: "..chunk_number_c_style..")")
+	send_firmware_chunk_to_node(ipv6_adress, firmware_bin_chunk)
 
 	if (tonumber(chunk_number_lua_style) == tonumber(chunk_quantity)) then
 		print("End chunks")
@@ -823,7 +831,7 @@ end
 --/*---------------------------------------------------------------------------*/--
 
 function main_cycle(limit)
-	local _, data_read, packet
+	local _, data_read, packet, message
 	local end_time, now_time = 0, 0
 	local buffer = {}
 	if (limit ~= nil) then
@@ -872,19 +880,15 @@ function firmware_update()
 	end
 	local image_file_bin_data = handle:read("*a")
 	handle:close()
-	local chunk_size = 100--224
+	local chunk_size = 600
 	ota_image_table_segments = data_cut(image_file_bin_data, chunk_size)
 	chunk_quantity = #ota_image_table_segments
 
-	local diff = chunk_size - #ota_image_table_segments[chunk_quantity]
-	while (diff > 0) do
-		diff = diff - 1 
-		ota_image_table_segments[chunk_quantity] = ota_image_table_segments[chunk_quantity].."\xFF"
-	end
+	local addition_ff = (("FF"):fromhex()):rep(chunk_size - #ota_image_table_segments[chunk_quantity])
+	ota_image_table_segments[chunk_quantity] = ota_image_table_segments[chunk_quantity]..addition_ff
 
 	send_firmware_new_fw_cmd_to_node(address, ota_image_table_segments)
 	print("Send DATA_TYPE_FIRMWARE_COMMAND_NEW_FW command, "..chunk_quantity.." chunks, size "..chunk_size)
-	main_cycle()
 end
 
 --/*---------------------------------------------------------------------------*/--
@@ -927,6 +931,7 @@ elseif (arg[1] == "firmware_update") then
 		return
 	end
 	firmware_update()
+	main_cycle()
 elseif (arg[1] == "main") then
 	main_cycle()
 elseif (arg[1] == "monitor") then
