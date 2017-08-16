@@ -1190,8 +1190,8 @@ PROCESS_THREAD(dag_node_process, ev, data)
       if (verify_ota_slot(0) == VERIFY_SLOT_CRC_ERROR)
       {
          printf("FW OTA: bad golden image, write current FW\n");
-         backup_golden_image();
          send_message_packet(DEVICE_MESSAGE_OTA_BAD_GOLDEN_IMAGE);
+         //backup_golden_image();
 
       }
    }
