@@ -9,7 +9,7 @@
 #define MAX_NUM_QUEUED_PACKETS 2
 MEMB(packets_memb, struct uip_packetqueue_packet, MAX_NUM_QUEUED_PACKETS);
 
-#define DEBUG DEBUG_FULL
+#define DEBUG 0
 #if DEBUG
 #include <stdio.h>
 #define PRINTF(...) printf(__VA_ARGS__)

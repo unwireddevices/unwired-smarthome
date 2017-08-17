@@ -1080,7 +1080,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
 
       }
 
-      etimer_set( &fw_timer_delay_chunk, (CLOCK_SECOND/3) ); //Таймер задержки перед запросом следующего чанка
+      etimer_set( &fw_timer_delay_chunk, (CLOCK_SECOND*2) ); //Таймер задержки перед запросом следующего чанка
       PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&fw_timer_delay_chunk) );
    }
 
