@@ -331,6 +331,11 @@ function print(data)
 	io.flush()
 end
 
+function print_n(data)
+	io.write(data or "")
+	io.flush()
+end
+
 --/*---------------------------------------------------------------------------*/--
 
 function update_ts_channels(address, voltage, uptime)
@@ -842,6 +847,7 @@ function main_cycle(limit)
  	while (main_cycle_permit == 1) do
 		_, data_read = p:read(1, 200)
 		if (data_read ~= nil) then			
+			--print_n(data_read)			
 			add_byte_to_buffer(buffer, data_read)
 			local buffer_state = get_buffer(buffer)
 			_, _, packet = string.find(buffer_state, "(DAGROOTRAW1"..('.'):rep(78).."RAWEND)")
