@@ -29,7 +29,7 @@
  *
  */
 
-#define DEBUG DEBUG_NONE
+#define DEBUG DEBUG_FULL
 #include "net/ip/uip-debug.h"
 
 #include "contiki.h"

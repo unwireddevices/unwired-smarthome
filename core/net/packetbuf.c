@@ -63,7 +63,7 @@ static uint8_t hdrlen;
 static uint32_t packetbuf_aligned[(PACKETBUF_SIZE + 3) / 4];
 static uint8_t *packetbuf = (uint8_t *)packetbuf_aligned;
 
-#define DEBUG 0
+#define DEBUG DEBUG_FULL
 #if DEBUG
 #include <stdio.h>
 #define PRINTF(...) printf(__VA_ARGS__)
