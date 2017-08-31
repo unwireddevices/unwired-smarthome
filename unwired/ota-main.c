@@ -289,6 +289,7 @@ backup_golden_image()
        chunk = chunk + chunk_size;
     }
     PRINTF("Write GM page %"PRIu32"\n", page);
+    watchdog_periodic();
 
   }
 
@@ -702,6 +703,7 @@ erase_ota_image( uint8_t ota_slot )
   for (page=0; page<25; page++) {
     PRINTF("[OTA]: Erasing page %"PRIu32" at 0x%"PRIX32"..\n", page, (( ota_image_base_address + page ) << 12));
     while( erase_extflash_page( (( ota_image_base_address + page ) << 12) ) );
+    watchdog_periodic();
   }
   PRINTF("[OTA]: OTA slot erased");
 
