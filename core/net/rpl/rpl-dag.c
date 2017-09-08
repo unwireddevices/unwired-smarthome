@@ -58,7 +58,7 @@
 #include <limits.h>
 #include <string.h>
 
-#define DEBUG DEBUG_NONE
+//#define DEBUG 1
 #include "net/ip/uip-debug.h"
 
 /* A configurable function called after every RPL parent switch */
