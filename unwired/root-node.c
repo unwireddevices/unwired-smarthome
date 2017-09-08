@@ -63,11 +63,15 @@
 #include "xxf_types_helper.h"
 #include "dev/watchdog.h"
 #include "root-node.h"
-
+#include "lpm.h"
 
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
 #define UART_DATA_POLL_INTERVAL 5 //in main timer ticks, one tick ~8ms
+
+static uint8_t lpm_mode_return(void);
+
+LPM_MODULE(root_lpm_module, lpm_mode_return, NULL, NULL, LPM_DOMAIN_NONE);
 
 /*---------------------------------------------------------------------------*/
 
@@ -76,6 +80,13 @@ uint8_t uart_magic_sequence[MAGIC_SEQUENCE_LENGTH] = {MAGIC_SEQUENCE};
 uint8_t uart_data[MAX_UART_DATA_LENGTH];
 
 PROCESS(send_command_process,"UDP command sender");
+
+/*---------------------------------------------------------------------------*/
+
+static uint8_t lpm_mode_return(void)
+{
+  return LPM_MODE_AWAKE;
+}
 
 /*---------------------------------------------------------------------------*/
 
@@ -245,6 +256,9 @@ void root_node_initialize()
    /* blink-blink LED */
    led_blink(LED_A);
    led_blink(LED_A);
+
+   /* set LPM mode to always awake */
+   lpm_register_module(&root_lpm_module);
 
    /* start flag "data for udp ready" poller process */
    process_start(&send_command_process, NULL);
