@@ -100,8 +100,8 @@
 #define LONG_STATUS_INTERVAL            (20 * 60 * CLOCK_SECOND)
 #define ROOT_FIND_INTERVAL                    (5 * CLOCK_SECOND)
 #define ROOT_FIND_LIMIT_TIME             (2 * 60 * CLOCK_SECOND)
-#define FW_DELAY                              (3 * CLOCK_SECOND)
-#define FW_DELAY_DEADLINE                     (2 * CLOCK_SECOND)
+#define FW_DELAY                             (15 * CLOCK_SECOND)
+#define FW_MAX_ERROR_COUNTER                    10
 
 #define MODE_NORMAL                             0x01
 #define MODE_NOTROOT                            0x02
@@ -1067,16 +1067,16 @@ PROCESS_THREAD(fw_update_process, ev, data)
          return 0;
       }
 
-      etimer_set( &fw_timer, FW_DELAY); //Таймер, который сбрасывается при получении пакета
-      etimer_set( &fw_timer_deadline, FW_DELAY_DEADLINE); //Таймер максимального ожидания
+      etimer_set( &fw_timer, FW_DELAY + 1); //Таймер, который сбрасывается при получении пакета
+      etimer_set( &fw_timer_deadline, FW_DELAY); //Таймер максимального ожидания
 
       PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&fw_timer) ); //Ждем сброса таймера после получения пакета или истечения времени ожидания пакета
 
       if (etimer_expired(&fw_timer_deadline) && (chunk_num < fw_chunk_quantity)) //Если истек таймер максимального ожидания(fw_timer_deadline)
       {
-         if (fw_error_counter > 4)
+         if (fw_error_counter > FW_MAX_ERROR_COUNTER)
          {
-            printf("FW OTA: Not delivered chunk(>5 errors), exit\n");
+            printf("FW OTA: Not delivered chunk(>%"PRId8" errors), exit\n", FW_MAX_ERROR_COUNTER);
             send_message_packet(DEVICE_MESSAGE_OTA_NOT_DELIVERED_CHUNK);
             process_exit(&fw_update_process);
             chunk_num = 0;
