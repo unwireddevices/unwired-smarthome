@@ -655,7 +655,11 @@ end
 function message_data_processing(ipv6_adress, data)
 	--print("Error status processing module")
 	print("MDPM: message packet from "..ipv6_adress..":")
-	print(" Message: "..device_message_type[data.b1])
+	if (data.b1 == DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS) then
+		print(" "..device_message_type[data.b1]..", page "..(bindechex.Hex2Dec(data.b2)).."/24")
+	else
+		print(" "..device_message_type[data.b1])
+	end
 	print("\n")
 end
 
