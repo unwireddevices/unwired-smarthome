@@ -29,7 +29,7 @@ root:
 	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 root-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o root-firmware.hex -intel
 	rm root.hex
 
-light: net-bootloader-clean
+light: net-bootloader
 	CONF="NOLEAF"; \
 	touch /tmp/unwired_last_conf; \
 	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean; \
@@ -65,6 +65,9 @@ clean:
 	
 net-bootloader-clean: 
 	cd ../bootloader && make clean && make -j5 CPU=$(CPU) bootloader.hex
+	
+net-bootloader: 
+	cd ../bootloader && make -j5 CPU=$(CPU) bootloader.hex
 	
 light-fb: light-CLEAN
 	while true; do ../../tools/backdoor-bootloader.py -e -w -v light-firmware.hex && break; done;
