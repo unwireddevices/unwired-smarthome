@@ -1012,9 +1012,6 @@ PROCESS_THREAD(fw_update_process, ev, data)
      printf("[OTA]: Erasing page %"PRIu32" at 0x%"PRIX32"..\n", page, (( ota_images[0] + page ) << 12));
      while( erase_extflash_page( (( ota_images[0] + page ) << 12) ) );
 
-     if(!(page % 3))
-     {
-     }
      send_message_packet(DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS, page);
      etimer_set( &ota_image_erase_timer, (CLOCK_SECOND/3) );
      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&ota_image_erase_timer) );
