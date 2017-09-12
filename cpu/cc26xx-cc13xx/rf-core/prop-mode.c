@@ -145,12 +145,13 @@ static int8_t rssi_threshold = PROP_MODE_RSSI_THRESHOLD;
 /*---------------------------------------------------------------------------*/
 static int on(void);
 static int off(void);
+static uint8_t rf_cmd_prop_rx();
 
 static rfc_propRxOutput_t rx_stats;
 /*---------------------------------------------------------------------------*/
 /* Defines and variables related to the .15.4g PHY HDR */
-#define DOT_4G_MAX_FRAME_LEN    2047
 #define DOT_4G_PHR_LEN             2
+#define DOT_4G_MAX_FRAME_LEN       ((NETSTACK_RADIO_MAX_PAYLOAD_LEN) + DOT_4G_PHR_LEN)
 
 /* PHY HDR bits */
 #define DOT_4G_PHR_CRC16  0x10
@@ -223,7 +224,20 @@ const output_config_t *tx_power_current = &output_power[1];
 #define DATA_ENTRY_LENSZ_BYTE 1
 #define DATA_ENTRY_LENSZ_WORD 2 /* 2 bytes */
 
-#define RX_BUF_SIZE 140
+
+/* -1: Do not count the dummy data byte in the entry */
+#define RX_BUF_ENTRY_HEADER_SIZE   (sizeof(rfc_dataEntryGeneral_t) - 1)
+
+/* 2 bytes length: config.lenSz = DATA_ENTRY_LENSZ_WORD */
+#define RX_BUF_PKT_LEN_SIZE        2
+
+/* + 1 byte RSSI + 1 byte status: .bAppendRssi = 1, .bAppendStatus = 1 */
+#define RX_BUF_APPENDED_BYTES      (RX_BUF_PKT_LEN_SIZE + 1 + 1)
+
+#define RX_BUF_DATA_SECTION_SIZE   (DOT_4G_MAX_FRAME_LEN + RX_BUF_APPENDED_BYTES)
+
+#define ALIGN_PADDING(length) (4-((length)%4)) // Padding offset
+#define RX_BUF_SIZE (RX_BUF_ENTRY_HEADER_SIZE + RX_BUF_DATA_SECTION_SIZE + ALIGN_PADDING(RX_BUF_ENTRY_HEADER_SIZE + RX_BUF_DATA_SECTION_SIZE))
 /* Receive buffers: 1 frame in each */
 static uint8_t rx_buf_0[RX_BUF_SIZE] CC_ALIGN(4);
 static uint8_t rx_buf_1[RX_BUF_SIZE] CC_ALIGN(4);
@@ -240,6 +254,16 @@ volatile static uint8_t *rx_read_entry;
 
 static uint8_t tx_buf[TX_BUF_HDR_LEN + TX_BUF_PAYLOAD_LEN] CC_ALIGN(4);
 /*---------------------------------------------------------------------------*/
+static void
+rf_check_rx_err()
+{
+  if (smartrf_settings_cmd_prop_rx_adv.status == RF_CORE_RADIO_OP_STATUS_PROP_ERROR_RXBUF)
+  {
+    PRINTF("RXQ full, re-enabling radio!\n");
+    (void)rf_cmd_prop_rx();
+  }
+}
+/*---------------------------------------------------------------------------*/
 static uint8_t
 rf_is_on(void)
 {
@@ -247,6 +271,7 @@ rf_is_on(void)
     return 0;
   }
 
+  rf_check_rx_err();
   return smartrf_settings_cmd_prop_rx_adv.status == RF_CORE_RADIO_OP_STATUS_ACTIVE;
 }
 /*---------------------------------------------------------------------------*/
@@ -402,7 +427,7 @@ rf_cmd_prop_rx()
    * Set the max Packet length. This is for the payload only, therefore
    * 2047 - length offset
    */
-  cmd_rx_adv->maxPktLen = DOT_4G_MAX_FRAME_LEN - cmd_rx_adv->lenOffset;
+  cmd_rx_adv->maxPktLen = DOT_4G_MAX_FRAME_LEN;
 
   ret = rf_core_send_cmd((uint32_t)cmd_rx_adv, &cmd_status);
 
@@ -582,14 +607,14 @@ init(void)
   entry->status = DATA_ENTRY_STATUS_PENDING;
   entry->config.type = DATA_ENTRY_TYPE_GEN;
   entry->config.lenSz = DATA_ENTRY_LENSZ_WORD;
-  entry->length = RX_BUF_SIZE - 8;
+  entry->length = RX_BUF_DATA_SECTION_SIZE;
   entry->pNextEntry = rx_buf_1;
 
   entry = (rfc_dataEntry_t *)rx_buf_1;
   entry->status = DATA_ENTRY_STATUS_PENDING;
   entry->config.type = DATA_ENTRY_TYPE_GEN;
   entry->config.lenSz = DATA_ENTRY_LENSZ_WORD;
-  entry->length = RX_BUF_SIZE - 8;
+  entry->length = RX_BUF_DATA_SECTION_SIZE;
   entry->pNextEntry = rx_buf_0;
 
   /* Set of RF Core data queue. Circular buffer, no last entry */
@@ -754,8 +779,8 @@ read_frame(void *buf, unsigned short buf_len)
      * This length includes all of those.
      */
     len = (*(uint16_t *)data_ptr);
-    data_ptr += 2;
-    len -= 2;
+    data_ptr += RX_BUF_PKT_LEN_SIZE;
+    len -= RX_BUF_PKT_LEN_SIZE;
 
     if(len > 0) {
       if(len <= buf_len) {
@@ -771,6 +796,7 @@ read_frame(void *buf, unsigned short buf_len)
     entry->status = DATA_ENTRY_STATUS_PENDING;
   }
 
+  rf_check_rx_err();
   return len;
 }
 /*---------------------------------------------------------------------------*/
