@@ -957,17 +957,8 @@ PROCESS_THREAD(status_send_process, ev, data)
          if (rpl_parent_is_reachable(dag->preferred_parent) == 0)
          {
             printf("DAG Node: Parent is not reachable\n");
-            //node_mode = MODE_RPL_PROBING;
             watchdog_reboot();
-            //ti_lib_sys_ctrl_system_reset() //new reset?
-
-            //rpl_local_repair(dag->instance);
-            //uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
-            //printf("RPL: parent ip address: ");
-            //uip_debug_ipaddr_print(ipaddr_parent);
-            //printf("\n");
          }
-
 
          const uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
          const struct link_stats *stat_parent = rpl_get_parent_link_stats(dag->preferred_parent);
@@ -979,9 +970,6 @@ PROCESS_THREAD(status_send_process, ev, data)
          }
          non_answered_packet++;
          printf("DAG Node: Non-answered packet counter increase(status message): %"PRId8" \n", non_answered_packet);
-
-         //printf("DAG Node: TEST REBOOT. WARNING!\n"); // <<<<<<==================================================!!!!
-         //watchdog_reboot(); // <<<<<<==================================================!!!!
       }
 
       if (CLASS == CLASS_B)
@@ -1028,10 +1016,8 @@ PROCESS_THREAD(fw_update_process, ev, data)
      {
      }
      send_message_packet(DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS, page);
-
      etimer_set( &ota_image_erase_timer, (CLOCK_SECOND/3) );
      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&ota_image_erase_timer) );
-
    }
    printf("[OTA]: OTA slot 1 erased\n");
 
