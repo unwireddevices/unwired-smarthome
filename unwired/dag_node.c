@@ -100,8 +100,8 @@
 #define LONG_STATUS_INTERVAL            (20 * 60 * CLOCK_SECOND)
 #define ROOT_FIND_INTERVAL                    (5 * CLOCK_SECOND)
 #define ROOT_FIND_LIMIT_TIME             (2 * 60 * CLOCK_SECOND)
-#define FW_DELAY                             (15 * CLOCK_SECOND)
-#define FW_MAX_ERROR_COUNTER                    10
+#define FW_DELAY                              (2 * CLOCK_SECOND)
+#define FW_MAX_ERROR_COUNTER                    5
 
 #define MODE_NORMAL                             0x01
 #define MODE_NOTROOT                            0x02
