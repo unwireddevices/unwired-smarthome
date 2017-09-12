@@ -102,7 +102,7 @@ SENSORS(&button_e_sensor_click,
 
 /* register dimmer process */
 PROCESS(main_process, "Incotext-light control process");
-PROCESS(send_data_process, "uart-data send process");
+PROCESS(send_data_process, "Uart-data send process");
 
 /* set autostart processes */
 AUTOSTART_PROCESSES(&dag_node_process, &main_process, &send_data_process);
