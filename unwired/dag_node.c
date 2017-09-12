@@ -1090,10 +1090,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
             chunk_num--;
             printf("FW OTA: Request %"PRId16"/%"PRId16" chunk again(%"PRId8" errors)\n", chunk_num + 1, fw_chunk_quantity, fw_error_counter);
          }
-
-
       }
-
       etimer_set( &fw_timer_delay_chunk, (CLOCK_SECOND/3) ); //Таймер задержки перед запросом следующего чанка
       PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&fw_timer_delay_chunk) );
    }
