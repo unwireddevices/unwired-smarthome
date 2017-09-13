@@ -1186,8 +1186,8 @@ PROCESS_THREAD(dag_node_process, ev, data)
       {
          printf("FW OTA: bad golden image, write current FW\n");
          send_message_packet(DEVICE_MESSAGE_OTA_BAD_GOLDEN_IMAGE, DATA_RESERVED);
-         //backup_golden_image();
-
+         backup_golden_image();
+         watchdog_reboot();
       }
    }
 
