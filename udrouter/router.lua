@@ -620,6 +620,10 @@ end
 
 function status_data_processing(ipv6_adress, data)
 	--print("Status data processing module")
+	if (flag_non_status_message ~= nil) then
+		return
+	end
+
 	local ipv6_adress_parent_short = data.b1..data.b2..":"..data.b3..data.b4..":"..data.b5..data.b6..":"..data.b7..data.b8
 
 	local uptime = tonumber(bindechex.Hex2Dec((data.b12 or 00)..(data.b11 or 00)..(data.b10 or 00)..(data.b9 or 00)))
@@ -936,6 +940,7 @@ if (arg[1] == "uart_asuno_test") then
 	local command, address, delay = arg[3], arg[2], arg[4]
 	send_uart_command(command, address, delay)
 elseif (arg[1] == "firmware_update") then
+	flag_non_status_message = "true"
 	if (arg[2] == nil or arg[3] == nil) then
 		print("use:\trouter.lua firmware_update fd00:0000:0000:0000:0212:4b00:0f0a:8b9b image_file")
 		return
