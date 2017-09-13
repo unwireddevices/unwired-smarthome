@@ -450,7 +450,7 @@ static void udp_receiver(struct simple_udp_connection *c,
             }
             else
             {
-               send_message_packet(DEVICE_MESSAGE_OTA_SPI_NOTACTIVE, DATA_RESERVED);
+               send_message_packet(DEVICE_MESSAGE_OTA_SPI_NOTACTIVE, DATA_NONE);
                printf("DAG Node: OTA update not processed, spi flash not-active\n");
             }
 
@@ -1043,7 +1043,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
          else
          {
             printf("FW OTA: New FW in OTA slot 1 non-correct CRC\n");
-            send_message_packet(DEVICE_MESSAGE_OTA_NONCORRECT_CRC, DATA_RESERVED);
+            send_message_packet(DEVICE_MESSAGE_OTA_NONCORRECT_CRC, DATA_NONE);
          }
          process_exit(&fw_update_process);
          lpm_unregister_module(&dag_lpm_module);
@@ -1060,7 +1060,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
          if (fw_error_counter > FW_MAX_ERROR_COUNTER)
          {
             printf("FW OTA: Not delivered chunk(>%"PRId8" errors), exit\n", FW_MAX_ERROR_COUNTER);
-            send_message_packet(DEVICE_MESSAGE_OTA_NOT_DELIVERED_CHUNK, DATA_RESERVED);
+            send_message_packet(DEVICE_MESSAGE_OTA_NOT_DELIVERED_CHUNK, DATA_NONE);
             process_exit(&fw_update_process);
             chunk_num = 0;
             fw_error_counter = 0;
@@ -1185,7 +1185,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
       if (verify_ota_slot(0) == VERIFY_SLOT_CRC_ERROR)
       {
          printf("FW OTA: bad golden image, write current FW\n");
-         send_message_packet(DEVICE_MESSAGE_OTA_BAD_GOLDEN_IMAGE, DATA_RESERVED);
+         send_message_packet(DEVICE_MESSAGE_OTA_BAD_GOLDEN_IMAGE, DATA_NONE);
          backup_golden_image();
          watchdog_reboot();
       }
@@ -1197,7 +1197,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
       //uint8_t write_flag_result = write_fw_flag(FW_FLAG_PING_OK);
       //if (write_flag_result == FLAG_ERROR_WRITE) { watchdog_reboot(); }
       printf("DAG Node: OTA flag changed to FW_FLAG_PING_OK\n");
-      send_message_packet(DEVICE_MESSAGE_OTA_UPDATE_SUCCESS, DATA_RESERVED);
+      send_message_packet(DEVICE_MESSAGE_OTA_UPDATE_SUCCESS, DATA_NONE);
    }
 
    PROCESS_END();

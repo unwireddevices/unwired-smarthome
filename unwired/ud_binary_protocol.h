@@ -29,6 +29,7 @@
 
 /* Reserved data */
 #define DATA_RESERVED                                           0xFF
+#define DATA_NONE                                               DATA_RESERVED
 
 /* Devices groups */
 /* Показывает только общее назначение устройства */
