@@ -657,19 +657,35 @@ end
 --/*---------------------------------------------------------------------------*/--
 
 function message_data_processing(ipv6_adress, data)
-	--print("Error status processing module")
-	print("MDPM: message packet from "..ipv6_adress..":")
-	if (data.b1 == DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS) then
-		print(" "..device_message_type[data.b1]..", page "..(bindechex.Hex2Dec(data.b2)).."/24")
-	else
-		print(" "..device_message_type[data.b1])
+	--print("Message status processing module")
+
+	if (message_data_processing_flag_n == nil) then
+		print("\n")
+		message_data_processing_flag_n = " "		
 	end
-	print("\n")
+	
+	if (data.b1 == DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS) then
+		print_n("\r"..device_message_type[data.b1].." from "..ipv6_adress..": page "..(bindechex.Hex2Dec(data.b2)).."/24")
+	elseif (data.b1 == DEVICE_MESSAGE_OTA_UPDATE_SUCCESS) then
+		print("MDPM: message packet from "..ipv6_adress..": "..device_message_type[data.b1])
+		print("\n")
+		os.exit(0)
+	else
+		print("MDPM: message packet from "..ipv6_adress..":")
+		print(" "..device_message_type[data.b1])
+		print("\n")
+	end
+	
 end
 
 --/*---------------------------------------------------------------------------*/--
 
 function fw_cmd_data_processing(ipv6_adress, data)
+	if (fw_cmd_data_processing_flag_n == nil) then
+		print("\n")
+		fw_cmd_data_processing_flag_n = " "
+	end
+
 	local chunk_number_c_style = tonumber(bindechex.Hex2Dec((data.b3 or 00)..(data.b2 or 00)))
 	local chunk_number_lua_style = chunk_number_c_style + 1
 
@@ -690,7 +706,7 @@ function fw_cmd_data_processing(ipv6_adress, data)
 	end
 
 	local chunk_quantity = #ota_image_table_segments
-	print("FW OTA processing module: send to node chunk "..chunk_number_lua_style.."/"..chunk_quantity.." (c-iter: "..chunk_number_c_style..")")
+	print_n("\rFW OTA processing module: send to node chunk "..chunk_number_lua_style.."/"..chunk_quantity)
 	send_firmware_chunk_to_node(ipv6_adress, firmware_bin_chunk)
 
 	if (tonumber(chunk_number_lua_style) == tonumber(chunk_quantity)) then
