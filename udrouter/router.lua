@@ -338,6 +338,16 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
+function colors(color)
+	if (color == "red") then
+		io.write(string.char(27,91,51,49,109))
+	elseif (color == "none") then
+		io.write(string.char(27,91,48,109))
+	end
+end
+
+--/*---------------------------------------------------------------------------*/--
+
 function update_ts_channels(address, voltage, uptime)
 	if api_keys[address] == nil then return end
 	local command = 'wget --no-check-certificate --wait=20 --random-wait --dns-timeout=5 --connect-timeout=10 --tries=0 --output-document=- "https://api.thingspeak.com/update?api_key='..api_keys[address]..'&field2='..voltage..'&field1='..uptime..'" &>/dev/null &'
@@ -931,7 +941,9 @@ else
 	f:close()
 end
 
+colors("red")
 print("RPL-router version "..ver..", uart protocol version: "..uart_version.."\n")
+colors("none")
 
 e, p = rs232.open(port_name)
 if e ~= rs232.RS232_ERR_NOERROR then
