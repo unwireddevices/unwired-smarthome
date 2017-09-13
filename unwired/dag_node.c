@@ -403,7 +403,7 @@ static void udp_receiver(struct simple_udp_connection *c,
          }
          printf("\n\n");
          */
-         printf("DAG Node: DATA_TYPE_FIRMWARE packet received(%"PRIu16" bytes)\n", datalen - FIRMWARE_PAYLOAD_OFFSET);
+         printf(" Firmware packet received(%"PRIu16" bytes)", datalen - FIRMWARE_PAYLOAD_OFFSET);
 
          uint8_t flash_write_buffer[FIRMWARE_PAYLOAD_LENGTH];
 
@@ -1021,7 +1021,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
      etimer_set( &ota_image_erase_timer, (CLOCK_SECOND/20) );
      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&ota_image_erase_timer) );
    }
-   printf("\n[OTA]: OTA slot 1 erased\n");
+   printf("\r[OTA]: OTA slot 1 erased                        \n");
 
 
    /* Начинаем процесс обновления */
@@ -1032,22 +1032,22 @@ PROCESS_THREAD(fw_update_process, ev, data)
       if (chunk_num < fw_chunk_quantity) //Если остались незапрошенные пакеты
       {
          send_fw_chunk_req_packet(chunk_num);
-         printf("FW OTA: Request %"PRId16"/%"PRId16" chunk... ", chunk_num + 1, fw_chunk_quantity);
+         printf("\r[OTA]: Request %"PRId16"/%"PRId16" chunk... ", chunk_num + 1, fw_chunk_quantity);
          chunk_num++;
       }
       else //Если все пакеты запрошены
       {
-         printf("FW OTA: End chunks, exit\n");
+         printf("\n[OTA]: End chunks\n");
          chunk_num = 0;
          fw_error_counter = 0;
          if (verify_ota_slot(1) == CORRECT_CRC){
-            printf("FW OTA: New FW in OTA slot 1 correct CRC, set FW_FLAG_NEW_IMG_EXT, reboot\n");
+            printf("[OTA]: New FW in OTA slot 1 correct CRC, set FW_FLAG_NEW_IMG_EXT, reboot\n");
             write_fw_flag(FW_FLAG_NEW_IMG_EXT);
             ti_lib_sys_ctrl_system_reset();
          }
          else
          {
-            printf("FW OTA: New FW in OTA slot 1 non-correct CRC\n");
+            printf("[OTA]: New FW in OTA slot 1 non-correct CRC\n");
             send_message_packet(DEVICE_MESSAGE_OTA_NONCORRECT_CRC, DATA_NONE);
          }
          process_exit(&fw_update_process);
@@ -1064,7 +1064,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
       {
          if (fw_error_counter > FW_MAX_ERROR_COUNTER)
          {
-            printf("FW OTA: Not delivered chunk(>%"PRId8" errors), exit\n", FW_MAX_ERROR_COUNTER);
+            printf("[OTA]: Not delivered chunk(>%"PRId8" errors), exit\n", FW_MAX_ERROR_COUNTER);
             send_message_packet(DEVICE_MESSAGE_OTA_NOT_DELIVERED_CHUNK, DATA_NONE);
             process_exit(&fw_update_process);
             chunk_num = 0;
@@ -1076,7 +1076,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
          {
             fw_error_counter++;
             chunk_num--;
-            printf("FW OTA: Request %"PRId16"/%"PRId16" chunk again(%"PRId8" errors)\n", chunk_num + 1, fw_chunk_quantity, fw_error_counter);
+            printf("[OTA]: Request %"PRId16"/%"PRId16" chunk again(%"PRId8" errors)\n", chunk_num + 1, fw_chunk_quantity, fw_error_counter);
          }
       }
       etimer_set( &fw_timer_delay_chunk, (CLOCK_SECOND/20) ); //Таймер задержки перед запросом следующего чанка
@@ -1189,7 +1189,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
    {
       if (verify_ota_slot(0) == VERIFY_SLOT_CRC_ERROR)
       {
-         printf("FW OTA: bad golden image, write current FW\n");
+         printf("[OTA]: bad golden image, write current FW\n");
          send_message_packet(DEVICE_MESSAGE_OTA_BAD_GOLDEN_IMAGE, DATA_NONE);
          backup_golden_image();
          watchdog_reboot();
