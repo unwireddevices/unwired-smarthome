@@ -453,8 +453,14 @@ static void udp_receiver(struct simple_udp_connection *c,
                send_message_packet(DEVICE_MESSAGE_OTA_SPI_NOTACTIVE, DATA_NONE);
                printf("DAG Node: OTA update not processed, spi flash not-active\n");
             }
-
-
+         }
+         if (data[3] == DATA_TYPE_FIRMWARE_COMMAND_REBOOT)
+         {
+            watchdog_reboot();
+         }
+         if (data[3] == DATA_TYPE_FIRMWARE_COMMAND_CLEAN_GI)
+         {
+            erase_ota_image(0);
          }
       }
 

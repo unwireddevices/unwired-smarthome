@@ -145,6 +145,9 @@
 /* DATA_TYPE_FIRMWARE commands  */
 #define DATA_TYPE_FIRMWARE_COMMAND_NEW_FW                       0x01 //Сообщение о наличии новой прошивки
 #define DATA_TYPE_FIRMWARE_COMMAND_CHANK_REQ                    0x02 //Запрос пакета с частью прошивки
+#define DATA_TYPE_FIRMWARE_COMMAND_REBOOT                       0x03 //Перезагрузка. Серьезно, без этого комментария не понятно?
+#define DATA_TYPE_FIRMWARE_COMMAND_CLEAN_GI                     0x04 //Стереть образ GI. Будет записан после перезагрузки.
+
 
 #define FIRMWARE_PAYLOAD_LENGTH                                 600
 #define FIRMWARE_PAYLOAD_OFFSET                                 7
