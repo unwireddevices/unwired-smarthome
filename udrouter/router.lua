@@ -884,8 +884,8 @@ end
 --/*---------------------------------------------------------------------------*/--
 
 function firmware_update()	
-	local address = arg[2]
-	local image_file = arg[3]
+	local image_file = arg[2]
+	local address = arg[3]
 
 	local handle, err = io.open(image_file,"r")
 	if (err ~= nil) then
@@ -939,10 +939,10 @@ if (arg[1] == "uart_asuno_test") then
 	end
 	local command, address, delay = arg[3], arg[2], arg[4]
 	send_uart_command(command, address, delay)
-elseif (arg[1] == "firmware_update") then
+elseif (arg[1] == "fw") then
 	flag_non_status_message = "true"
 	if (arg[2] == nil or arg[3] == nil) then
-		print("use:\trouter.lua firmware_update fd00:0000:0000:0000:0212:4b00:0f0a:8b9b image_file")
+		print("use:\trouter.lua fw image_file fd00:0000:0000:0000:0212:4b00:0f0a:8b9b fd00:0000:0000:0000:0212:4b00:0f0a:8b9b ...")
 		return
 	end
 	firmware_update()
@@ -967,6 +967,6 @@ hex_data = "FD0000000000000002124B000F0A8B9B01010CFFFFFFFFBEE6BEE6A4ED00003412CD
 elseif (arg[1] == "monitor") then
 	port_monitor()
 else
-	print("Use:\trouter.lua main \t\tstart main loop(data parse/show)\n\trouter.lua firmware_update \tsend firmware file to node\n\trouter.lua uart_asuno_test \tsend uart asuno command to node\n\trouter.lua monitor \t\tstart port monitor\n")
+	print("Use:\trouter.lua main \t\tstart main loop(data parse/show)\n\trouter.lua fw \tsend firmware file to node\n\trouter.lua uart_asuno_test \tsend uart asuno command to node\n\trouter.lua monitor \t\tstart port monitor\n")
 end
 
