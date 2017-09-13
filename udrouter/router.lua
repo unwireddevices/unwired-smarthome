@@ -305,6 +305,7 @@ local pid = posix.getpid()
 local start_time = 0
 local state = "all_on"
 local main_cycle_permit = 1
+local device_list = {}
 
 --/*---------------------------------------------------------------------------*/--
 
@@ -604,6 +605,10 @@ end
 
 function join_data_processing(ipv6_adress, data)
 	--print("Join data processing module")
+	if (flag_non_status_join_message ~= nil) then
+		return
+	end
+
 	local current_device_group = data.b1 or "no device_group"
 	local current_sleep_type = data.b2 or "no sleep_type"
 	local ability_1 = data.b3 or "no ability_1"
@@ -630,7 +635,7 @@ end
 
 function status_data_processing(ipv6_adress, data)
 	--print("Status data processing module")
-	if (flag_non_status_message ~= nil) then
+	if (flag_non_status_join_message ~= nil) then
 		return
 	end
 
@@ -670,7 +675,7 @@ function message_data_processing(ipv6_adress, data)
 	--print("Message status processing module")
 
 	if (message_data_processing_flag_n == nil) then
-		print("\n")
+		print_n("\n")
 		message_data_processing_flag_n = " "		
 	end
 	
@@ -678,12 +683,12 @@ function message_data_processing(ipv6_adress, data)
 		print_n("\r"..device_message_type[data.b1].." from "..ipv6_adress..": page "..(bindechex.Hex2Dec(data.b2)).."/24")
 	elseif (data.b1 == DEVICE_MESSAGE_OTA_UPDATE_SUCCESS) then
 		print("MDPM: message packet from "..ipv6_adress..": "..device_message_type[data.b1])
-		print("\n")
-		os.exit(0)
+		print_n("\n")
+		main_cycle_permit = 0
 	else
 		print("MDPM: message packet from "..ipv6_adress..":")
 		print(" "..device_message_type[data.b1])
-		print("\n")
+		print_n("\n")
 	end
 	
 end
@@ -692,7 +697,7 @@ end
 
 function fw_cmd_data_processing(ipv6_adress, data)
 	if (fw_cmd_data_processing_flag_n == nil) then
-		print("\n")
+		print_n("\n")
 		fw_cmd_data_processing_flag_n = " "
 	end
 
@@ -720,10 +725,25 @@ function fw_cmd_data_processing(ipv6_adress, data)
 	send_firmware_chunk_to_node(ipv6_adress, firmware_bin_chunk)
 
 	if (tonumber(chunk_number_lua_style) == tonumber(chunk_quantity)) then
-		print("End chunks")
+		print(". End chunks\n")
 		--os.exit(0)
 	end
 end
+
+--/*---------------------------------------------------------------------------*/--
+
+function packet_processing_see_adresses(a)
+	local ipv6_adress = a[1]..a[2]..":"..a[3]..a[4]..":"..a[5]..a[6]..":"..a[7]..a[8]..":"..a[9]..a[10]..":"..a[11]..a[12]..":"..a[13]..a[14]..":"..a[15]..a[16]
+
+	for i = 1, #device_list do 
+		if (ipv6_adress == device_list[i]) then
+			return
+		end
+	end
+	device_list[#device_list+1] = ipv6_adress
+	print(ipv6_adress)
+end
+
 
 --/*---------------------------------------------------------------------------*/--
 
@@ -768,7 +788,7 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function packet_parse(packet)
+function packet_parse(packet, packet_processing_alt)
 	--print("Packet parse module")
 	--print("Packet parse start: +"..(socket.gettime()*1000 - start_time).." ms")
 	local adress_capturing_all = "(%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w)"
@@ -784,7 +804,11 @@ function packet_parse(packet)
 		_, end_1, a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15],a[16]  = string.find(adress, adress_capturing)
 		_, end_2, d.p_version,d.dev_version,d.d_type,d.b1,d.b2,d.b3,d.b4,d.b5,d.b6,d.b7,d.b8,d.b9,d.b10,d.b11,d.b12,d.b13,d.b14,d.b15,d.b16,d.b17,d.b18,d.b19,d.b20 = string.find(raw_data, data_capturing)
 		if (end_1 ~= nil and end_2 ~= nil) then
-			packet_processing(a, d)
+			if (packet_processing_alt == nil) then
+				packet_processing(a, d)
+			else
+				packet_processing_alt(a, d)
+			end
 		else
 			print(string.format("Not parse adress(%s) or data(%s) in packet"), tostring(end_1), tostring(end_2))
 			print(packet)
@@ -869,7 +893,7 @@ end
 	
 --/*---------------------------------------------------------------------------*/--
 
-function main_cycle(limit)
+function main_cycle(limit, adresses_print_mode)
 	local _, data_read, packet, message
 	local end_time, now_time = 0, 0
 	local buffer = {}
@@ -887,7 +911,11 @@ function main_cycle(limit)
 			_, _, packet = string.find(buffer_state, "(DAGROOTRAW1"..('.'):rep(78).."RAWEND)")
 			if (packet ~= nil) then
 				led("on")
-				packet_parse(packet)
+				if adresses_print_mode ~= nil then
+					packet_parse(packet, packet_processing_see_adresses)
+				else
+					packet_parse(packet)
+				end
 				led("off")
 			end
 			_, _, message = string.find(buffer_state, "(UDM:.+\n)")
@@ -909,10 +937,7 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function firmware_update()	
-	local image_file = arg[2]
-	local address = arg[3]
-
+function firmware_update(image_file, address)	
 	local handle, err = io.open(image_file,"r")
 	if (err ~= nil) then
 		print("Error open file")
@@ -968,13 +993,24 @@ if (arg[1] == "uart_asuno_test") then
 	local command, address, delay = arg[3], arg[2], arg[4]
 	send_uart_command(command, address, delay)
 elseif (arg[1] == "fw") then
-	flag_non_status_message = "true"
 	if (arg[2] == nil or arg[3] == nil) then
 		print("use:\trouter.lua fw image_file fd00:0000:0000:0000:0212:4b00:0f0a:8b9b fd00:0000:0000:0000:0212:4b00:0f0a:8b9b ...")
 		return
 	end
-	firmware_update()
-	main_cycle()
+	flag_non_status_join_message = "true"
+	local image_file = arg[2]
+	for i = 3, #arg do 
+		main_cycle_permit = 1
+		fw_cmd_data_processing_flag_n = nil
+		firmware_update(image_file, arg[i])
+		main_cycle()
+		colors("red")
+		print("Update device "..arg[i].."("..(i-2).."/"..(#arg-2)..") success!\n")
+		colors("none")
+	end 
+	return
+elseif (arg[1] == "device_list") then
+	main_cycle(nil, 1)
 elseif (arg[1] == "main") then
 	main_cycle()
 elseif (arg[1] == "monitor") then
