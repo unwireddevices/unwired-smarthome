@@ -1015,14 +1015,14 @@ PROCESS_THREAD(fw_update_process, ev, data)
    printf("[OTA]: Erasing OTA slot 1 [%#x, %#x)...\n", (ota_images[0]<<12), ((ota_images[0]+25)<<12));
    for (page=0; page<25; page++)
    {
-     printf("[OTA]: Erasing page %"PRIu32" at 0x%"PRIX32"..\n", page, (( ota_images[0] + page ) << 12));
+     printf("\r[OTA]: Erasing page %"PRIu32" at 0x%"PRIX32"..", page, (( ota_images[0] + page ) << 12));
      while( erase_extflash_page( (( ota_images[0] + page ) << 12) ) );
 
      send_message_packet(DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS, page);
      etimer_set( &ota_image_erase_timer, (CLOCK_SECOND/20) );
      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&ota_image_erase_timer) );
    }
-   printf("[OTA]: OTA slot 1 erased\n");
+   printf("\n[OTA]: OTA slot 1 erased\n");
 
 
    /* Начинаем процесс обновления */
@@ -1033,7 +1033,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
       if (chunk_num < fw_chunk_quantity) //Если остались незапрошенные пакеты
       {
          send_fw_chunk_req_packet(chunk_num);
-         printf("FW OTA: Request %"PRId16"/%"PRId16" chunk\n", chunk_num + 1, fw_chunk_quantity);
+         printf("FW OTA: Request %"PRId16"/%"PRId16" chunk... ", chunk_num + 1, fw_chunk_quantity);
          chunk_num++;
       }
       else //Если все пакеты запрошены
