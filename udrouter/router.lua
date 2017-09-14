@@ -328,6 +328,12 @@ function print_n(data)
 	io.flush()
 end
 
+function print_red(data)
+	colors("red")
+	print(data)
+	colors("none")
+end
+
 --/*---------------------------------------------------------------------------*/--
 
 function colors(color)
@@ -956,9 +962,7 @@ else
 	f:close()
 end
 
-colors("red")
-print("RPL-router version "..ver..", uart protocol version: "..uart_version.."\n")
-colors("none")
+print_red("RPL-router version "..ver..", uart protocol version: "..uart_version.."\n")
 
 e, p = rs232.open(port_name)
 if e ~= rs232.RS232_ERR_NOERROR then
@@ -993,10 +997,7 @@ elseif (arg[1] == "fw") then
 		main_cycle_permit = 1
 		fw_cmd_data_processing_flag_n = nil
 		firmware_update(image_file, arg[i])
-		main_cycle()
-		colors("red")
-		print("Update device "..arg[i].."("..(i-2).."/"..(#arg-2)..") success!\n")
-		colors("none")
+		print_red("Update device "..arg[i].."("..(i-2).."/"..(#arg-2)..") success!\n")
 	end 
 	return
 elseif (arg[1] == "device_list") then
