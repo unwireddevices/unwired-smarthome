@@ -1004,7 +1004,7 @@ elseif (arg[1] == "fw") then
 		main_cycle_permit = 1
 		fw_cmd_data_processing_flag_n = nil
 		firmware_update(image_file, arg[i])
-		limit_wait_firmware_update_success = 5*60
+		limit_wait_firmware_update_success = 4*60
 		status = main_cycle(limit_wait_firmware_update_success)
 		if (status == 1) then
 			print_red("\nUpdate device "..arg[i].."("..(i-2).."/"..(#arg-2)..") failed(success message limit reached)\n")
