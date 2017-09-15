@@ -5,9 +5,9 @@ local rs232 = require("rs232") -- Последняя версия для Lua 5.2
 
 local socket = require("socket") -- Сокеты просто ставятся через luarocks: luarocks install luasocket
 
+-- Программа DSLite — часть пакета Uniflash, которы можно скачать тут: http://processors.wiki.ti.com/index.php/Category:CCS_UniFlash
 -- Адрес порта, к которому подключена плата, и адрес прошивки указывается в параметрах командной строки: ./program.lua image_file port_name
 -- Переменная с адресом распложена в строке 124
-
 --/*---------------------------------------------------------------------------*/--
 
 local uart_cycle_permit = 1
