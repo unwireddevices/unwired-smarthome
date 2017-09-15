@@ -417,7 +417,11 @@ function uart_send(bin_data)
 	uart_packet_size_hex_b1 = string.sub(uart_packet_size_hex, 1, 2)
 	uart_packet_size_hex_b2 = string.sub(uart_packet_size_hex, 3, 4)
 
-	local preamble = UART_PV2_START_MQ:fromhex()..UART_PROTOCOL_VERSION_V3:fromhex()..uart_packet_size_hex_b2:fromhex()..uart_packet_size_hex_b1:fromhex()..UART_FF_DATA:fromhex()
+	local preamble = UART_PV2_START_MQ:fromhex()..
+						UART_PROTOCOL_VERSION_V3:fromhex()..
+						uart_packet_size_hex_b2:fromhex()..
+						uart_packet_size_hex_b1:fromhex()..
+						UART_FF_DATA:fromhex()
 	bin_data = preamble..bin_data
 
 	--print("Send packet:\n"..preamble:tohex().."\n"..packet_data:tohex().."\nPacket size: "..#packet_data..", uart packet size: "..#bin_data.."\n")
