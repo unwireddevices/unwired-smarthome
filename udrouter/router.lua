@@ -893,13 +893,14 @@ end
 function main_cycle(limit, adresses_print_mode)
 	local _, data_read, packet, message
 	local end_time, now_time = 0, 0
+	local main_cycle_limit_reached = 0
 	local buffer = {}
 	if (limit ~= nil) then
 		now_time = socket.gettime()*1000
 		end_time = now_time+(limit*1000)
 	end
 
- 	while (main_cycle_permit == 1) do
+ 	while (main_cycle_permit == 1 and main_cycle_limit_reached == 0) do
 		_, data_read = p:read(1, 200)
 		if (data_read ~= nil) then			
 			--print_n(data_read)			
@@ -926,10 +927,11 @@ function main_cycle(limit, adresses_print_mode)
 		if (limit ~= nil) then
 			now_time = socket.gettime()*1000
 			if (now_time > end_time) then
-				main_cycle_permit = 0
+				main_cycle_limit_reached = 1
 			end
 		end
 	end
+	return main_cycle_limit_reached
 end
 
 --/*---------------------------------------------------------------------------*/--
@@ -997,7 +999,13 @@ elseif (arg[1] == "fw") then
 		main_cycle_permit = 1
 		fw_cmd_data_processing_flag_n = nil
 		firmware_update(image_file, arg[i])
-		print_red("Update device "..arg[i].."("..(i-2).."/"..(#arg-2)..") success!\n")
+		limit_wait_firmware_update_success = 5*60
+		status = main_cycle(limit_wait_firmware_update_success)
+		if (status == 1) then
+			print_red("Update device "..arg[i].."("..(i-2).."/"..(#arg-2)..") failed(success message limit reached)\n")
+		else
+			print_red("Update device "..arg[i].."("..(i-2).."/"..(#arg-2)..") success\n")
+		end
 	end 
 	return
 elseif (arg[1] == "device_list") then
