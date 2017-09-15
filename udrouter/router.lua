@@ -373,7 +373,7 @@ function ipv6_adress_parse(ipv6_adress)
 	if (end_1 ~= nil) then
 		return a[1]..a[2]..a[3]..a[4]..a[5]..a[6]..a[7]..a[8]..a[9]..a[10]..a[11]..a[12]..a[13]..a[14]..a[15]..a[16]
 	else
-		print("IV6P: Adress parse error "..ipv6_adress)
+		print("\nIV6P: Adress parse error "..ipv6_adress)
 		return nil
 	end
 end
@@ -1015,6 +1015,9 @@ elseif (arg[1] == "main") then
 elseif (arg[1] == "monitor") then
 	port_monitor()
 else
-	print("Use:\trouter.lua main \t\tstart main loop(data parse/show)\n\trouter.lua fw \tsend firmware file to node\n\trouter.lua uart_asuno_test \tsend uart asuno command to node\n\trouter.lua monitor \t\tstart port monitor\n")
+	print([[Use:\trouter.lua main \t\tstart main loop(data parse/show)\n
+		\trouter.lua fw \tsend firmware file to node\n\
+		trouter.lua uart_asuno_test \tsend uart asuno command to node\n\
+			trouter.lua monitor \t\tstart port monitor\n]])
 end
 
