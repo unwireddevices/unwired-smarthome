@@ -8,6 +8,8 @@ local bindechex = require("bindechex")
 local posix = require("posix")
 local version = require("version") 
 local logic = require("logic") 
+local lanes = require "lanes".configure()
+local linda = lanes.linda()
 
 --/*---------------------------------------------------------------------------*/--
 
@@ -297,6 +299,7 @@ local start_time = 0
 local state = "all_on"
 local main_cycle_permit = 1
 local device_list = {}
+local update_device_list = {}
 
 --/*---------------------------------------------------------------------------*/--
 
@@ -734,16 +737,31 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function packet_processing_see_adresses(a)
+function packet_processing_see_adresses(a, data)
 	local ipv6_adress = a[1]..a[2]..":"..a[3]..a[4]..":"..a[5]..a[6]..":"..a[7]..a[8]..":"..a[9]..a[10]..":"..a[11]..a[12]..":"..a[13]..a[14]..":"..a[15]..a[16]
+	local ota_flag = ""
+	if (data.p_version == PROTOCOL_VERSION_V1 and data.dev_version == DEVICE_VERSION_V1) then
+		if data.d_type == DATA_TYPE_STATUS then
+			local version = bindechex.Hex2Dec(data.b17 or 00).."."..bindechex.Hex2Dec(data.b18 or 00)
+			
+			if (data.b19 == "01") then
+				ota_flag = "active"
+			else
+				ota_flag = "not-active"
+			end
 
-	for i = 1, #device_list do 
-		if (ipv6_adress == device_list[i]) then
-			return
+			for i = 1, #device_list do 
+				if (ipv6_adress == device_list[i]) then
+					return
+				end
+			end
+			device_list[#device_list+1] = ipv6_adress
+			if (ota_flag == "active") then
+				update_device_list[#update_device_list+1] = ipv6_adress
+			end
+			print("Device "..#device_list..", adress: "..ipv6_adress..", version "..version..", OTA: "..ota_flag)
 		end
 	end
-	device_list[#device_list+1] = ipv6_adress
-	print(ipv6_adress)
 end
 
 
@@ -895,6 +913,14 @@ end
 	
 --/*---------------------------------------------------------------------------*/--
 
+function lanes_io_input()
+	if io.read() == "q" then
+	    linda:set("exit_flag", "exit")
+	end
+end
+
+--/*---------------------------------------------------------------------------*/--
+
 function main_cycle(limit, adresses_print_mode)
 	local _, data_read, packet, message
 	local end_time, now_time = 0, 0
@@ -936,6 +962,13 @@ function main_cycle(limit, adresses_print_mode)
 				main_cycle_limit_reached = 1
 			end
 		end
+
+		exit_flag = linda:get("exit_flag")
+		if (exit_flag ~= nil) then
+			main_cycle_permit = 0
+			linda:set("exit_flag", nil)
+		end
+
 	end
 	return main_cycle_limit_reached
 end
@@ -1014,9 +1047,29 @@ elseif (arg[1] == "fw") then
 			print_red("Update device "..arg[i].."("..(i-2).."/"..(#arg-2)..") success\n")
 		end
 	end 
-	return
-elseif (arg[1] == "device_list") then
+elseif (arg[1] == "bulk_update") then
+	if (arg[2] == nil) then
+		print("use:\trouter.lua bulk_update image_file")
+		return
+	end
+	print("Please, wait status messages or reboot all devices. Press Q to go to update")
+	a = lanes.gen("*",lanes_io_input)()
 	main_cycle(nil, 1)
+	flag_non_status_join_message = "true"
+	local image_file = arg[2]
+	for i = 1, #update_device_list do 
+		main_cycle_permit = 1
+		fw_cmd_data_processing_flag_n = nil
+		firmware_update(image_file, update_device_list[i])
+		limit_wait_firmware_update_success = 4*60
+		status = main_cycle(limit_wait_firmware_update_success)
+		if (status == 1) then
+			print_red("\nUpdate device "..update_device_list[i].."("..(i-2).."/"..(#update_device_list-2)..") failed(success message limit reached)\n")
+		else
+			print_red("Update device "..update_device_list[i].."("..(i-2).."/"..(#update_device_list-2)..") success\n")
+		end
+	end 
+
 elseif (arg[1] == "main") then
 	main_cycle()
 elseif (arg[1] == "monitor") then
