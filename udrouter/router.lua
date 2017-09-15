@@ -899,6 +899,7 @@ function main_cycle(limit, adresses_print_mode)
 	local _, data_read, packet, message
 	local end_time, now_time = 0, 0
 	local main_cycle_limit_reached = 0
+	main_cycle_permit = 1
 	local buffer = {}
 	if (limit ~= nil) then
 		now_time = socket.gettime()*1000
