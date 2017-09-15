@@ -671,18 +671,19 @@ end
 function message_data_processing(ipv6_adress, data)
 	--print("Message status processing module")
 
-	if (message_data_processing_flag_n == nil) then
-		print_n("\n")
-		message_data_processing_flag_n = " "		
-	end
+
 	
 	if (data.b1 == DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS) then
 		print_n("\r"..device_message_type[data.b1].." from "..ipv6_adress..": page "..(bindechex.Hex2Dec(data.b2)).."/24")
 	elseif (data.b1 == DEVICE_MESSAGE_OTA_UPDATE_SUCCESS) then
-		print("MDPM: message packet from "..ipv6_adress..": "..device_message_type[data.b1])
 		print_n("\n")
+		print("MDPM: message packet from "..ipv6_adress..": "..device_message_type[data.b1])
 		main_cycle_permit = 0
 	else
+		if (message_data_processing_flag_n == nil) then
+			print_n("\n")
+			message_data_processing_flag_n = " "		
+		end
 		print("MDPM: message packet from "..ipv6_adress..":")
 		print(" "..device_message_type[data.b1])
 		print_n("\n")
@@ -1002,7 +1003,7 @@ elseif (arg[1] == "fw") then
 		limit_wait_firmware_update_success = 5*60
 		status = main_cycle(limit_wait_firmware_update_success)
 		if (status == 1) then
-			print_red("Update device "..arg[i].."("..(i-2).."/"..(#arg-2)..") failed(success message limit reached)\n")
+			print_red("\nUpdate device "..arg[i].."("..(i-2).."/"..(#arg-2)..") failed(success message limit reached)\n")
 		else
 			print_red("Update device "..arg[i].."("..(i-2).."/"..(#arg-2)..") success\n")
 		end
@@ -1015,9 +1016,9 @@ elseif (arg[1] == "main") then
 elseif (arg[1] == "monitor") then
 	port_monitor()
 else
-	print([[Use:\trouter.lua main \t\tstart main loop(data parse/show)\n
-		\trouter.lua fw \tsend firmware file to node\n\
-		trouter.lua uart_asuno_test \tsend uart asuno command to node\n\
-			trouter.lua monitor \t\tstart port monitor\n]])
+	print("Use:\trouter.lua main \t\tstart main loop(data parse/show)")
+	print("\trouter.lua fw \t\t\tsend firmware file to node")
+	print("\trouter.lua uart_asuno_test \tsend uart asuno command to node")
+	print("\trouter.lua monitor \t\tstart port monitor\n")
 end
 
