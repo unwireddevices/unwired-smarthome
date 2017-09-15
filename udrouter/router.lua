@@ -956,6 +956,7 @@ function firmware_update(image_file, address)
 	local addition_ff = (("FF"):fromhex()):rep(chunk_size - #ota_image_table_segments[chunk_quantity])
 	ota_image_table_segments[chunk_quantity] = ota_image_table_segments[chunk_quantity]..addition_ff
 
+	print_n("Send new FW command to node "..address)
 	send_firmware_new_fw_cmd_to_node(address, ota_image_table_segments)
 end
 
