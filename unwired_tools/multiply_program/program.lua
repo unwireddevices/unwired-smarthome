@@ -15,10 +15,10 @@ local path = "/Applications/ti/Uniflash/" -- Адрес папки с прило
 local executable = "ccs_base/DebugServer/bin/DSLite" -- Путь к исполняемому файлу приложения-программатора
 
 -- cc1310f128.ccxml и cc2650f128.ccxml лежат рядом с этим файлом, для других контроллеров их надо достать из Uniflash
-local cmd_flash_cc1310_mode = path..executable..' flash --config cc1310f128.ccxml --load-settings generated.ufsettings --verbose --flash --verify'
-local cmd_reboot_cc1310_mode = path..executable..' memory --config cc1310f128.ccxml --verbose --output /dev/null --range 0,1'
-local cmd_flash_cc2650_mode = path..executable..' flash --config cc2650f128.ccxml --load-settings generated.ufsettings --verbose --flash --verify'
-local cmd_reboot_cc2650_mode = path..executable..' memory --config cc2650f128.ccxml --verbose --output /dev/null --range 0,1'
+local cmd_flash_cc1310_mode = path..executable..' flash --config cc1310f128.ccxml --load-settings generated.ufsettings --verbose --flash --verify ' --пробел в конце нужен.
+local cmd_reboot_cc1310_mode = path..executable..' memory --config cc1310f128.ccxml --verbose --output /dev/null --range 0,1 ' --и тут тоже
+local cmd_flash_cc2650_mode = path..executable..' flash --config cc2650f128.ccxml --load-settings generated.ufsettings --verbose --flash --verify '
+local cmd_reboot_cc2650_mode = path..executable..' memory --config cc2650f128.ccxml --verbose --output /dev/null --range 0,1 '
 local redirection_command = " 2>&1"
 
 --/*---------------------------------------------------------------------------*/--
@@ -154,10 +154,9 @@ function flash_reboot(image_file)
         cmd_flash = cmd_flash_cc1310_mode
         cmd_reboot = cmd_reboot_cc1310_mode
     else
-        if (controller_type == "cc2650") then
-            print("Controller type error, please, set cc1310 or cc2650")
-        end
-    return
+       print("Controller type error, please, set cc1310 or cc2650")
+       return "ERROR"
+    end
 
     local status_flash = flash_result_parse(exe_command(cmd_flash..image_file..redirection_command))
     if (status_flash ~= "Success") then
@@ -189,7 +188,7 @@ if (arg[1] == nil or arg[2] == nil) then
 end
 
 if arg[1] == nil then controller_type = "cc1310" else controller_type = arg[1] end
-if arg[2] == nil then image_file = " light-firmware.hex.example" else image_file = arg[2] end
+if arg[2] == nil then image_file = "light-firmware.hex.example" else image_file = arg[2] end
 if arg[3] == nil then port_name = "/dev/tty.SLAB_USBtoUART" else port_name = arg[3] end
 
 while (true) do
