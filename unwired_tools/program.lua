@@ -175,7 +175,7 @@ port_name = arg[2]
 while (true) do
 
     local status_flash_reboot = flash_reboot(image_file)
-    if (status_flash_reboot ~= "OK") then
+    if (status_flash_reboot == "OK") then
         local status = uart_cycle(20)
         if (status == 0) then
             print("Device is flashed and loaded successfully")
