@@ -178,7 +178,7 @@ while (true) do
     if (status_flash_reboot == "OK") then
         local status = uart_cycle(20)
         if (status == 0) then
-            print("Device is flashed and loaded successfully")
+            print("Device is flashed and boot successfully")
         else
             print("Device is flashed, and not boot or not correct message")
         end
