@@ -1057,16 +1057,16 @@ elseif (arg[1] == "bulk_update") then
 	main_cycle(nil, 1)
 	flag_non_status_join_message = "true"
 	local image_file = arg[2]
-	for i = 1, #update_device_list do 
+	for i = 1, #update_device_list do 	
 		main_cycle_permit = 1
 		fw_cmd_data_processing_flag_n = nil
 		firmware_update(image_file, update_device_list[i])
 		limit_wait_firmware_update_success = 4*60
 		status = main_cycle(limit_wait_firmware_update_success)
 		if (status == 1) then
-			print_red("\nUpdate device "..update_device_list[i].."("..(i-2).."/"..(#update_device_list-2)..") failed(success message limit reached)\n")
+			print_red("\nUpdate device "..update_device_list[i].."("..(i).."/"..(#update_device_list)..") failed(success message limit reached)\n")
 		else
-			print_red("Update device "..update_device_list[i].."("..(i-2).."/"..(#update_device_list-2)..") success\n")
+			print_red("Update device "..update_device_list[i].."("..(i).."/"..(#update_device_list)..") success\n")
 		end
 	end 
 
@@ -1076,7 +1076,8 @@ elseif (arg[1] == "monitor") then
 	port_monitor()
 else
 	print("Use:\trouter.lua main \t\tstart main loop(data parse/show)")
-	print("\trouter.lua fw \t\t\tsend firmware file to node")
+	print("\trouter.lua fw \t\t\tsend firmware file to nodes")
+	print("\trouter.lua bulk_update file \t\tupdate many nodes")
 	print("\trouter.lua uart_asuno_test \tsend uart asuno command to node")
 	print("\trouter.lua monitor \t\tstart port monitor\n")
 end
