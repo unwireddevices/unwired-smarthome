@@ -201,7 +201,7 @@ device_message_type[DEVICE_MESSAGE_OTA_UPDATE_SUCCESS] 	        = "OTA: Update s
 --/*---------------------------------------------------------------------------*/--
 
 DATA_TYPE_FIRMWARE_COMMAND_NEW_FW              =         "01" --Сообщение о наличии новой прошивки
-DATA_TYPE_FIRMWARE_COMMAND_chunk_REQ           =         "02" --Запрос пакета с частью прошивки
+DATA_TYPE_FIRMWARE_COMMAND_chunk_REQ           =         "02" --Запрос пакета с частью прошивки ???????
 
 PROTOCOL_VERSION_V1            =     "01"
 DEVICE_VERSION_V1              =     "01"
