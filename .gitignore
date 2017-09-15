@@ -142,3 +142,4 @@ LOG_OPENOCD
 /unwired/incotex/light-ota-image.binary
 /unwired/incotex/light-ota-chunks
 /udrouter/version.lua
+/.vscode
