@@ -485,7 +485,7 @@ end
 --/*---------------------------------------------------------------------------*/--
 
 function send_firmware_new_fw_cmd_to_node(ipv6_adress, table_segments)
-	local adress = ipv6_adress_parse(ipv6_adress)
+	local adress = ipv6_adress_parse(ipv6_adress) or ""
 	local chunk_quantity = #table_segments
 
 	local chunk_quantity_hex = bindechex.Dec2Hex(chunk_quantity)
