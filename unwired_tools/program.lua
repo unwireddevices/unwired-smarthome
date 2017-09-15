@@ -1,13 +1,13 @@
 #!/usr/local/bin/lua
 
 local rs232 = require("rs232") -- Последняя версия для Lua 5.2 и собираемая под винду: https://github.com/moteus/librs232
--- Там же есть файл rockspecs/rs232-0.1.0-1.rockspec, который можно подсунуть luarocks, после чего он должен все собрать автоматически: luarocks install rs232-0.1.0-1.rockspec
+-- Там же есть файл rockspecs/rs232-0.1.0-1.rockspec, который можно подсунуть luarocks, после чего он должен все собрать автоматически: luarocks install .,./rs232-0.1.0-1.rockspec
 
 local socket = require("socket") -- Сокеты просто ставятся через luarocks: luarocks install luasocket
 
--- Программа DSLite — часть пакета Uniflash, которы можно скачать тут: http://processors.wiki.ti.com/index.php/Category:CCS_UniFlash
--- Адрес порта, к которому подключена плата, и адрес прошивки указывается в параметрах командной строки: ./program.lua image_file port_name
--- Переменная с адресом распложена в строке 124
+-- Программа DSLite — часть пакета Uniflash, который можно скачать тут: http://processors.wiki.ti.com/index.php/Category:CCS_UniFlash
+-- Адрес порта, к которому подключена плата, тип контроллера и адрес прошивки указывается в параметрах командной строки: ./program.lua controller_type image_file port_name
+-- Переменная с адресом расположена в строке 130
 --/*---------------------------------------------------------------------------*/--
 
 local uart_cycle_permit = 1
