@@ -6,8 +6,8 @@ local rs232 = require("luars232")
 local socket = require("socket")
 local bindechex = require("bindechex")
 local posix = require("posix")
-local version = require("version") 
-local logic = require("logic") 
+local version = require("version")
+local logic = require("logic")
 local lanes = require "lanes".configure()
 local linda = lanes.linda()
 
@@ -181,7 +181,7 @@ device_message_type[DEVICE_MESSAGE_ERROR_ON_RELAY] 	         	= "Warning: error 
 
 DEVICE_MESSAGE_ERROR_OFF_RELAY               		      	    =           "06"
 device_message_type[DEVICE_MESSAGE_ERROR_OFF_RELAY] 	     	= "Warning: error off relay"
- 
+
 DEVICE_MESSAGE_OTA_SPI_NOTACTIVE             					=           "07"
 device_message_type[DEVICE_MESSAGE_OTA_SPI_NOTACTIVE] 			= "OTA: External flash not active"
 
@@ -304,7 +304,7 @@ local update_device_list = {}
 --/*---------------------------------------------------------------------------*/--
 
 function string.fromhex(str)
-    local str = string.gsub(str, " ", "") 
+    local str = string.gsub(str, " ", "")
     return (str:gsub('..', function (cc)
         return string.char(tonumber(cc, 16))
     end))
@@ -388,7 +388,7 @@ function data_cut(all_data, segment_len)
   local data_len = string.len(all_data)
   local i = 1
   local data = {}
-  repeat 
+  repeat
     data_len = string.len(all_data)
     local data_sub = string.sub(all_data, 0, max_len)
     all_data = string.sub(all_data, max_len+1)
@@ -430,10 +430,10 @@ function uart_send(bin_data)
 	--print("Send packet:\n"..preamble:tohex().."\n"..packet_data:tohex().."\nPacket size: "..#packet_data..", uart packet size: "..#bin_data.."\n")
 
 	local table_segments = data_cut(bin_data, 25)
-	for i = 1, #table_segments do 
+	for i = 1, #table_segments do
 		p:write(table_segments[i])
 		socket.sleep(0.006)
-	end 
+	end
 end
 
 --/*---------------------------------------------------------------------------*/--
@@ -527,7 +527,7 @@ function send_firmware_chunk_to_node(ipv6_adress, firmware_bin_chunk)
 
 	bin_data = bin_data..UART_FF_DATA:fromhex() --reserved
 	bin_data = bin_data..UART_FF_DATA:fromhex() --reserved
-	
+
 	bin_data = bin_data..firmware_bin_chunk
 
 	uart_send(bin_data)
@@ -555,7 +555,7 @@ function send_relay_command(ipv6_adress, relay_number, state)
 	elseif (relay_number == 2) then
 		ability_number = tostring("02")
 	end
-	
+
 	if (ability_state ~= nil) then
 		send_command_to_ability(ipv6_adress, DEVICE_ABILITY_RELAY, ability_number, ability_state)
 	else
@@ -568,7 +568,7 @@ end
 function motion_sensor_data_processing(ipv6_adress, sensor_number, sensor_event)
 	local current_event = device_motionsensor_events[sensor_event]
 	print(" MDPM: Motion sensor: "..sensor_number..", event: "..current_event)
-	
+
 	logic.motion_sensor_event_handler(ipv6_adress, sensor_number, current_event)
 end
 
@@ -679,7 +679,7 @@ function message_data_processing(ipv6_adress, data)
 	--print("Message status processing module")
 
 
-	
+
 	if (data.b1 == DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS) then
 		print_n("\r"..device_message_type[data.b1].." from "..ipv6_adress..": page "..(bindechex.Hex2Dec(data.b2)).."/24")
 	elseif (data.b1 == DEVICE_MESSAGE_OTA_UPDATE_SUCCESS) then
@@ -689,13 +689,13 @@ function message_data_processing(ipv6_adress, data)
 	else
 		if (message_data_processing_flag_n == nil) then
 			print_n("\n")
-			message_data_processing_flag_n = " "		
+			message_data_processing_flag_n = " "
 		end
 		print("MDPM: message packet from "..ipv6_adress..":")
 		print(" "..device_message_type[data.b1])
 		print_n("\n")
 	end
-	
+
 end
 
 --/*---------------------------------------------------------------------------*/--
@@ -750,7 +750,7 @@ function packet_processing_see_adresses(a, data)
 				ota_flag = "not-active"
 			end
 
-			for i = 1, #device_list do 
+			for i = 1, #device_list do
 				if (ipv6_adress == device_list[i]) then
 					return
 				end
@@ -820,7 +820,7 @@ function packet_parse(packet, packet_processing_alt)
 		local d = {}
 		local adress_capturing = "(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)"
 		local data_capturing = "(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)"
-		
+
 		_, end_1, a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15],a[16]  = string.find(adress, adress_capturing)
 		_, end_2, d.p_version,d.dev_version,d.d_type,d.b1,d.b2,d.b3,d.b4,d.b5,d.b6,d.b7,d.b8,d.b9,d.b10,d.b11,d.b12,d.b13,d.b14,d.b15,d.b16,d.b17,d.b18,d.b19,d.b20 = string.find(raw_data, data_capturing)
 		if (end_1 ~= nil and end_2 ~= nil) then
@@ -873,7 +873,7 @@ function add_byte_to_buffer(buffer, byte)
 end
 
 function clean_buffer(buffer)
-	for i = 1, #buffer do 
+	for i = 1, #buffer do
 		table.insert(buffer, 0)
 	end
 end
@@ -887,9 +887,9 @@ end
 function port_monitor()
  	while 1 do
 		_, data_read = p:read(1, 200)
-		if (data_read ~= nil) then	
+		if (data_read ~= nil) then
 			io.write(data_read)
-			io.flush()		
+			io.flush()
 		end
 	end
 end
@@ -901,7 +901,7 @@ function data_cut(all_data, segment_len)
   local data_len = string.len(all_data)
   local i = 1
   local data = {}
-  repeat 
+  repeat
     data_len = string.len(all_data)
     local data_sub = string.sub(all_data, 0, max_len)
     all_data = string.sub(all_data, max_len+1)
@@ -910,7 +910,7 @@ function data_cut(all_data, segment_len)
   until (data_len < max_len+1)
   return data
 end
-	
+
 --/*---------------------------------------------------------------------------*/--
 
 function lanes_io_input()
@@ -934,8 +934,8 @@ function main_cycle(limit, adresses_print_mode)
 
  	while (main_cycle_permit == 1 and main_cycle_limit_reached == 0) do
 		_, data_read = p:read(1, 200)
-		if (data_read ~= nil) then			
-			--print_n(data_read)			
+		if (data_read ~= nil) then
+			--print_n(data_read)
 			add_byte_to_buffer(buffer, data_read)
 			local buffer_state = get_buffer(buffer)
 			_, _, packet = string.find(buffer_state, "(DAGROOTRAW1"..('.'):rep(78).."RAWEND)")
@@ -975,7 +975,7 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function firmware_update(image_file, address)	
+function firmware_update(image_file, address)
 	local handle, err = io.open(image_file,"r")
 	if (err ~= nil) then
 		print("Error open file")
@@ -1017,7 +1017,7 @@ assert(p:set_baud_rate(rs232.RS232_BAUD_115200) == rs232.RS232_ERR_NOERROR)
 assert(p:set_data_bits(rs232.RS232_DATA_8) == rs232.RS232_ERR_NOERROR)
 assert(p:set_parity(rs232.RS232_PARITY_NONE) == rs232.RS232_ERR_NOERROR)
 assert(p:set_stop_bits(rs232.RS232_STOP_1) == rs232.RS232_ERR_NOERROR)
-assert(p:set_flow_control(rs232.RS232_FLOW_OFF)  == rs232.RS232_ERR_NOERROR)
+assert(p:set_flow_control(rs232.RS232_FLOW_OFF) == rs232.RS232_ERR_NOERROR)
 
 --/*---------------------------------------------------------------------------*/--
 
@@ -1035,7 +1035,7 @@ elseif (arg[1] == "fw") then
 	end
 	flag_non_status_join_message = "true"
 	local image_file = arg[2]
-	for i = 3, #arg do 
+	for i = 3, #arg do
 		main_cycle_permit = 1
 		fw_cmd_data_processing_flag_n = nil
 		firmware_update(image_file, arg[i])
@@ -1046,7 +1046,7 @@ elseif (arg[1] == "fw") then
 		else
 			print_red("Update device "..arg[i].."("..(i-2).."/"..(#arg-2)..") success\n")
 		end
-	end 
+	end
 elseif (arg[1] == "bulk_update") then
 	if (arg[2] == nil) then
 		print("use:\trouter.lua bulk_update image_file")
@@ -1057,7 +1057,7 @@ elseif (arg[1] == "bulk_update") then
 	main_cycle(nil, 1)
 	flag_non_status_join_message = "true"
 	local image_file = arg[2]
-	for i = 1, #update_device_list do 	
+	for i = 1, #update_device_list do
 		main_cycle_permit = 1
 		fw_cmd_data_processing_flag_n = nil
 		firmware_update(image_file, update_device_list[i])
@@ -1068,7 +1068,7 @@ elseif (arg[1] == "bulk_update") then
 		else
 			print_red("Update device "..update_device_list[i].."("..(i).."/"..(#update_device_list)..") success\n")
 		end
-	end 
+	end
 
 elseif (arg[1] == "main") then
 	main_cycle()
