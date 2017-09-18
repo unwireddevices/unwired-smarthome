@@ -60,7 +60,6 @@ void set_epoch_time(uint32_t epoch)
     {
         epoch_offset = epoch - current_uptime;
     }
-
 }
 
 /*---------------------------------------------------------------------------*/

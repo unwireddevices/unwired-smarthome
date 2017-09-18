@@ -147,7 +147,6 @@ uint32_t ota_image_current_offset = 0;
 
 rpl_dag_t *rpl_probing_dag;
 
-
 static uint8_t lpm_mode_return(void);
 
 LPM_MODULE(dag_lpm_module, lpm_mode_return, NULL, NULL, LPM_DOMAIN_NONE);

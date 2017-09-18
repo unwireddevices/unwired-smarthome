@@ -743,7 +743,7 @@ function packet_processing_see_adresses(a, data)
 	if (data.p_version == PROTOCOL_VERSION_V1 and data.dev_version == DEVICE_VERSION_V1) then
 		if data.d_type == DATA_TYPE_STATUS then
 			local version = bindechex.Hex2Dec(data.b17 or 00).."."..bindechex.Hex2Dec(data.b18 or 00)
-			
+
 			if (data.b19 == "01") then
 				ota_flag = "active"
 			else
@@ -932,7 +932,7 @@ function main_cycle(limit, adresses_print_mode)
 		end_time = now_time+(limit*1000)
 	end
 
- 	while (main_cycle_permit == 1 and main_cycle_limit_reached == 0) do
+	while (main_cycle_permit == 1 and main_cycle_limit_reached == 0) do
 		_, data_read = p:read(1, 200)
 		if (data_read ~= nil) then
 			--print_n(data_read)
