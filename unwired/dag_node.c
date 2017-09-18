@@ -329,6 +329,136 @@ uart_console(unsigned char uart_char)
    }
 }
 
+
+/*---------------------------------------------------------------------------*/
+
+static void join_confirm_handler(const uip_ipaddr_t *sender_addr,
+                                    const uint8_t *data,
+                                    uint16_t datalen)
+{
+      uip_ipaddr_copy(&root_addr, sender_addr);
+      process_post(&dag_node_process, PROCESS_EVENT_CONTINUE, NULL);
+      etimer_set(&maintenance_timer, 0);
+}
+
+/*---------------------------------------------------------------------------*/
+
+static void command_settings_handler(const uip_ipaddr_t *sender_addr,
+                                    const uint8_t *data,
+                                    uint16_t datalen)
+{
+      printf("DAG Node: Command/settings packet received\n");
+      message_for_main_process.data_type = data[2];
+      message_for_main_process.ability_target = data[3];
+      message_for_main_process.ability_number = data[4];
+      message_for_main_process.ability_state = data[5];
+      process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
+}
+
+
+/*---------------------------------------------------------------------------*/
+
+static void uart_packet_handler(const uip_ipaddr_t *sender_addr,
+                                    const uint8_t *data,
+                                    uint16_t datalen)
+{
+      //printf("DAG Node: Uart packet received\n");
+      message_for_main_process.data_type = data[2];
+      message_for_main_process.uart_returned_data_length = data[3];
+      message_for_main_process.uart_data_length = data[4];
+      if ( message_for_main_process.uart_returned_data_length > 16 )
+            message_for_main_process.uart_returned_data_length = 16;
+
+      message_for_main_process.payload[0] = data[5];
+      message_for_main_process.payload[1] = data[6];
+      message_for_main_process.payload[2] = data[7];
+      message_for_main_process.payload[3] = data[8];
+      message_for_main_process.payload[4] = data[9];
+      message_for_main_process.payload[5] = data[10];
+      message_for_main_process.payload[6] = data[11];
+      message_for_main_process.payload[7] = data[12];
+      message_for_main_process.payload[8] = data[13];
+      message_for_main_process.payload[9] = data[14];
+      message_for_main_process.payload[10] = data[15];
+      message_for_main_process.payload[11] = data[16];
+      message_for_main_process.payload[12] = data[17];
+      message_for_main_process.payload[13] = data[18];
+      message_for_main_process.payload[14] = data[19];
+      message_for_main_process.payload[15] = data[20];
+      process_post(&main_process, PROCESS_EVENT_CONTINUE, &message_for_main_process);
+}
+
+
+/*---------------------------------------------------------------------------*/
+
+static void pong_handler(const uip_ipaddr_t *sender_addr,
+                        const uint8_t *data,
+                        uint16_t datalen)
+{
+      non_answered_packet = 0;
+      printf("DAG Node: Pong packet received, non-answered packet counter: %"PRId8" \n", non_answered_packet);
+      net_off(RADIO_OFF_NOW);
+}
+
+/*---------------------------------------------------------------------------*/
+
+static void firmware_data_handler(const uip_ipaddr_t *sender_addr,
+                                    const uint8_t *data,
+                                    uint16_t datalen)
+{
+      printf(" Firmware packet received(%"PRIu16" bytes)", datalen - FIRMWARE_PAYLOAD_OFFSET);
+
+      uint8_t flash_write_buffer[FIRMWARE_PAYLOAD_LENGTH];
+
+      for (uint16_t i = 0; i < FIRMWARE_PAYLOAD_LENGTH; i++)
+      {
+            flash_write_buffer[i] = data[i + FIRMWARE_PAYLOAD_OFFSET];
+      }
+
+      fw_error_counter = 0;
+      uint32_t current_ota_ext_flash_address = (ota_images[1-1] << 12) + ota_image_current_offset;
+      while(store_firmware_data(current_ota_ext_flash_address, flash_write_buffer, FIRMWARE_PAYLOAD_LENGTH));
+      ota_image_current_offset = ota_image_current_offset + FIRMWARE_PAYLOAD_LENGTH;
+
+      etimer_set( &fw_timer, 0 );
+}
+
+/*---------------------------------------------------------------------------*/
+
+static void firmware_cmd_new_fw_handler(const uip_ipaddr_t *sender_addr,
+                                          const uint8_t *data,
+                                          uint16_t datalen)
+{
+      uint8_t chunk_quantity_uint8[2];
+      chunk_quantity_uint8[0] = data[5];
+      chunk_quantity_uint8[1] = data[4];
+      ota_image_current_offset = 0;
+
+      uint16_t *chunk_quantity_uint16_t = (uint16_t *)&chunk_quantity_uint8;
+      fw_chunk_quantity = *chunk_quantity_uint16_t;
+
+      printf("DAG Node: DATA_TYPE_FIRMWARE_COMMAND_NEW_FW command received, %"PRIu16"(0x%"PRIXX8" 0x%"PRIXX8") chunks\n", fw_chunk_quantity, data[5], data[4]);
+/*
+      uint8_t old_flag = read_fw_flag();
+      uint8_t write_flag_result = write_fw_flag(FW_FLAG_NEW_IMG_EXT);
+      write_fw_flag(old_flag);
+
+      if (write_flag_result == FLAG_ERROR_WRITE)
+         watchdog_reboot();
+*/
+      if (spi_status == SPI_EXT_FLASH_ACTIVE)
+      {
+            printf("DAG Node: OTA update process start\n");
+            lpm_register_module(&dag_lpm_module);
+            process_start(&fw_update_process, NULL);
+      }
+      else
+      {
+            send_message_packet(DEVICE_MESSAGE_OTA_SPI_NOTACTIVE, DATA_NONE);
+            printf("DAG Node: OTA update not processed, spi flash not-active\n");
+      }
+}
+
 /*---------------------------------------------------------------------------*/
 
 static void udp_receiver(struct simple_udp_connection *c,
