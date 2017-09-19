@@ -35,9 +35,5 @@
 
 #define FLAG_SIZE                      1
 
-
-uint8_t
-write_fw_flag(uint8_t value);
-
-uint8_t
-read_fw_flag();
+uint8_t write_fw_flag(uint8_t value);
+uint8_t read_fw_flag();

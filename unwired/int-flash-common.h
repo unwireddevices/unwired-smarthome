@@ -56,6 +56,8 @@
 #define POWER_2_CH_LAST_STATE_OFFSET            0x03
 #define POWER_2_CH_START_STATE_OFFSET           0x04
 
+#define OTA_STATUS_FLAG                         0x05
+
 #define BLANK_FLASH_VALUE                       0xFF
 
 /*---------------------------------------------------------------------------*/

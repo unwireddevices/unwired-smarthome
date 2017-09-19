@@ -58,10 +58,10 @@ void user_flash_update_byte(uint8_t offset, uint8_t data)
    flash_read(buffer, START_USER_FLASH, USER_FLASH_LENGTH);
    buffer[offset] = data;
 
+   ti_lib_vims_mode_set(VIMS_BASE, old_vims_state);
+
    ti_lib_flash_sector_erase(START_USER_FLASH);
    ti_lib_flash_program(buffer, START_USER_FLASH, USER_FLASH_LENGTH);
-
-   ti_lib_vims_mode_set(VIMS_BASE, old_vims_state);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -94,9 +94,6 @@ void flash_read(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Coun
 
 uint32_t flash_write(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count)
 {
-   uint32_t old_vims_state = ti_lib_vims_mode_get(VIMS_BASE);
-   ti_lib_vims_mode_set(VIMS_BASE, VIMS_MODE_DISABLED);
    uint32_t write_status = ti_lib_flash_program(pui8DataBuffer, ui32Address, ui32Count);
-   ti_lib_vims_mode_set(VIMS_BASE, old_vims_state);
    return write_status;
 }

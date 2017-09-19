@@ -437,14 +437,7 @@ static void firmware_cmd_new_fw_handler(const uip_ipaddr_t *sender_addr,
       fw_chunk_quantity = *chunk_quantity_uint16_t;
 
       printf("DAG Node: DATA_TYPE_FIRMWARE_COMMAND_NEW_FW command received, %"PRIu16"(0x%"PRIXX8" 0x%"PRIXX8") chunks\n", fw_chunk_quantity, data[5], data[4]);
-/*
-      uint8_t old_flag = read_fw_flag();
-      uint8_t write_flag_result = write_fw_flag(FW_FLAG_NEW_IMG_EXT);
-      write_fw_flag(old_flag);
 
-      if (write_flag_result == FLAG_ERROR_WRITE)
-         watchdog_reboot();
-*/
       if (spi_status == SPI_EXT_FLASH_ACTIVE)
       {
             printf("DAG Node: OTA update process start\n");
@@ -1230,11 +1223,10 @@ PROCESS_THREAD(dag_node_process, ev, data)
       }
    }
 
-   if (read_fw_flag() == FW_FLAG_NEW_IMG_INT)
+   uint8_t current_ota_flag_status = read_fw_flag();
+   if (current_ota_flag_status == FW_FLAG_NEW_IMG_INT)
    {
       write_fw_flag(FW_FLAG_PING_OK);
-      //uint8_t write_flag_result = write_fw_flag(FW_FLAG_PING_OK);
-      //if (write_flag_result == FLAG_ERROR_WRITE) { watchdog_reboot(); }
       printf("DAG Node: OTA flag changed to FW_FLAG_PING_OK\n");
       send_message_packet(DEVICE_MESSAGE_OTA_UPDATE_SUCCESS, DATA_NONE);
    }
