@@ -510,7 +510,6 @@ static void udp_receiver(struct simple_udp_connection *c,
                   uip_debug_ip6addr_print(sender_addr);
                   printf(", data type: 0x%02x\n", data[2]);
             }
-
       }
       else
       {
