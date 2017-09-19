@@ -1,4 +1,8 @@
 /*
+ * Copyright (c) 2010, Swedish Institute of Computer Science.
+ * Copyright (c) 2014, Texas Instruments Incorporated - http://www.ti.com/
+ * All rights reserved.
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -22,81 +26,43 @@
  * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
- */
-
-/*---------------------------------------------------------------------------*/
-/*
- * \file
- *         Flash write-read functions for Unwired Devices mesh smart house system(UDMSHS %) <- this is smile
- * \author
- *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  *
  */
 /*---------------------------------------------------------------------------*/
-
+/**
+ * \file
+ *         Header file for internal flash read-write functions
+ * \author
+ *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
+ */
+/*---------------------------------------------------------------------------*/
 #include "contiki.h"
-#include "contiki-lib.h"
-
-#include <string.h>
-#include <stdio.h>
-#include "ti-lib.h"
-
-#include "flash-common.h"
-#include "driverlib/flash.h"
-#include "driverlib/vims.h"
 #include "ud_binary_protocol.h"
-#include "xxf_types_helper.h"
 
+#define USER_FLASH_LENGTH                       100
 
+#define START_USER_FLASH                        0x1C000
+#define END_USER_FLASH                          USER_FLASH_LENGTH + START_USER_FLASH
 
-void user_flash_update_byte(uint8_t offset, uint8_t data)
-{
-   uint32_t old_vims_state = ti_lib_vims_mode_get(VIMS_BASE);
-   ti_lib_vims_mode_set(VIMS_BASE, VIMS_MODE_DISABLED);
+#define START_ON_LAST_STATE                     0x01
+#define START_ON_ON_STATE                       0x02
+#define START_ON_OFF_STATE                      0x03
 
-   uint8_t buffer[USER_FLASH_LENGTH];
-   flash_read(buffer, START_USER_FLASH, USER_FLASH_LENGTH);
-   buffer[offset] = data;
+#define POWER_1_DIO                             BOARD_IOID_RELAY_1
+#define POWER_1_CH_LAST_STATE_OFFSET            0x01
+#define POWER_1_CH_START_STATE_OFFSET           0x02
 
-   ti_lib_flash_sector_erase(START_USER_FLASH);
-   ti_lib_flash_program(buffer, START_USER_FLASH, USER_FLASH_LENGTH);
+#define POWER_2_DIO                             BOARD_IOID_RELAY_2
+#define POWER_2_CH_LAST_STATE_OFFSET            0x03
+#define POWER_2_CH_START_STATE_OFFSET           0x04
 
-   ti_lib_vims_mode_set(VIMS_BASE, old_vims_state);
-}
+#define BLANK_FLASH_VALUE                       0xFF
+
+/*---------------------------------------------------------------------------*/
+void user_flash_update_byte(uint8_t offset, uint8_t data);
+uint8_t user_flash_read_byte(uint8_t offset);
+void flash_read(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count);
+uint32_t flash_write(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count);
 
 /*---------------------------------------------------------------------------*/
 
-uint8_t user_flash_read_byte(uint8_t offset)
-{
-   uint32_t old_vims_state = ti_lib_vims_mode_get(VIMS_BASE);
-   ti_lib_vims_mode_set(VIMS_BASE, VIMS_MODE_DISABLED);
-   uint32_t address = offset + START_USER_FLASH;
-   uint8_t data = *(uint8_t *)address;
-   ti_lib_vims_mode_set(VIMS_BASE, old_vims_state);
-   return data;
-}
-
-/*---------------------------------------------------------------------------*/
-
-void flash_read(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count)
-{
-   uint32_t old_vims_state = ti_lib_vims_mode_get(VIMS_BASE);
-   ti_lib_vims_mode_set(VIMS_BASE, VIMS_MODE_DISABLED);
-   uint8_t *pui8ReadAddress = (uint8_t *)ui32Address;
-   while (ui32Count--)
-   {
-      *pui8DataBuffer++ = *pui8ReadAddress++;
-   }
-   ti_lib_vims_mode_set(VIMS_BASE, old_vims_state);
-}
-
-/*---------------------------------------------------------------------------*/
-
-uint32_t flash_write(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count)
-{
-   uint32_t old_vims_state = ti_lib_vims_mode_get(VIMS_BASE);
-   ti_lib_vims_mode_set(VIMS_BASE, VIMS_MODE_DISABLED);
-   uint32_t write_status = ti_lib_flash_program(pui8DataBuffer, ui32Address, ui32Count);
-   ti_lib_vims_mode_set(VIMS_BASE, old_vims_state);
-   return write_status;
-}

@@ -68,7 +68,7 @@
 #include "ota-common.h"
 #include "lpm.h"
 
-#include "flash-common.h"
+#include "int-flash-common.h"
 #include "xxf_types_helper.h"
 #include "ud_binary_protocol.h"
 

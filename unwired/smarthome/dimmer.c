@@ -67,7 +67,7 @@
 #include "ti-lib.h"
 #include "clock.h"
 #include "../ud_binary_protocol.h"
-#include "../flash-common.h"
+#include "../int-flash-common.h"
 
 
 #include "../fake_headers.h" //no move up! not "krasivo"!

@@ -1,6 +1,6 @@
 all: button
 
-PROJECT_SOURCEFILES += ../dag_node.c ../flash-common.c ../ota-main.c ../ota-common.c
+PROJECT_SOURCEFILES += ../dag_node.c ../int-flash-common.c ../ota-main.c ../ota-common.c
 DEFINES+=PROJECT_CONF_H=\"project-conf-class-b.h\"
 DEFINES+=IF_UD_BUTTON=1
 DEFINES+=FAKEDEFINE=1
