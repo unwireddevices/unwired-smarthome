@@ -117,16 +117,17 @@ main(void)
 
    ti_lib_gpio_clear_dio(LED_IOID);
 
-   /* Сброс флага после процесса обновления и прыжок на основную программу */
-   if (fw_flag == FW_FLAG_PING_OK) //
+   /* Сброс флага после процесса обновления и перезагрузка */
+   if (fw_flag == FW_FLAG_PING_OK)
    {
-      print_uart_bl("OTA Update ok(PING_OK), change flag, jump to main image\n");
+      print_uart_bl("OTA Update ok(PING_OK), change flag, reboot\n");
       write_fw_flag(FW_FLAG_NON_UPDATE);
-      jump_to_image( (CURRENT_FIRMWARE<<12) );
+      ti_lib_sys_ctrl_system_reset();
+      //jump_to_image( (CURRENT_FIRMWARE<<12) );
    }
 
    /* Gрыжок на основную программу, если процесса обновления нет */
-   if (fw_flag == FW_FLAG_NON_UPDATE) //
+   if (fw_flag == FW_FLAG_NON_UPDATE)
    {
       print_uart_bl("Jump to main image(FW_FLAG_NON_UPDATE)\n\n");
       jump_to_image( (CURRENT_FIRMWARE<<12) );
@@ -135,7 +136,7 @@ main(void)
    /* Прыжок на основную программу после неудачного обновления */
    if (fw_flag == FW_FLAG_ERROR_GI_LOADED)
    {
-      print_uart_bl("Jump to main image(ERROR_GI_LOAD)\n\n");
+      print_uart_bl("Jump to main image(ERROR_GI_LOADED)\n\n");
       jump_to_image( (CURRENT_FIRMWARE<<12) );
    }
 
@@ -150,11 +151,10 @@ main(void)
    /* Шьем Golden Image, если у нас нет флага подтверждения работы */
    if (fw_flag == FW_FLAG_NEW_IMG_INT)
    {
-      print_uart_bl("Update error, set ERROR_GI_LOAD\n\n");
-      write_fw_flag(FW_FLAG_ERROR_GI_LOADED);
-      print_uart_bl("Flash golden image\n");
+      print_uart_bl("Update error(FW_FLAG_NEW_IMG_INT), flash golden image\n");
       update_firmware( 0 );
-      //print_uart_bl("Need reboot\n");
+      print_uart_bl("Set flag to ERROR_GI_LOADED\n");
+      write_fw_flag(FW_FLAG_ERROR_GI_LOADED);
       ti_lib_sys_ctrl_system_reset();
    }
 
