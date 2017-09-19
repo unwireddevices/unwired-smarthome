@@ -897,6 +897,14 @@ PROCESS_THREAD(maintenance_process, ev, data)
 
    while (1)
    {
+      if (node_mode == MODE_NEED_REBOOT)
+      {
+            static struct etimer maintenance_reboot_timer;
+            etimer_set( &maintenance_reboot_timer, (5 * CLOCK_SECOND));
+            PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&maintenance_reboot_timer) );
+            watchdog_reboot();
+      }
+
       if (node_mode == MODE_NORMAL)
       {
          led_mode_set(LED_OFF);
@@ -1153,8 +1161,8 @@ PROCESS_THREAD(root_find_process, ev, data)
          {
             node_mode = MODE_NOTROOT;
             printf("DAG Node: mode set to MODE_NOTROOT\n");
-            etimer_set(&maintenance_timer, 0);
-            watchdog_reboot(); //КОСТЫЛЬ11
+            process_exit(&maintenance_process);
+            process_start(&maintenance_process, NULL);
          }
 
       }
@@ -1223,6 +1231,10 @@ PROCESS_THREAD(dag_node_process, ev, data)
       write_fw_flag(FW_FLAG_PING_OK);
       printf("DAG Node: OTA flag changed to FW_FLAG_PING_OK\n");
       send_message_packet(DEVICE_MESSAGE_OTA_UPDATE_SUCCESS, DATA_NONE);
+      node_mode = MODE_NEED_REBOOT;
+      printf("DAG Node: mode set to MODE_NEED_REBOOT(reboot after ota-update)\n");
+      process_exit(&maintenance_process);
+      process_start(&maintenance_process, NULL);
    }
 
    PROCESS_END();
