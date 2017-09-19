@@ -914,9 +914,8 @@ end
 --/*---------------------------------------------------------------------------*/--
 
 function lanes_io_input()
-	if io.read() == "q" then
-	    linda:set("exit_flag", "exit")
-	end
+	io.read()
+	linda:set("exit_flag", "exit")
 end
 
 --/*---------------------------------------------------------------------------*/--
@@ -1052,7 +1051,7 @@ elseif (arg[1] == "bulk_update") then
 		print("use:\trouter.lua bulk_update image_file")
 		return
 	end
-	print("Please, wait status messages or reboot all devices. Press Q to go to update")
+	print("Please, wait status messages or reboot all devices. Press enter to go to update")
 	a = lanes.gen("*",lanes_io_input)()
 	main_cycle(nil, 1)
 	flag_non_status_join_message = "true"
