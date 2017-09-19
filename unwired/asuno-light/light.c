@@ -76,11 +76,6 @@
 
 #define UART_DATA_POLL_INTERVAL 5 //in main timer ticks, one tick ~8ms
 
-
-#define MODE_NORMAL                             0x01
-#define MODE_NOTROOT                            0x02
-#define MODE_JOIN_PROGRESS                      0x03
-
 /*---------------------------------------------------------------------------*/
 /* UART char iterator */
 volatile static uint8_t uart_data_iterator = 0;

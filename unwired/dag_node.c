@@ -103,10 +103,6 @@
 #define FW_DELAY                              (2 * CLOCK_SECOND)
 #define FW_MAX_ERROR_COUNTER                    5
 
-#define MODE_NORMAL                             0x01
-#define MODE_NOTROOT                            0x02
-#define MODE_JOIN_PROGRESS                      0x03
-
 #define FALSE                                   0x00
 #define TRUE                                    0x01
 

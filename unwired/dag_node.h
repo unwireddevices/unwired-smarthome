@@ -38,6 +38,15 @@
 
 #include "contiki.h"
 /*---------------------------------------------------------------------------*/
+
+#define MODE_NORMAL                             0x01
+#define MODE_NOTROOT                            0x02
+#define MODE_JOIN_PROGRESS                      0x03
+#define MODE_NEED_REBOOT                        0x04
+
+
+/*---------------------------------------------------------------------------*/
+
 struct simple_udp_connection udp_connection;
 volatile uip_ip6addr_t root_addr;
 volatile uint8_t node_mode;
