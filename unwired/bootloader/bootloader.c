@@ -69,7 +69,6 @@ main(void)
    initialize_peripherals();
    initialize_uart();
    print_uart("\n\n\n\n");
-   print_uart_bl("Start\n");
 
    ti_lib_ioc_pin_type_gpio_output(LED_IOID);
    ti_lib_gpio_set_dio(LED_IOID);

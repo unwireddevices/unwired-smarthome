@@ -548,7 +548,7 @@ update_firmware( uint8_t ota_slot )
   //      Overwrite them with the corresponding image pages from
   //      external flash.
   //  Each firmware image is 25 pages big at most
-  print_uart("Bootloader:\t flash int mem: ");
+  print_uart("Bootloader:\t Flash internal memory: ");
   for (uint8_t sector_num=0; sector_num<25; sector_num++) {
     while( update_firmware_page( (ota_image_address + (sector_num << 12)), ((sector_num+CURRENT_FIRMWARE) << 12) ) );
     print_uart(".");
