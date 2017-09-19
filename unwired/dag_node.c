@@ -96,6 +96,7 @@
 
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
+#define MAINTENANCE_INTERVAL            (10 * 60 * CLOCK_SECOND)
 #define SHORT_STATUS_INTERVAL           (10 * 60 * CLOCK_SECOND)
 #define LONG_STATUS_INTERVAL            (20 * 60 * CLOCK_SECOND)
 #define ROOT_FIND_INTERVAL                    (5 * CLOCK_SECOND)
@@ -955,7 +956,7 @@ PROCESS_THREAD(maintenance_process, ev, data)
             process_exit(&status_send_process);
       }
 
-      etimer_set( &maintenance_timer, SHORT_STATUS_INTERVAL);
+      etimer_set( &maintenance_timer, MAINTENANCE_INTERVAL);
       PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&maintenance_timer) );
    }
    PROCESS_END();
