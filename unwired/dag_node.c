@@ -1180,9 +1180,6 @@ PROCESS_THREAD(dag_node_process, ev, data)
 
    node_mode = MODE_JOIN_PROGRESS;
 
-   //printf("------------------->New FW!<-------------------\n");
-   //printf("------------->Hey, look! Boobs! (.Y.)<---------\n");
-
    spi_status = spi_test();
 
    printf("Node started, %s mode, %s class, SPI %s, version %"PRIu8".%"PRIu8"\n",
