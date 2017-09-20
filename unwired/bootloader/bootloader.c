@@ -68,7 +68,7 @@ main(void)
 {
    initialize_peripherals();
    initialize_uart();
-   print_uart("\n\n\n\n");
+   print_uart("\n\n/-----------------------------------------------------------/\n");
 
    ti_lib_ioc_pin_type_gpio_output(LED_IOID);
    ti_lib_gpio_set_dio(LED_IOID);
@@ -93,13 +93,13 @@ main(void)
    print_uart_byte(fw_flag);
    print_uart("\n");
 
-   print_uart_bl("Internal firmware ");
+   print_uart_bl("Internal firmware: ");
    if (verify_result_int == CORRECT_CRC)
       print_uart("correct CRC\n");
    if (verify_result_int == NON_CORRECT_CRC)
       print_uart("non-correct CRC\n");
 
-   print_uart_bl("OTA slot 0 ");
+   print_uart_bl("OTA slot GI: ");
    if (verify_result_ota_0 == NON_CORRECT_CRC)
       print_uart("non-correct CRC\n");
    if (verify_result_ota_0 == NON_READ_FLASH)
@@ -107,7 +107,7 @@ main(void)
    if (verify_result_ota_0 == CORRECT_CRC)
       print_uart("correct CRC\n");
 
-   print_uart_bl("OTA slot 1 ");
+   print_uart_bl("OTA slot update: ");
    if (verify_result_ota_1 == NON_CORRECT_CRC)
       print_uart("non-correct CRC\n");
    if (verify_result_ota_1 == NON_READ_FLASH)
