@@ -52,6 +52,8 @@
 //uppercase hexadecimal printf format for uint8_t
 
 
+#define PRIX8   "X"
+//uppercase hexadecimal printf format for uint8_t
 
 #define PRIX16   "X"
 //uppercase hexadecimal printf format for uint16_t
@@ -59,8 +61,9 @@
 #define PRIX32   "lX"
 //uppercase hexadecimal printf format for uint32_t
 
-#define PRIX8   "X"
-//uppercase hexadecimal printf format for uint8_t
+#define PRIXX32   "08lX"
+//uppercase hexadecimal printf format for uint32_t
+
 
 
 #define PRIxPTR   PRIx16
