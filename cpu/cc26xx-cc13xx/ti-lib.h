@@ -534,8 +534,10 @@
 /* flash.h */
 #include "driverlib/flash.h"
 
-#define ti_lib_flash_program(...)           FlashProgram(__VA_ARGS__)
-#define ti_lib_flash_sector_erase(...)      FlashSectorErase(__VA_ARGS__)
+#define ti_lib_flash_protection_get(...)            FlashProtectionSave(__VA_ARGS__)
+#define ti_lib_flash_protection_set(...)            FlashProtectionGet(__VA_ARGS__)
+#define ti_lib_flash_program(...)                   FlashProgram(__VA_ARGS__)
+#define ti_lib_flash_sector_erase(...)              FlashSectorErase(__VA_ARGS__)
 /*---------------------------------------------------------------------------*/
 /* watchdog.h */
 #include "driverlib/watchdog.h"
