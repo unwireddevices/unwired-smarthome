@@ -444,12 +444,27 @@ void uart_packet_dump(uint8_t *uart_buf, uint16_t uart_data_size)
 
 /*---------------------------------------------------------------------------*/
 
+void local_command(uint8_t *uart_data, uint16_t uart_data_length)
+{
+}
+
+/*---------------------------------------------------------------------------*/
+
 void uart_packet_processed(uint8_t *uart_data, uint16_t uart_data_length)
 {
    if (uart_data[18] == DATA_TYPE_COMMAND)
+   {
+      uint8_t local_cmd_flag = 1;
       for (uint8_t i = 0; i < 16; i++)
       {
+         if (uart_data[i] != 0x00)
+            local_cmd_flag = 0;
          command_message.destination_address.u8[i] = uart_data[i];
+      }
+      if (local_cmd_flag == 1)
+      {
+         local_command(uart_data, uart_data_length)
+      }
 
       command_message.protocol_version = uart_data[16];
       command_message.device_version = uart_data[17];
