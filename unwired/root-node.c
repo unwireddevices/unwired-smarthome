@@ -446,6 +446,29 @@ void uart_packet_dump(uint8_t *uart_buf, uint16_t uart_data_size)
 
 void local_command(uint8_t *uart_data, uint16_t uart_data_length)
 {
+   uint8_t protocol_version = uart_data[16];
+   uint8_t device_version = uart_data[17];
+   uint8_t ability_target = uart_data[19];
+   uint8_t ability_number = uart_data[20];
+   uint8_t ability_state = uart_data[21];
+
+
+   if (protocol_version == PROTOCOL_VERSION_V1 &&
+       device_version == CURRENT_DEVICE_VERSION &&
+       ability_target == DEVICE_ABILITY_NONE &&
+       ability_number == DEVICE_ABILITY_NONE )
+       {
+         if (ability_state == LOCAL_ROOT_COMMAND_REBOOT)
+         {
+            ti_lib_sys_ctrl_system_reset();
+         }
+
+         if (ability_state == LOCAL_ROOT_COMMAND_BOOTLOADER_ACTIVATE)
+         {
+            ti_lib_flash_sector_erase(0x0001F000);
+         }
+       }
+
 }
 
 /*---------------------------------------------------------------------------*/
