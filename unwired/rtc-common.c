@@ -55,20 +55,19 @@ uint32_t epoch_offset = 0;
 
 void set_epoch_time(uint32_t epoch)
 {
-    uint32_t current_uptime = clock_seconds();
-    if (epoch > current_uptime)
-    {
-        epoch_offset = epoch - current_uptime;
-    }
+   uint32_t current_uptime = clock_seconds();
+   if (epoch > current_uptime)
+   {
+      epoch_offset = epoch - current_uptime;
+   }
 }
 
 /*---------------------------------------------------------------------------*/
 
 uint32_t get_epoch_time()
 {
-    uint32_t current_uptime = clock_seconds();
-    return current_uptime+epoch_offset;
+   uint32_t current_uptime = clock_seconds();
+   return current_uptime + epoch_offset;
 }
 
 /*---------------------------------------------------------------------------*/
-

@@ -106,7 +106,6 @@ struct firmware_data firmware_message;
 struct firmware_cmd firmware_cmd_message;
 struct uart_data uart_message;
 
-
 /* main UPD connection */
 struct simple_udp_connection udp_connection;
 
@@ -125,12 +124,12 @@ void rpl_initialize();
 void root_node_initialize();
 
 void udp_data_receiver(struct simple_udp_connection *connection,
-                              const uip_ipaddr_t *sender_addr,
-                              uint16_t sender_port,
-                              const uip_ipaddr_t *receiver_addr,
-                              uint16_t receiver_port,
-                              const uint8_t *data,
-                              uint16_t datalen);
+                       const uip_ipaddr_t *sender_addr,
+                       uint16_t sender_port,
+                       const uip_ipaddr_t *receiver_addr,
+                       uint16_t receiver_port,
+                       const uint8_t *data,
+                       uint16_t datalen);
 
 void send_uart_packet(struct uart_data *uart_message);
 
@@ -145,4 +144,3 @@ int uart_data_receiver(unsigned char uart_char);
 void uart_packet_dump(uint8_t *uart_buf, uint16_t uart_data_size);
 
 /*---------------------------------------------------------------------------*/
-

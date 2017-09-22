@@ -37,10 +37,7 @@
  */
 /*---------------------------------------------------------------------------*/
 
-
 #ifndef FAKEDEFINE
-
-
 
 #include "../../platform/unwired/udboards/cc26xx/board.h"
 
@@ -95,6 +92,5 @@
 #ifndef CLASS_C
 #define CLASS_C
 #endif
-
 
 #endif //FAKEDEFINE

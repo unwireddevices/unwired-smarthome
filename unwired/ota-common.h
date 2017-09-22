@@ -11,7 +11,6 @@
 
 #define FLASH_PAGE_SIZE                0x1000
 
-
 #define NON_CORRECT_CRC                -2
 #define NON_READ_FLASH                 -1
 #define CORRECT_CRC                     0
@@ -19,9 +18,7 @@
 #define FLAG_OK_WRITE                  1
 #define FLAG_ERROR_WRITE               0
 
-/**
- *    NEW_FW_FLAG — Флаг статуса процесса обновления
- */
+/* NEW_FW_FLAG — Флаг статуса процесса обновления */
 #define FW_FLAG                        0x42
 #define FW_FLAG_ADRESS                 0x1000
 

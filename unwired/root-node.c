@@ -79,13 +79,13 @@ LPM_MODULE(root_lpm_module, lpm_mode_return, NULL, NULL, LPM_DOMAIN_NONE);
 uint8_t uart_magic_sequence[MAGIC_SEQUENCE_LENGTH] = {MAGIC_SEQUENCE};
 uint8_t uart_data[MAX_UART_DATA_LENGTH];
 
-PROCESS(send_command_process,"UDP command sender");
+PROCESS(send_command_process, "UDP command sender");
 
 /*---------------------------------------------------------------------------*/
 
 static uint8_t lpm_mode_return(void)
 {
-  return LPM_MODE_AWAKE;
+   return LPM_MODE_AWAKE;
 }
 
 /*---------------------------------------------------------------------------*/
@@ -170,15 +170,15 @@ void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const ui
    if (length == 10)
    {
       printf("%02X%02X%02X%02X%02X%02X%02X%02X%02X%02XFFFFFFFFFFFFFFFFFFFFFFFFFF",
-             data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9]);
+             data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9]);
    }
 
    if (length == 23)
    {
       printf("%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X%02X",
-             data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7],data[8],data[9],
-             data[10],data[11],data[12],data[13],data[14],data[15],data[16],data[17],data[18],data[19],
-             data[20],data[21],data[22]);
+             data[0], data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9],
+             data[10], data[11], data[12], data[13], data[14], data[15], data[16], data[17], data[18], data[19],
+             data[20], data[21], data[22]);
    }
 
    printf("RAWEND   \n");
@@ -187,12 +187,12 @@ void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const ui
 /*---------------------------------------------------------------------------*/
 
 void udp_data_receiver(struct simple_udp_connection *connection,
-                              const uip_ipaddr_t *sender_addr,
-                              uint16_t sender_port,
-                              const uip_ipaddr_t *receiver_addr,
-                              uint16_t receiver_port,
-                              const uint8_t *data,
-                              uint16_t datalen)
+                       const uip_ipaddr_t *sender_addr,
+                       uint16_t sender_port,
+                       const uip_ipaddr_t *receiver_addr,
+                       uint16_t receiver_port,
+                       const uint8_t *data,
+                       uint16_t datalen)
 {
    led_on(LED_A);
 
@@ -204,7 +204,7 @@ void udp_data_receiver(struct simple_udp_connection *connection,
    }
 
    if (data[0] == PROTOCOL_VERSION_V1 && (data[2] == DATA_TYPE_STATUS ||
-                                          data[2] == DATA_TYPE_SENSOR_DATA) )
+                                          data[2] == DATA_TYPE_SENSOR_DATA))
    {
       send_pong_packet(sender_addr);
    }
@@ -213,7 +213,6 @@ void udp_data_receiver(struct simple_udp_connection *connection,
 }
 
 /*---------------------------------------------------------------------------*/
-
 
 void rpl_initialize()
 {
@@ -244,7 +243,6 @@ void rpl_initialize()
 
 /*---------------------------------------------------------------------------*/
 
-
 void root_node_initialize()
 {
    /* register udp-connection, set incoming upd-data handler(udp_data_receiver) */
@@ -273,7 +271,7 @@ void send_uart_packet(struct uart_data *uart_message)
       printf("UDM: dest_addr in send_uart_packet null\n");
       return;
    }
-   if (&udp_connection.udp_conn == NULL)   //указатель на что?
+   if (&udp_connection.udp_conn == NULL) //указатель на что?
    {
       printf("UDM: connection in send_uart_packet null\n");
       return;
@@ -281,7 +279,6 @@ void send_uart_packet(struct uart_data *uart_message)
 
    uip_ip6addr_t addr;
    uip_ip6addr_copy(&addr, &uart_message->destination_address);
-
 
    printf("UDM: returned_data_lenth: %" PRIXX8 "\n", uart_message->returned_data_lenth);
    printf("UDM: data_lenth: %" PRIXX8 "\n", uart_message->data_lenth);
@@ -291,7 +288,6 @@ void send_uart_packet(struct uart_data *uart_message)
       printf("0x%" PRIXX8 " ", uart_message->payload[i]);
    }
    printf("\n");
-
 
    uint8_t length = 23;
    uint8_t udp_buffer[length];
@@ -333,7 +329,7 @@ void send_firmware_cmd_packet(struct firmware_cmd *firmware_cmd_message)
       printf("UDM: dest_addr in send_command_packet null\n");
       return;
    }
-   if (&udp_connection.udp_conn == NULL)   //указатель на что?
+   if (&udp_connection.udp_conn == NULL) //указатель на что?
    {
       printf("UDM: connection in send_command_packet null\n");
       return;
@@ -366,7 +362,7 @@ void send_firmware_packet(struct firmware_data *firmware_message)
       printf("UDM: dest_addr in send_command_packet null\n");
       return;
    }
-   if (&udp_connection.udp_conn == NULL)   //указатель на что?
+   if (&udp_connection.udp_conn == NULL) //указатель на что?
    {
       printf("UDM: connection in send_command_packet null\n");
       return;
@@ -404,7 +400,7 @@ void send_command_packet(struct command_data *command_message)
       printf("UDM: dest_addr in send_command_packet null\n");
       return;
    }
-   if (&udp_connection.udp_conn == NULL)   //указатель на что?
+   if (&udp_connection.udp_conn == NULL) //указатель на что?
    {
       printf("UDM: connection in send_command_packet null\n");
       return;
@@ -426,7 +422,6 @@ void send_command_packet(struct command_data *command_message)
    udp_buffer[8] = DATA_RESERVED;
    udp_buffer[9] = DATA_RESERVED;
    simple_udp_sendto(&udp_connection, udp_buffer, length, &addr);
-
 }
 
 /*---------------------------------------------------------------------------*/
@@ -442,7 +437,7 @@ void uart_packet_dump(uint8_t *uart_buf, uint16_t uart_data_size)
    printf("UDM: UART->6LP: ");
    for (uint16_t i = 0; i < uart_data_size; i++)
    {
-      printf("%"PRIXX8, uart_buf[i]);
+      printf("%" PRIXX8, uart_buf[i]);
    }
    printf("\n");
 }
@@ -452,70 +447,70 @@ void uart_packet_dump(uint8_t *uart_buf, uint16_t uart_data_size)
 void uart_packet_processed(uint8_t *uart_data, uint16_t uart_data_length)
 {
    if (uart_data[18] == DATA_TYPE_COMMAND)
+      for (uint8_t i = 0; i < 16; i++)
       {
-         for (uint8_t i = 0; i < 16; i++)
-            command_message.destination_address.u8[i] = uart_data[i];
+         command_message.destination_address.u8[i] = uart_data[i];
 
-         command_message.protocol_version = uart_data[16];
-         command_message.device_version = uart_data[17];
+      command_message.protocol_version = uart_data[16];
+      command_message.device_version = uart_data[17];
 
-         command_message.ability_target = uart_data[19];
-         command_message.ability_number = uart_data[20];
-         command_message.ability_state = uart_data[21];
-         command_message.ready_to_send = 1;
-      }
+      command_message.ability_target = uart_data[19];
+      command_message.ability_number = uart_data[20];
+      command_message.ability_state = uart_data[21];
+      command_message.ready_to_send = 1;
+   }
 
    if (uart_data[18] == DATA_TYPE_FIRMWARE)
-      {
-         uint16_t fw_payload_lenght = uart_data_length-23; // 23 = 16(address) + 7(packet header)
-         for (uint8_t i = 0; i < 16; i++)
-            firmware_message.destination_address.u8[i] = uart_data[i];
+   {
+      uint16_t fw_payload_lenght = uart_data_length - 23; // 23 = 16(address) + 7(packet header)
+      for (uint8_t i = 0; i < 16; i++)
+         firmware_message.destination_address.u8[i] = uart_data[i];
 
-         firmware_message.protocol_version = uart_data[16];
-         firmware_message.device_version = uart_data[17];
+      firmware_message.protocol_version = uart_data[16];
+      firmware_message.device_version = uart_data[17];
 
-         firmware_message.chunk_number_b1 = uart_data[19];
-         firmware_message.chunk_number_b2 = uart_data[20];
-         firmware_message.reserved_b1 = uart_data[21];
-         firmware_message.reserved_b2 = uart_data[22];
-         firmware_message.chunk_size = fw_payload_lenght;
+      firmware_message.chunk_number_b1 = uart_data[19];
+      firmware_message.chunk_number_b2 = uart_data[20];
+      firmware_message.reserved_b1 = uart_data[21];
+      firmware_message.reserved_b2 = uart_data[22];
+      firmware_message.chunk_size = fw_payload_lenght;
 
-         for (uint16_t i = 0; i < fw_payload_lenght; i++)
-            firmware_message.firmware_payload.data[i] = uart_data[23 + i];
+      for (uint16_t i = 0; i < fw_payload_lenght; i++)
+         firmware_message.firmware_payload.data[i] = uart_data[23 + i];
 
-         firmware_message.ready_to_send = 1;
-      }
+      firmware_message.ready_to_send = 1;
+   }
 
    if (uart_data[18] == DATA_TYPE_FIRMWARE_CMD)
-      {
-         for (uint8_t i = 0; i < 16; i++)
-            firmware_cmd_message.destination_address.u8[i] = uart_data[i];
+   {
+      for (uint8_t i = 0; i < 16; i++)
+         firmware_cmd_message.destination_address.u8[i] = uart_data[i];
 
-         firmware_cmd_message.protocol_version = uart_data[16];
-         firmware_cmd_message.device_version = uart_data[17];
+      firmware_cmd_message.protocol_version = uart_data[16];
+      firmware_cmd_message.device_version = uart_data[17];
 
-         firmware_cmd_message.firmware_command = uart_data[19];
-         firmware_cmd_message.chunk_quantity_b1 = uart_data[20];
-         firmware_cmd_message.chunk_quantity_b2 = uart_data[21];
-         firmware_cmd_message.ready_to_send = 1;
-         //printf("UDM: chunk_quantity: 0x%" PRIXX8 " 0x%" PRIXX8 "\n", uart_data[20], uart_data[21]);
-      }
+      firmware_cmd_message.firmware_command = uart_data[19];
+      firmware_cmd_message.chunk_quantity_b1 = uart_data[20];
+      firmware_cmd_message.chunk_quantity_b2 = uart_data[21];
+      firmware_cmd_message.ready_to_send = 1;
+      //printf("UDM: chunk_quantity: 0x%" PRIXX8 " 0x%" PRIXX8 "\n", uart_data[20], uart_data[21]);
+   }
 
    if (uart_data[26] == DATA_TYPE_UART)
-      {
-         for (uint8_t i = 0; i < 16; i++)
-            uart_message.destination_address.u8[i] = uart_data[i];
+   {
+      for (uint8_t i = 0; i < 16; i++)
+         uart_message.destination_address.u8[i] = uart_data[i];
 
-         uart_message.protocol_version = uart_data[16];
-         uart_message.device_version = uart_data[17];
+      uart_message.protocol_version = uart_data[16];
+      uart_message.device_version = uart_data[17];
 
-         uart_message.data_lenth = uart_data[19];
-         uart_message.returned_data_lenth = uart_data[20];
-         for (uint8_t i = 0; i < 16; i++)
-            uart_message.payload[i] = uart_data[21 + i];
+      uart_message.data_lenth = uart_data[19];
+      uart_message.returned_data_lenth = uart_data[20];
+      for (uint8_t i = 0; i < 16; i++)
+         uart_message.payload[i] = uart_data[21 + i];
 
-         uart_message.ready_to_send = 1;
-      }
+      uart_message.ready_to_send = 1;
+   }
 }
 
 /*---------------------------------------------------------------------------*/
@@ -524,12 +519,11 @@ int uart_data_receiver(unsigned char uart_char)
    led_blink(LED_A);
 
    static uint8_t uart_header_iterator = 0;
-   static uint8_t uart_header_data[PACKET_HEADER_LENGTH-MAGIC_SEQUENCE_LENGTH];
+   static uint8_t uart_header_data[PACKET_HEADER_LENGTH - MAGIC_SEQUENCE_LENGTH];
    static uint16_t uart_data_iterator = 0;
    static uint16_t uart_data_length = 0;
 
    static uint8_t uart_packet_crc = 0;
-
 
    if (uart_header_iterator < PACKET_HEADER_LENGTH &&
        uart_header_iterator < MAGIC_SEQUENCE_LENGTH) //Read and verify magic seq
@@ -551,43 +545,42 @@ int uart_data_receiver(unsigned char uart_char)
        uart_header_iterator >= MAGIC_SEQUENCE_LENGTH) //Read header data
    {
       //printf("UDM: New char(%" PRIXX8 ") in data header buffer: %" PRIu16 "\n", uart_char, uart_header_iterator);
-      uart_header_data[uart_header_iterator-MAGIC_SEQUENCE_LENGTH] = uart_char;
+      uart_header_data[uart_header_iterator - MAGIC_SEQUENCE_LENGTH] = uart_char;
 
       uart_header_iterator++;
    }
 
-
    if (uart_header_iterator == PACKET_HEADER_LENGTH)
-         {
-            //printf("UDM: check uart header data\n");
-            if (uart_header_data[0] != UART_PROTOCOL_VERSION_V3) //Check uart protocol version
-            {
-               printf("UDM: Incompatible protocol version: %" PRIXX8 "!\n", uart_header_data[0]);
-               uart_header_iterator = 0;
-               uart_data_iterator = 0;
-               uart_data_length = 0;
-               uart_packet_crc = 0;
-               return 1;
-            }
-            uint8_t uart_data_length_uint8[2];
-            uart_data_length_uint8[0] = uart_header_data[1];
-            uart_data_length_uint8[1] = uart_header_data[2];
-            uint16_t *uart_data_length_uint16_t = (uint16_t *)&uart_data_length_uint8; //Convert data length
-            uart_data_length = *uart_data_length_uint16_t;
-            if (uart_data_length > MAX_UART_DATA_LENGTH)
-            {
-               printf("UDM: too big packet size: %" PRIu16 "\n", uart_data_length);
-               uart_header_iterator = 0;
-               uart_data_iterator = 0;
-               uart_data_length = 0;
-               uart_packet_crc = 0;
-               return 1;
-            }
-            uart_packet_crc = uart_header_data[3];
-            uart_header_iterator++;
-            //printf("UDM: new buffer %" PRIu16 " bytes, uart version %" PRIXX8 ", crc %" PRIXX8 "\n", uart_data_length, uart_header_data[0], uart_packet_crc);
-            return 1;
-         }
+   {
+      //printf("UDM: check uart header data\n");
+      if (uart_header_data[0] != UART_PROTOCOL_VERSION_V3) //Check uart protocol version
+      {
+         printf("UDM: Incompatible protocol version: %" PRIXX8 "!\n", uart_header_data[0]);
+         uart_header_iterator = 0;
+         uart_data_iterator = 0;
+         uart_data_length = 0;
+         uart_packet_crc = 0;
+         return 1;
+      }
+      uint8_t uart_data_length_uint8[2];
+      uart_data_length_uint8[0] = uart_header_data[1];
+      uart_data_length_uint8[1] = uart_header_data[2];
+      uint16_t *uart_data_length_uint16_t = (uint16_t *)&uart_data_length_uint8; //Convert data length
+      uart_data_length = *uart_data_length_uint16_t;
+      if (uart_data_length > MAX_UART_DATA_LENGTH)
+      {
+         printf("UDM: too big packet size: %" PRIu16 "\n", uart_data_length);
+         uart_header_iterator = 0;
+         uart_data_iterator = 0;
+         uart_data_length = 0;
+         uart_packet_crc = 0;
+         return 1;
+      }
+      uart_packet_crc = uart_header_data[3];
+      uart_header_iterator++;
+      //printf("UDM: new buffer %" PRIu16 " bytes, uart version %" PRIXX8 ", crc %" PRIXX8 "\n", uart_data_length, uart_header_data[0], uart_packet_crc);
+      return 1;
+   }
 
    if (uart_data_iterator >= MAX_UART_DATA_LENGTH)
    {
@@ -619,9 +612,6 @@ int uart_data_receiver(unsigned char uart_char)
       uart_packet_crc = 0;
       return 1;
    }
-
-
-
 
    return 1;
 }

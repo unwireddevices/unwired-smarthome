@@ -47,8 +47,6 @@
 #include "ud_binary_protocol.h"
 #include "xxf_types_helper.h"
 
-
-
 void user_flash_update_byte(uint8_t offset, uint8_t data)
 {
    uint32_t old_vims_state = ti_lib_vims_mode_get(VIMS_BASE);

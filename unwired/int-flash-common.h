@@ -67,4 +67,3 @@ void flash_read(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Coun
 uint32_t flash_write(uint8_t *pui8DataBuffer, uint32_t ui32Address, uint32_t ui32Count);
 
 /*---------------------------------------------------------------------------*/
-

@@ -44,7 +44,6 @@
 #define MODE_JOIN_PROGRESS                      0x03
 #define MODE_NEED_REBOOT                        0x04
 
-
 /*---------------------------------------------------------------------------*/
 
 struct simple_udp_connection udp_connection;
@@ -80,7 +79,6 @@ void send_message_packet(uint8_t message_type, uint8_t data);
 void send_uart_data(struct command_data *uart_data);
 void uart_console(unsigned char uart_char);
 
-
 PROCESS_NAME(dag_node_process);
 PROCESS_NAME(dag_node_button_process);
 PROCESS_NAME(root_find_process);
@@ -89,7 +87,4 @@ PROCESS_NAME(maintenance_process);
 PROCESS_NAME(led_process);
 PROCESS_NAME(fw_update_process);
 
-
-
 /*---------------------------------------------------------------------------*/
-
