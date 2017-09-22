@@ -454,7 +454,7 @@ void local_command(uint8_t *uart_data, uint16_t uart_data_length)
 
 
    if (protocol_version == PROTOCOL_VERSION_V1 &&
-       device_version == CURRENT_DEVICE_VERSION &&
+       device_version == DEVICE_VERSION_V1 &&
        ability_target == DEVICE_ABILITY_NONE &&
        ability_number == DEVICE_ABILITY_NONE )
        {
@@ -486,7 +486,7 @@ void uart_packet_processed(uint8_t *uart_data, uint16_t uart_data_length)
       }
       if (local_cmd_flag == 1)
       {
-         local_command(uart_data, uart_data_length)
+         local_command(uart_data, uart_data_length);
       }
 
       command_message.protocol_version = uart_data[16];

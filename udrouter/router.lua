@@ -152,6 +152,17 @@ device_relay_commands[DEVICE_ABILITY_RELAY_COMMAND_TOGGLE] = "toggle"
 
 --/*---------------------------------------------------------------------------*/--
 
+device_root_local_commands = {}
+
+LOCAL_ROOT_COMMAND_REBOOT        =   "00"
+device_root_local_commands[LOCAL_ROOT_COMMAND_REBOOT] = "on"
+
+LOCAL_ROOT_COMMAND_BOOTLOADER_ACTIVATE    =   "01"
+device_root_local_commands[LOCAL_ROOT_COMMAND_BOOTLOADER_ACTIVATE] = "off"
+
+
+--/*---------------------------------------------------------------------------*/--
+
 device_sleep_type = {}
 
 DEVICE_SLEEP_TYPE_NORMAL             =           "01"
@@ -974,6 +985,13 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
+function enter_bootloader()
+   send_command_to_ability("0000:0000:0000:0000:0000:0000:0000:0000", DEVICE_ABILITY_NONE, DEVICE_ABILITY_NONE, LOCAL_ROOT_COMMAND_BOOTLOADER_ACTIVATE)
+   send_command_to_ability("0000:0000:0000:0000:0000:0000:0000:0000", DEVICE_ABILITY_NONE, DEVICE_ABILITY_NONE, LOCAL_ROOT_COMMAND_REBOOT)
+end
+
+--/*---------------------------------------------------------------------------*/--
+
 function firmware_update(image_file, address)
 	local handle, err = io.open(image_file,"r")
 	if (err ~= nil) then
@@ -1068,6 +1086,8 @@ elseif (arg[1] == "bulk_update") then
 			print_red("Update device "..update_device_list[i].."("..(i).."/"..(#update_device_list)..") success\n")
 		end
 	end
+elseif (arg[1] == "bootloader") then
+	enter_bootloader();
 
 elseif (arg[1] == "main") then
 	main_cycle()

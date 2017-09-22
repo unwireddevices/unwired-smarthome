@@ -176,6 +176,10 @@
 
 #define PACKET_HEADER_LENGTH                                    10
 
+/* DEVICE_ROOT_LOCAL commands */
+#define LOCAL_ROOT_COMMAND_REBOOT                               0x00
+#define LOCAL_ROOT_COMMAND_BOOTLOADER_ACTIVATE                  0x01
+
 /* Defines */
 
 #define UDP_DATA_PORT                                           4004
