@@ -30,7 +30,7 @@ button: net-bootloader-clean
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.button
 	arm-none-eabi-size button.elf | grep -v text > /tmp/size.tmp 
 	lua ../../tools/mem_used.lua /tmp/size.tmp 125000 20000
-	../bootloader/generate-metadata/generate-metadata button.bin 0x0 0xabcd1234 1
+	../bootloader/generate-metadata/generate-metadata button.bin 0x0 0x00A10001 1
 	srec_cat firmware-metadata.bin -binary button.bin -binary -offset 0x100 -o button-ota-image.bin -binary
 	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 button-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o button-firmware.hex -intel
 	rm button.hex
@@ -43,7 +43,7 @@ root: net-bootloader-clean
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.root
 	arm-none-eabi-size root.elf  | grep -v text > /tmp/size.tmp 
 	lua ../../tools/mem_used.lua /tmp/size.tmp 125000 20000
-	../bootloader/generate-metadata/generate-metadata root.bin 0x0 0xabcd1234 1
+	../bootloader/generate-metadata/generate-metadata root.bin 0x0 0x00FF0001 1
 	srec_cat firmware-metadata.bin -binary root.bin -binary -offset 0x100 -o root-ota-image.bin -binary
 	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 root-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o root-firmware.hex -intel
 	rm root.hex
@@ -56,7 +56,7 @@ relay: net-bootloader-clean
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.relay
 	arm-none-eabi-size relay.elf | grep -v text > /tmp/size.tmp 
 	lua ../../tools/mem_used.lua /tmp/size.tmp 125000 20000
-	../bootloader/generate-metadata/generate-metadata relay.bin 0x0 0xabcd1234 1
+	../bootloader/generate-metadata/generate-metadata relay.bin 0x0 0x00A20001 1
 	srec_cat firmware-metadata.bin -binary relay.bin -binary -offset 0x100 -o relay-ota-image.bin -binary
 	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 relay-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o relay-firmware.hex -intel
 	rm relay.hex
@@ -69,7 +69,7 @@ dimmer: net-bootloader-clean
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.dimmer
 	arm-none-eabi-size dimmer.elf | grep -v text > /tmp/size.tmp 
 	lua ../../tools/mem_used.lua /tmp/size.tmp 125000 20000
-	../bootloader/generate-metadata/generate-metadata dimmer.bin 0x0 0xabcd1234 1
+	../bootloader/generate-metadata/generate-metadata dimmer.bin 0x0 0x00A30001 1
 	srec_cat firmware-metadata.bin -binary dimmer.bin -binary -offset 0x100 -o dimmer-ota-image.bin -binary
 	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 dimmer-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o dimmer-firmware.hex -intel
 	rm dimmer.hex
@@ -82,7 +82,7 @@ motionsensor: net-bootloader-clean
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.motionsensor
 	arm-none-eabi-size motionsensor.elf | grep -v text > /tmp/size.tmp 
 	lua ../../tools/mem_used.lua /tmp/size.tmp 125000 20000
-	../bootloader/generate-metadata/generate-metadata motionsensor.bin 0x0 0xabcd1234 1
+	../bootloader/generate-metadata/generate-metadata motionsensor.bin 0x0 0x00A40001 1
 	srec_cat firmware-metadata.bin -binary motionsensor.bin -binary -offset 0x100 -o motionsensor-ota-image.bin -binary
 	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 motionsensor-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o motionsensor-firmware.hex -intel
 	rm motionsensor.hex
