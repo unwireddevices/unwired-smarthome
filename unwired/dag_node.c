@@ -1078,7 +1078,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
             else
             {
                printf("[OTA]: New FW in OTA slot 1 non-correct firmware UUID\n");
-               send_message_packet(DEVICE_MESSAGE_OTA_NONCORRECT_CRC, DATA_NONE);
+               send_message_packet(DEVICE_MESSAGE_OTA_NONCORRECT_UUID, DATA_NONE);
             }
 
          }
