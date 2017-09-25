@@ -1072,10 +1072,27 @@ PROCESS_THREAD(fw_update_process, ev, data)
          printf("\n[OTA]: End chunks\n");
          chunk_num = 0;
          fw_error_counter = 0;
-         if (verify_ota_slot(1) == CORRECT_CRC){
-            printf("[OTA]: New FW in OTA slot 1 correct CRC, set FW_FLAG_NEW_IMG_EXT, reboot\n");
-            write_fw_flag(FW_FLAG_NEW_IMG_EXT);
-            ti_lib_sys_ctrl_system_reset();
+         int crc_status_ota_slot = verify_ota_slot(1);
+         OTAMetadata_t current_firmware;
+         OTAMetadata_t ota_slot_1_firmware;
+         get_current_metadata( &current_firmware );
+         get_ota_slot_metadata(1, &ota_slot_1_firmware);
+
+         if (crc_status_ota_slot == CORRECT_CRC)
+         {
+            printf("[OTA]: New FW in OTA slot 1 correct CRC\n");
+            if (current_firmware.uuid == ota_slot_1_firmware.uuid) //TODO: add univeral uuid(0xFFFFFFFF)
+            {
+               printf("[OTA]: New FW in OTA slot 1 correct UUID, set FW_FLAG_NEW_IMG_EXT, reboot\n");
+               write_fw_flag(FW_FLAG_NEW_IMG_EXT);
+               ti_lib_sys_ctrl_system_reset();
+            }
+            else
+            {
+               printf("[OTA]: New FW in OTA slot 1 non-correct firmware UUID\n");
+               send_message_packet(DEVICE_MESSAGE_OTA_NONCORRECT_CRC, DATA_NONE);
+            }
+
          }
          else
          {

@@ -165,6 +165,7 @@
 #define DEVICE_MESSAGE_OTA_BAD_GOLDEN_IMAGE                     0x0A
 #define DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS                0x0B
 #define DEVICE_MESSAGE_OTA_UPDATE_SUCCESS                       0x0C
+#define DEVICE_MESSAGE_OTA_NONCORRECT_UUID                      0x0D
 
 /* UART Binary data */
 #define UART_PROTOCOL_VERSION_V1                                0x01

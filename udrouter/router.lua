@@ -211,6 +211,9 @@ device_message_type[DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS] 	= "OTA: SPI flash
 DEVICE_MESSAGE_OTA_UPDATE_SUCCESS               		        =           "0C"
 device_message_type[DEVICE_MESSAGE_OTA_UPDATE_SUCCESS] 	        = "OTA: Update success"
 
+DEVICE_MESSAGE_OTA_NONCORRECT_UUID               		        =           "0D"
+device_message_type[DEVICE_MESSAGE_OTA_NONCORRECT_UUID] 	        = "OTA: Non-correct firmware UUID"
+
 --/*---------------------------------------------------------------------------*/--
 
 DATA_TYPE_FIRMWARE_COMMAND_NEW_FW              =         "01" --Сообщение о наличии новой прошивки
