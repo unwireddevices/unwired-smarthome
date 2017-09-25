@@ -144,10 +144,6 @@ uint32_t ota_image_current_offset = 0;
 
 rpl_dag_t *rpl_probing_dag;
 
-static uint8_t lpm_mode_return(void);
-
-LPM_MODULE(dag_lpm_module, lpm_mode_return, NULL, NULL, LPM_DOMAIN_NONE);
-
 /*---------------------------------------------------------------------------*/
 
 PROCESS(dag_node_process, "DAG-node process");
@@ -157,13 +153,6 @@ PROCESS(status_send_process, "Status send process");
 PROCESS(maintenance_process, "Maintenance process");
 PROCESS(led_process, "Led process");
 PROCESS(fw_update_process, "FW OTA update process");
-
-/*---------------------------------------------------------------------------*/
-
-static uint8_t lpm_mode_return(void)
-{
-  return LPM_MODE_AWAKE;
-}
 
 /*---------------------------------------------------------------------------*/
 
@@ -438,7 +427,6 @@ static void firmware_cmd_new_fw_handler(const uip_ipaddr_t *sender_addr,
       if (spi_status == SPI_EXT_FLASH_ACTIVE)
       {
             printf("DAG Node: OTA update process start\n");
-            lpm_register_module(&dag_lpm_module);
             process_start(&fw_update_process, NULL);
       }
       else
@@ -1100,7 +1088,6 @@ PROCESS_THREAD(fw_update_process, ev, data)
             send_message_packet(DEVICE_MESSAGE_OTA_NONCORRECT_CRC, DATA_NONE);
          }
          process_exit(&fw_update_process);
-         lpm_unregister_module(&dag_lpm_module);
          return 0;
       }
 
@@ -1118,7 +1105,6 @@ PROCESS_THREAD(fw_update_process, ev, data)
             process_exit(&fw_update_process);
             chunk_num = 0;
             fw_error_counter = 0;
-            lpm_unregister_module(&dag_lpm_module);
             return 0;
          }
          else
@@ -1132,7 +1118,6 @@ PROCESS_THREAD(fw_update_process, ev, data)
       PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&fw_timer_delay_chunk) );
    }
 
-   lpm_unregister_module(&dag_lpm_module);
    PROCESS_END();
 }
 
