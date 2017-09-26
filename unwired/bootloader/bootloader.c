@@ -8,22 +8,17 @@
 #define UART_SPEED       115200
 #define LED_IOID         IOID_22
 
-static void
-power_domains_on(void) {
-  /* Turn on the PERIPH PD */
-  ti_lib_prcm_power_domain_on(PRCM_DOMAIN_PERIPH);
-
-  /* Wait for domains to power on */
-  while((ti_lib_prcm_power_domain_status(PRCM_DOMAIN_PERIPH)
-        != PRCM_DOMAIN_POWER_ON));
-}
-
 void
 initialize_peripherals() {
   /* Disable global interrupts */
   bool int_disabled = ti_lib_int_master_disable();
 
-  power_domains_on();
+  /* Turn on the PERIPH PD */
+  ti_lib_prcm_power_domain_on(PRCM_DOMAIN_PERIPH);
+
+  /* Wait for domains to power on */
+  while((ti_lib_prcm_power_domain_status(PRCM_DOMAIN_PERIPH)
+      != PRCM_DOMAIN_POWER_ON));
 
   /* Enable GPIO peripheral */
   ti_lib_prcm_peripheral_run_enable(PRCM_PERIPH_GPIO);
