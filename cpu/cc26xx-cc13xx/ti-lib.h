@@ -524,6 +524,15 @@
 #define ti_lib_uart_hw_flow_control_en(...)    UARTHwFlowControlEnable(__VA_ARGS__)
 #define ti_lib_uart_hw_flow_control_dis(...)   UARTHwFlowControlDisable(__VA_ARGS__)
 /*---------------------------------------------------------------------------*/
+/* crypto.h */
+#include "driverlib/crypto.h"
+
+#define ti_lib_crypto_aes_load_key(...)      CRYPTOAesLoadKey(__VA_ARGS__)
+#define ti_lib_crypto_aes_ecb(...)           CRYPTOAesEcb(__VA_ARGS__)
+#define ti_lib_crypto_aes_ecb_status(...)    CRYPTOAesEcbStatus(__VA_ARGS__)
+#define ti_lib_crypto_aes_cbc(...)           CRYPTOAesCbc(__VA_ARGS__)
+#define ti_lib_crypto_aes_cbc_status(...)    CRYPTOAesCbcStatus(__VA_ARGS__)
+/*---------------------------------------------------------------------------*/
 /* vims.h */
 #include "driverlib/vims.h"
 
