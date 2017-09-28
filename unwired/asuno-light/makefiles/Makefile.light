@@ -1,6 +1,7 @@
 all: light
 
-PROJECT_SOURCEFILES += ../dag_node.c ../int-flash-common.c ../ota-main.c ../ota-common.c ../rtc-common.c
+PROJECTDIRS += ..
+PROJECT_SOURCEFILES += dag_node.c int-flash-common.c ota-main.c ota-common.c rtc-common.c 
 DEFINES+=PROJECT_CONF_H=\"project-conf-class-c.h\"
 DEFINES+=IF_UD_LIGHT=1
 DEFINES+=FAKEDEFINE=1

@@ -1,6 +1,7 @@
 all: root
 
-PROJECT_SOURCEFILES += ../root-node.c
+PROJECTDIRS += ..
+PROJECT_SOURCEFILES += root-node.c
 DEFINES+=PROJECT_CONF_H=\"project-conf-class-c.h\"
 DEFINES+=FAKEDEFINE=1
 DEFINES+=CLASS=0x0C
