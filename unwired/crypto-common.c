@@ -46,11 +46,83 @@
 #include "ud_binary_protocol.h"
 #include "xxf_types_helper.h"
 
+#include <cpu/cc26xx-cc13xx/lib/cc13xxware/driverlib/rom_crypto.h>
+#include <cpu/cc26xx-cc13xx/lib/cc13xxware/driverlib/crypto.h>
+
+/*---------------------------------------------------------------------------*/
+
+enum crypto
+{
+   Encrypt = 0x01,
+   Decrypt = 0x00,
+   InterruptsEnabled = 0x01,
+   InterruptsDisabled = 0x00,
+};
+
+/*---------------------------------------------------------------------------*/
+
+void aes_cbc_nonce_gen(uint32_t *nonce)
+{
+   for (uint8_t i=0; i < 8; i++ )
+      ((uint16_t *)nonce )[i] = random_rand();
+}
+
+/*---------------------------------------------------------------------------*/
+
+void periph_crypto_run()
+{
+   ti_lib_int_master_disable();
+   ti_lib_prcm_peripheral_run_enable(PRCM_PERIPH_CRYPTO);
+   ti_lib_prcm_peripheral_sleep_enable(PRCM_PERIPH_CRYPTO);
+   ti_lib_prcm_peripheral_deep_sleep_enable(PRCM_PERIPH_CRYPTO);
+   ti_lib_prcm_load_set();
+   while(!ti_lib_prcm_load_get());
+   ti_lib_int_master_enable();
+}
+
+/*---------------------------------------------------------------------------*/
+
+void periph_crypto_stop()
+{
+   ti_lib_int_master_disable();
+   ti_lib_prcm_peripheral_run_disable(PRCM_PERIPH_CRYPTO);
+   ti_lib_prcm_peripheral_sleep_disable(PRCM_PERIPH_CRYPTO);
+   ti_lib_prcm_peripheral_deep_sleep_disable(PRCM_PERIPH_CRYPTO);
+   ti_lib_prcm_load_set();
+   while(!ti_lib_prcm_load_get());
+   ti_lib_int_master_enable();
+}
+
 /*---------------------------------------------------------------------------*/
 
 
+void aes_cbc_crypt(uint32_t *aes_key, uint32_t *nonce, uint32_t *input_data, uint32_t *output_data, uint32_t data_lenth)
+{
+   uint8_t key_index = CRYPTO_KEY_AREA_0;
+   aes_cbc_nonce_gen(nonce);
+
+   periph_crypto_run();
+   ti_lib_crypto_aes_load_key(aes_key, key_index);
+   ti_lib_crypto_aes_cbc(input_data, output_data, data_lenth, nonce, key_index, Encrypt, InterruptsDisabled);
+   while (ti_lib_crypto_aes_cbc_status() != AES_SUCCESS);
+   ti_lib_crypto_aes_cbc_finish();
+   periph_crypto_stop();
+}
+
+/*---------------------------------------------------------------------------*/
+
+void aes_cbc_decrypt(uint32_t *aes_key, uint32_t *nonce, uint32_t *input_data, uint32_t *output_data, uint32_t data_lenth)
+{
+   uint8_t key_index = CRYPTO_KEY_AREA_0;
+
+   periph_crypto_run();
+   ti_lib_crypto_aes_load_key(aes_key, key_index);
+   ti_lib_crypto_aes_cbc(input_data, output_data, data_lenth, nonce, key_index, Decrypt, InterruptsDisabled);
+   while (ti_lib_crypto_aes_cbc_status() != AES_SUCCESS);
+   ti_lib_crypto_aes_cbc_finish();
+   periph_crypto_stop();
+}
+
 /*---------------------------------------------------------------------------*/
 
 
-
-/*---------------------------------------------------------------------------*/
