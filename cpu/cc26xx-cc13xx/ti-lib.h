@@ -530,8 +530,10 @@
 #define ti_lib_crypto_aes_load_key(...)      CRYPTOAesLoadKey(__VA_ARGS__)
 #define ti_lib_crypto_aes_ecb(...)           CRYPTOAesEcb(__VA_ARGS__)
 #define ti_lib_crypto_aes_ecb_status(...)    CRYPTOAesEcbStatus(__VA_ARGS__)
+#define ti_lib_crypto_aes_ecb_finish(...)    CRYPTOAesCbcFinish(__VA_ARGS__)
 #define ti_lib_crypto_aes_cbc(...)           CRYPTOAesCbc(__VA_ARGS__)
 #define ti_lib_crypto_aes_cbc_status(...)    CRYPTOAesCbcStatus(__VA_ARGS__)
+#define ti_lib_crypto_aes_cbc_finish(...)    CRYPTOAesCbcFinish(__VA_ARGS__)
 /*---------------------------------------------------------------------------*/
 /* vims.h */
 #include "driverlib/vims.h"
