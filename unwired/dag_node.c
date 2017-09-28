@@ -66,7 +66,6 @@
 #include "ti-lib.h"
 #include "ota-main.h"
 #include "ota-common.h"
-#include "lpm.h"
 #include "crypto-common.h"
 
 #include "int-flash-common.h"
@@ -311,7 +310,6 @@ uart_console(unsigned char uart_char)
 
    if (uart_char == 't')
    {
-      printf("OTA: result %"PRId8" \n", verify_ota_slot(1));
    }
 }
 
