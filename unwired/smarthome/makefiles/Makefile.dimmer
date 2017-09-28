@@ -1,7 +1,7 @@
 all: dimmer
 
 PROJECTDIRS += ..
-PROJECT_SOURCEFILES += dag_node.c int-flash-common.c ota-main.c ota-common.c
+PROJECT_SOURCEFILES += dag_node.c int-flash-common.c ota-main.c ota-common.c crypto-common.c
 DEFINES+=PROJECT_CONF_H=\"project-conf-class-c.h\"
 DEFINES+=IF_UD_DIMMER=1
 DEFINES+=FAKEDEFINE=1

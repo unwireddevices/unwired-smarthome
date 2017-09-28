@@ -64,6 +64,7 @@
 #include "dev/watchdog.h"
 #include "root-node.h"
 #include "lpm.h"
+#include "crypto-common.h"
 
 #include "../fake_headers.h" //no move up! not "krasivo"!
 
