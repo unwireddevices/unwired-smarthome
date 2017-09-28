@@ -53,10 +53,10 @@
 
 enum crypto
 {
-   Encrypt = 0x01,
-   Decrypt = 0x00,
-   InterruptsEnabled = 0x01,
-   InterruptsDisabled = 0x00,
+   encrypt = 0x01,
+   decrypt = 0x00,
+   interrupts_enabled = 0x01,
+   interrupts_disabled = 0x00,
 };
 
 /*---------------------------------------------------------------------------*/
@@ -96,14 +96,14 @@ void periph_crypto_stop()
 /*---------------------------------------------------------------------------*/
 
 
-void aes_cbc_crypt(uint32_t *aes_key, uint32_t *nonce, uint32_t *input_data, uint32_t *output_data, uint32_t data_lenth)
+void aes_cbc_encrypt(uint32_t *aes_key, uint32_t *nonce, uint32_t *input_data, uint32_t *output_data, uint32_t data_lenth)
 {
    uint8_t key_index = CRYPTO_KEY_AREA_0;
    aes_cbc_nonce_gen(nonce);
 
    periph_crypto_run();
    ti_lib_crypto_aes_load_key(aes_key, key_index);
-   ti_lib_crypto_aes_cbc(input_data, output_data, data_lenth, nonce, key_index, Encrypt, InterruptsDisabled);
+   ti_lib_crypto_aes_cbc(input_data, output_data, data_lenth, nonce, key_index, encrypt, interrupts_disabled);
    while (ti_lib_crypto_aes_cbc_status() != AES_SUCCESS);
    ti_lib_crypto_aes_cbc_finish();
    periph_crypto_stop();
@@ -117,7 +117,7 @@ void aes_cbc_decrypt(uint32_t *aes_key, uint32_t *nonce, uint32_t *input_data, u
 
    periph_crypto_run();
    ti_lib_crypto_aes_load_key(aes_key, key_index);
-   ti_lib_crypto_aes_cbc(input_data, output_data, data_lenth, nonce, key_index, Decrypt, InterruptsDisabled);
+   ti_lib_crypto_aes_cbc(input_data, output_data, data_lenth, nonce, key_index, decrypt, interrupts_disabled);
    while (ti_lib_crypto_aes_cbc_status() != AES_SUCCESS);
    ti_lib_crypto_aes_cbc_finish();
    periph_crypto_stop();

@@ -314,7 +314,7 @@ uart_console(unsigned char uart_char)
       uint8_t input_data[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF,
                               0xBE, 0xAD, 0xFA, 0xCE, 0xBE, 0xAD, 0xFA, 0xCE, 0xBE, 0xAD, 0xFA, 0xCE, 0xBE, 0xAD, 0xFA};
       uint8_t nonce[16] = {0};
-      uint8_t crypted_data[sizeof(input_data)] = {0};
+      uint8_t encrypted_data[sizeof(input_data)] = {0};
       uint8_t decrypted_data[sizeof(input_data)] = {0};
 
       printf("\n");
@@ -332,11 +332,11 @@ uart_console(unsigned char uart_char)
       printf("\n");
       printf("\n");
 
-      aes_cbc_crypt((uint32_t*)aes_key, (uint32_t*)nonce, (uint32_t*)input_data, (uint32_t*)crypted_data, sizeof(input_data));
+      aes_cbc_encrypt((uint32_t*)aes_key, (uint32_t*)nonce, (uint32_t*)input_data, (uint32_t*)encrypted_data, sizeof(input_data));
 
       printf("Crypted data: \t\t");
       for (uint8_t i=0; i < sizeof(input_data); i++ )
-         printf(" %"PRIXX8"", crypted_data[i]);
+         printf(" %"PRIXX8"", encrypted_data[i]);
       printf("\n");
 
       printf("Nonce data: \t\t");
@@ -347,7 +347,7 @@ uart_console(unsigned char uart_char)
       printf("\n");
       printf("\n");
 
-      aes_cbc_decrypt((uint32_t*)aes_key, (uint32_t*)nonce, (uint32_t*)crypted_data, (uint32_t*)decrypted_data, sizeof(input_data));
+      aes_cbc_decrypt((uint32_t*)aes_key, (uint32_t*)nonce, (uint32_t*)encrypted_data, (uint32_t*)decrypted_data, sizeof(input_data));
 
       printf("Decrypted data: \t");
       for (uint8_t i=0; i < sizeof(input_data); i++ )
