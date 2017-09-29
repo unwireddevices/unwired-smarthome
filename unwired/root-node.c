@@ -190,13 +190,14 @@ void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const ui
 void decrypted_data_processed(const uip_ip6addr_t *sender_addr, const uint8_t *data, uint16_t datalen)
 {
    dag_root_raw_print(sender_addr, data, datalen);
+   uint8_t packet_type = data[2];
 
-   if (data[2] == DATA_TYPE_JOIN)
+   if (packet_type == DATA_TYPE_JOIN)
    {
       send_confirmation_packet(sender_addr);
    }
 
-   if (data[2] == DATA_TYPE_STATUS || data[2] == DATA_TYPE_SENSOR_DATA)
+   else if (packet_type == DATA_TYPE_STATUS || packet_type == DATA_TYPE_SENSOR_DATA)
    {
       send_pong_packet(sender_addr);
    }
@@ -282,6 +283,7 @@ void root_node_initialize()
    /* start flag "data for udp ready" poller process */
    process_start(&send_command_process, NULL);
 }
+
 
 /*---------------------------------------------------------------------------*/
 
