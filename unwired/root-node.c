@@ -187,6 +187,30 @@ void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const ui
 
 /*---------------------------------------------------------------------------*/
 
+void decrypted_data_processed(const uip_ip6addr_t *sender_addr, const uint8_t *data, uint16_t datalen)
+{
+   dag_root_raw_print(sender_addr, data, datalen);
+
+   if (data[2] == DATA_TYPE_JOIN)
+   {
+      send_confirmation_packet(sender_addr);
+   }
+
+   if (data[2] == DATA_TYPE_STATUS || data[2] == DATA_TYPE_SENSOR_DATA)
+   {
+      send_pong_packet(sender_addr);
+   }
+}
+
+/*---------------------------------------------------------------------------*/
+
+void encrypted_data_processed(const uip_ip6addr_t *sender_addr, const uint8_t *data, uint16_t datalen)
+{
+   printf("UDM: encrypted data received\n");
+}
+
+/*---------------------------------------------------------------------------*/
+
 void udp_data_receiver(struct simple_udp_connection *connection,
                        const uip_ipaddr_t *sender_addr,
                        uint16_t sender_port,
@@ -197,17 +221,13 @@ void udp_data_receiver(struct simple_udp_connection *connection,
 {
    led_on(LED_A);
 
-   dag_root_raw_print(sender_addr, data, datalen);
-
-   if (data[0] == PROTOCOL_VERSION_V1 && data[2] == DATA_TYPE_JOIN)
+   if (data[0] == PROTOCOL_VERSION_V1)
    {
-      send_confirmation_packet(sender_addr);
+      decrypted_data_processed(sender_addr, data, datalen);
    }
-
-   if (data[0] == PROTOCOL_VERSION_V1 && (data[2] == DATA_TYPE_STATUS ||
-                                          data[2] == DATA_TYPE_SENSOR_DATA))
+   else if (data[0] == PROTOCOL_VERSION_V2)
    {
-      send_pong_packet(sender_addr);
+      encrypted_data_processed(sender_addr, data, datalen);
    }
 
    led_off(LED_A);

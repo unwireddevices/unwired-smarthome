@@ -9,6 +9,7 @@
 
 /* Inter-device protocol versions */
 #define PROTOCOL_VERSION_V1                                     0x01
+#define PROTOCOL_VERSION_V2                                     0x02
 #define DEVICE_VERSION_V1                                       0x01
 
 /* Data types */
