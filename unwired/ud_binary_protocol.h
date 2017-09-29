@@ -148,7 +148,7 @@
 #define DATA_TYPE_FIRMWARE_COMMAND_CHANK_REQ                    0x02 //Запрос пакета с частью прошивки
 #define DATA_TYPE_FIRMWARE_COMMAND_REBOOT                       0x03 //Перезагрузка. Серьезно, без этого комментария не понятно?
 #define DATA_TYPE_FIRMWARE_COMMAND_CLEAN_GI                     0x04 //Стереть образ GI. Будет записан после перезагрузки.
-
+#define DATA_TYPE_FIRMWARE_COMMAND_FLASH_GI                     0x04 //Записать образ GI во флеш
 
 #define FIRMWARE_PAYLOAD_LENGTH                                 600
 #define FIRMWARE_PAYLOAD_OFFSET                                 7

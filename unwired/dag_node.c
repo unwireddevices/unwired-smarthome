@@ -519,6 +519,13 @@ static void udp_receiver(struct simple_udp_connection *c,
 
                   else if (data[3] == DATA_TYPE_FIRMWARE_COMMAND_CLEAN_GI)
                         erase_ota_image(0);
+
+                  else if (data[3] == DATA_TYPE_FIRMWARE_COMMAND_FLASH_GI)
+                  {
+                     write_fw_flag(FW_FLAG_NEW_IMG_INT);
+                     watchdog_reboot();
+                  }
+
                   else
                   {
                         printf("DAG Node: Incompatible FW CMD command from");
