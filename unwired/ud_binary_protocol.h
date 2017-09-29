@@ -22,8 +22,8 @@
 #define DATA_TYPE_GET_STATUS                                    0x07 //Запрос статуса(не реализовано)
 #define DATA_TYPE_SETTINGS                                      0x08 //Команда настройки параметров
 #define DATA_TYPE_MESSAGE                                       0x09 //Сообщения
-#define DATA_TYPE_SET_TIME                                      0x0A //Команда установки времени(не реализовано)
-#define DATA_TYPE_SET_SCHEDULE                                  0x0B //Команда установки расписания(не реализовано)
+#define DATA_TYPE_SET_TIME                                      0x0A //Команда установки времени
+#define DATA_TYPE_SET_SCHEDULE                                  0x0B //Команда установки расписания
 #define DATA_TYPE_FIRMWARE                                      0x0C //Данные для OTA
 #define DATA_TYPE_UART                                          0x0D //Команда с данными UART
 #define DATA_TYPE_FIRMWARE_CMD                                  0x0E //Команды OTA
@@ -150,8 +150,8 @@
 #define DATA_TYPE_FIRMWARE_COMMAND_CLEAN_GI                     0x04 //Стереть образ GI. Будет записан после перезагрузки.
 #define DATA_TYPE_FIRMWARE_COMMAND_FLASH_GI                     0x04 //Записать образ GI во флеш
 
-#define FIRMWARE_PAYLOAD_LENGTH                                 600
-#define FIRMWARE_PAYLOAD_OFFSET                                 7
+#define FIRMWARE_PAYLOAD_LENGTH                                 600 //Размер чанка
+#define FIRMWARE_PAYLOAD_OFFSET                                 7   //Сдвиг от начала пакета до содержимого чанка
 
 /* Devices messages */
 #define DEVICE_MESSAGE_HIGH_TEMPERATYRE                         0x01
