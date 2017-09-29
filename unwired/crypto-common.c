@@ -126,3 +126,31 @@ void aes_cbc_decrypt(uint32_t *aes_key, uint32_t *nonce, uint32_t *input_data, u
 /*---------------------------------------------------------------------------*/
 
 
+void aes_ecb_encrypt(uint32_t *aes_key, uint32_t *nonce, uint32_t *input_data, uint32_t *output_data, uint32_t data_lenth)
+{
+   uint8_t key_index = CRYPTO_KEY_AREA_0;
+
+   periph_crypto_run();
+   ti_lib_crypto_aes_load_key(aes_key, key_index);
+   ti_lib_crypto_aes_ecb(input_data, output_data, key_index, encrypt, interrupts_disabled);
+   while (ti_lib_crypto_aes_ecb_status() != AES_SUCCESS);
+   ti_lib_crypto_aes_ecb_finish();
+   periph_crypto_stop();
+}
+
+/*---------------------------------------------------------------------------*/
+
+void aes_ecb_decrypt(uint32_t *aes_key, uint32_t *nonce, uint32_t *input_data, uint32_t *output_data, uint32_t data_lenth)
+{
+   uint8_t key_index = CRYPTO_KEY_AREA_0;
+
+   periph_crypto_run();
+   ti_lib_crypto_aes_load_key(aes_key, key_index);
+   ti_lib_crypto_aes_ecb(input_data, output_data, key_index, decrypt, interrupts_disabled);
+   while (ti_lib_crypto_aes_ecb_status() != AES_SUCCESS);
+   ti_lib_crypto_aes_ecb_finish();
+   periph_crypto_stop();
+}
+
+/*---------------------------------------------------------------------------*/
+
