@@ -110,6 +110,8 @@ CCIF clock_time_t clock_time(void);
  */
 CCIF unsigned long clock_seconds(void);
 
+CCIF uint16_t clock_mseconds(void);
+
 /**
  * Set the value of the platform seconds.
  * \param sec   The value to set.

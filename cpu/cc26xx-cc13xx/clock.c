@@ -176,6 +176,25 @@ clock_seconds(void)
   return (unsigned long)secs_now;
 }
 /*---------------------------------------------------------------------------*/
+CCIF uint16_t
+clock_mseconds(void)
+{
+  bool interrupts_disabled;
+  uint16_t msecs_now;
+
+  interrupts_disabled = ti_lib_int_master_disable();
+
+  msecs_now = ti_lib_aon_rtc_fraction_get()/4294967;
+
+  /* Re-enable interrupts */
+  if(!interrupts_disabled) {
+    ti_lib_int_master_enable();
+  }
+
+
+  return msecs_now;
+}
+/*---------------------------------------------------------------------------*/
 void
 clock_wait(clock_time_t i)
 {
