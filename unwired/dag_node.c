@@ -306,7 +306,30 @@ uart_console(unsigned char uart_char)
       backup_golden_image();
 
    if (uart_char == 'o')
-      verify_ota_slot(1);
+      {
+         uint8_t aes_key[16] = {0x5a, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6c, 0x6c, 0x69, 0x61, 0x6e, 0x63, 0x65, 0x30, 0x39};
+         uint8_t input_data[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF};
+         uint8_t nonce[16] = {0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF};
+         uint8_t encrypted_data[sizeof(input_data)] = {0};
+         uint8_t decrypted_data[sizeof(input_data)] = {0};
+         uint32_t start_uptime = clock_seconds();
+         uint32_t rounds_count = 500000;
+
+
+         uint8_t key_index = CRYPTO_KEY_AREA_0;
+
+         for (uint32_t i=0; i < rounds_count; i++ )
+         {
+            aes_cbc_encrypt((uint32_t*)aes_key, (uint32_t*)nonce, (uint32_t*)input_data, (uint32_t*)encrypted_data, sizeof(input_data));
+            aes_cbc_decrypt((uint32_t*)aes_key, (uint32_t*)nonce, (uint32_t*)encrypted_data, (uint32_t*)decrypted_data, sizeof(input_data));
+            if (!(i % 2000))
+               watchdog_periodic();
+            if (!(i % 20000))
+               printf(".");
+         }
+         printf( "HW AES TEST(%" PRIu32 ") took %" PRIu32 " s, speed %" PRIu32 " r/s\n", rounds_count, clock_seconds()-start_uptime, rounds_count/(clock_seconds()-start_uptime) );
+
+      }
 
    if (uart_char == 't')
    {
