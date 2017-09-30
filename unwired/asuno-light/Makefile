@@ -22,8 +22,7 @@ root:
 	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean_no_hex; \
 	echo $$CONF > /tmp/unwired_last_conf
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.root
-	arm-none-eabi-size root.elf  | grep -v text > /tmp/size.tmp
-	lua ../../tools/mem_used.lua /tmp/size.tmp 125000 20000
+	arm-none-eabi-size root.elf  | grep -v text | lua ../../tools/mem_used.lua 125000 20000
 	../bootloader/generate-metadata/generate-metadata root.bin 0x0 0x01FF0001 1
 	srec_cat firmware-metadata.bin -binary root.bin -binary -offset 0x100 -o root-ota-image.bin -binary
 	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 root-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o root-firmware.hex -intel
@@ -35,8 +34,7 @@ light: net-bootloader
 	[ "x`cat /tmp/unwired_last_conf`" != "x$$CONF" ] && make clean; \
 	echo $$CONF > /tmp/unwired_last_conf
 	make -j5 TARGET=unwired BOARD=$(BOARD)/$(CPU) -f makefiles/Makefile.light
-	arm-none-eabi-size light.elf | grep -v text > /tmp/size.tmp
-	lua ../../tools/mem_used.lua /tmp/size.tmp 125000 20000
+	arm-none-eabi-size light.elf | grep -v text | lua ../../tools/mem_used.lua 125000 20000
 	../bootloader/generate-metadata/generate-metadata light.bin 0x0 0x01A00001 1
 	srec_cat firmware-metadata.bin -binary light.bin -binary -offset 0x100 -o light-ota-image.bin -binary
 	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 light-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o light-firmware.hex -intel

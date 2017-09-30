@@ -3,13 +3,12 @@ math.round = function(num, idp)
   return math.floor(num * mult + 0.5) / mult
 end
 
+local max_flash = tonumber(arg[1]) or 125000
+local max_ram = tonumber(arg[2]) or 20000
 
-local max_flash = tonumber(arg[2]) or 125000
-local max_ram = tonumber(arg[3]) or 20000
-
-local handle,err = io.open(arg[1],"r")
-local result = handle:read("*a")
-handle:close()
+for line in io.lines() do
+  result = line
+end
 local _, _, text, data, bss = string.find(result, '%s*(%d*)%s*(%d*)%s*(%d*)')
 text = tonumber(text)
 data = tonumber(data)
