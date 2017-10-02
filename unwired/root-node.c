@@ -198,7 +198,6 @@ void data_type_set_time_request_processing(const uip_ip6addr_t *addr, const uint
 
 void decrypted_data_processed(const uip_ip6addr_t *sender_addr, const uint8_t *data, uint16_t datalen)
 {
-   dag_root_raw_print(sender_addr, data, datalen);
    uint8_t packet_type = data[2];
 
    if (packet_type == DATA_TYPE_JOIN)
@@ -216,6 +215,7 @@ void decrypted_data_processed(const uip_ip6addr_t *sender_addr, const uint8_t *d
       data_type_set_time_request_processing(sender_addr, data, datalen);
    }
 
+   dag_root_raw_print(sender_addr, data, datalen);
 }
 
 /*---------------------------------------------------------------------------*/
