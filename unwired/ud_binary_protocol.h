@@ -12,6 +12,11 @@
 #define PROTOCOL_VERSION_V2                                     0x02
 #define DEVICE_VERSION_V1                                       0x01
 
+/* Packet sizes in V2 protocol */
+#define PROTOCOL_VERSION_V2_16BYTE                              16
+#define PROTOCOL_VERSION_V2_32BYTE                              32
+#define PROTOCOL_VERSION_V2_592BYTE                             592
+
 /* Data types */
 #define DATA_TYPE_JOIN                                          0x01 //Запрос на включение в сеть
 #define DATA_TYPE_SENSOR_DATA                                   0x02 //Данные с датчиков устройства
@@ -153,6 +158,12 @@
 #define FIRMWARE_PAYLOAD_LENGTH                                 600 //Размер чанка
 #define FIRMWARE_PAYLOAD_OFFSET                                 7   //Сдвиг от начала пакета до содержимого чанка
 
+/* DATA_TYPE_SET_TIME commands  */
+#define DATA_TYPE_SET_TIME_COMMAND_SYNC                         0x01 //Команда "синхронизировать время"
+#define DATA_TYPE_SET_TIME_TIME                                 0x02 //Данные текущего времени(для координатора)
+#define DATA_TYPE_SET_TIME_REQUEST                              0x03 //Запрос синхронизации времени
+#define DATA_TYPE_SET_TIME_RESPONSE                             0x04 //Ответ на запрос синхронизации времени
+
 /* Devices messages */
 #define DEVICE_MESSAGE_HIGH_TEMPERATYRE                         0x01
 #define DEVICE_MESSAGE_LOW_VOLTAGE                              0x02
@@ -181,6 +192,8 @@
 /* DEVICE_ROOT_LOCAL commands */
 #define LOCAL_ROOT_COMMAND_REBOOT                               0x00
 #define LOCAL_ROOT_COMMAND_BOOTLOADER_ACTIVATE                  0x01
+#define LOCAL_ROOT_COMMAND_TIME_SET                             0x02
+
 
 /* Defines */
 
