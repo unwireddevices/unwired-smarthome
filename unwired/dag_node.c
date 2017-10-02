@@ -506,6 +506,77 @@ static void firmware_cmd_new_fw_handler(const uip_ipaddr_t *sender_addr,
 
 /*---------------------------------------------------------------------------*/
 
+/*
+ * Пакет DATA_TYPE_SET_TIME_RESPONSE состоит из следующих данных:
+ * struct udbp-set-time-responce-packet
+      {
+         uint8_t protocol_version;
+         uint8_t device_version;
+         uint8_t DATA_TYPE_SET_TIME; //Тип — пакеты синхронизации времени
+         uint8_t DATA_TYPE_SET_TIME_RESPONSE; //Подтип — ответ на запрос
+         uint32_t send_responce_time_s; //Локальное время координатора(с) в момент отправки пакета
+         uint16_t send_responce_time_ms; //Локальное время координатора(мс) в момент отправки пакета
+         uint8_t reserved_FF_data[6];
+      };
+ *
+ */
+/*---------------------------------------------------------------------------*/
+static void time_data_handler(const uip_ipaddr_t *sender_addr,
+                                          const uint8_t *data,
+                                          uint16_t datalen)
+{
+   if (data[3] == DATA_TYPE_SET_TIME_RESPONSE)
+   {
+
+      uint8_t root_time_s_uint8[32/8] = {data[4], data[5], data[6], data[7]};
+      uint32_t root_time_s = *(uint32_t *)&root_time_s_uint8;
+
+      uint8_t root_time_ms_uint8[16/8] = {data[8], data[9]};
+      uint16_t root_time_ms = *(uint16_t *)&root_time_ms_uint8;
+
+      uint16_t half_transit_time = calculate_transit_time() / 2;
+
+      printf("TIME SYNC: responce recieved: %" PRIu32 " sec, %" PRIu16 " ms, half transit time: %" PRIu16 " ms\n", root_time_s, root_time_ms, half_transit_time);
+
+      if (half_transit_time > 1000)
+      {
+         half_transit_time = half_transit_time - 1000;
+         root_time_s--;
+      }
+
+      else if (half_transit_time > 2000)
+      {
+         half_transit_time = half_transit_time - 2000;
+         root_time_s--;
+         root_time_s--;
+      }
+
+      else if  (half_transit_time > 3000)
+      {
+         return;
+      }
+
+      if (half_transit_time > root_time_ms)
+      {
+         root_time_s--;
+         root_time_ms = root_time_ms + 1000;
+      }
+      root_time_ms = root_time_ms - half_transit_time;
+
+      set_epoch_time(root_time_s);
+      set_epoch_msec_time(root_time_ms);
+
+      printf("TIME SYNC: new time: %" PRIu32 " sec, %" PRIu16 " ms\n", root_time_s, root_time_ms);
+
+   }
+   else if (data[3] == DATA_TYPE_SET_TIME_COMMAND_SYNC)
+   {
+      send_time_sync_req_packet();
+   }
+}
+
+/*---------------------------------------------------------------------------*/
+
 static void udp_receiver(struct simple_udp_connection *c,
                          const uip_ipaddr_t *sender_addr,
                          uint16_t sender_port,
@@ -531,6 +602,9 @@ static void udp_receiver(struct simple_udp_connection *c,
 
             else if (data[2] == DATA_TYPE_FIRMWARE)
                   firmware_data_handler(sender_addr, data, datalen);
+
+            else if (data[2] == DATA_TYPE_SET_TIME)
+                  time_data_handler(sender_addr, data, datalen);
 
             else if (data[2] == DATA_TYPE_FIRMWARE_CMD)
             {
@@ -608,6 +682,46 @@ print_debug_data(void)
           printf("SYSTEM: temp: %"PRIu8"C, voltage: %"PRId16"mv\n", temp, ((batmon_sensor.value(BATMON_SENSOR_TYPE_VOLT) * 125) >> 5));
       }
     */
+}
+
+/*---------------------------------------------------------------------------*/
+
+void send_time_sync_req_packet()
+{
+   if (node_mode != MODE_NORMAL)
+      return;
+
+   uip_ip6addr_t addr;
+   uip_ip6addr_copy(&addr, &root_addr);
+
+   uint32_t local_time_s = clock_seconds();
+   uint16_t local_time_ms = clock_mseconds();
+
+   uint8_t *local_time_s_uint8 = (uint8_t *)&local_time_s;
+   uint8_t *local_time_ms_uint8 = (uint8_t *)&local_time_ms;
+
+   set_local_time_req_send(); //Сохранить текущее время для расчета времени следования
+
+   uint8_t udp_buffer[PROTOCOL_VERSION_V2_16BYTE];
+   udp_buffer[0] = PROTOCOL_VERSION_V1;
+   udp_buffer[1] = DEVICE_VERSION_V1;
+   udp_buffer[2] = DATA_TYPE_SET_TIME;
+   udp_buffer[3] = DATA_TYPE_SET_TIME_REQUEST;
+   udp_buffer[4] = *local_time_s_uint8++;
+   udp_buffer[5] = *local_time_s_uint8++;
+   udp_buffer[6] = *local_time_s_uint8++;
+   udp_buffer[7] = *local_time_s_uint8;
+   udp_buffer[8] = *local_time_ms_uint8++;
+   udp_buffer[9] = *local_time_ms_uint8;
+   udp_buffer[10] = DATA_RESERVED;
+   udp_buffer[11] = DATA_RESERVED;
+   udp_buffer[12] = DATA_RESERVED;
+   udp_buffer[13] = DATA_RESERVED;
+   udp_buffer[14] = DATA_RESERVED;
+   udp_buffer[15] = DATA_RESERVED; // << 16-byte packet, ready to encrypt v2 protocol
+
+   net_on(RADIO_ON_TIMER_OFF);
+   simple_udp_sendto(&udp_connection, udp_buffer, PROTOCOL_VERSION_V2_16BYTE, &addr);
 }
 
 /*---------------------------------------------------------------------------*/

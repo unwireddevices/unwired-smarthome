@@ -49,7 +49,34 @@
 
 /*---------------------------------------------------------------------------*/
 
-uint32_t epoch_offset = 0;
+uint32_t epoch_sec_offset = 0;
+int16_t epoch_msec_offset = 0;
+
+uint32_t local_time_req_send_s = 0;
+int16_t local_time_req_send_ms = 0;
+
+/*---------------------------------------------------------------------------*/
+
+void set_local_time_req_send()
+{
+   local_time_req_send_s = clock_seconds();
+   local_time_req_send_ms = clock_mseconds();
+}
+
+/*---------------------------------------------------------------------------*/
+
+uint16_t calculate_transit_time()
+{
+   uint32_t local_time_res_recieved_s = clock_seconds();
+   uint16_t local_time_res_recieved_ms = clock_mseconds();
+
+   uint32_t transit_time_s = local_time_res_recieved_s - local_time_req_send_s;
+   int32_t transit_time_ms = local_time_res_recieved_ms - local_time_req_send_ms;
+
+   int32_t full_transit_time_ms = (transit_time_s * 1000) + transit_time_ms;
+
+   return (uint16_t)full_transit_time_ms;
+}
 
 /*---------------------------------------------------------------------------*/
 
@@ -58,7 +85,7 @@ void set_epoch_time(uint32_t epoch)
    uint32_t current_uptime = clock_seconds();
    if (epoch > current_uptime)
    {
-      epoch_offset = epoch - current_uptime;
+      epoch_sec_offset = epoch - current_uptime;
    }
 }
 
@@ -67,7 +94,24 @@ void set_epoch_time(uint32_t epoch)
 uint32_t get_epoch_time()
 {
    uint32_t current_uptime = clock_seconds();
-   return current_uptime + epoch_offset;
+   return current_uptime + epoch_sec_offset;
 }
 
 /*---------------------------------------------------------------------------*/
+
+void set_epoch_msec_time(uint16_t msec)
+{
+   uint16_t current_msec = clock_mseconds();
+   epoch_msec_offset = msec - current_msec; //тут таится какая-то фигня!
+}
+
+/*---------------------------------------------------------------------------*/
+
+uint16_t get_epoch_msec_time()
+{
+   uint16_t current_msec = clock_mseconds();
+   return current_msec + epoch_msec_offset;
+}
+
+/*---------------------------------------------------------------------------*/
+
