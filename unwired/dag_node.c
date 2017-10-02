@@ -67,6 +67,7 @@
 #include "ota-main.h"
 #include "ota-common.h"
 #include "crypto-common.h"
+#include "rtc-common.h"
 
 #include "int-flash-common.h"
 #include "xxf_types_helper.h"
@@ -577,6 +578,15 @@ static void time_data_handler(const uip_ipaddr_t *sender_addr,
 
 /*---------------------------------------------------------------------------*/
 
+static void shedule_data_handler(const uip_ipaddr_t *sender_addr,
+                                          const uint8_t *data,
+                                          uint16_t datalen)
+{
+
+}
+
+/*---------------------------------------------------------------------------*/
+
 static void udp_receiver(struct simple_udp_connection *c,
                          const uip_ipaddr_t *sender_addr,
                          uint16_t sender_port,
@@ -605,6 +615,9 @@ static void udp_receiver(struct simple_udp_connection *c,
 
             else if (data[2] == DATA_TYPE_SET_TIME)
                   time_data_handler(sender_addr, data, datalen);
+
+            else if (data[2] == DATA_TYPE_SET_SCHEDULE)
+                  shedule_data_handler(sender_addr, data, datalen);
 
             else if (data[2] == DATA_TYPE_FIRMWARE_CMD)
             {
