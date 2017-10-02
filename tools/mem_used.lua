@@ -6,9 +6,7 @@ end
 local max_flash = tonumber(arg[1]) or 125000
 local max_ram = tonumber(arg[2]) or 20000
 
-for line in io.lines() do
-  result = line
-end
+local result = io.stdin:read("*a")
 local _, _, text, data, bss = string.find(result, '%s*(%d*)%s*(%d*)%s*(%d*)')
 text = tonumber(text)
 data = tonumber(data)
@@ -20,7 +18,7 @@ if (text ~= nil and data ~= nil and bss ~= nil) then
 	local ram_kb = math.round((ram/1024), 1)
 	local flash_percent = math.round((flash/(max_flash/100)), 1)
 	local ram_percent = math.round((ram/(max_ram/100)), 1)
-	print("/------------------------------------------------------------------------------------------------------------/")
+	print("/----------------------------------------------------------------------------------------------/")
 	print("Program used FLASH: "..flash_kb.."kb("..flash_percent.."%), RAM: "..ram_kb.."kb("..ram_percent.."%)")
-	print("/------------------------------------------------------------------------------------------------------------/")
+	print("/----------------------------------------------------------------------------------------------/\n\n")
 end
