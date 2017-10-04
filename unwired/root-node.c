@@ -295,23 +295,21 @@ void send_time_sync_resp_packet(const uip_ip6addr_t *dest_addr, const uint8_t *d
    if (dest_addr == NULL || &udp_connection.udp_conn == NULL)
       return;
 
-   uint32_t root_time_s = clock_seconds();
-   uint16_t root_time_ms = clock_mseconds();
-
-   uint8_t *root_time_s_uint8 = (uint8_t *)&root_time_s;
-   uint8_t *root_time_ms_uint8 = (uint8_t *)&root_time_ms;
+   time_data_t root_time;
+   root_time.seconds = clock_seconds();
+   root_time.milliseconds = clock_mseconds();
 
    uint8_t udp_buffer[PROTOCOL_VERSION_V2_16BYTE];
    udp_buffer[0] = PROTOCOL_VERSION_V1;
    udp_buffer[1] = DEVICE_VERSION_V1;
    udp_buffer[2] = DATA_TYPE_SET_TIME;
    udp_buffer[3] = DATA_TYPE_SET_TIME_RESPONSE;
-   udp_buffer[4] = *root_time_s_uint8++;
-   udp_buffer[5] = *root_time_s_uint8++;
-   udp_buffer[6] = *root_time_s_uint8++;
-   udp_buffer[7] = *root_time_s_uint8;
-   udp_buffer[8] = *root_time_ms_uint8++;
-   udp_buffer[9] = *root_time_ms_uint8;
+   udp_buffer[4] = root_time.seconds_u8[0];
+   udp_buffer[5] = root_time.seconds_u8[1];
+   udp_buffer[6] = root_time.seconds_u8[2];
+   udp_buffer[7] = root_time.seconds_u8[3];
+   udp_buffer[8] = root_time.milliseconds_u8[0];
+   udp_buffer[9] = root_time.milliseconds_u8[1];
    udp_buffer[10] = data[10];
    udp_buffer[11] = data[11];
    udp_buffer[12] = data[12];
@@ -319,7 +317,7 @@ void send_time_sync_resp_packet(const uip_ip6addr_t *dest_addr, const uint8_t *d
    udp_buffer[14] = data[14];
    udp_buffer[15] = data[15]; // << 16-byte packet, ready to encrypt v2 protocol
 
-   printf("UDM: time sync responce sended: %" PRIu32 " sec, %" PRIu16 " ms\n", root_time_s, root_time_ms);
+   printf("UDM: time sync responce sended: %" PRIu32 " sec, %" PRIu16 " ms\n", root_time.seconds, root_time.milliseconds);
 
    simple_udp_sendto(&udp_connection, udp_buffer, PROTOCOL_VERSION_V2_16BYTE, dest_addr);
 }

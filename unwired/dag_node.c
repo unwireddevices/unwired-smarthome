@@ -137,7 +137,7 @@ static struct command_data message_for_main_process;
 static struct etimer maintenance_timer;
 static struct etimer fw_timer;
 
-volatile uint16_t fw_chunk_quantity = 0;
+volatile u8_u16_t fw_chunk_quantity;
 volatile uint16_t fw_ext_flash_address = 0;
 volatile uint8_t fw_error_counter = 0;
 
@@ -484,15 +484,12 @@ static void firmware_cmd_new_fw_handler(const uip_ipaddr_t *sender_addr,
                                           const uint8_t *data,
                                           uint16_t datalen)
 {
-      uint8_t chunk_quantity_uint8[2];
-      chunk_quantity_uint8[0] = data[5];
-      chunk_quantity_uint8[1] = data[4];
+      fw_chunk_quantity.u8[0] = data[5];
+      fw_chunk_quantity.u8[1] = data[4];
+
       ota_image_current_offset = 0;
 
-      uint16_t *chunk_quantity_uint16_t = (uint16_t *)&chunk_quantity_uint8;
-      fw_chunk_quantity = *chunk_quantity_uint16_t;
-
-      printf("DAG Node: DATA_TYPE_FIRMWARE_COMMAND_NEW_FW command received, %"PRIu16"(0x%"PRIXX8" 0x%"PRIXX8") chunks\n", fw_chunk_quantity, data[5], data[4]);
+      printf("DAG Node: DATA_TYPE_FIRMWARE_COMMAND_NEW_FW command received, %"PRIu16"(0x%"PRIXX8" 0x%"PRIXX8") chunks\n", fw_chunk_quantity.u16, data[5], data[4]);
 
       if (spi_status == SPI_EXT_FLASH_ACTIVE)
       {
@@ -964,12 +961,13 @@ void send_join_packet(const uip_ip6addr_t *dest_addr)
 
 /*---------------------------------------------------------------------------*/
 
-void send_fw_chunk_req_packet(uint16_t chunk_num)
+void send_fw_chunk_req_packet(uint16_t chunk_num_raw)
 {
    uip_ip6addr_t addr;
    uip_ip6addr_copy(&addr, &root_addr);
 
-   int8_t *chunk_num_uint8_t = (int8_t *)&chunk_num;
+   u8_u16_t chunk_num;
+   chunk_num.u16 = chunk_num_raw;
 
    uint8_t length = 10;
    uint8_t udp_buffer[length];
@@ -977,8 +975,8 @@ void send_fw_chunk_req_packet(uint16_t chunk_num)
    udp_buffer[1] = CURRENT_DEVICE_VERSION;
    udp_buffer[2] = DATA_TYPE_FIRMWARE_CMD;
    udp_buffer[3] = DATA_TYPE_FIRMWARE_COMMAND_CHANK_REQ;
-   udp_buffer[4] = *chunk_num_uint8_t++;
-   udp_buffer[5] = *chunk_num_uint8_t;
+   udp_buffer[4] = chunk_num.u8[0];
+   udp_buffer[5] = chunk_num.u8[1];
    udp_buffer[6] = DATA_RESERVED;
    udp_buffer[7] = DATA_RESERVED;
    udp_buffer[8] = DATA_RESERVED;
@@ -1251,10 +1249,10 @@ PROCESS_THREAD(fw_update_process, ev, data)
    while (1)
    {
 
-      if (chunk_num < fw_chunk_quantity) //Если остались незапрошенные пакеты
+      if (chunk_num < fw_chunk_quantity.u16) //Если остались незапрошенные пакеты
       {
          send_fw_chunk_req_packet(chunk_num);
-         printf("\r[OTA]: Request %"PRId16"/%"PRId16" chunk... ", chunk_num + 1, fw_chunk_quantity);
+         printf("\r[OTA]: Request %"PRId16"/%"PRId16" chunk... ", chunk_num + 1, fw_chunk_quantity.u16);
          chunk_num++;
       }
       else //Если все пакеты запрошены
@@ -1298,7 +1296,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
 
       PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&fw_timer) ); //Ждем сброса таймера после получения пакета или истечения времени ожидания пакета
 
-      if (etimer_expired(&fw_timer_deadline) && (chunk_num < fw_chunk_quantity)) //Если истек таймер максимального ожидания(fw_timer_deadline)
+      if (etimer_expired(&fw_timer_deadline) && (chunk_num < fw_chunk_quantity.u16)) //Если истек таймер максимального ожидания(fw_timer_deadline)
       {
          if (fw_error_counter > FW_MAX_ERROR_COUNTER)
          {
@@ -1313,7 +1311,7 @@ PROCESS_THREAD(fw_update_process, ev, data)
          {
             fw_error_counter++;
             chunk_num--;
-            printf("[OTA]: Request %"PRId16"/%"PRId16" chunk again(%"PRId8" errors)\n", chunk_num + 1, fw_chunk_quantity, fw_error_counter);
+            printf("[OTA]: Request %"PRId16"/%"PRId16" chunk again(%"PRId8" errors)\n", chunk_num + 1, fw_chunk_quantity.u16, fw_error_counter);
          }
       }
       etimer_set( &fw_timer_delay_chunk, (CLOCK_SECOND/20) ); //Таймер задержки перед запросом следующего чанка
