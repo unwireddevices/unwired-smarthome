@@ -197,7 +197,7 @@ void decrypted_data_processed(const uip_ip6addr_t *sender_addr, const uint8_t *d
 
    else if (packet_type == DATA_TYPE_SET_TIME && data[3] == DATA_TYPE_SET_TIME_REQUEST)
    {
-      send_time_sync_resp_packet(sender_addr, data, length);
+      send_time_sync_resp_packet(sender_addr, data, datalen);
       return;
    }
 
