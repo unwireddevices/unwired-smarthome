@@ -513,9 +513,10 @@ static void firmware_cmd_new_fw_handler(const uip_ipaddr_t *sender_addr,
          uint8_t device_version;
          uint8_t DATA_TYPE_SET_TIME; //Тип — пакеты синхронизации времени
          uint8_t DATA_TYPE_SET_TIME_RESPONSE; //Подтип — ответ на запрос
-         uint32_t send_responce_time_s; //Локальное время координатора(с) в момент отправки пакета
-         uint16_t send_responce_time_ms; //Локальное время координатора(мс) в момент отправки пакета
-         uint8_t reserved_FF_data[6];
+         uint32_t send_responce_time_s; //Локальное время координатора(с) в момент отправки ответа
+         uint16_t send_responce_time_ms; //Локальное время координатора(мс) в момент отправки ответа
+         uint32_t send_responce_time_s; //Локальное время ноды(с) в момент отправки запроса
+         uint16_t send_responce_time_ms; //Локальное время ноды(мс) в момент отправки запроса
       };
  *
  */
