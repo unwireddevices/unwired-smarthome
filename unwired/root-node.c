@@ -223,13 +223,16 @@ void udp_data_receiver(struct simple_udp_connection *connection,
 {
    led_on(LED_A);
 
+   uip_ip6addr_t node_addr;
+   uip_ip6addr_copy(&node_addr, sender_addr);
+
    if (data[0] == PROTOCOL_VERSION_V1)
    {
-      decrypted_data_processed(sender_addr, data, datalen);
+      decrypted_data_processed(&node_addr, data, datalen);
    }
    else if (data[0] == PROTOCOL_VERSION_V2)
    {
-      encrypted_data_processed(sender_addr, data, datalen);
+      encrypted_data_processed(&node_addr, data, datalen);
    }
 
    led_off(LED_A);
