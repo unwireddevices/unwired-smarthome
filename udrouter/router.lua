@@ -13,268 +13,259 @@ local linda = lanes.linda()
 
 --/*---------------------------------------------------------------------------*/--
 
-device_group = {}
-DEVICE_GROUP_BUTTON_SWITCH     =     "00"
+local device_group = {}
+local DEVICE_GROUP_BUTTON_SWITCH     =     "00"
 device_group[DEVICE_GROUP_BUTTON_SWITCH]		   =     "Button/switch"
 
-DEVICE_GROUP_SENSORS           =     "01"
+local DEVICE_GROUP_SENSORS           =     "01"
 device_group[DEVICE_GROUP_SENSORS]				   =     "Sensor"
 
-DEVICE_GROUP_MOTION_SENSOR     =     "02"
+local DEVICE_GROUP_MOTION_SENSOR     =     "02"
 device_group[DEVICE_GROUP_MOTION_SENSOR]		   =     "Motion sensor"
 
-DEVICE_GROUP_OPEN_SENSORS      =     "03"
+local DEVICE_GROUP_OPEN_SENSORS      =     "03"
 device_group[DEVICE_GROUP_OPEN_SENSORS]			   =     "Door open sensor"
 
-DEVICE_GROUP_METERS            =     "04"
+local DEVICE_GROUP_METERS            =     "04"
 device_group[DEVICE_GROUP_METERS]				   =     "Meter"
 
-DEVICE_GROUP_RELAY             =     "05"
+local DEVICE_GROUP_RELAY             =     "05"
 device_group[DEVICE_GROUP_RELAY]				   =     "Relay"
 
-DEVICE_GROUP_DIMMER            =     "06"
+local DEVICE_GROUP_DIMMER            =     "06"
 device_group[DEVICE_GROUP_DIMMER]				   =     "Dimmer"
 
-DEVICE_GROUP_LIGHT             =     "07"
+local DEVICE_GROUP_LIGHT             =     "07"
 device_group[DEVICE_GROUP_LIGHT]				   =     "Light"
 
-DEVICE_GROUP_RGB_LIGHT         =     "08"
+local DEVICE_GROUP_RGB_LIGHT         =     "08"
 device_group[DEVICE_GROUP_RGB_LIGHT]			   =     "RGB light"
 
-DEVICE_GROUP_BRIDGE_CONVERTER  =     "09"
+local DEVICE_GROUP_BRIDGE_CONVERTER  =     "09"
 device_group[DEVICE_GROUP_BRIDGE_CONVERTER]		   =     "Bridge/Converter"
 
-DEVICE_GROUP_OTHER             =     "FF"
+local DEVICE_GROUP_OTHER             =     "FF"
 device_group[DEVICE_GROUP_OTHER]				   =     "Other device"
 
 --/*---------------------------------------------------------------------------*/--
 
-device_ability = {}
+local device_ability = {}
 
-DEVICE_ABILITY_NONE            =     "00"
+local DEVICE_ABILITY_NONE            =     "00"
 
-DEVICE_ABILITY_BUTTON          =     "01"
+local DEVICE_ABILITY_BUTTON          =     "01"
 device_ability[DEVICE_ABILITY_BUTTON] = "Button/switch"
 
-DEVICE_ABILITY_TEMPERATURE     =     "02"
+local DEVICE_ABILITY_TEMPERATURE     =     "02"
 device_ability[DEVICE_ABILITY_TEMPERATURE] = "Temperature sensor"
 
-DEVICE_ABILITY_HUMIDITY        =     "03"
+local DEVICE_ABILITY_HUMIDITY        =     "03"
 device_ability[DEVICE_ABILITY_HUMIDITY] = "Humidity sensor"
 
-DEVICE_ABILITY_PRESSURE        =     "04"
+local DEVICE_ABILITY_PRESSURE        =     "04"
 device_ability[DEVICE_ABILITY_PRESSURE] = "Pressure sensor"
 
-DEVICE_ABILITY_LIGHT_SENSOR    =     "05"
+local DEVICE_ABILITY_LIGHT_SENSOR    =     "05"
 device_ability[DEVICE_ABILITY_LIGHT_SENSOR] = "Light sensor"
 
-DEVICE_ABILITY_NOISE_SENSOR    =     "06"
+local DEVICE_ABILITY_NOISE_SENSOR    =     "06"
 device_ability[DEVICE_ABILITY_NOISE_SENSOR] = "Noise sensor"
 
-DEVICE_ABILITY_MOTION_SENSOR   =     "07"
+local DEVICE_ABILITY_MOTION_SENSOR   =     "07"
 device_ability[DEVICE_ABILITY_MOTION_SENSOR] = "Motion sensor"
 
-DEVICE_ABILITY_RESERVED1       =     "08"
+local DEVICE_ABILITY_RESERVED1       =     "08"
 
-DEVICE_ABILITY_C02_SENSOR      =     "09"
+local DEVICE_ABILITY_C02_SENSOR      =     "09"
 device_ability[DEVICE_ABILITY_C02_SENSOR] = "CO2 sensor"
 
-DEVICE_ABILITY_CO_SENSOR       =     "0A"
+local DEVICE_ABILITY_CO_SENSOR       =     "0A"
 device_ability[DEVICE_ABILITY_CO_SENSOR] = "CO sensor"
 
-DEVICE_ABILITY_GAS_SENSOR      =     "0B"
+local DEVICE_ABILITY_GAS_SENSOR      =     "0B"
 device_ability[DEVICE_ABILITY_GAS_SENSOR] = "GAS sensor"
 
-DEVICE_ABILITY_POWER_METER     =     "0C"
+local DEVICE_ABILITY_POWER_METER     =     "0C"
 device_ability[DEVICE_ABILITY_POWER_METER] = "Power/voltage meter"
 
-DEVICE_ABILITY_RADIATION_METER       =     "0D"
+local DEVICE_ABILITY_RADIATION_METER       =     "0D"
 device_ability[DEVICE_ABILITY_RADIATION_METER] = "Radiation meter"
 
-DEVICE_ABILITY_RESERVED3       =     "0E"
-DEVICE_ABILITY_RESERVED4       =     "0F"
-DEVICE_ABILITY_RESERVED5       =     "10"
+local DEVICE_ABILITY_RESERVED3       =     "0E"
+local DEVICE_ABILITY_RESERVED4       =     "0F"
+local DEVICE_ABILITY_RESERVED5       =     "10"
 
-DEVICE_ABILITY_RELAY           =     "11"
+local DEVICE_ABILITY_RELAY           =     "11"
 device_ability[DEVICE_ABILITY_RELAY] = "Relay"
 
-
-DEVICE_ABILITY_DIMMER          =     "12"
+local DEVICE_ABILITY_DIMMER          =     "12"
 device_ability[DEVICE_ABILITY_DIMMER] = "Dimmer"
 
-DEVICE_ABILITY_RESERVED6       =     "13"
-DEVICE_ABILITY_RESERVED7       =     "14"
-DEVICE_ABILITY_RESERVED8       =     "15"
-DEVICE_ABILITY_RESERVED9       =     "16"
-DEVICE_ABILITY_RESERVED10      =     "17"
+local DEVICE_ABILITY_RESERVED6       =     "13"
+local DEVICE_ABILITY_RESERVED7       =     "14"
+local DEVICE_ABILITY_RESERVED8       =     "15"
+local DEVICE_ABILITY_RESERVED9       =     "16"
+local DEVICE_ABILITY_RESERVED10      =     "17"
 
-DEVICE_ABILITY_LED             =     "18"
+local DEVICE_ABILITY_LED             =     "18"
 device_ability[DEVICE_ABILITY_LED] = "LED indicator"
 
 --/*---------------------------------------------------------------------------*/--
 
-device_button_events = {}
+local device_button_events = {}
 
-DEVICE_ABILITY_BUTTON_EVENT_CLICK        =   "01"
+local DEVICE_ABILITY_BUTTON_EVENT_CLICK        =   "01"
 device_button_events[DEVICE_ABILITY_BUTTON_EVENT_CLICK] = "click"
 
-DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK   =   "02"
+local DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK   =   "02"
 device_button_events[DEVICE_ABILITY_BUTTON_EVENT_LONG_CLICK] = "longclick"
 
-DEVICE_ABILITY_BUTTON_EVENT_ON           =   "03"
+local DEVICE_ABILITY_BUTTON_EVENT_ON           =   "03"
 device_button_events[DEVICE_ABILITY_BUTTON_EVENT_ON] = "on"
 
-DEVICE_ABILITY_BUTTON_EVENT_OFF          =   "04"
+local DEVICE_ABILITY_BUTTON_EVENT_OFF          =   "04"
 device_button_events[DEVICE_ABILITY_BUTTON_EVENT_OFF] = "off"
 
 --/*---------------------------------------------------------------------------*/--
 
-device_motionsensor_events = {}
+local device_motionsensor_events = {}
 
-DEVICE_ABILITY_MOTION_SENSOR_EVENT_MOTION        =   "01"
+local DEVICE_ABILITY_MOTION_SENSOR_EVENT_MOTION        =   "01"
 device_motionsensor_events[DEVICE_ABILITY_MOTION_SENSOR_EVENT_MOTION] = "motion"
 
-DEVICE_ABILITY_MOTION_SENSOR_EVENT_NO_MOTION   =   "02"
+local DEVICE_ABILITY_MOTION_SENSOR_EVENT_NO_MOTION   =   "02"
 device_motionsensor_events[DEVICE_ABILITY_MOTION_SENSOR_EVENT_NO_MOTION] = "nomotion"
 
 --/*---------------------------------------------------------------------------*/--
 
-device_relay_commands = {}
+local device_relay_commands = {}
 
-DEVICE_ABILITY_RELAY_COMMAND_ON        =   "01"
+local DEVICE_ABILITY_RELAY_COMMAND_ON        =   "01"
 device_relay_commands[DEVICE_ABILITY_RELAY_COMMAND_ON] = "on"
 
-DEVICE_ABILITY_RELAY_COMMAND_OFF   =   "00"
+local DEVICE_ABILITY_RELAY_COMMAND_OFF   =   "00"
 device_relay_commands[DEVICE_ABILITY_RELAY_COMMAND_OFF] = "off"
 
-DEVICE_ABILITY_RELAY_COMMAND_TOGGLE   =   "80"
+local DEVICE_ABILITY_RELAY_COMMAND_TOGGLE   =   "80"
 device_relay_commands[DEVICE_ABILITY_RELAY_COMMAND_TOGGLE] = "toggle"
 
 --/*---------------------------------------------------------------------------*/--
 
-device_root_local_commands = {}
-
-LOCAL_ROOT_COMMAND_REBOOT        =   "00"
-device_root_local_commands[LOCAL_ROOT_COMMAND_REBOOT] = "on"
-
-LOCAL_ROOT_COMMAND_BOOTLOADER_ACTIVATE    =   "01"
-device_root_local_commands[LOCAL_ROOT_COMMAND_BOOTLOADER_ACTIVATE] = "off"
-
-LOCAL_ROOT_COMMAND_TIME_SET    =   "02"
-device_root_local_commands[LOCAL_ROOT_COMMAND_TIME_SET] = "off"
-
+local LOCAL_ROOT_COMMAND_REBOOT        =   "00"
+local LOCAL_ROOT_COMMAND_BOOTLOADER_ACTIVATE    =   "01"
+local LOCAL_ROOT_COMMAND_TIME_SET    =   "02"
 
 --/*---------------------------------------------------------------------------*/--
 
-device_sleep_type = {}
+local device_sleep_type = {}
 
-DEVICE_SLEEP_TYPE_NORMAL             =           "01"
+local DEVICE_SLEEP_TYPE_NORMAL             =           "01"
 device_sleep_type[DEVICE_SLEEP_TYPE_NORMAL] = "Non-sleep"
 
-DEVICE_SLEEP_TYPE_LEAF               =           "02"
+local DEVICE_SLEEP_TYPE_LEAF               =           "02"
 device_sleep_type[DEVICE_SLEEP_TYPE_LEAF] = "Leaf mode"
 
 --/*---------------------------------------------------------------------------*/--
 
-device_message_type = {}
+local device_message_type = {}
 
-DEVICE_MESSAGE_HIGH_TEMPERATYRE             					=           "01"
+local DEVICE_MESSAGE_HIGH_TEMPERATYRE             					=           "01"
 device_message_type[DEVICE_MESSAGE_HIGH_TEMPERATYRE] 			= "Warning: high temperature"
 
-DEVICE_MESSAGE_LOW_VOLTAGE               			            =           "02"
+local DEVICE_MESSAGE_LOW_VOLTAGE               			            =           "02"
 device_message_type[DEVICE_MESSAGE_LOW_VOLTAGE] 	            = "Warning: low voltage"
 
-DEVICE_MESSAGE_HIGH_CURRENT               			         	=           "03"
+local DEVICE_MESSAGE_HIGH_CURRENT               			         	=           "03"
 device_message_type[DEVICE_MESSAGE_HIGH_CURRENT] 		     	= "Warning: high current"
 
-DEVICE_MESSAGE_LOW_POWER               			                =           "04"
+local DEVICE_MESSAGE_LOW_POWER               			                =           "04"
 device_message_type[DEVICE_MESSAGE_LOW_POWER] 	             	= "Warning: low power"
 
-DEVICE_MESSAGE_ERROR_ON_RELAY               		      	    =           "05"
+local DEVICE_MESSAGE_ERROR_ON_RELAY               		      	    =           "05"
 device_message_type[DEVICE_MESSAGE_ERROR_ON_RELAY] 	         	= "Warning: error on relay"
 
-DEVICE_MESSAGE_ERROR_OFF_RELAY               		      	    =           "06"
+local DEVICE_MESSAGE_ERROR_OFF_RELAY               		      	    =           "06"
 device_message_type[DEVICE_MESSAGE_ERROR_OFF_RELAY] 	     	= "Warning: error off relay"
 
-DEVICE_MESSAGE_OTA_SPI_NOTACTIVE             					=           "07"
+local DEVICE_MESSAGE_OTA_SPI_NOTACTIVE             					=           "07"
 device_message_type[DEVICE_MESSAGE_OTA_SPI_NOTACTIVE] 			= "OTA: External flash not active"
 
-DEVICE_MESSAGE_OTA_NOT_DELIVERED_CHUNK               			=           "08"
+local DEVICE_MESSAGE_OTA_NOT_DELIVERED_CHUNK               			=           "08"
 device_message_type[DEVICE_MESSAGE_OTA_NOT_DELIVERED_CHUNK] 	= "OTA: Chunk not delivered"
 
-DEVICE_MESSAGE_OTA_NONCORRECT_CRC               				=           "09"
+local DEVICE_MESSAGE_OTA_NONCORRECT_CRC               				=           "09"
 device_message_type[DEVICE_MESSAGE_OTA_NONCORRECT_CRC] 			= "OTA: Non-correct image CRC"
 
-DEVICE_MESSAGE_OTA_BAD_GOLDEN_IMAGE               			    =           "0A"
+local DEVICE_MESSAGE_OTA_BAD_GOLDEN_IMAGE               			    =           "0A"
 device_message_type[DEVICE_MESSAGE_OTA_BAD_GOLDEN_IMAGE] 		= "OTA: Bad golden image"
 
-DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS               		    =           "0B"
+local DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS               		    =           "0B"
 device_message_type[DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS] 	= "OTA: SPI flash erase in progress"
 
-DEVICE_MESSAGE_OTA_UPDATE_SUCCESS               		        =           "0C"
+local DEVICE_MESSAGE_OTA_UPDATE_SUCCESS               		        =           "0C"
 device_message_type[DEVICE_MESSAGE_OTA_UPDATE_SUCCESS] 	        = "OTA: Update success"
 
-DEVICE_MESSAGE_OTA_NONCORRECT_UUID               		        =           "0D"
+local DEVICE_MESSAGE_OTA_NONCORRECT_UUID               		        =           "0D"
 device_message_type[DEVICE_MESSAGE_OTA_NONCORRECT_UUID] 	        = "OTA: Non-correct firmware UUID"
 
-DEVICE_MESSAGE_TIMESYNC_STATUS                                 =         "0E"
+local DEVICE_MESSAGE_TIMESYNC_STATUS                                 =         "0E"
 device_message_type[DEVICE_MESSAGE_TIMESYNC_STATUS] 	        = "TIMESYNC: Time synced"
 
 --/*---------------------------------------------------------------------------*/--
 
-DATA_TYPE_FIRMWARE_COMMAND_NEW_FW              =         "01" --Сообщение о наличии новой прошивки
-DATA_TYPE_FIRMWARE_COMMAND_chunk_REQ           =         "02" --Запрос пакета с частью прошивки ???????
+local DATA_TYPE_FIRMWARE_COMMAND_NEW_FW              =         "01" --Сообщение о наличии новой прошивки
+local DATA_TYPE_FIRMWARE_COMMAND_chunk_REQ           =         "02" --Запрос пакета с частью прошивки ???????
 
-PROTOCOL_VERSION_V1            =     "01"
-DEVICE_VERSION_V1              =     "01"
+local PROTOCOL_VERSION_V1            =     "01"
+local DEVICE_VERSION_V1              =     "01"
 
-UART_PROTOCOL_VERSION_V1       =     "01"
-UART_PROTOCOL_VERSION_V2       =     "02"
-UART_PROTOCOL_VERSION_V3       =     "03"
+local UART_PROTOCOL_VERSION_V1       =     "01"
+local UART_PROTOCOL_VERSION_V2       =     "02"
+local UART_PROTOCOL_VERSION_V3       =     "03"
 
-UART_PV2_START_MQ = "011616161610"
-UART_FF_DATA = "FF"
+local UART_PV2_START_MQ = "011616161610"
+local UART_FF_DATA = "FF"
 
-VOLTAGE_PRESCALER = 16
-
---/*---------------------------------------------------------------------------*/--
-
-DATA_TYPE_JOIN                            =              "01" --Запрос на включение в сеть
-DATA_TYPE_SENSOR_DATA                     =              "02" --Данные с датчиков устройства
-DATA_TYPE_CONFIRM                 	      =              "03" --Подтверждение запроса на включение в сеть
-DATA_TYPE_PONG                            =              "04" --Подтверждение доставки пакета
-DATA_TYPE_COMMAND                         =              "05" --Команды возможностям устройства
-DATA_TYPE_STATUS                          =              "06" --Пакет со статусными данными
-DATA_TYPE_GET_STATUS                      =              "07" --Запрос статуса(не реализовано)
-DATA_TYPE_SETTINGS                        =              "08" --Команда настройки параметров
-DATA_TYPE_MESSAGE                         =              "09" --Сообщения
-DATA_TYPE_SET_TIME                        =              "0A" --Команда установки времени(не реализовано)
-DATA_TYPE_SET_SCHEDULE                    =              "0B" --Команда установки расписания(не реализовано)
-DATA_TYPE_FIRMWARE                        =              "0C" --Данные для OTA
-DATA_TYPE_UART                            =              "0D" --Команда с данными UART
-DATA_TYPE_FIRMWARE_CMD                    =              "0E" --Команды OTA
+local VOLTAGE_PRESCALER = 16
 
 --/*---------------------------------------------------------------------------*/--
 
-switch_mini_door = "fd00:0000:0000:0000:0212:4b00:0c47:4b82"
-switch_mini_bed = "fd00:0000:0000:0000:0212:4b00:0c47:4a82"
-switch_mini_table = "fd00:0000:0000:0000:0212:4b00:0c47:3b04"
-switch_wc = "fd00:0000:0000:0000:0212:4b00:0c47:4b05"
-switch_main_room = "fd00:0000:0000:0000:0212:4b00:0c47:3a00"
-switch_kitchen = "fd00:0000:0000:0000:0212:4b00:0c47:4880"
-
-relay_main_room_table = "fd00:0000:0000:0000:0212:4b00:0c47:4a85"
-relay_main_room = "fd00:0000:0000:0000:0212:4b00:0c47:3e00"
-relay_hall = "fd00:0000:0000:0000:0212:4b00:0c47:3c84"
-relay_kitchen = "fd00:0000:0000:0000:0212:4b00:0c47:4a02"
-relay_bathroom = "fd00:0000:0000:0000:0212:4b00:0c47:4802"
-relay_wc = "fd00:0000:0000:0000:0212:4b00:0c47:4886"
-
-motion_sensor_hall = "fd00:0000:0000:0000:0212:4b00:0c47:4602"
+local DATA_TYPE_JOIN                            =              "01" --Запрос на включение в сеть
+local DATA_TYPE_SENSOR_DATA                     =              "02" --Данные с датчиков устройства
+local DATA_TYPE_CONFIRM                 	      =              "03" --Подтверждение запроса на включение в сеть
+local DATA_TYPE_PONG                            =              "04" --Подтверждение доставки пакета
+local DATA_TYPE_COMMAND                         =              "05" --Команды возможностям устройства
+local DATA_TYPE_STATUS                          =              "06" --Пакет со статусными данными
+local DATA_TYPE_GET_STATUS                      =              "07" --Запрос статуса(не реализовано)
+local DATA_TYPE_SETTINGS                        =              "08" --Команда настройки параметров
+local DATA_TYPE_MESSAGE                         =              "09" --Сообщения
+local DATA_TYPE_SET_TIME                        =              "0A" --Команда установки времени(не реализовано)
+local DATA_TYPE_SET_SCHEDULE                    =              "0B" --Команда установки расписания(не реализовано)
+local DATA_TYPE_FIRMWARE                        =              "0C" --Данные для OTA
+local DATA_TYPE_UART                            =              "0D" --Команда с данными UART
+local DATA_TYPE_FIRMWARE_CMD                    =              "0E" --Команды OTA
 
 --/*---------------------------------------------------------------------------*/--
 
-devices_names = {}
+local switch_mini_door = "fd00:0000:0000:0000:0212:4b00:0c47:4b82"
+local switch_mini_bed = "fd00:0000:0000:0000:0212:4b00:0c47:4a82"
+local switch_mini_table = "fd00:0000:0000:0000:0212:4b00:0c47:3b04"
+local switch_wc = "fd00:0000:0000:0000:0212:4b00:0c47:4b05"
+local switch_main_room = "fd00:0000:0000:0000:0212:4b00:0c47:3a00"
+local switch_kitchen = "fd00:0000:0000:0000:0212:4b00:0c47:4880"
+
+local relay_main_room_table = "fd00:0000:0000:0000:0212:4b00:0c47:4a85"
+local relay_main_room = "fd00:0000:0000:0000:0212:4b00:0c47:3e00"
+local relay_hall = "fd00:0000:0000:0000:0212:4b00:0c47:3c84"
+local relay_kitchen = "fd00:0000:0000:0000:0212:4b00:0c47:4a02"
+local relay_bathroom = "fd00:0000:0000:0000:0212:4b00:0c47:4802"
+local relay_wc = "fd00:0000:0000:0000:0212:4b00:0c47:4886"
+
+local motion_sensor_hall = "fd00:0000:0000:0000:0212:4b00:0c47:4602"
+
+--/*---------------------------------------------------------------------------*/--
+
+local devices_names = {}
 devices_names[switch_mini_door] = "switch_mini_door"
 devices_names[switch_mini_bed] = "switch_mini_bed"
 devices_names[switch_mini_table] = "switch_mini_table"
@@ -293,7 +284,7 @@ devices_names[motion_sensor_hall] = "motion_sensor_hall"
 
 --/*---------------------------------------------------------------------------*/--
 
-api_keys = {} -- keys for thingspeak
+local api_keys = {} -- keys for thingspeak
 api_keys[switch_mini_door] = "9U3175EF4NWFLCHU"
 api_keys[switch_mini_bed] = "PCHJXTUODC0LS2PW"
 api_keys[switch_mini_table] = "F80QAU2U0RM47IFG"
@@ -315,16 +306,18 @@ local uart_version = UART_PROTOCOL_VERSION_V1
 local pid_file = "/tmp/run/unwired_router.pid"
 local port_name = "/dev/ttyATH0"
 local pid = posix.getpid()
-local start_time = 0
-local state = "all_on"
+--local start_time = 0 --Для профилирования выполнения
 local main_cycle_permit = 1
 local device_list = {}
 local update_device_list = {}
-
+local arg = arg
+local p
+local message_data_processing_flag_n, ota_image_table_segments
+local flag_non_status_join_message, fw_cmd_data_processing_flag_n
 --/*---------------------------------------------------------------------------*/--
 
 function string.fromhex(str)
-    local str = string.gsub(str, " ", "")
+   str = string.gsub(str, " ", "")
     return (str:gsub('..', function (cc)
         return string.char(tonumber(cc, 16))
     end))
@@ -338,28 +331,7 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-raw_print = print
-
-function print(data)
-	io.write(data or "")
-	io.write("\n")
-	io.flush()
-end
-
-function print_n(data)
-	io.write(data or "")
-	io.flush()
-end
-
-function print_red(data)
-	colors("red")
-	print(data)
-	colors("none")
-end
-
---/*---------------------------------------------------------------------------*/--
-
-function colors(color)
+local function colors(color)
 	if (color == "red") then
 		io.write(string.char(27,91,51,49,109))
 	elseif (color == "none") then
@@ -369,7 +341,28 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function update_ts_channels(address, voltage, uptime)
+local raw_print = print
+
+local function print(data)
+	io.write(data or "")
+	io.write("\n")
+	io.flush()
+end
+
+local function print_n(data)
+	io.write(data or "")
+	io.flush()
+end
+
+local function print_red(data)
+	colors("red")
+	print(data)
+	colors("none")
+end
+
+--/*---------------------------------------------------------------------------*/--
+
+local function update_ts_channels(address, voltage, uptime)
 	if api_keys[address] == nil then return end
 	local command = 'wget --no-check-certificate --wait=20 --random-wait --dns-timeout=5 --connect-timeout=10 --tries=0 --output-document=- "https://api.thingspeak.com/update?api_key='..api_keys[address]..'&field2='..voltage..'&field1='..uptime..'" &>/dev/null &'
 	os.execute(command)
@@ -377,19 +370,19 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function led(state)
-	if (state == "on") then
-		os.execute("echo 1 > /sys/devices/platform/leds-gpio/leds/unwone\:green\:eth1_rxtx/brightness")
-	elseif (state == "off") then
-		os.execute("echo 0 > /sys/devices/platform/leds-gpio/leds/unwone\:green\:eth1_rxtx/brightness")
+local function led(led_state)
+	if (led_state == "on") then
+		os.execute([[echo 1 > /sys/devices/platform/leds-gpio/leds/unwone:green:eth1_rxtx/brightness]])
+	elseif (led_state == "off") then
+		os.execute([[echo 0 > /sys/devices/platform/leds-gpio/leds/unwone:green:eth1_rxtx/brightness]])
 	end
 end
 
 --/*---------------------------------------------------------------------------*/--
 
-function ipv6_adress_parse(ipv6_adress)
+local function ipv6_adress_parse(ipv6_adress)
 	local adress_capturing = "(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w):(%w%w)(%w%w)"
-	local _
+	local _, end_1
 	local a = {}
 
 	_, end_1, a[1],a[2],a[3],a[4],a[5],a[6],a[7],a[8],a[9],a[10],a[11],a[12],a[13],a[14],a[15],a[16]  = string.find(ipv6_adress, adress_capturing)
@@ -403,9 +396,9 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function data_cut(all_data, segment_len)
+local function data_cut(all_data, segment_len)
   local max_len = segment_len
-  local data_len = string.len(all_data)
+  local data_len
   local i = 1
   local data = {}
   repeat
@@ -420,9 +413,7 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function uart_send(bin_data)
-	local packet_data = bin_data
-
+local function uart_send(bin_data)
 	local uart_packet_size = #bin_data
 	local max_packet_size = 1500
 
@@ -437,8 +428,8 @@ function uart_send(bin_data)
 	elseif (#uart_packet_size_hex == 3) then uart_packet_size_hex = "0"..uart_packet_size_hex
 	end
 
-	uart_packet_size_hex_b1 = string.sub(uart_packet_size_hex, 1, 2)
-	uart_packet_size_hex_b2 = string.sub(uart_packet_size_hex, 3, 4)
+	local uart_packet_size_hex_b1 = string.sub(uart_packet_size_hex, 1, 2)
+	local uart_packet_size_hex_b2 = string.sub(uart_packet_size_hex, 3, 4)
 
 	local preamble = UART_PV2_START_MQ:fromhex()..
 						UART_PROTOCOL_VERSION_V3:fromhex()..
@@ -447,7 +438,7 @@ function uart_send(bin_data)
 						UART_FF_DATA:fromhex()
 	bin_data = preamble..bin_data
 
-	--print("Send packet:\n"..preamble:tohex().."\n"..packet_data:tohex().."\nPacket size: "..#packet_data..", uart packet size: "..#bin_data.."\n")
+	--print("Send packet:\n"..preamble:tohex().."\n"..bin_data:tohex().."\nPacket size: "..#bin_data.."\n")
 
 	local table_segments = data_cut(bin_data, 25)
 	for i = 1, #table_segments do
@@ -458,7 +449,7 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function send_command_to_ability(ipv6_adress, ability_target, ability_number, ability_state)
+local function send_command_to_ability(ipv6_adress, ability_target, ability_number, ability_state)
 	local adress = ipv6_adress_parse(ipv6_adress)
 	local bin_data = ""
 
@@ -477,7 +468,7 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function send_uart_data_to_ability(ipv6_adress, returned_data_lenth, data_lenth, payload)
+local function send_uart_data_to_ability(ipv6_adress, returned_data_lenth, data_lenth, payload)
 	local adress = ipv6_adress_parse(ipv6_adress)
 	local bin_data = ""
 	bin_data = bin_data..adress:fromhex()
@@ -507,7 +498,7 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function send_firmware_new_fw_cmd_to_node(ipv6_adress, table_segments)
+local function send_firmware_new_fw_cmd_to_node(ipv6_adress, table_segments)
 	local adress = ipv6_adress_parse(ipv6_adress) or ""
 	local chunk_quantity = #table_segments
 
@@ -533,7 +524,7 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function send_firmware_chunk_to_node(ipv6_adress, firmware_bin_chunk)
+local function send_firmware_chunk_to_node(ipv6_adress, firmware_bin_chunk)
 	local adress = ipv6_adress_parse(ipv6_adress)
 
 	local bin_data = ""
@@ -555,18 +546,18 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function send_relay_command(ipv6_adress, relay_number, state)
+local function send_relay_command(ipv6_adress, relay_number, relay_state)
 	--print("Relay command processing start: +"..(socket.gettime()*1000 - start_time).." ms")
 
 	local device_name = devices_names[ipv6_adress] or ipv6_adress
-	print("Send command to device: "..device_name..", relay:"..relay_number..", state:"..state)
-	local ability_state, ability
+	print("Send command to device: "..device_name..", relay:"..relay_number..", state:"..relay_state)
+	local ability_state, ability_number
 
-	if (state == device_relay_commands[DEVICE_ABILITY_RELAY_COMMAND_ON]) then
+	if (relay_state == device_relay_commands[DEVICE_ABILITY_RELAY_COMMAND_ON]) then
 		ability_state = DEVICE_ABILITY_RELAY_COMMAND_ON
-	elseif (state == device_relay_commands[DEVICE_ABILITY_RELAY_COMMAND_OFF]) then
+	elseif (relay_state == device_relay_commands[DEVICE_ABILITY_RELAY_COMMAND_OFF]) then
 		ability_state = DEVICE_ABILITY_RELAY_COMMAND_OFF
-	elseif (state == device_relay_commands[DEVICE_ABILITY_RELAY_COMMAND_TOGGLE]) then
+	elseif (relay_state == device_relay_commands[DEVICE_ABILITY_RELAY_COMMAND_TOGGLE]) then
 		ability_state = DEVICE_ABILITY_RELAY_COMMAND_TOGGLE
 	end
 
@@ -585,7 +576,7 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function motion_sensor_data_processing(ipv6_adress, sensor_number, sensor_event)
+local function motion_sensor_data_processing(ipv6_adress, sensor_number, sensor_event)
 	local current_event = device_motionsensor_events[sensor_event]
 	print(" MDPM: Motion sensor: "..sensor_number..", event: "..current_event)
 
@@ -595,7 +586,7 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function button_data_processing(ipv6_adress, sensor_number, sensor_event)
+local function button_data_processing(ipv6_adress, sensor_number, sensor_event)
 	local button_name = string.upper(tostring(sensor_number):fromhex())
 	local current_event = device_button_events[sensor_event]
 	print(" BDPM: Button: "..button_name..", event: "..device_button_events[sensor_event])
@@ -605,7 +596,7 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function sensor_data_processing(ipv6_adress, data)
+local function sensor_data_processing(ipv6_adress, data)
 	--print("Sensor data processing module")
 	--print("Sensor data processing start: +"..(socket.gettime()*1000 - start_time).." ms")
 	local number_ability = data.b1 or "no number_ability"
@@ -627,7 +618,7 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function join_data_processing(ipv6_adress, data)
+local function join_data_processing(ipv6_adress, data)
 	--print("Join data processing module")
 	if (flag_non_status_join_message ~= nil) then
 		return
@@ -649,15 +640,15 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function getu16(data, pos) -- reads a 16 bit value of the string data at position pos
+local function getu16(data, pos)
 	local high, low = string.byte(data, pos, pos+1)
-	local val = high*256 + low -- no bit fiddling in lua since everything is a double internally
+	local val = high*256 + low
 	return val
 end
 
 --/*---------------------------------------------------------------------------*/--
 
-function status_data_processing(ipv6_adress, data)
+local function status_data_processing(ipv6_adress, data)
 	--print("Status data processing module")
 	if (flag_non_status_join_message ~= nil) then
 		return
@@ -668,20 +659,18 @@ function status_data_processing(ipv6_adress, data)
 	local uptime = tonumber(bindechex.Hex2Dec((data.b12 or 00)..(data.b11 or 00)..(data.b10 or 00)..(data.b9 or 00)))
 	local voltage = (bindechex.Hex2Dec(data.b16 or 00)*VOLTAGE_PRESCALER/1000)
 	local temp = bindechex.Hex2Dec(data.b15 or 00)
-	local parent_rssi_raw = tonumber(bindechex.Hex2Dec((data.b14 or 00)..(data.b13 or 00)))
-	local version = bindechex.Hex2Dec(data.b17 or 00).."."..bindechex.Hex2Dec(data.b18 or 00)
+	local parent_rssi = tonumber(bindechex.Hex2Dec((data.b14 or 00)..(data.b13 or 00)))
+	local node_version = bindechex.Hex2Dec(data.b17 or 00).."."..bindechex.Hex2Dec(data.b18 or 00)
 	local ota_flag = data.b19
 	if ota_flag == "01" then ota_flag = "Active" else ota_flag = "Non-active" end
 
-	if parent_rssi_raw > 32768 then
-		parent_rssi_raw = parent_rssi_raw - 65536
+	if parent_rssi > 32768 then
+		parent_rssi = parent_rssi - 65536
 	end
 
-	parent_rssi = string.format("%d, %i, %u", parent_rssi_raw, parent_rssi_raw, parent_rssi_raw) or "no rssi"
-	parent_rssi = parent_rssi_raw
 	local device_name = devices_names[ipv6_adress] or ipv6_adress
 	print("\nSDPM: Status packet from "..device_name..":")
-	print(" Version: "..version)
+	print(" Version: "..node_version)
 	print(" OTA: "..ota_flag)
 	print(" Parent adress: "..ipv6_adress_parent_short)
 	print(" Uptime: "..uptime.."s")
@@ -695,7 +684,7 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function message_data_processing(ipv6_adress, data)
+local function message_data_processing(ipv6_adress, data)
 	--print("Message status processing module")
    local message_type = data.b1
    local message_data_b1 = data.b2
@@ -727,7 +716,7 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function fw_cmd_data_processing(ipv6_adress, data)
+local function fw_cmd_data_processing(ipv6_adress, data)
 	if (fw_cmd_data_processing_flag_n == nil) then
 		print_n("\n")
 		fw_cmd_data_processing_flag_n = " "
@@ -745,9 +734,9 @@ function fw_cmd_data_processing(ipv6_adress, data)
 		os.exit(0)
 	end
 
-	firmware_bin_chunk = ota_image_table_segments[chunk_number_lua_style]
+	local firmware_bin_chunk = ota_image_table_segments[chunk_number_lua_style]
 
-	if (firmware_bin_chunk == null) then
+	if (firmware_bin_chunk == nil) then
 		print("Chunk null")
 		os.exit(0)
 	end
@@ -764,12 +753,12 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function packet_processing_see_adresses(a, data)
+local function packet_processing_see_adresses(a, data)
 	local ipv6_adress = a[1]..a[2]..":"..a[3]..a[4]..":"..a[5]..a[6]..":"..a[7]..a[8]..":"..a[9]..a[10]..":"..a[11]..a[12]..":"..a[13]..a[14]..":"..a[15]..a[16]
-	local ota_flag = ""
+	local ota_flag
 	if (data.p_version == PROTOCOL_VERSION_V1 and data.dev_version == DEVICE_VERSION_V1) then
 		if data.d_type == DATA_TYPE_STATUS then
-			local version = bindechex.Hex2Dec(data.b17 or 00).."."..bindechex.Hex2Dec(data.b18 or 00)
+			local node_version = bindechex.Hex2Dec(data.b17 or 00).."."..bindechex.Hex2Dec(data.b18 or 00)
 
 			if (data.b19 == "01") then
 				ota_flag = "active"
@@ -786,7 +775,7 @@ function packet_processing_see_adresses(a, data)
 			if (ota_flag == "active") then
 				update_device_list[#update_device_list+1] = ipv6_adress
 			end
-			print("Device "..#device_list..", adress: "..ipv6_adress..", version "..version..", OTA: "..ota_flag)
+			print("Device "..#device_list..", adress: "..ipv6_adress..", version "..node_version..", OTA: "..ota_flag)
 		end
 	end
 end
@@ -794,13 +783,13 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function packet_processing(a, data)
+local function packet_processing(a, data)
 	--print("Packet processing module")
 	--print("Packet processing start: +"..(socket.gettime()*1000 - start_time).." ms")
 	local ipv6_adress = a[1]..a[2]..":"..a[3]..a[4]..":"..a[5]..a[6]..":"..a[7]..a[8]..":"..a[9]..a[10]..":"..a[11]..a[12]..":"..a[13]..a[14]..":"..a[15]..a[16]
 	if (data.p_version == PROTOCOL_VERSION_V1 and data.dev_version == DEVICE_VERSION_V1) then
 		if data.d_type == DATA_TYPE_JOIN then
-		 	join_data_processing(ipv6_adress, data)
+         join_data_processing(ipv6_adress, data)
 
 		elseif data.d_type == DATA_TYPE_SENSOR_DATA then
 			sensor_data_processing(ipv6_adress, data)
@@ -817,9 +806,6 @@ function packet_processing(a, data)
 		elseif data.d_type == DATA_TYPE_CONFIRM then
 			print("PPM: Data type: DATA_TYPE_CONFIRM from "..ipv6_adress)
 
-		elseif data.d_type == DATA_TYPE_PING then
-			print("PPM: Data type: DATA_TYPE_PING from "..ipv6_adress)
-
 		elseif data.d_type == DATA_TYPE_COMMAND then
 			print("PPM: Data type: DATA_TYPE_COMMAND from "..ipv6_adress)
 
@@ -835,7 +821,7 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function packet_parse(packet, packet_processing_alt)
+local function packet_parse(packet, packet_processing_alt)
 	--print("Packet parse module")
 	--print("Packet parse start: +"..(socket.gettime()*1000 - start_time).." ms")
 	local adress_capturing_all = "(%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w%w)"
@@ -845,6 +831,7 @@ function packet_parse(packet, packet_processing_alt)
 		local _ = {}
 		local a = {}
 		local d = {}
+      local end_1, end_2
 		local adress_capturing = "(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)"
 		local data_capturing = "(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)(%w%w)"
 
@@ -871,7 +858,7 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function send_uart_command(command, address, delay)
+local function send_uart_command(command, address, delay)
 	local cmd_on = {"1B", "31", "32", "33", "2B"}
 
 	local cmd_off = {"1B", "30", "30", "30", "2B"}
@@ -892,28 +879,28 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function add_byte_to_buffer(buffer, byte)
+local function add_byte_to_buffer(buffer, byte)
 	table.insert(buffer, byte)
 	while (#buffer > 95) do
 		table.remove(buffer, 1)
 	end
 end
 
-function clean_buffer(buffer)
+local function clean_buffer(buffer)
 	for i = 1, #buffer do
 		table.insert(buffer, 0)
 	end
 end
 
-function get_buffer(buffer)
+local function get_buffer(buffer)
 	return table.concat(buffer)
 end
 
 --/*---------------------------------------------------------------------------*/--
 
-function port_monitor()
- 	while 1 do
-		_, data_read = p:read(1, 200)
+local function port_monitor()
+   while 1 do
+		local _, data_read = p:read(1, 200)
 		if (data_read ~= nil) then
 			io.write(data_read)
 			io.flush()
@@ -923,33 +910,16 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function data_cut(all_data, segment_len)
-  local max_len = segment_len
-  local data_len = string.len(all_data)
-  local i = 1
-  local data = {}
-  repeat
-    data_len = string.len(all_data)
-    local data_sub = string.sub(all_data, 0, max_len)
-    all_data = string.sub(all_data, max_len+1)
-    data[i] = data_sub
-    i = i + 1
-  until (data_len < max_len+1)
-  return data
-end
-
---/*---------------------------------------------------------------------------*/--
-
-function lanes_io_input()
+local function lanes_io_input()
 	io.read()
 	linda:set("exit_flag", "exit")
 end
 
 --/*---------------------------------------------------------------------------*/--
 
-function main_cycle(limit, adresses_print_mode)
+local function main_cycle(limit, adresses_print_mode)
 	local _, data_read, packet, message
-	local end_time, now_time = 0, 0
+	local end_time, now_time
 	local main_cycle_limit_reached = 0
 	main_cycle_permit = 1
 	local buffer = {}
@@ -989,7 +959,7 @@ function main_cycle(limit, adresses_print_mode)
 			end
 		end
 
-		exit_flag = linda:get("exit_flag")
+		local exit_flag = linda:get("exit_flag")
 		if (exit_flag ~= nil) then
 			main_cycle_permit = 0
 			linda:set("exit_flag", nil)
@@ -1001,14 +971,14 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-function enter_bootloader()
+local function enter_bootloader()
    send_command_to_ability("0000:0000:0000:0000:0000:0000:0000:0000", DEVICE_ABILITY_NONE, DEVICE_ABILITY_NONE, LOCAL_ROOT_COMMAND_BOOTLOADER_ACTIVATE)
    send_command_to_ability("0000:0000:0000:0000:0000:0000:0000:0000", DEVICE_ABILITY_NONE, DEVICE_ABILITY_NONE, LOCAL_ROOT_COMMAND_REBOOT)
 end
 
 --/*---------------------------------------------------------------------------*/--
 
-function firmware_update(image_file, address)
+local function firmware_update(image_file, address)
 	local handle, err = io.open(image_file,"r")
 	if (err ~= nil) then
 		print("Error open file")
@@ -1018,7 +988,7 @@ function firmware_update(image_file, address)
 	handle:close()
 	local chunk_size = 600
 	ota_image_table_segments = data_cut(image_file_bin_data, chunk_size)
-	chunk_quantity = #ota_image_table_segments
+	local chunk_quantity = #ota_image_table_segments
 
 	local addition_ff = (("FF"):fromhex()):rep(chunk_size - #ota_image_table_segments[chunk_quantity])
 	ota_image_table_segments[chunk_quantity] = ota_image_table_segments[chunk_quantity]..addition_ff
@@ -1029,20 +999,21 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
-local f,err = io.open(pid_file,"w")
-if not f then
-	print(err, f)
+local pid_file_descriptor, fid_file_open_error = io.open(pid_file,"w")
+if (not pid_file_descriptor) then
+	print(fid_file_open_error, pid_file_descriptor)
 else
-	f:write(pid)
-	f:close()
+	pid_file_descriptor:write(pid)
+	pid_file_descriptor:close()
 end
 
 print_red("RPL-router version "..ver..", uart protocol version: "..uart_version.."\n")
 
-e, p = rs232.open(port_name)
-if e ~= rs232.RS232_ERR_NOERROR then
+local rs232_error
+rs232_error, p = rs232.open(port_name)
+if rs232_error ~= rs232.RS232_ERR_NOERROR then
 	print(string.format("can't open serial port '%s', error: '%s'\n",
-			port_name, rs232.error_tostring(e)))
+			port_name, rs232.error_tostring(rs232_error)))
 	return
 end
 
@@ -1072,8 +1043,8 @@ elseif (arg[1] == "fw") then
 		main_cycle_permit = 1
 		fw_cmd_data_processing_flag_n = nil
 		firmware_update(image_file, arg[i])
-		limit_wait_firmware_update_success = 4*60
-		status = main_cycle(limit_wait_firmware_update_success)
+		local limit_wait_firmware_update_success = 4*60
+		local status = main_cycle(limit_wait_firmware_update_success)
 		if (status == 1) then
 			print_red("\nUpdate device "..arg[i].."("..(i-2).."/"..(#arg-2)..") failed(success message limit reached)\n")
 		else
@@ -1086,7 +1057,7 @@ elseif (arg[1] == "bulk_update") then
 		return
 	end
 	print("Please, wait status messages or reboot all devices. Press enter to go to update")
-	a = lanes.gen("*",lanes_io_input)()
+	lanes.gen("*",lanes_io_input)()
 	main_cycle(nil, 1)
 	flag_non_status_join_message = "true"
 	local image_file = arg[2]
@@ -1094,8 +1065,8 @@ elseif (arg[1] == "bulk_update") then
 		main_cycle_permit = 1
 		fw_cmd_data_processing_flag_n = nil
 		firmware_update(image_file, update_device_list[i])
-		limit_wait_firmware_update_success = 4*60
-		status = main_cycle(limit_wait_firmware_update_success)
+		local limit_wait_firmware_update_success = 4*60
+		local status = main_cycle(limit_wait_firmware_update_success)
 		if (status == 1) then
 			print_red("\nUpdate device "..update_device_list[i].."("..(i).."/"..(#update_device_list)..") failed(success message limit reached)\n")
 		else
