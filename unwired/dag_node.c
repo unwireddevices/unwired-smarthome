@@ -1445,7 +1445,6 @@ PROCESS_THREAD(dag_node_process, ev, data)
    }
 
    static struct etimer test_timer;
-   time_data_t time;
 
    while (1)
    {
