@@ -74,6 +74,24 @@ struct sensor_packet
    uint8_t sensor_event;
 };
 
+typedef union u8_u16_t
+{
+   uint16_t u16;
+   uint8_t u8[2];
+} u8_u16_t;
+
+typedef union u8_i16_t
+{
+   int16_t i16;
+   uint8_t u8[2];
+} u8_i16_t;
+
+typedef union u8_u32_t
+{
+   uint32_t u32;
+   uint8_t u8[4];
+} u8_u32_t;
+
 void send_sensor_event(struct sensor_packet *sensor_packet);
 void send_message_packet(uint8_t message_type, uint8_t data);
 void send_uart_data(struct command_data *uart_data);

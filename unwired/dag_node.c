@@ -884,16 +884,19 @@ void send_uart_data(struct command_data *uart_data)
 /*---------------------------------------------------------------------------*/
 
 void send_status_packet(const uip_ipaddr_t *parent_addr,
-                        uint32_t uptime,
-                        int16_t rssi_parent,
+                        uint32_t uptime_raw,
+                        int16_t rssi_parent_raw,
                         uint8_t temp,
                         uint8_t voltage)
 {
    if (parent_addr == NULL)
       return;
 
-   uint8_t *uptime_uint8_t = (uint8_t *)&uptime;
-   int8_t *rssi_parent_uint8_t = (int8_t *)&rssi_parent;
+   u8_u32_t uptime;
+   u8_i16_t rssi_parent;
+
+   uptime.u32 = uptime_raw;
+   rssi_parent.i16 = rssi_parent_raw;
    uip_ip6addr_t addr;
    uip_ip6addr_copy(&addr, &root_addr);
 
@@ -906,20 +909,20 @@ void send_status_packet(const uip_ipaddr_t *parent_addr,
    udp_buffer[0] = PROTOCOL_VERSION_V1;
    udp_buffer[1] = CURRENT_DEVICE_VERSION;
    udp_buffer[2] = DATA_TYPE_STATUS;
-   udp_buffer[3] = ( (uint8_t *)parent_addr )[8];
-   udp_buffer[4] = ( (uint8_t *)parent_addr )[9];
-   udp_buffer[5] = ( (uint8_t *)parent_addr )[10];
-   udp_buffer[6] = ( (uint8_t *)parent_addr )[11];
-   udp_buffer[7] = ( (uint8_t *)parent_addr )[12];
-   udp_buffer[8] = ( (uint8_t *)parent_addr )[13];
-   udp_buffer[9] = ( (uint8_t *)parent_addr )[14];
-   udp_buffer[10] = ( (uint8_t *)parent_addr )[15];
-   udp_buffer[11] = *uptime_uint8_t++;
-   udp_buffer[12] = *uptime_uint8_t++;
-   udp_buffer[13] = *uptime_uint8_t++;
-   udp_buffer[14] = *uptime_uint8_t;
-   udp_buffer[15] = *rssi_parent_uint8_t++;
-   udp_buffer[16] = *rssi_parent_uint8_t;
+   udp_buffer[3] = parent_addr->u8[8];
+   udp_buffer[4] = parent_addr->u8[9];
+   udp_buffer[5] = parent_addr->u8[10];
+   udp_buffer[6] = parent_addr->u8[11];
+   udp_buffer[7] = parent_addr->u8[12];
+   udp_buffer[8] = parent_addr->u8[13];
+   udp_buffer[9] = parent_addr->u8[14];
+   udp_buffer[10] = parent_addr->u8[15];
+   udp_buffer[11] = uptime.u8[0];
+   udp_buffer[12] = uptime.u8[1];
+   udp_buffer[13] = uptime.u8[2];
+   udp_buffer[14] = uptime.u8[3];
+   udp_buffer[15] = rssi_parent.u8[0];
+   udp_buffer[16] = rssi_parent.u8[1];
    udp_buffer[17] = temp;
    udp_buffer[18] = voltage;
    udp_buffer[19] = BIG_VERSION;
