@@ -525,56 +525,51 @@ static void time_data_handler(const uip_ipaddr_t *sender_addr,
                                           const uint8_t *data,
                                           uint16_t datalen)
 {
-   if (data[3] == DATA_TYPE_SET_TIME_RESPONSE)
+   time_data_t root_time;
+   time_data_t local_time_req;
+   time_data_t local_time_res;
+
+   for (uint8_t i = 0; i < 4; i++)
+      root_time.seconds_u8[i] = data[i+4];
+   for (uint8_t i = 0; i < 2; i++)
+      root_time.milliseconds_u8[i] = data[i+8];
+
+   for (uint8_t i = 0; i < 4; i++)
+      local_time_req.seconds_u8[i] = data[i+10];
+   for (uint8_t i = 0; i < 2; i++)
+      local_time_req.milliseconds_u8[i] = data[i+14];
+
+   local_time_res = get_epoch_time();
+
+   uint16_t half_transit_time = calculate_transit_time(local_time_req, local_time_res);
+
+   //printf("TIME SYNC: responce recieved: %" PRIu32 " sec, %" PRIu16 " ms, half transit time: %" PRIu16 " ms\n", root_time.seconds, root_time.milliseconds, half_transit_time);
+
+   if (half_transit_time > 3000)
+      return;
+
+   while (half_transit_time > 1000)
    {
-      time_data_t root_time;
-      time_data_t local_time_req;
-      time_data_t local_time_res;
-
-      for (uint8_t i = 0; i < 4; i++)
-         root_time.seconds_u8[i] = data[i+4];
-      for (uint8_t i = 0; i < 2; i++)
-         root_time.milliseconds_u8[i] = data[i+8];
-
-      for (uint8_t i = 0; i < 4; i++)
-         local_time_req.seconds_u8[i] = data[i+10];
-      for (uint8_t i = 0; i < 2; i++)
-         local_time_req.milliseconds_u8[i] = data[i+14];
-
-      local_time_res = get_epoch_time();
-
-      uint16_t half_transit_time = calculate_transit_time(local_time_req, local_time_res);
-
-      //printf("TIME SYNC: responce recieved: %" PRIu32 " sec, %" PRIu16 " ms, half transit time: %" PRIu16 " ms\n", root_time.seconds, root_time.milliseconds, half_transit_time);
-
-      while (half_transit_time > 1000)
-      {
-         if (half_transit_time > 3000) { return; }
-         half_transit_time = half_transit_time - 1000;
-         root_time.seconds--;
-      }
-
-      if (half_transit_time > root_time.milliseconds)
-      {
-         root_time.seconds--;
-         root_time.milliseconds = root_time.milliseconds + 1000;
-      }
-      root_time.milliseconds = root_time.milliseconds - half_transit_time;
-
-      u8_i16_t time_diff_ms;
-      time_diff_ms.i16 = calculate_diff_time(root_time, local_time_res);
-      set_epoch_time(root_time);
-
-      //printf("TIME SYNC: local time: %" PRIu32 " sec, %" PRIu16 " ms\n", local_time_res.seconds, local_time_res.milliseconds);
-      printf("TIME SYNC: root time: %" PRIu32 " sec, %" PRIu16 " ms\n", root_time.seconds, root_time.milliseconds);
-      printf("TIME SYNC: sync error %" PRIi16 " ms\n", time_diff_ms.i16);
-
-      send_message_packet(DEVICE_MESSAGE_TIMESYNC_STATUS, time_diff_ms.u8[0], time_diff_ms.u8[1]);
+      half_transit_time = half_transit_time - 1000;
+      root_time.seconds--;
    }
-   else if (data[3] == DATA_TYPE_SET_TIME_COMMAND_SYNC)
+
+   if (half_transit_time > root_time.milliseconds)
    {
-      send_time_sync_req_packet();
+      root_time.seconds--;
+      root_time.milliseconds = root_time.milliseconds + 1000;
    }
+   root_time.milliseconds = root_time.milliseconds - half_transit_time;
+
+   u8_i16_t time_diff_ms;
+   time_diff_ms.i16 = calculate_diff_time(root_time, local_time_res);
+   set_epoch_time(root_time);
+
+   //printf("TIME SYNC: local time: %" PRIu32 " sec, %" PRIu16 " ms\n", local_time_res.seconds, local_time_res.milliseconds);
+   printf("TIME SYNC: root time: %" PRIu32 " sec, %" PRIu16 " ms\n", root_time.seconds, root_time.milliseconds);
+   printf("TIME SYNC: sync error %" PRIi16 " ms\n", time_diff_ms.i16);
+
+   send_message_packet(DEVICE_MESSAGE_TIMESYNC_STATUS, time_diff_ms.u8[0], time_diff_ms.u8[1]);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -615,7 +610,16 @@ static void udp_receiver(struct simple_udp_connection *c,
                   firmware_data_handler(sender_addr, data, datalen);
 
             else if (data[2] == DATA_TYPE_SET_TIME)
+            {
+               if (data[3] == DATA_TYPE_SET_TIME_RESPONSE)
+               {
                   time_data_handler(sender_addr, data, datalen);
+               }
+               else if (data[3] == DATA_TYPE_SET_TIME_COMMAND_SYNC)
+               {
+                  send_time_sync_req_packet();
+               }
+            }
 
             else if (data[2] == DATA_TYPE_SET_SCHEDULE)
                   shedule_data_handler(sender_addr, data, datalen);
