@@ -694,14 +694,16 @@ end
 
 function message_data_processing(ipv6_adress, data)
 	--print("Message status processing module")
+   local message_type = data.b1
+   local message_data_b1 = data.b2
+   local message_data_b2 = data.b3
 
 
-
-	if (data.b1 == DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS) then
-		print_n("\r"..device_message_type[data.b1].." from "..ipv6_adress..": page "..(bindechex.Hex2Dec(data.b2)).."/24")
-	elseif (data.b1 == DEVICE_MESSAGE_OTA_UPDATE_SUCCESS) then
+	if (message_type == DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS) then
+		print_n("\r"..device_message_type[message_type].." from "..ipv6_adress..": page "..(bindechex.Hex2Dec(message_data_b1)).."/24")
+	elseif (message_type == DEVICE_MESSAGE_OTA_UPDATE_SUCCESS) then
 		print_n("\n")
-		print("MDPM: message packet from "..ipv6_adress..": "..device_message_type[data.b1])
+		print("MDPM: message packet from "..ipv6_adress..": "..device_message_type[message_type])
 		main_cycle_permit = 0
 	else
 		if (message_data_processing_flag_n == nil) then
@@ -709,7 +711,7 @@ function message_data_processing(ipv6_adress, data)
 			message_data_processing_flag_n = " "
 		end
 		print("MDPM: message packet from "..ipv6_adress..":")
-		print(" "..device_message_type[data.b1])
+		print(" "..(device_message_type[message_type] or ""))
 		print_n("\n")
 	end
 

@@ -93,7 +93,7 @@ typedef union u8_u32_t
 } u8_u32_t;
 
 void send_sensor_event(struct sensor_packet *sensor_packet);
-void send_message_packet(uint8_t message_type, uint8_t data);
+void send_message_packet(uint8_t message_type, uint8_t data_1, uint8_t data_2);
 void send_uart_data(struct command_data *uart_data);
 void uart_console(unsigned char uart_char);
 void send_time_sync_req_packet();
