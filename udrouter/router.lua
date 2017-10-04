@@ -160,6 +160,9 @@ device_root_local_commands[LOCAL_ROOT_COMMAND_REBOOT] = "on"
 LOCAL_ROOT_COMMAND_BOOTLOADER_ACTIVATE    =   "01"
 device_root_local_commands[LOCAL_ROOT_COMMAND_BOOTLOADER_ACTIVATE] = "off"
 
+LOCAL_ROOT_COMMAND_TIME_SET    =   "02"
+device_root_local_commands[LOCAL_ROOT_COMMAND_TIME_SET] = "off"
+
 
 --/*---------------------------------------------------------------------------*/--
 
