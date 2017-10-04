@@ -565,13 +565,15 @@ static void time_data_handler(const uip_ipaddr_t *sender_addr,
       }
       root_time.milliseconds = root_time.milliseconds - half_transit_time;
 
-      int16_t time_diff_ms = calculate_diff_time(root_time, local_time_res);
+      u8_i16_t time_diff_ms;
+      time_diff_ms.i16 = calculate_diff_time(root_time, local_time_res);
       set_epoch_time(root_time);
 
       printf("TIME SYNC: old time: %" PRIu32 " sec, %" PRIu16 " ms\n", local_time_res.seconds, local_time_res.milliseconds);
       printf("TIME SYNC: new time: %" PRIu32 " sec, %" PRIu16 " ms\n", root_time.seconds, root_time.milliseconds);
-      printf("TIME SYNC: diff %" PRIi16 " ms\n", time_diff_ms);
+      printf("TIME SYNC: sync error %" PRIi16 " ms\n", time_diff_ms.i16);
 
+      send_message_packet(DEVICE_MESSAGE_TIMESYNC_STATUS, time_diff_ms.u8[0], time_diff_ms.u8[1]);
    }
    else if (data[3] == DATA_TYPE_SET_TIME_COMMAND_SYNC)
    {

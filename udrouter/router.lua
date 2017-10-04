@@ -217,6 +217,9 @@ device_message_type[DEVICE_MESSAGE_OTA_UPDATE_SUCCESS] 	        = "OTA: Update s
 DEVICE_MESSAGE_OTA_NONCORRECT_UUID               		        =           "0D"
 device_message_type[DEVICE_MESSAGE_OTA_NONCORRECT_UUID] 	        = "OTA: Non-correct firmware UUID"
 
+DEVICE_MESSAGE_TIMESYNC_STATUS                                 =         "0E"
+device_message_type[DEVICE_MESSAGE_TIMESYNC_STATUS] 	        = "TIMESYNC: Time synced"
+
 --/*---------------------------------------------------------------------------*/--
 
 DATA_TYPE_FIRMWARE_COMMAND_NEW_FW              =         "01" --Сообщение о наличии новой прошивки
@@ -705,6 +708,11 @@ function message_data_processing(ipv6_adress, data)
 		print_n("\n")
 		print("MDPM: message packet from "..ipv6_adress..": "..device_message_type[message_type])
 		main_cycle_permit = 0
+   elseif (message_type == DEVICE_MESSAGE_TIMESYNC_STATUS) then
+      local sync_error = tonumber(bindechex.Hex2Dec((message_data_b2 or 00)..(message_data_b1 or 00)))
+      if sync_error > 32768 then sync_error = sync_error - 65536 end
+		print_n("\n")
+		print("MDPM: Device "..ipv6_adress..": sync time, error "..sync_error.." ms")
 	else
 		if (message_data_processing_flag_n == nil) then
 			print_n("\n")
