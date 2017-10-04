@@ -163,7 +163,6 @@
 #define DATA_TYPE_SET_TIME_TIME                                 0x02 //Данные текущего времени(для координатора)
 #define DATA_TYPE_SET_TIME_REQUEST                              0x03 //Запрос синхронизации времени
 #define DATA_TYPE_SET_TIME_RESPONSE                             0x04 //Ответ на запрос синхронизации времени
-#define DATA_TYPE_SET_TIME_STATUS                               0x05 //Статус синхронизации времени
 
 /* Devices messages */
 #define DEVICE_MESSAGE_HIGH_TEMPERATYRE                         0x01
@@ -179,6 +178,7 @@
 #define DEVICE_MESSAGE_OTA_SPI_ERASE_IN_PROGRESS                0x0B
 #define DEVICE_MESSAGE_OTA_UPDATE_SUCCESS                       0x0C
 #define DEVICE_MESSAGE_OTA_NONCORRECT_UUID                      0x0D
+#define DEVICE_MESSAGE_TIMESYNC_STATUS                          0x0E //Статус синхронизации времени
 
 /* UART Binary data */
 #define UART_PROTOCOL_VERSION_V1                                0x01
