@@ -163,6 +163,7 @@
 #define DATA_TYPE_SET_TIME_TIME                                 0x02 //Данные текущего времени(для координатора)
 #define DATA_TYPE_SET_TIME_REQUEST                              0x03 //Запрос синхронизации времени
 #define DATA_TYPE_SET_TIME_RESPONSE                             0x04 //Ответ на запрос синхронизации времени
+#define DATA_TYPE_SET_TIME_STATUS                               0x05 //Статус синхронизации времени
 
 /* Devices messages */
 #define DEVICE_MESSAGE_HIGH_TEMPERATYRE                         0x01

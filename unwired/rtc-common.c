@@ -50,67 +50,81 @@
 /*---------------------------------------------------------------------------*/
 
 uint32_t epoch_sec_offset = 0;
-int16_t epoch_msec_offset = 0;
-
-uint32_t local_time_req_send_s = 0;
-int16_t local_time_req_send_ms = 0;
+uint16_t epoch_msec_offset = 0;
 
 /*---------------------------------------------------------------------------*/
 
-void set_local_time_req_send()
+int16_t calculate_diff_time(time_data_t time_max, time_data_t time_min)
 {
-   local_time_req_send_s = clock_seconds();
-   local_time_req_send_ms = clock_mseconds();
+   int64_t diff_time_s = time_max.seconds - time_min.seconds;
+   int64_t diff_time_ms = time_max.milliseconds - time_min.milliseconds;
+
+   diff_time_ms = ((diff_time_s * 1000) + diff_time_ms);
+
+   //printf("RTC_COMMON: diff %"PRIi64" ms\n", diff_time_ms);
+
+   if (diff_time_s > 30 || diff_time_s < -30 || diff_time_ms > 30*1000 || diff_time_ms < -30*1000)
+      return 32768;
+   else
+      return (int16_t)diff_time_ms;
+}
+/*---------------------------------------------------------------------------*/
+
+uint16_t calculate_transit_time(time_data_t time_req, time_data_t time_res)
+{
+   uint32_t transit_time_s = time_res.seconds - time_req.seconds;
+   uint32_t transit_time_ms = time_res.milliseconds - time_req.milliseconds;
+   uint32_t half_transit_time_ms = ((transit_time_s * 1000) + transit_time_ms) / 2;
+   //printf("RTC_COMMON: transit time: %"PRIu32" sec, %"PRIu32" ms\n", transit_time_s, transit_time_ms);
+   return (uint16_t)half_transit_time_ms;
 }
 
 /*---------------------------------------------------------------------------*/
 
-uint16_t calculate_transit_time()
-{
-   uint32_t local_time_res_recieved_s = clock_seconds();
-   uint16_t local_time_res_recieved_ms = clock_mseconds();
-
-   uint32_t transit_time_s = local_time_res_recieved_s - local_time_req_send_s;
-   int32_t transit_time_ms = local_time_res_recieved_ms - local_time_req_send_ms;
-
-   int32_t full_transit_time_ms = (transit_time_s * 1000) + transit_time_ms;
-
-   return (uint16_t)full_transit_time_ms;
-}
-
-/*---------------------------------------------------------------------------*/
-
-void set_epoch_time(uint32_t epoch)
+void set_epoch_time(time_data_t time)
 {
    uint32_t current_uptime = clock_seconds();
-   if (epoch > current_uptime)
+   uint16_t current_msec = clock_mseconds();
+
+   if ((time.milliseconds - current_msec) > 1000)
    {
-      epoch_sec_offset = epoch - current_uptime;
+      epoch_msec_offset = (time.milliseconds - current_msec) - 1000;
+      epoch_sec_offset = (time.seconds - current_uptime) + 1;
    }
+   else if ((time.milliseconds - current_msec) < 0)
+   {
+      epoch_msec_offset = (time.milliseconds - current_msec) + 1000;
+      epoch_sec_offset = (time.seconds - current_uptime) - 1;
+   }
+   //printf("RTC_COMMON: set offset: %" PRIu32 " sec, %" PRIi16 " ms\n", epoch_sec_offset, epoch_msec_offset);
 }
 
 /*---------------------------------------------------------------------------*/
 
-uint32_t get_epoch_time()
+time_data_t get_epoch_time()
 {
-   uint32_t current_uptime = clock_seconds();
-   return current_uptime + epoch_sec_offset;
-}
+   time_data_t time;
 
-/*---------------------------------------------------------------------------*/
+   //printf("RTC_COMMON: get offsets: %" PRIu32 " sec, %" PRIi16 " ms\n", epoch_sec_offset, epoch_msec_offset);
 
-void set_epoch_msec_time(uint16_t msec)
-{
-   uint16_t current_msec = clock_mseconds();
-   epoch_msec_offset = msec - current_msec; //тут таится какая-то фигня!
-}
 
-/*---------------------------------------------------------------------------*/
+   time.seconds = clock_seconds() + epoch_sec_offset;
+   time.milliseconds = clock_mseconds() + epoch_msec_offset;
 
-uint16_t get_epoch_msec_time()
-{
-   uint16_t current_msec = clock_mseconds();
-   return current_msec + epoch_msec_offset;
+   if (time.milliseconds > 1000)
+   {
+      time.seconds++;
+      time.milliseconds = time.milliseconds - 1000;
+   }
+   else if (time.milliseconds < 0)
+   {
+      time.seconds--;
+      time.milliseconds = time.milliseconds + 1000;
+   }
+
+   //printf("RTC_COMMON: get time: %" PRIu32 " sec, %" PRIi16 " ms\n", time.seconds, time.milliseconds);
+
+   return time;
 }
 
 /*---------------------------------------------------------------------------*/

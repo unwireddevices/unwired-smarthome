@@ -301,10 +301,14 @@ uart_console(unsigned char uart_char)
    }
 
    if (uart_char == 'i')
-      verify_int_firmware_v();
+      send_time_sync_req_packet();
 
    if (uart_char == 'b')
-      backup_golden_image();
+   {
+      time_data_t time = get_epoch_time();
+      printf( "RTC TEST: %" PRIu32 " sec, %" PRIu16 " ms, uptime %" PRIu32 " sec\n", time.seconds, time.milliseconds, clock_seconds());
+
+   }
 
    if (uart_char == 'o')
       {
@@ -315,9 +319,6 @@ uart_console(unsigned char uart_char)
          uint8_t decrypted_data[sizeof(input_data)] = {0};
          uint32_t start_uptime = clock_seconds();
          uint32_t rounds_count = 500000;
-
-
-         uint8_t key_index = CRYPTO_KEY_AREA_0;
 
          for (uint32_t i=0; i < rounds_count; i++ )
          {
@@ -528,46 +529,48 @@ static void time_data_handler(const uip_ipaddr_t *sender_addr,
 {
    if (data[3] == DATA_TYPE_SET_TIME_RESPONSE)
    {
+      time_data_t root_time;
+      time_data_t local_time_req;
+      time_data_t local_time_res;
 
-      uint8_t root_time_s_uint8[32/8] = {data[4], data[5], data[6], data[7]};
-      uint32_t root_time_s = *(uint32_t *)&root_time_s_uint8;
+      for (uint8_t i = 0; i < 4; i++)
+         root_time.seconds_u8[i] = data[i+4];
+      for (uint8_t i = 0; i < 2; i++)
+         root_time.milliseconds_u8[i] = data[i+8];
 
-      uint8_t root_time_ms_uint8[16/8] = {data[8], data[9]};
-      uint16_t root_time_ms = *(uint16_t *)&root_time_ms_uint8;
+      for (uint8_t i = 0; i < 4; i++)
+         local_time_req.seconds_u8[i] = data[i+10];
+      for (uint8_t i = 0; i < 2; i++)
+         local_time_req.milliseconds_u8[i] = data[i+14];
 
-      uint16_t half_transit_time = calculate_transit_time() / 2;
+      local_time_res = get_epoch_time();
+      printf("\n");
 
-      printf("TIME SYNC: responce recieved: %" PRIu32 " sec, %" PRIu16 " ms, half transit time: %" PRIu16 " ms\n", root_time_s, root_time_ms, half_transit_time);
 
-      if (half_transit_time > 1000)
+      uint16_t half_transit_time = calculate_transit_time(local_time_req, local_time_res);
+
+      //printf("TIME SYNC: responce recieved: %" PRIu32 " sec, %" PRIu16 " ms, half transit time: %" PRIu16 " ms\n", root_time.seconds, root_time.milliseconds, half_transit_time);
+
+      while (half_transit_time > 1000)
       {
+         if (half_transit_time > 3000) { return; }
          half_transit_time = half_transit_time - 1000;
-         root_time_s--;
+         root_time.seconds--;
       }
 
-      else if (half_transit_time > 2000)
+      if (half_transit_time > root_time.milliseconds)
       {
-         half_transit_time = half_transit_time - 2000;
-         root_time_s--;
-         root_time_s--;
+         root_time.seconds--;
+         root_time.milliseconds = root_time.milliseconds + 1000;
       }
+      root_time.milliseconds = root_time.milliseconds - half_transit_time;
 
-      else if  (half_transit_time > 3000)
-      {
-         return;
-      }
+      int16_t time_diff_ms = calculate_diff_time(root_time, local_time_res);
+      set_epoch_time(root_time);
 
-      if (half_transit_time > root_time_ms)
-      {
-         root_time_s--;
-         root_time_ms = root_time_ms + 1000;
-      }
-      root_time_ms = root_time_ms - half_transit_time;
-
-      set_epoch_time(root_time_s);
-      set_epoch_msec_time(root_time_ms);
-
-      printf("TIME SYNC: new time: %" PRIu32 " sec, %" PRIu16 " ms\n", root_time_s, root_time_ms);
+      printf("TIME SYNC: old time: %" PRIu32 " sec, %" PRIu16 " ms\n", local_time_res.seconds, local_time_res.milliseconds);
+      printf("TIME SYNC: new time: %" PRIu32 " sec, %" PRIu16 " ms\n", root_time.seconds, root_time.milliseconds);
+      printf("TIME SYNC: diff %" PRIi16 " ms\n", time_diff_ms);
 
    }
    else if (data[3] == DATA_TYPE_SET_TIME_COMMAND_SYNC)
@@ -707,31 +710,25 @@ void send_time_sync_req_packet()
    uip_ip6addr_t addr;
    uip_ip6addr_copy(&addr, &root_addr);
 
-   uint32_t local_time_s = clock_seconds();
-   uint16_t local_time_ms = clock_mseconds();
-
-   uint8_t *local_time_s_uint8 = (uint8_t *)&local_time_s;
-   uint8_t *local_time_ms_uint8 = (uint8_t *)&local_time_ms;
-
-   set_local_time_req_send(); //Сохранить текущее время для расчета времени следования
+   time_data_t local_time = get_epoch_time();
 
    uint8_t udp_buffer[PROTOCOL_VERSION_V2_16BYTE];
    udp_buffer[0] = PROTOCOL_VERSION_V1;
    udp_buffer[1] = DEVICE_VERSION_V1;
    udp_buffer[2] = DATA_TYPE_SET_TIME;
    udp_buffer[3] = DATA_TYPE_SET_TIME_REQUEST;
-   udp_buffer[4] = *local_time_s_uint8++;
-   udp_buffer[5] = *local_time_s_uint8++;
-   udp_buffer[6] = *local_time_s_uint8++;
-   udp_buffer[7] = *local_time_s_uint8;
-   udp_buffer[8] = *local_time_ms_uint8++;
-   udp_buffer[9] = *local_time_ms_uint8;
-   udp_buffer[10] = DATA_RESERVED;
-   udp_buffer[11] = DATA_RESERVED;
-   udp_buffer[12] = DATA_RESERVED;
-   udp_buffer[13] = DATA_RESERVED;
-   udp_buffer[14] = DATA_RESERVED;
-   udp_buffer[15] = DATA_RESERVED; // << 16-byte packet, ready to encrypt v2 protocol
+   udp_buffer[4] = DATA_NONE;
+   udp_buffer[5] = DATA_NONE;
+   udp_buffer[6] = DATA_NONE;
+   udp_buffer[7] = DATA_NONE;
+   udp_buffer[8] = DATA_NONE;
+   udp_buffer[9] = DATA_NONE;
+   udp_buffer[10] = local_time.seconds_u8[0];
+   udp_buffer[11] = local_time.seconds_u8[1];
+   udp_buffer[12] = local_time.seconds_u8[2];
+   udp_buffer[13] = local_time.seconds_u8[3];
+   udp_buffer[14] = local_time.milliseconds_u8[0];
+   udp_buffer[15] = local_time.milliseconds_u8[1]; // << 16-byte packet, ready to encrypt v2 protocol
 
    net_on(RADIO_ON_TIMER_OFF);
    simple_udp_sendto(&udp_connection, udp_buffer, PROTOCOL_VERSION_V2_16BYTE, &addr);
@@ -1443,6 +1440,8 @@ PROCESS_THREAD(dag_node_process, ev, data)
       process_exit(&maintenance_process);
       process_start(&maintenance_process, NULL);
    }
+
+   send_time_sync_req_packet();
 
    PROCESS_END();
 }

@@ -72,7 +72,7 @@
 #define UART_DATA_POLL_INTERVAL 5 //in main timer ticks, one tick ~8ms
 
 static uint8_t lpm_mode_return(void);
-void send_time_sync_resp_packet(const uip_ip6addr_t *dest_addr);
+void send_time_sync_resp_packet(const uip_ip6addr_t *dest_addr, const uint8_t *data, const uint16_t length);
 
 LPM_MODULE(root_lpm_module, lpm_mode_return, NULL, NULL, LPM_DOMAIN_NONE);
 
@@ -145,16 +145,8 @@ void send_pong_packet(const uip_ip6addr_t *dest_addr)
 
 void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const uint16_t length)
 {
-   if (addr == NULL)
-   {
-      printf("UDM: addr in dag_root_raw_print null\n");
+   if (addr == NULL || data == NULL)
       return;
-   }
-   if (data == NULL)
-   {
-      printf("UDM: data in dag_root_raw_print null\n");
-      return;
-   }
 
    if (length != 10 && length != 23)
    {
@@ -189,13 +181,6 @@ void dag_root_raw_print(const uip_ip6addr_t *addr, const uint8_t *data, const ui
 
 /*---------------------------------------------------------------------------*/
 
-void data_type_set_time_request_processing(const uip_ip6addr_t *addr, const uint8_t *data, const uint16_t length)
-{
-   send_time_sync_resp_packet(addr);
-}
-
-/*---------------------------------------------------------------------------*/
-
 void decrypted_data_processed(const uip_ip6addr_t *sender_addr, const uint8_t *data, uint16_t datalen)
 {
    uint8_t packet_type = data[2];
@@ -212,7 +197,8 @@ void decrypted_data_processed(const uip_ip6addr_t *sender_addr, const uint8_t *d
 
    else if (packet_type == DATA_TYPE_SET_TIME && data[3] == DATA_TYPE_SET_TIME_REQUEST)
    {
-      data_type_set_time_request_processing(sender_addr, data, datalen);
+      send_time_sync_resp_packet(sender_addr, data, length);
+      return;
    }
 
    dag_root_raw_print(sender_addr, data, datalen);
@@ -301,7 +287,7 @@ void root_node_initialize()
 
 /*---------------------------------------------------------------------------*/
 
-void send_time_sync_resp_packet(const uip_ip6addr_t *dest_addr)
+void send_time_sync_resp_packet(const uip_ip6addr_t *dest_addr, const uint8_t *data, const uint16_t length)
 {
    if (dest_addr == NULL || &udp_connection.udp_conn == NULL)
       return;
@@ -323,12 +309,12 @@ void send_time_sync_resp_packet(const uip_ip6addr_t *dest_addr)
    udp_buffer[7] = *root_time_s_uint8;
    udp_buffer[8] = *root_time_ms_uint8++;
    udp_buffer[9] = *root_time_ms_uint8;
-   udp_buffer[10] = DATA_RESERVED;
-   udp_buffer[11] = DATA_RESERVED;
-   udp_buffer[12] = DATA_RESERVED;
-   udp_buffer[13] = DATA_RESERVED;
-   udp_buffer[14] = DATA_RESERVED;
-   udp_buffer[15] = DATA_RESERVED; // << 16-byte packet, ready to encrypt v2 protocol
+   udp_buffer[10] = data[10];
+   udp_buffer[11] = data[11];
+   udp_buffer[12] = data[12];
+   udp_buffer[13] = data[13];
+   udp_buffer[14] = data[14];
+   udp_buffer[15] = data[15]; // << 16-byte packet, ready to encrypt v2 protocol
 
    printf("UDM: time sync responce sended: %" PRIu32 " sec, %" PRIu16 " ms\n", root_time_s, root_time_ms);
 
