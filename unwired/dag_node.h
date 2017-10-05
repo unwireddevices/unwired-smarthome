@@ -37,6 +37,7 @@
 /*---------------------------------------------------------------------------*/
 
 #include "contiki.h"
+#include "net/ip/uip.h"
 /*---------------------------------------------------------------------------*/
 
 #define MODE_NORMAL                             0x01
@@ -47,7 +48,7 @@
 /*---------------------------------------------------------------------------*/
 
 struct simple_udp_connection udp_connection;
-volatile uip_ip6addr_t root_addr;
+volatile uip_ipaddr_t root_addr;
 volatile uint8_t node_mode;
 
 struct command_data

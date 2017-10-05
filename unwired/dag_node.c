@@ -131,7 +131,7 @@ volatile uint8_t led_mode;
 static void led_mode_set(uint8_t mode);
 
 volatile uint8_t non_answered_packet = 0;
-volatile uip_ip6addr_t root_addr;
+volatile uip_ipaddr_t root_addr;
 static struct command_data message_for_main_process;
 
 static struct etimer maintenance_timer;
@@ -709,7 +709,7 @@ void send_time_sync_req_packet()
    if (node_mode != MODE_NORMAL)
       return;
 
-   uip_ip6addr_t addr;
+   uip_ipaddr_t addr;
    uip_ip6addr_copy(&addr, &root_addr);
 
    time_data_t local_time = get_epoch_time();
@@ -773,7 +773,7 @@ void send_message_packet(uint8_t message_type, uint8_t data_1, uint8_t data_2)
    if (node_mode != MODE_NORMAL)
       return;
 
-   uip_ip6addr_t addr;
+   uip_ipaddr_t addr;
    uip_ip6addr_copy(&addr, &root_addr);
 
    uint8_t length = 10;
@@ -803,7 +803,7 @@ void send_sensor_event(struct sensor_packet *sensor_packet)
    if (sensor_packet == NULL)
       return;
 
-   uip_ip6addr_t addr;
+   uip_ipaddr_t addr;
    uip_ip6addr_copy(&addr, &root_addr);
 
    printf("DAG Node: Send sensor-event message to DAG-root node:");
@@ -840,7 +840,7 @@ void send_uart_data(struct command_data *uart_data)
    if (uart_data == NULL)
       return;
 
-   uip_ip6addr_t addr;
+   uip_ipaddr_t addr;
    uip_ip6addr_copy(&addr, &root_addr);
 
    //printf("DAG Node: Send uart data to DAG-root node:");
@@ -896,7 +896,7 @@ void send_status_packet(const uip_ipaddr_t *parent_addr,
 
    uptime.u32 = uptime_raw;
    rssi_parent.i16 = rssi_parent_raw;
-   uip_ip6addr_t addr;
+   uip_ipaddr_t addr;
    uip_ip6addr_copy(&addr, &root_addr);
 
    printf("DAG Node: Send status packet to DAG-root node:");
@@ -937,12 +937,12 @@ void send_status_packet(const uip_ipaddr_t *parent_addr,
 
 /*---------------------------------------------------------------------------*/
 
-void send_join_packet(const uip_ip6addr_t *dest_addr)
+void send_join_packet(const uip_ipaddr_t *dest_addr)
 {
    if (dest_addr == NULL)
       return;
 
-   uip_ip6addr_t addr;
+   uip_ipaddr_t addr;
    uip_ip6addr_copy(&addr, dest_addr);
 
    printf("DAG Node: Send join packet to DAG-root node:");
@@ -968,7 +968,7 @@ void send_join_packet(const uip_ip6addr_t *dest_addr)
 
 void send_fw_chunk_req_packet(uint16_t chunk_num_raw)
 {
-   uip_ip6addr_t addr;
+   uip_ipaddr_t addr;
    uip_ip6addr_copy(&addr, &root_addr);
 
    u8_u16_t chunk_num;
