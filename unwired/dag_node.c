@@ -1443,14 +1443,13 @@ PROCESS_THREAD(dag_node_process, ev, data)
       process_start(&maintenance_process, NULL);
    }
 
-   static struct etimer test_timer;
+   static struct etimer time_sync_timer;
 
    while (1)
    {
       send_time_sync_req_packet();
-
-      etimer_set( &test_timer, (CLOCK_SECOND*5) );
-      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&test_timer) );
+      etimer_set( &time_sync_timer, (CLOCK_SECOND*60*60) );
+      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&time_sync_timer) );
    }
 
 
