@@ -265,6 +265,8 @@ void rpl_initialize()
    rpl_set_prefix(dag, &prefix, 64);
 
    printf("UDM: Created a new RPL DAG, i'm root!\n");
+
+   printf("UDM: Time sync needed\n");
 }
 
 /*---------------------------------------------------------------------------*/
@@ -296,8 +298,7 @@ void send_time_sync_resp_packet(const uip_ip6addr_t *dest_addr, const uint8_t *d
       return;
 
    time_data_t root_time;
-   root_time.seconds = rtc_s();
-   root_time.milliseconds = rtc_ms();
+   root_time = get_epoch_time();
 
    uint8_t udp_buffer[PROTOCOL_VERSION_V2_16BYTE];
    udp_buffer[0] = PROTOCOL_VERSION_V1;
@@ -505,53 +506,64 @@ void uart_packet_dump(uint8_t *uart_buf, uint16_t uart_data_size)
 /*---------------------------------------------------------------------------*/
 /*
  * Локальная команда — команда, отправляемая координатору роутером, не передающаяся на другие устройства.
- * Адрес устройства в этой команде состоит из нулей("0000:0000:0000:0000:0000:0000:0000:0000")
  */
 
 void local_command(uint8_t *uart_data, uint16_t uart_data_length)
 {
    uint8_t protocol_version = uart_data[16];
    uint8_t device_version = uart_data[17];
-   uint8_t ability_target = uart_data[19];
-   uint8_t ability_number = uart_data[20];
-   uint8_t ability_state = uart_data[21];
+   uint8_t command_type = uart_data[18];
+   uint8_t command_subtype = uart_data[19];
 
+   typedef union u8_u32_t
+   {
+      uint32_t u32;
+      uint8_t u8[4];
+   } u8_u32_t;
 
-   if (protocol_version == PROTOCOL_VERSION_V1 &&
-       device_version == DEVICE_VERSION_V1 &&
-       ability_target == DEVICE_ABILITY_NONE &&
-       ability_number == DEVICE_ABILITY_NONE )
-       {
-         if (ability_state == LOCAL_ROOT_COMMAND_REBOOT)
-         {
-            ti_lib_sys_ctrl_system_reset();
-         }
+   if (command_type == DATA_TYPE_LOCAL_CMD)
+   {
+      if (command_subtype == LOCAL_ROOT_COMMAND_TIME_SET)
+      {
+         printf("UDM: local command time set\n");
+         u8_u32_t epoch;
+         for (uint8_t i = 0; i < 4; i++)
+            epoch.u8[i] = uart_data[i+20];
 
-         if (ability_state == LOCAL_ROOT_COMMAND_BOOTLOADER_ACTIVATE)
-         {
-            ti_lib_flash_sector_erase(0x0001F000);
-         }
-       }
+         time_data_t new_time;
+         new_time.seconds = epoch.u32;
+         new_time.milliseconds = 0;
 
+         set_epoch_time(new_time);
+
+         printf("UDM: epoch time: %" PRIu32 "(%" PRIXX8 " %" PRIXX8 " %" PRIXX8 " %" PRIXX8 ")\n", epoch.u32, epoch.u8[0], epoch.u8[1], epoch.u8[2], epoch.u8[3]);
+      }
+      if (command_subtype == LOCAL_ROOT_COMMAND_BOOTLOADER_ACTIVATE)
+      {
+         printf("UDM: local command bootloader activate\n");
+         ti_lib_flash_sector_erase(0x0001F000);
+      }
+      if (command_subtype == LOCAL_ROOT_COMMAND_REBOOT)
+      {
+         printf("UDM: local command reboot\n");
+         ti_lib_sys_ctrl_system_reset();
+      }
+   }
 }
 
 /*---------------------------------------------------------------------------*/
 
 void uart_packet_processed(uint8_t *uart_data, uint16_t uart_data_length)
 {
+   if (uart_data[18] == DATA_TYPE_LOCAL_CMD)
+   {
+      local_command(uart_data, uart_data_length);
+   }
+
    if (uart_data[18] == DATA_TYPE_COMMAND)
    {
-      uint8_t local_cmd_flag = 1;
       for (uint8_t i = 0; i < 16; i++)
-      {
-         if (uart_data[i] != 0x00)
-            local_cmd_flag = 0;
          command_message.destination_address.u8[i] = uart_data[i];
-      }
-      if (local_cmd_flag == 1)
-      {
-         local_command(uart_data, uart_data_length);
-      }
 
       command_message.protocol_version = uart_data[16];
       command_message.device_version = uart_data[17];

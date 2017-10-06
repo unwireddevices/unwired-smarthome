@@ -244,6 +244,7 @@ local DATA_TYPE_SET_SCHEDULE                    =              "0B" --Коман
 local DATA_TYPE_FIRMWARE                        =              "0C" --Данные для OTA
 local DATA_TYPE_UART                            =              "0D" --Команда с данными UART
 local DATA_TYPE_FIRMWARE_CMD                    =              "0E" --Команды OTA
+local DATA_TYPE_LOCAL_CMD                       =              "0F" --Локальные команды для координатора
 
 --/*---------------------------------------------------------------------------*/--
 
@@ -460,6 +461,27 @@ local function send_command_to_ability(ipv6_adress, ability_target, ability_numb
 	bin_data = bin_data..ability_target:fromhex()
 	bin_data = bin_data..ability_number:fromhex()
 	bin_data = bin_data..ability_state:fromhex()
+	uart_send(bin_data)
+	--print("Processing time "..(math.ceil(socket.gettime()*1000 - start_time)).." ms")
+	--start_time = socket.gettime()*1000
+	socket.sleep(0.08)
+end
+
+--/*---------------------------------------------------------------------------*/--
+
+local function send_local_command(subcommand_type, local_cmd_data_bin)
+	local adress = ipv6_adress_parse("0000:0000:0000:0000:0000:0000:0000:00FF")
+	local bin_data = ""
+
+	bin_data = bin_data..adress:fromhex()
+	bin_data = bin_data..PROTOCOL_VERSION_V1:fromhex()
+	bin_data = bin_data..DEVICE_VERSION_V1:fromhex()
+   bin_data = bin_data..DATA_TYPE_LOCAL_CMD:fromhex()
+   bin_data = bin_data..subcommand_type:fromhex()
+   bin_data = bin_data..local_cmd_data_bin[4]:fromhex() or (0xFF):fromhex()
+   bin_data = bin_data..local_cmd_data_bin[3]:fromhex() or (0xFF):fromhex()
+   bin_data = bin_data..local_cmd_data_bin[2]:fromhex() or (0xFF):fromhex()
+   bin_data = bin_data..local_cmd_data_bin[1]:fromhex() or (0xFF):fromhex()
 	uart_send(bin_data)
 	--print("Processing time "..(math.ceil(socket.gettime()*1000 - start_time)).." ms")
 	--start_time = socket.gettime()*1000
@@ -879,6 +901,34 @@ end
 
 --/*---------------------------------------------------------------------------*/--
 
+local function enter_bootloader()
+   send_command_to_ability("0000:0000:0000:0000:0000:0000:0000:0000", DEVICE_ABILITY_NONE, DEVICE_ABILITY_NONE, LOCAL_ROOT_COMMAND_BOOTLOADER_ACTIVATE)
+   send_command_to_ability("0000:0000:0000:0000:0000:0000:0000:0000", DEVICE_ABILITY_NONE, DEVICE_ABILITY_NONE, LOCAL_ROOT_COMMAND_REBOOT)
+   send_local_command(LOCAL_ROOT_COMMAND_BOOTLOADER_ACTIVATE)
+   send_local_command(LOCAL_ROOT_COMMAND_REBOOT)
+end
+
+--/*---------------------------------------------------------------------------*/--
+
+local function root_time_sync()
+   local now_epoch = os.time()
+
+   local now_epoch_hex = bindechex.Dec2Hex(now_epoch)
+   while (#now_epoch_hex < 32/8*2) do
+      now_epoch_hex = "0"..now_epoch_hex
+   end
+   local epoch_hex_bytes = {}
+   epoch_hex_bytes[1] = string.sub(now_epoch_hex, 1, 2)
+	epoch_hex_bytes[2] = string.sub(now_epoch_hex, 3, 4)
+   epoch_hex_bytes[3] = string.sub(now_epoch_hex, 5, 6)
+   epoch_hex_bytes[4] = string.sub(now_epoch_hex, 7, 8)
+   print("RTS: time sync at "..now_epoch.." epoch, bytes "..epoch_hex_bytes[1].." "..epoch_hex_bytes[2].." "..epoch_hex_bytes[3].." "..epoch_hex_bytes[4])
+   send_local_command(LOCAL_ROOT_COMMAND_TIME_SET, epoch_hex_bytes)
+end
+
+--/*---------------------------------------------------------------------------*/--
+
+
 local function add_byte_to_buffer(buffer, byte)
 	table.insert(buffer, byte)
 	while (#buffer > 95) do
@@ -945,11 +995,15 @@ local function main_cycle(limit, adresses_print_mode)
 				led("off")
 			end
 			_, _, message = string.find(buffer_state, "(UDM:.+\n)")
-			if (message ~= nil) then
-				led("on")
-				print(message)
-				clean_buffer(buffer)
-				led("off")
+         if (message ~= nil) then
+            if (message == "UDM: Time sync needed\n") then
+               root_time_sync();
+            else
+               led("on")
+               print(message)
+               led("off")
+            end
+            clean_buffer(buffer)
 			end
 		end
 		if (limit ~= nil) then
@@ -967,13 +1021,6 @@ local function main_cycle(limit, adresses_print_mode)
 
 	end
 	return main_cycle_limit_reached
-end
-
---/*---------------------------------------------------------------------------*/--
-
-local function enter_bootloader()
-   send_command_to_ability("0000:0000:0000:0000:0000:0000:0000:0000", DEVICE_ABILITY_NONE, DEVICE_ABILITY_NONE, LOCAL_ROOT_COMMAND_BOOTLOADER_ACTIVATE)
-   send_command_to_ability("0000:0000:0000:0000:0000:0000:0000:0000", DEVICE_ABILITY_NONE, DEVICE_ABILITY_NONE, LOCAL_ROOT_COMMAND_REBOOT)
 end
 
 --/*---------------------------------------------------------------------------*/--

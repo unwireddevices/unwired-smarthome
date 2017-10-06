@@ -32,6 +32,7 @@
 #define DATA_TYPE_FIRMWARE                                      0x0C //Данные для OTA
 #define DATA_TYPE_UART                                          0x0D //Команда с данными UART
 #define DATA_TYPE_FIRMWARE_CMD                                  0x0E //Команды OTA
+#define DATA_TYPE_LOCAL_CMD                                     0x0F //Локальные команды для координатора
 
 /* Reserved data */
 #define DATA_RESERVED                                           0xFF
