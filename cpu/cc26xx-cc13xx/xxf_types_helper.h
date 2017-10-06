@@ -1,59 +1,36 @@
-#define PRId8   "d"
-//decimal printf format for int8_t
+   #define PRId8   "d"
+   #define PRId16   "d"
+   #define PRId32   "ld"
 
-#define PRId16   "d"
-//decimal printf format for int16_t
+   #define PRIi8   "i"
+   #define PRIi16   "i"
+   #define PRIi32   "li"
+   #define PRIi64   "lli"
 
-#define PRId32   "ld"
-//decimal printf format for int32_t
+   #define PRIu8   "u"
+   #define PRIu16   "u"
 
+#ifndef PRIu32
+   #define PRIu32   "lu"
+#endif
 
-#define PRIi8   "i"
-//integer printf format for int8_t
-
-#define PRIi16   "i"
-//integer printf format for int16_t
-
-#define PRIi32   "li"
-//integer printf format for int32_t
-
-#define PRIi64   "lli"
-//integer printf format for int32_t
+   #define PRIu64   "llu"
 
 
-#define PRIu8   "u"
-//decimal printf format for uint8_t
+   #define PRIx8   "x"
+   #define PRIx16   "x"
+#ifndef PRIx32
+   #define PRIx32   "lx"
+#endif
+   #define PRIXX8   "02X"
 
-#define PRIu16   "u"
-//decimal printf format for uint16_t
-
-#define PRIu32   "lu"
-//decimal printf format for uint32_t
-
-
-#define PRIx8   "x"
-//hexadecimal printf format for uint8_t
-
-#define PRIx16   "x"
-//hexadecimal printf format for uint16_t
-
-#define PRIx32   "lx"
-//hexadecimal printf format for uint32_t
-
-#define PRIXX8   "02X"
-//uppercase hexadecimal printf format for uint8_t
-
-
-#define PRIX8   "X"
-//uppercase hexadecimal printf format for uint8_t
-
-#define PRIX16   "X"
-//uppercase hexadecimal printf format for uint16_t
-
-#define PRIX32   "lX"
-//uppercase hexadecimal printf format for uint32_t
-
-#define PRIXX32   "08lX"
-//uppercase hexadecimal printf format for uint32_t
+   #define PRIX8   "X"
+   #define PRIX16   "X"
+#ifndef PRIX32
+   #define PRIX32   "lX"
+#endif
+#ifndef PRIXX32
+   #define PRIXX32   "08lX"
+#endif
 
 
