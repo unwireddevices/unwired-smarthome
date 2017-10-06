@@ -110,7 +110,8 @@ CCIF clock_time_t clock_time(void);
  */
 CCIF unsigned long clock_seconds(void);
 
-CCIF uint16_t clock_mseconds(void);
+CCIF uint16_t rtc_ms(void);
+CCIF uint32_t rtc_s(void);
 
 /**
  * Set the value of the platform seconds.

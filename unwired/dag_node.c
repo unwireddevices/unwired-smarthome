@@ -305,8 +305,7 @@ uart_console(unsigned char uart_char)
    if (uart_char == 'b')
    {
       time_data_t time = get_epoch_time();
-      printf( "RTC TEST: %" PRIu32 " sec, %" PRIu16 " ms, uptime %" PRIu32 " sec\n", time.seconds, time.milliseconds, clock_seconds());
-
+      printf( "RTC TEST: %" PRIu32 " sec, %" PRIu16 " ms, uptime %" PRIu32 " sec\n", time.seconds, time.milliseconds, rtc_s());
    }
 
    if (uart_char == 'o')
@@ -316,7 +315,7 @@ uart_console(unsigned char uart_char)
          uint8_t nonce[16] = {0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF, 0xDE, 0xAD, 0xBE, 0xEF};
          uint8_t encrypted_data[sizeof(input_data)] = {0};
          uint8_t decrypted_data[sizeof(input_data)] = {0};
-         uint32_t start_uptime = clock_seconds();
+         uint32_t start_uptime = rtc_s();
          uint32_t rounds_count = 500000;
 
          for (uint32_t i=0; i < rounds_count; i++ )
@@ -328,7 +327,7 @@ uart_console(unsigned char uart_char)
             if (!(i % 20000))
                printf(".");
          }
-         printf( "HW AES TEST(%" PRIu32 ") took %" PRIu32 " s, speed %" PRIu32 " r/s\n", rounds_count, clock_seconds()-start_uptime, rounds_count/(clock_seconds()-start_uptime) );
+         printf( "HW AES TEST(%" PRIu32 ") took %" PRIu32 " s, speed %" PRIu32 " r/s\n", rounds_count, rtc_s()-start_uptime, rounds_count/(rtc_s()-start_uptime) );
 
       }
 
@@ -672,7 +671,7 @@ print_debug_data(void)
 {
    /*
    printf("\n");
-   printf( "SYSTEM: uptime: %" PRIu32 " s\n", clock_seconds() );
+   printf( "SYSTEM: uptime: %" PRIu32 " s\n", rtc_s() );
 
       rpl_dag_t *dag = rpl_get_any_dag();
 
@@ -1195,7 +1194,7 @@ PROCESS_THREAD(status_send_process, ev, data)
          uint8_t voltage = ( (batmon_sensor.value(BATMON_SENSOR_TYPE_VOLT) * 125) >> 5 ) / VOLTAGE_PRESCALER;
          if (ipaddr_parent != NULL && stat_parent != NULL)
          {
-            send_status_packet(ipaddr_parent, clock_seconds(), stat_parent->rssi, temp, voltage);
+            send_status_packet(ipaddr_parent, rtc_s(), stat_parent->rssi, temp, voltage);
          }
          non_answered_packet++;
          printf("DAG Node: Non-answered packet counter increase(status message): %"PRId8" \n", non_answered_packet);

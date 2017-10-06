@@ -84,8 +84,8 @@ uint16_t calculate_transit_time(time_data_t time_req, time_data_t time_res)
 void set_epoch_time(time_data_t new_time)
 {
    time_data_t local_time;
-   local_time.seconds = clock_seconds();
-   local_time.milliseconds = clock_mseconds();
+   local_time.seconds = rtc_s();
+   local_time.milliseconds = rtc_ms();
 
    if ((new_time.milliseconds - local_time.milliseconds) >= 1000)
    {
@@ -112,8 +112,8 @@ time_data_t get_epoch_time()
    time_data_t local_time;
 
    //printf("RTC_COMMON: get offsets: %" PRIu32 " sec, %" PRIi16 " ms\n", epoch_sec_offset, epoch_msec_offset);
-   local_time.seconds = clock_seconds() + epoch_sec_offset;
-   local_time.milliseconds = clock_mseconds() + epoch_msec_offset;
+   local_time.seconds = rtc_s() + epoch_sec_offset;
+   local_time.milliseconds = rtc_ms() + epoch_msec_offset;
 
    if (local_time.milliseconds >= 1000)
    {

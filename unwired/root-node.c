@@ -296,8 +296,8 @@ void send_time_sync_resp_packet(const uip_ip6addr_t *dest_addr, const uint8_t *d
       return;
 
    time_data_t root_time;
-   root_time.seconds = clock_seconds();
-   root_time.milliseconds = clock_mseconds();
+   root_time.seconds = rtc_s();
+   root_time.milliseconds = rtc_ms();
 
    uint8_t udp_buffer[PROTOCOL_VERSION_V2_16BYTE];
    udp_buffer[0] = PROTOCOL_VERSION_V1;
