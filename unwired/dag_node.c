@@ -99,7 +99,7 @@
 #define MAINTENANCE_INTERVAL            (10 * 60 * CLOCK_SECOND)
 #define SHORT_STATUS_INTERVAL           (10 * 60 * CLOCK_SECOND)
 #define LONG_STATUS_INTERVAL            (20 * 60 * CLOCK_SECOND)
-#define ROOT_FIND_INTERVAL                    (5 * CLOCK_SECOND)
+#define ROOT_FIND_INTERVAL                    (2 * CLOCK_SECOND)
 #define ROOT_FIND_LIMIT_TIME             (2 * 60 * CLOCK_SECOND)
 #define FW_DELAY                              (2 * CLOCK_SECOND)
 #define FW_MAX_ERROR_COUNTER                    5
@@ -1337,23 +1337,22 @@ PROCESS_THREAD(root_find_process, ev, data)
    static struct etimer find_root_timer;
    static struct etimer find_root_limit_timer;
    static rpl_dag_t *root_find_dag = NULL;
+   static uip_ds6_addr_t *ds6_addr = NULL;
    PROCESS_PAUSE();
 
    etimer_set( &find_root_limit_timer, ROOT_FIND_LIMIT_TIME);
 
    while (1)
    {
-      etimer_set( &find_root_timer, ROOT_FIND_INTERVAL + (random_rand() % ROOT_FIND_INTERVAL) );
-      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&find_root_timer) );
-
       if (node_mode == MODE_JOIN_PROGRESS)
       {
          if (!etimer_expired(&find_root_limit_timer))
          {
-            if (uip_ds6_get_global(ADDR_PREFERRED) != NULL)
+            ds6_addr = uip_ds6_get_global(ADDR_PREFERRED);
+            if (ds6_addr != NULL)
             {
-               root_find_dag = rpl_get_any_dag();
-               if (root_find_dag != NULL && &root_find_dag->dag_id)
+               root_find_dag = rpl_get_dag(&ds6_addr->ipaddr);
+               if (root_find_dag != NULL)
                {
                   if ( led_mode != LED_FAST_BLINK)
                      led_mode_set(LED_FAST_BLINK);
@@ -1371,6 +1370,8 @@ PROCESS_THREAD(root_find_process, ev, data)
          }
 
       }
+      etimer_set( &find_root_timer, ROOT_FIND_INTERVAL + (random_rand() % ROOT_FIND_INTERVAL) );
+      PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&find_root_timer) );
    }
 
    PROCESS_END();
