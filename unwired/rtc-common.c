@@ -64,7 +64,7 @@ int16_t calculate_diff_time(time_data_t time_max, time_data_t time_min)
    //printf("RTC_COMMON: diff %"PRIi64" ms\n", diff_time_ms);
 
    if (diff_time_s > 30 || diff_time_s < -30 || diff_time_ms > 30*1000 || diff_time_ms < -30*1000)
-      return 32768;
+      return 32767;
    else
       return (int16_t)diff_time_ms;
 }
