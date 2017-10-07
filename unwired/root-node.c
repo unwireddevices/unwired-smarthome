@@ -292,7 +292,7 @@ void root_node_initialize()
 
 void send_time_sync_resp_packet(const uip_ip6addr_t *dest_addr, const uint8_t *data, const uint16_t length)
 {
-   if (dest_addr == NULL || &udp_connection.udp_conn == NULL)
+   if (dest_addr == NULL && udp_connection.udp_conn == NULL)
       return;
 
    time_data_t root_time;
@@ -325,16 +325,8 @@ void send_time_sync_resp_packet(const uip_ip6addr_t *dest_addr, const uint8_t *d
 
 void send_uart_packet(struct uart_data *uart_message)
 {
-   if (&uart_message->destination_address == NULL)
-   {
-      printf("UDM: dest_addr in send_uart_packet null\n");
+   if (udp_connection.udp_conn == NULL)
       return;
-   }
-   if (&udp_connection.udp_conn == NULL) //указатель на что?
-   {
-      printf("UDM: connection in send_uart_packet null\n");
-      return;
-   }
 
    uip_ip6addr_t addr;
    uip_ip6addr_copy(&addr, &uart_message->destination_address);
@@ -383,16 +375,8 @@ void send_uart_packet(struct uart_data *uart_message)
 
 void send_firmware_cmd_packet(struct firmware_cmd *firmware_cmd_message)
 {
-   if (&firmware_cmd_message->destination_address == NULL)
-   {
-      printf("UDM: dest_addr in send_command_packet null\n");
+   if (udp_connection.udp_conn == NULL)
       return;
-   }
-   if (&udp_connection.udp_conn == NULL) //указатель на что?
-   {
-      printf("UDM: connection in send_command_packet null\n");
-      return;
-   }
 
    uip_ip6addr_t addr;
    uip_ip6addr_copy(&addr, &firmware_cmd_message->destination_address);
@@ -416,16 +400,8 @@ void send_firmware_cmd_packet(struct firmware_cmd *firmware_cmd_message)
 
 void send_firmware_packet(struct firmware_data *firmware_message)
 {
-   if (&firmware_message->destination_address == NULL)
-   {
-      printf("UDM: dest_addr in send_command_packet null\n");
+   if (udp_connection.udp_conn == NULL)
       return;
-   }
-   if (&udp_connection.udp_conn == NULL) //указатель на что?
-   {
-      printf("UDM: connection in send_command_packet null\n");
-      return;
-   }
 
    uip_ip6addr_t addr;
    uip_ip6addr_copy(&addr, &firmware_message->destination_address);
@@ -454,16 +430,8 @@ void send_firmware_packet(struct firmware_data *firmware_message)
 
 void send_command_packet(struct command_data *command_message)
 {
-   if (&command_message->destination_address == NULL)
-   {
-      printf("UDM: dest_addr in send_command_packet null\n");
+   if (udp_connection.udp_conn == NULL)
       return;
-   }
-   if (&udp_connection.udp_conn == NULL) //указатель на что?
-   {
-      printf("UDM: connection in send_command_packet null\n");
-      return;
-   }
 
    uip_ip6addr_t addr;
    uip_ip6addr_copy(&addr, &command_message->destination_address);
