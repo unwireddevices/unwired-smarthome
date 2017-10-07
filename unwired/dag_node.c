@@ -487,9 +487,7 @@ static void firmware_cmd_new_fw_handler(const uip_ipaddr_t *sender_addr,
  *
  */
 /*---------------------------------------------------------------------------*/
-static void time_data_handler(const uip_ipaddr_t *sender_addr,
-                                          const uint8_t *data,
-                                          uint16_t datalen)
+static void time_data_handler(const uint8_t *data, uint16_t datalen)
 {
    time_data_t root_time;
    time_data_t local_time_req;
@@ -540,9 +538,7 @@ static void time_data_handler(const uip_ipaddr_t *sender_addr,
 
 /*---------------------------------------------------------------------------*/
 
-static void shedule_data_handler(const uip_ipaddr_t *sender_addr,
-                                          const uint8_t *data,
-                                          uint16_t datalen)
+static void shedule_data_handler(const uint8_t *data, uint16_t datalen)
 {
 
 }
@@ -557,51 +553,53 @@ static void udp_receiver(struct simple_udp_connection *c,
                          const uint8_t *data, //TODO: make "parse" function(data[0] -> data.protocol_version)
                          uint16_t datalen)
 {
-      if (data[0] == PROTOCOL_VERSION_V1 && data[1] == CURRENT_DEVICE_VERSION)
+      uint8_t protocol_version = data[0];
+      uint8_t device_version = data[1];
+      uint8_t packet_type = data[2];
+      uint8_t packet_subtype = data[3];
+
+      if (protocol_version == PROTOCOL_VERSION_V1 && device_version == CURRENT_DEVICE_VERSION)
       {
 
-            if (data[2] == DATA_TYPE_JOIN_CONFIRM)
+            if (packet_type == DATA_TYPE_JOIN_CONFIRM)
                   join_confirm_handler(sender_addr, data, datalen);
 
-            else if (data[2] == DATA_TYPE_COMMAND || data[2] == DATA_TYPE_SETTINGS)
+            else if (packet_type == DATA_TYPE_COMMAND || data[2] == DATA_TYPE_SETTINGS)
                   command_settings_handler(sender_addr, data, datalen);
 
-            else if (data[2] == DATA_TYPE_UART)
+            else if (packet_type == DATA_TYPE_UART)
                   uart_packet_handler(sender_addr, data, datalen);
 
-            else if (data[2] == DATA_TYPE_PONG)
+            else if (packet_type == DATA_TYPE_PONG)
                   pong_handler(sender_addr, data, datalen);
 
-            else if (data[2] == DATA_TYPE_FIRMWARE)
+            else if (packet_type == DATA_TYPE_FIRMWARE)
                   firmware_data_handler(sender_addr, data, datalen);
 
-            else if (data[2] == DATA_TYPE_SET_TIME)
+            else if (packet_type == DATA_TYPE_SET_TIME)
             {
-               if (data[3] == DATA_TYPE_SET_TIME_RESPONSE)
-               {
-                  time_data_handler(sender_addr, data, datalen);
-               }
-               else if (data[3] == DATA_TYPE_SET_TIME_COMMAND_SYNC)
-               {
-                  send_time_sync_req_packet();
-               }
+               if (packet_subtype == DATA_TYPE_SET_TIME_RESPONSE)
+                  time_data_handler(data, datalen);
+
+               else if (packet_subtype == DATA_TYPE_SET_TIME_COMMAND_SYNC)
+                  send_time_sync_req_packet(data, datalen);
             }
 
-            else if (data[2] == DATA_TYPE_SET_SCHEDULE)
-                  shedule_data_handler(sender_addr, data, datalen);
+            else if (packet_type == DATA_TYPE_SET_SCHEDULE)
+                  shedule_data_handler(data, datalen);
 
-            else if (data[2] == DATA_TYPE_FIRMWARE_CMD)
+            else if (packet_type == DATA_TYPE_FIRMWARE_CMD)
             {
-                  if (data[3] == DATA_TYPE_FIRMWARE_COMMAND_NEW_FW)
+                  if (packet_subtype == DATA_TYPE_FIRMWARE_COMMAND_NEW_FW)
                         firmware_cmd_new_fw_handler(sender_addr, data, datalen);
 
-                  else if (data[3] == DATA_TYPE_FIRMWARE_COMMAND_REBOOT)
+                  else if (packet_subtype == DATA_TYPE_FIRMWARE_COMMAND_REBOOT)
                         watchdog_reboot();
 
-                  else if (data[3] == DATA_TYPE_FIRMWARE_COMMAND_CLEAN_GI)
+                  else if (packet_subtype == DATA_TYPE_FIRMWARE_COMMAND_CLEAN_GI)
                         erase_ota_image(0);
 
-                  else if (data[3] == DATA_TYPE_FIRMWARE_COMMAND_FLASH_GI)
+                  else if (packet_subtype == DATA_TYPE_FIRMWARE_COMMAND_FLASH_GI)
                   {
                      write_fw_flag(FW_FLAG_NEW_IMG_INT);
                      watchdog_reboot();
