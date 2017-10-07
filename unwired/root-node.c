@@ -52,6 +52,7 @@
 
 #include "button-sensor.h"
 #include "board-peripherals.h"
+#include "system-common.h"
 
 #include "ti-lib.h"
 #include "dev/cc26xx-uart.h"
@@ -511,12 +512,6 @@ void local_command(uint8_t *uart_data, uint16_t uart_data_length)
    uint8_t device_version = uart_data[17];
    uint8_t command_type = uart_data[18];
    uint8_t command_subtype = uart_data[19];
-
-   typedef union u8_u32_t
-   {
-      uint32_t u32;
-      uint8_t u8[4];
-   } u8_u32_t;
 
    if (command_type == DATA_TYPE_LOCAL_CMD)
    {

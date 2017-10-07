@@ -65,6 +65,7 @@
 #include "crypto-common.h"
 #include "rtc-common.h"
 
+#include "system-common.h"
 #include "int-flash-common.h"
 #include "xxf_types_helper.h"
 #include "ud_binary_protocol.h"
@@ -160,36 +161,6 @@ flash_erase(size_t offset, size_t length)
    ext_flash_open();
    ext_flash_erase(offset, length);
    ext_flash_close();
-}
-
-/*---------------------------------------------------------------------------*/
-
-void
-hexraw_print(uint32_t flash_length, uint8_t *flash_read_data_buffer)
-{
-   for (uint32_t i = 0; i < flash_length; i++)
-   {
-         printf("%"PRIXX8, flash_read_data_buffer[i]);
-   }
-}
-
-/*---------------------------------------------------------------------------*/
-
-void
-hexview_print(uint32_t flash_length, uint8_t *flash_read_data_buffer, uint32_t offset)
-{
-
-   for (uint32_t i = 0; i < flash_length; i = i + 16)
-   {
-      printf("0x%"PRIXX32": ", i + offset);
-      for (int i2 = 0; i2 < 16; i2++)
-      {
-         printf("%"PRIXX8" ", flash_read_data_buffer[i2+i]);
-         if (i2 == 7) { printf(" "); }
-      }
-      printf("\n");
-   }
-
 }
 
 /*---------------------------------------------------------------------------*/

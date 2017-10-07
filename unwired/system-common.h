@@ -27,64 +27,37 @@
 /*---------------------------------------------------------------------------*/
 /**
  * \file
- *         Header file for DAG-node service
+ *         Header file for system functions
  * \author
  *         Vladislav Zaytsev vvzvlad@gmail.com vz@unwds.com
  */
 /*---------------------------------------------------------------------------*/
 
 #include "contiki.h"
-#include "net/ip/uip.h"
+#include "ud_binary_protocol.h"
 
 /*---------------------------------------------------------------------------*/
 
-#define MODE_NORMAL                             0x01
-#define MODE_NOTROOT                            0x02
-#define MODE_JOIN_PROGRESS                      0x03
-#define MODE_NEED_REBOOT                        0x04
-
-/*---------------------------------------------------------------------------*/
-
-struct simple_udp_connection udp_connection;
-volatile uip_ipaddr_t root_addr;
-volatile uint8_t node_mode;
-
-struct command_data
+typedef union u8_u16_t
 {
-   volatile uint8_t data_type;
-   volatile uint8_t protocol_version;
-   volatile uint8_t device_version;
-   volatile uint8_t ability_target;
-   volatile uint8_t ability_number;
-   volatile uint8_t ability_state;
-   volatile uint8_t uart_returned_data_length;
-   volatile uint8_t uart_data_length;
-   volatile uint8_t ready_to_send;
-   volatile uint8_t payload[16];
-};
+   uint16_t u16;
+   uint8_t u8[2];
+} u8_u16_t;
 
-struct sensor_packet
+typedef union u8_i16_t
 {
-   uint8_t protocol_version;
-   uint8_t device_version;
-   uint8_t data_type;
-   uint8_t number_ability;
-   uint8_t sensor_number;
-   uint8_t sensor_event;
-};
+   int16_t i16;
+   uint8_t u8[2];
+} u8_i16_t;
 
-void send_sensor_event(struct sensor_packet *sensor_packet);
-void send_message_packet(uint8_t message_type, uint8_t data_1, uint8_t data_2);
-void send_uart_data(struct command_data *uart_data);
-void uart_console(unsigned char uart_char);
-void send_time_sync_req_packet();
+typedef union u8_u32_t
+{
+   uint32_t u32;
+   uint8_t u8[4];
+} u8_u32_t;
 
-PROCESS_NAME(dag_node_process);
-PROCESS_NAME(dag_node_button_process);
-PROCESS_NAME(root_find_process);
-PROCESS_NAME(status_send_process);
-PROCESS_NAME(maintenance_process);
-PROCESS_NAME(led_process);
-PROCESS_NAME(fw_update_process);
+void hexraw_print(uint32_t flash_length, uint8_t *flash_read_data_buffer);
+void hexview_print(uint32_t flash_length, uint8_t *flash_read_data_buffer, uint32_t offset);
 
 /*---------------------------------------------------------------------------*/
+
