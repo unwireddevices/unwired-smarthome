@@ -35,6 +35,7 @@
 
 #include "contiki.h"
 #include "net/ip/uip.h"
+#include "net/ip/simple-udp.h"
 
 /*---------------------------------------------------------------------------*/
 
@@ -45,7 +46,7 @@
 
 /*---------------------------------------------------------------------------*/
 
-struct simple_udp_connection udp_connection;
+simple_udp_connection_t udp_connection;
 volatile uip_ipaddr_t root_addr;
 volatile uint8_t node_mode;
 

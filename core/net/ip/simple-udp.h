@@ -29,7 +29,7 @@
  * This file is part of the Contiki operating system.
  */
 
-/** 
+/**
  * \file
  *         Header file for the simple-udp module.
  * \author
@@ -76,6 +76,8 @@ struct simple_udp_connection {
   struct uip_udp_conn *udp_conn;
   struct process *client_process;
 };
+
+typedef struct simple_udp_connection simple_udp_connection_t;
 
 /**
  * \brief      Register a UDP connection

@@ -48,6 +48,7 @@
 #include "net/ipv6/uip-ds6.h"
 #include "net/ipv6/uip-ds6-nbr.h"
 #include "net/ip/uip-debug.h"
+#include "net/ip/simple-udp.h"
 #include "net/link-stats.h"
 
 #include "dev/leds.h"
@@ -122,7 +123,7 @@
 /*---------------------------------------------------------------------------*/
 
 /* struct for simple_udp_send */
-struct simple_udp_connection udp_connection;
+simple_udp_connection_t udp_connection;
 
 volatile uint8_t node_mode;
 volatile uint8_t spi_status;
