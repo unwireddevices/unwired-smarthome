@@ -41,94 +41,13 @@
 #include "contiki-conf.h"
 #include "shell-vars.h"
 
-#include "loader/symbols.h"
 
 #include <stdio.h>
 #include <string.h>
 
-#ifdef SHELL_VARS_CONF_RAM_BEGIN
-#define SHELL_VARS_RAM_BEGIN SHELL_VARS_CONF_RAM_BEGIN
-#define SHELL_VARS_RAM_END   SHELL_VARS_CONF_RAM_END
-#else /* SHELL_VARS_CONF_RAM_BEGIN */
-#define SHELL_VARS_RAM_BEGIN 0
-#define SHELL_VARS_RAM_END (uintptr_t)-1
-#endif /* SHELL_VARS_CONF_RAM_BEGIN */
-
-/*---------------------------------------------------------------------------*/
-PROCESS(shell_vars_process, "vars");
-SHELL_COMMAND(vars_command,
-	      "vars",
-	      "vars: list all variables in RAM",
-	      &shell_vars_process);
-/*---------------------------------------------------------------------------*/
-PROCESS(shell_var_process, "var");
-SHELL_COMMAND(var_command,
-	      "var",
-	      "var <variable>: show content of a variable",
-	      &shell_var_process);
-/*---------------------------------------------------------------------------*/
-PROCESS_THREAD(shell_vars_process, ev, data)
-{
-  int i;
-  
-  PROCESS_BEGIN();
-
-  shell_output_str(&vars_command, "Variables in RAM:", "");
-  
-  for(i = 0; i < symbols_nelts; ++i) {
-    if(symbols[i].name != NULL &&
-       (uintptr_t)symbols[i].value >= SHELL_VARS_RAM_BEGIN &&
-       (uintptr_t)symbols[i].value <= SHELL_VARS_RAM_END) {
-      shell_output_str(&vars_command, (char *)symbols[i].name, "");
-    }
-  }
-  
-  PROCESS_END();
-}
-/*---------------------------------------------------------------------------*/
-PROCESS_THREAD(shell_var_process, ev, data)
-{
-  int i;
-  int j;
-  char numbuf[40];
-  
-  PROCESS_BEGIN();
-
-  if(data == NULL) {
-    shell_output_str(&var_command, "syntax: var <variable name>", "");
-  } else {
-    for(i = 0; i < symbols_nelts; ++i) {
-      if(symbols[i].name != NULL &&
-	 strncmp(symbols[i].name, data, strlen(symbols[i].name)) == 0) {
-	
-	sprintf(numbuf, " %d", *((int *)symbols[i].value));
-	shell_output_str(&var_command, (char *)symbols[i].name, numbuf);
-
-	for(j = 0; j < 8 * 8; j += 8) {
-	  sprintf(numbuf, "0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x 0x%02x",
-		  ((unsigned char *)symbols[i].value)[j],
-		  ((unsigned char *)symbols[i].value)[j + 1],
-		  ((unsigned char *)symbols[i].value)[j + 2],
-		  ((unsigned char *)symbols[i].value)[j + 3],
-		  ((unsigned char *)symbols[i].value)[j + 4],
-		  ((unsigned char *)symbols[i].value)[j + 5],
-		  ((unsigned char *)symbols[i].value)[j + 6],
-		  ((unsigned char *)symbols[i].value)[j + 7]);
-	  shell_output_str(&var_command, numbuf, "");
-	}
-	PROCESS_EXIT();
-      }
-    }
-    shell_output_str(&var_command, data, ": variable name not found");
-  }
-  
-  PROCESS_END();
-}
 /*---------------------------------------------------------------------------*/
 void
 shell_vars_init(void)
 {
-  shell_register_command(&var_command);
-  shell_register_command(&vars_command);
 }
 /*---------------------------------------------------------------------------*/

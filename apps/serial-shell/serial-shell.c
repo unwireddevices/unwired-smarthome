@@ -81,7 +81,8 @@ shell_default_output(const char *text1, int len1, const char *text2, int len2)
 void
 shell_prompt(char *str)
 {
-  printf("%d.%d: %s\r\n", linkaddr_node_addr.u8[0], linkaddr_node_addr.u8[1],
+  printf("%02X%02X:%02X%02X: %s", linkaddr_node_addr.u8[4], linkaddr_node_addr.u8[5],
+    linkaddr_node_addr.u8[6], linkaddr_node_addr.u8[7],
 	 str);
 }
 /*---------------------------------------------------------------------------*/
@@ -95,6 +96,7 @@ PROCESS_THREAD(serial_shell_process, ev, data)
   PROCESS_BEGIN();
 
   shell_init();
+  serial_line_init();
 
   while(1) {
     PROCESS_WAIT_EVENT_UNTIL(ev == serial_line_event_message && data != NULL);

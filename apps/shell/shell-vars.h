@@ -42,6 +42,5 @@
 
 #include "shell.h"
 
-void shell_vars_init(void);
 
 #endif /* SHELL_VARS_H_ */

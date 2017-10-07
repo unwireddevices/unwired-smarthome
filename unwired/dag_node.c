@@ -52,6 +52,8 @@
 
 #include "dev/leds.h"
 #include "sys/clock.h"
+#include "shell.h"
+#include "serial-shell.h"
 #include "button-sensor.h"
 #include "batmon-sensor.h"
 #include "radio_power.h"
@@ -1409,6 +1411,9 @@ PROCESS_THREAD(dag_node_process, ev, data)
       process_start(&maintenance_process, NULL);
    }
 
+   serial_shell_init();
+   shell_reboot_init();
+   shell_time_init();
 
    static struct etimer time_sync_timer;
 

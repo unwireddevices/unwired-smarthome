@@ -207,7 +207,7 @@ PROCESS_THREAD(main_process, ev, data)
    printf("Unwired Incotext-light device. HELL-IN-CODE free. I hope.\n");
 
    /* set incoming uart-data handler(uart_data_receiver) */
-   cc26xx_uart_set_input(&uart_data_receiver);
+   //cc26xx_uart_set_input(&uart_data_receiver);
 
    while (1)
    {

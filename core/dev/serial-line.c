@@ -30,6 +30,7 @@
  *
  */
 #include "dev/serial-line.h"
+#include "dev/cc26xx-uart.h"
 #include <string.h> /* for memcpy() */
 
 #include "lib/ringbuf.h"
@@ -131,6 +132,7 @@ PROCESS_THREAD(serial_line_process, ev, data)
 void
 serial_line_init(void)
 {
+  cc26xx_uart_set_input(&serial_line_input_byte);
   ringbuf_init(&rxbuf, rxbuf_data, sizeof(rxbuf_data));
   process_start(&serial_line_process, NULL);
 }

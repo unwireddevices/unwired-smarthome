@@ -54,27 +54,11 @@ SHELL_COMMAND(reboot_command,
 /*---------------------------------------------------------------------------*/
 PROCESS_THREAD(shell_reboot_process, ev, data)
 {
-  static struct etimer etimer;
+  PROCESS_EXITHANDLER()
 
-  PROCESS_EXITHANDLER(leds_off(LEDS_ALL);)
-  
   PROCESS_BEGIN();
 
-  shell_output_str(&reboot_command,
-		   "Rebooting the node in four seconds...", "");
-
-  etimer_set(&etimer, CLOCK_SECOND);
-  PROCESS_WAIT_UNTIL(etimer_expired(&etimer));
-  leds_on(LEDS_RED);
-  etimer_reset(&etimer);
-  PROCESS_WAIT_UNTIL(etimer_expired(&etimer));
-  leds_on(LEDS_GREEN);
-  etimer_reset(&etimer);
-  PROCESS_WAIT_UNTIL(etimer_expired(&etimer));
-  leds_on(LEDS_BLUE);
-  etimer_reset(&etimer);
-  PROCESS_WAIT_UNTIL(etimer_expired(&etimer));
-  
+  shell_output_str(&reboot_command, "Rebooting...", "");
   watchdog_reboot();
 
   PROCESS_END();
