@@ -35,6 +35,8 @@
 #include "contiki.h"
 #include "ud_binary_protocol.h"
 
+PROCESS_NAME(time_sync_process);
+
 /*---------------------------------------------------------------------------*/
 
 typedef struct time_data_t
@@ -51,8 +53,12 @@ typedef struct time_data_t
 
 /*---------------------------------------------------------------------------*/
 
-int16_t calculate_diff_time(time_data_t time_max, time_data_t time_min);
+void time_data_handler(const uint8_t *data, uint16_t datalen);
 
+
+
+
+int16_t calculate_diff_time(time_data_t time_max, time_data_t time_min);
 
 /*
  * Функция, рассчитывающее время следования пакета до координатора и обратно.
