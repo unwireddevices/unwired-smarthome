@@ -102,7 +102,7 @@ void set_epoch_time(time_data_t new_time)
       epoch_msec_offset = new_time.milliseconds - local_time.milliseconds;
       epoch_sec_offset = new_time.seconds - local_time.seconds;
    }
-   printf("RTC_COMMON: set offset: %" PRIu32 " sec, %" PRIi16 " ms\n", epoch_sec_offset, epoch_msec_offset);
+   //printf("RTC_COMMON: set offset: %" PRIu32 " sec, %" PRIi16 " ms\n", epoch_sec_offset, epoch_msec_offset);
 }
 
 /*---------------------------------------------------------------------------*/

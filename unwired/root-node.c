@@ -476,8 +476,6 @@ void uart_packet_dump(uint8_t *uart_buf, uint16_t uart_data_size)
 
 void local_command(uint8_t *uart_data, uint16_t uart_data_length)
 {
-   uint8_t protocol_version = uart_data[16];
-   uint8_t device_version = uart_data[17];
    uint8_t command_type = uart_data[18];
    uint8_t command_subtype = uart_data[19];
 
@@ -637,7 +635,7 @@ int uart_data_receiver(unsigned char uart_char)
          return 1;
       }
       uint8_t uart_data_length_uint8[2];
-      uart_data_length_uint8[0] = uart_header_data[1];
+      uart_data_length_uint8[0] = uart_header_data[1]; //Можно использовать u8_u16_t
       uart_data_length_uint8[1] = uart_header_data[2];
       uint16_t *uart_data_length_uint16_t = (uint16_t *)&uart_data_length_uint8; //Convert data length
       uart_data_length = *uart_data_length_uint16_t;

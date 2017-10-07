@@ -171,7 +171,7 @@ get_ota_slot_metadata( uint8_t ota_slot, OTAMetadata_t *ota_slot_metadata )
   int eeprom_access = ext_flash_open();
 
   if(!eeprom_access) {
-    PRINTF("[OTA]: Error - Could not access EEPROM.(%"PRIu16")\n", __LINE__);
+    //PRINTF("[OTA]: Error - Could not access EEPROM.(%"PRIu16")\n", __LINE__);
     ext_flash_close();
     return -1;
   }

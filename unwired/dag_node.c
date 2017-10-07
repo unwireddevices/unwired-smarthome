@@ -60,13 +60,14 @@
 #include "board-peripherals.h"
 #include "board.h"
 #include "ti-lib.h"
+
 #include "ota-main.h"
 #include "ota-common.h"
 #include "crypto-common.h"
 #include "rtc-common.h"
-
 #include "system-common.h"
 #include "int-flash-common.h"
+
 #include "xxf_types_helper.h"
 #include "ud_binary_protocol.h"
 
@@ -296,7 +297,6 @@ uart_console(unsigned char uart_char)
                printf(".");
          }
          printf( "HW AES TEST(%" PRIu32 ") took %" PRIu32 " s, speed %" PRIu32 " r/s\n", rounds_count, rtc_s()-start_uptime, rounds_count/(rtc_s()-start_uptime) );
-
       }
 
    if (uart_char == 't')
@@ -1408,6 +1408,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
       process_exit(&maintenance_process);
       process_start(&maintenance_process, NULL);
    }
+
 
    static struct etimer time_sync_timer;
 
