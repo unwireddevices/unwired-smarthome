@@ -118,8 +118,8 @@ void time_data_handler(const uint8_t *data, uint16_t datalen)
    u8_i16_t time_diff_ms;
    time_diff_ms.i16 = calculate_diff_time(root_time, local_time_res);
 
-   //printf("TIME SYNC: local time: %" PRIu32 " sec, %" PRIu16 " ms\n", local_time_res.seconds, local_time_res.milliseconds);
-   printf("TIME SYNC: new time: %" PRIu32 ",%03" PRIu16 " s, sync error: %" PRIi16 " ms\n", root_time.seconds, root_time.milliseconds, time_diff_ms.i16);
+   //printf("Time sync: local time: %" PRIu32 " sec, %" PRIu16 " ms\n", local_time_res.seconds, local_time_res.milliseconds);
+   printf("Time sync: new time: %" PRIu32 ",%03" PRIu16 " s, sync error: %" PRIi16 " ms\n", root_time.seconds, root_time.milliseconds, time_diff_ms.i16);
    send_message_packet(DEVICE_MESSAGE_TIMESYNC_STATUS, time_diff_ms.u8[0], time_diff_ms.u8[1]);
 }
 
