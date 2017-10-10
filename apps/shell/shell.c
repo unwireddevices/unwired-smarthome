@@ -110,14 +110,12 @@ PROCESS_THREAD(help_command_process, ev, data)
 {
   struct shell_command *c;
   PROCESS_BEGIN();
-
-  shell_output_str(&help_command, "Available commands:", "");
+  shell_output_str(&help_command, "\nAvailable commands:", "");
   for(c = list_head(commands);
       c != NULL;
       c = c->next) {
     shell_output_str(&help_command, c->description, "");
   }
-
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
@@ -222,11 +220,11 @@ start_command(char *commandline, struct shell_command *child)
       c = c->next);
 
   if(c == NULL) {
-    shell_output_str(NULL, commandline, ": command not found (try 'help')");
+    shell_output_str(NULL, commandline, ": command not found (try 'help')\n");
     command_kill(child);
     c = NULL;
   } else if(process_is_running(c->process) || child == c) {
-    shell_output_str(NULL, commandline, ": command already running");
+    shell_output_str(NULL, commandline, ": command already running\n");
     c->child = NULL;
     c = NULL;
   } else {

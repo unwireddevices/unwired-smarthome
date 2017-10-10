@@ -534,23 +534,23 @@ static void udp_receiver(struct simple_udp_connection *c,
 
                   else
                   {
-                        printf("DAG Node: Incompatible FW CMD command from");
-                        uip_debug_ip6addr_print(sender_addr);
+                        printf("DAG Node: Incompatible FW CMD command from ");
+                        uip_debug_ipaddr_print(sender_addr);
                         printf(", command: 0x%02x\n", data[3]);
                   }
             }
 
             else
             {
-                  printf("DAG Node: Incompatible data type UDP packer from");
-                  uip_debug_ip6addr_print(sender_addr);
+                  printf("DAG Node: Incompatible data type UDP packer from ");
+                  uip_debug_ipaddr_print(sender_addr);
                   printf(", data type: 0x%02x\n", data[2]);
             }
       }
       else
       {
-         printf("DAG Node: Incompatible data type UDP packer from");
-         uip_debug_ip6addr_print(sender_addr);
+         printf("DAG Node: Incompatible data type UDP packer from ");
+         uip_debug_ipaddr_print(sender_addr);
          printf(", data type: 0x%02x\n", data[2]);
       }
 
@@ -661,8 +661,8 @@ void send_sensor_event(struct sensor_packet *sensor_packet)
    uip_ipaddr_t addr;
    uip_ip6addr_copy(&addr, &root_addr);
 
-   printf("DAG Node: Send sensor-event message to DAG-root node:");
-   uip_debug_ip6addr_print(&addr);
+   printf("DAG Node: Send sensor-event message to DAG-root node: ");
+   uip_debug_ipaddr_print(&addr);
    printf("\n");
 
    uint8_t length = 10;
@@ -698,8 +698,8 @@ void send_uart_data(struct command_data *uart_data)
    uip_ipaddr_t addr;
    uip_ip6addr_copy(&addr, &root_addr);
 
-   //printf("DAG Node: Send uart data to DAG-root node:");
-   //uip_debug_ip6addr_print(&addr);
+   //printf("DAG Node: Send uart data to DAG-root node: ");
+   //uip_debug_ipaddr_print(&addr);
    //printf("\n");
 
    uint8_t length = 23;
@@ -754,8 +754,8 @@ void send_status_packet(const uip_ipaddr_t *parent_addr,
    uip_ipaddr_t addr;
    uip_ip6addr_copy(&addr, &root_addr);
 
-   printf("DAG Node: Send status packet to DAG-root node:");
-   uip_debug_ip6addr_print(&addr);
+   printf("DAG Node: Send status packet to DAG-root node: ");
+   uip_debug_ipaddr_print(&addr);
    printf("\n");
 
    uint8_t length = 23;
@@ -800,8 +800,8 @@ void send_join_packet(const uip_ipaddr_t *dest_addr)
    uip_ipaddr_t addr;
    uip_ip6addr_copy(&addr, dest_addr);
 
-   printf("DAG Node: Send join packet to DAG-root node:");
-   uip_debug_ip6addr_print(&addr);
+   printf("DAG Node: Send join packet to DAG-root node: ");
+   uip_debug_ipaddr_print(&addr);
    printf("\n");
 
    uint8_t length = 10;
@@ -1032,8 +1032,6 @@ PROCESS_THREAD(status_send_process, ev, data)
 
    while (1)
    {
-      //print_debug_data();
-
       dag = rpl_get_any_dag();
 
       if (dag != NULL && node_mode == MODE_NORMAL)
