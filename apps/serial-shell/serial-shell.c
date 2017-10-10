@@ -96,7 +96,6 @@ PROCESS_THREAD(serial_shell_process, ev, data)
   PROCESS_BEGIN();
 
   shell_init();
-  serial_line_init();
 
   while(1) {
     PROCESS_WAIT_EVENT_UNTIL(ev == serial_line_event_message && data != NULL);
