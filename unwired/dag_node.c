@@ -1310,6 +1310,11 @@ PROCESS_THREAD(dag_node_process, ev, data)
    process_start(&dag_node_button_process, NULL);
    process_start(&maintenance_process, NULL);
 
+   serial_shell_init();
+   shell_reboot_init();
+   shell_time_init();
+   printf("DAG Node: Shell activated, type \"help\" for command list\n");
+
    SENSORS_ACTIVATE(batmon_sensor);
 
    PROCESS_YIELD();
@@ -1348,11 +1353,6 @@ PROCESS_THREAD(dag_node_process, ev, data)
       process_exit(&maintenance_process);
       process_start(&maintenance_process, NULL);
    }
-
-   serial_shell_init();
-   shell_reboot_init();
-   shell_time_init();
-
 
 
    PROCESS_END();
