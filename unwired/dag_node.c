@@ -420,7 +420,7 @@ static void pong_handler(const uip_ipaddr_t *sender_addr,
                         uint16_t datalen)
 {
       non_answered_packet = 0;
-      printf("DAG Node: Pong packet received, non-answered packet counter: %"PRId8" \n", non_answered_packet);
+      //printf("DAG Node: Pong packet received, non-answered packet counter: %"PRId8" \n", non_answered_packet);
       net_off(RADIO_OFF_NOW);
 }
 
@@ -1099,17 +1099,20 @@ PROCESS_THREAD(status_send_process, ev, data)
             send_status_packet(ipaddr_parent, rtc_s(), stat_parent->rssi, temp, voltage);
          }
          non_answered_packet++;
-         printf("DAG Node: Non-answered packet counter increase(status message): %"PRId8" \n", non_answered_packet);
+         if (non_answered_packet != 1)
+         {
+            printf("DAG Node: Non-answered packet counter increase(status message): %"PRId8" \n", non_answered_packet);
+         }
       }
 
       if (CLASS == CLASS_B)
       {
-         printf("DAG Node: Next status message planned on long interval\n");
+         printf("DAG Node: Next status message planned on long interval(%"PRId8" m)\n", LONG_STATUS_INTERVAL/CLOCK_SECOND/60);
          etimer_set( &status_send_timer, LONG_STATUS_INTERVAL + (random_rand() % LONG_STATUS_INTERVAL) );
       }
       if (CLASS == CLASS_C)
       {
-         printf("DAG Node: Next status message planned on short interval\n");
+         printf("DAG Node: Next status message planned on short interval(%"PRId8" m)\n", SHORT_STATUS_INTERVAL/CLOCK_SECOND/60);
          etimer_set( &status_send_timer, SHORT_STATUS_INTERVAL + (random_rand() % SHORT_STATUS_INTERVAL) );
       }
 

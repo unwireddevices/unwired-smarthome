@@ -118,7 +118,7 @@ set_rf_params(void)
   NETSTACK_RADIO.set_object(RADIO_PARAM_64BIT_ADDR, ext_addr, 8);
 
   NETSTACK_RADIO.get_value(RADIO_PARAM_CHANNEL, &val);
-  printf(" RF: Channel %d\n", val);
+  printf(" Net: Channel %d\n", val);
 
 #if STARTUP_CONF_VERBOSE
   {
@@ -135,11 +135,11 @@ set_rf_params(void)
   node_id = short_addr;
   //printf(" Node ID: %u\n", node_id);
   printf(" PAN ID: 0x%04X\n", IEEE802154_PANID);
-  printf(" Security level: %u\n", NONCORESEC_CONF_SEC_LVL);
-  printf(" Define leaf: %s\n", RPL_CONF_LEAF_ONLY == 1 ? "Yes" : "No");
+  //printf(" Security level: %u\n", NONCORESEC_CONF_SEC_LVL);
+  //printf(" Define leaf: %s\n", RPL_CONF_LEAF_ONLY == 1 ? "Yes" : "No");
   printf(" RPL probing interval: %u s\n", RPL_CONF_PROBING_INTERVAL/CLOCK_SECOND);
-  printf(" Min DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_MIN);
-  printf(" Max DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_DOUBLINGS+RPL_CONF_DIO_INTERVAL_MIN);
+  //printf(" Min DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_MIN);
+  //printf(" Max DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_DOUBLINGS+RPL_CONF_DIO_INTERVAL_MIN);
   printf(" Max routes: %u\n", UIP_CONF_MAX_ROUTES);
 
 }
@@ -197,8 +197,7 @@ main(void)
 
   serial_line_init();
 
-  printf("Starting Contiki 3.x\n");
-  printf("With DriverLib v%u.%u\n", DRIVERLIB_RELEASE_GROUP,
+  printf("Starting Contiki 3.x With DriverLib v%u.%u\n", DRIVERLIB_RELEASE_GROUP,
          DRIVERLIB_RELEASE_BUILD);
   printf("\n");
 
@@ -226,18 +225,17 @@ main(void)
   energest_init();
   ENERGEST_ON(ENERGEST_TYPE_CPU);
 
-  printf(" Net: ");
-  printf("%s\n", NETSTACK_NETWORK.name);
-  printf(" MAC: ");
-  printf("%s\n", NETSTACK_MAC.name);
-  printf(" RDC: ");
-  printf("%s", NETSTACK_RDC.name);
+  //printf(" Net: ");
+  //printf("%s\n", NETSTACK_NETWORK.name);
+  //printf(" MAC: ");
+  //printf("%s\n", NETSTACK_MAC.name);
+  //printf(" RDC: ");
+  //printf("%s", NETSTACK_RDC.name);
 
   if(NETSTACK_RDC.channel_check_interval() != 0) {
-    printf(", Channel Check Interval: %u ticks",
+    printf(", Channel Check Interval: %u ticks\n",
            NETSTACK_RDC.channel_check_interval());
   }
-  printf("\n");
 
   netstack_init();
 
