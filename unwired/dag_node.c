@@ -271,15 +271,6 @@ uart_console(unsigned char uart_char)
       erase_ota_image(1);
    }
 
-   if (uart_char == 'i')
-      send_time_sync_req_packet();
-
-   if (uart_char == 'b')
-   {
-      time_data_t time = get_epoch_time();
-      printf( "RTC TEST: %" PRIu32 " sec, %" PRIu16 " ms, uptime %" PRIu32 " sec\n", time.seconds, time.milliseconds, rtc_s());
-   }
-
    if (uart_char == 'o')
       {
          uint8_t aes_key[16] = {0x5a, 0x69, 0x67, 0x42, 0x65, 0x65, 0x41, 0x6c, 0x6c, 0x69, 0x61, 0x6e, 0x63, 0x65, 0x30, 0x39};
@@ -564,42 +555,6 @@ static void udp_receiver(struct simple_udp_connection *c,
       }
 
    led_mode_set(LED_FLASH);
-}
-
-/*---------------------------------------------------------------------------*/
-
-void
-print_debug_data(void)
-{
-   /*
-   printf("\n");
-   printf( "SYSTEM: uptime: %" PRIu32 " s\n", rtc_s() );
-
-      rpl_dag_t *dag = rpl_get_any_dag();
-
-      if (dag) {
-          uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
-          printf("RPL: parent ip address: ");
-          uip_debug_ipaddr_print(ipaddr_parent);
-          printf("\n");
-
-          uip_ipaddr_t dag_id_addr = dag->dag_id;
-          printf("RPL: dag root ip address: ");
-          uip_debug_ipaddr_print(&dag_id_addr);
-          printf("\n");
-
-          const struct link_stats *stat_parent = rpl_get_parent_link_stats(dag->preferred_parent);
-          printf("RPL: parent last tx: %u sec ago\n", (unsigned)((clock_time() - stat_parent->last_tx_time) / (CLOCK_SECOND)));
-
-          printf("RPL: parent rssi: %" PRId16 "\n", stat_parent->rssi);
-
-          int parent_is_reachable = rpl_parent_is_reachable(dag->preferred_parent);
-          printf("RPL: parent is reachable: %" PRId16 "\n", parent_is_reachable);
-
-          uint8_t temp = batmon_sensor.value(BATMON_SENSOR_TYPE_TEMP);
-          printf("SYSTEM: temp: %"PRIu8"C, voltage: %"PRId16"mv\n", temp, ((batmon_sensor.value(BATMON_SENSOR_TYPE_VOLT) * 125) >> 5));
-      }
-    */
 }
 
 /*---------------------------------------------------------------------------*/
@@ -1313,6 +1268,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
    serial_shell_init();
    shell_reboot_init();
    shell_time_init();
+   unwired_shell_init();
    printf("DAG Node: Shell activated, type \"help\" for command list\n");
 
    SENSORS_ACTIVATE(batmon_sensor);

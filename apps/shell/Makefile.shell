@@ -1,4 +1,4 @@
-shell_src = shell.c shell-reboot.c shell-vars.c shell-ps.c \
+shell_src = shell.c shell-reboot.c shell-unwired.c shell-vars.c shell-ps.c \
             shell-blink.c shell-text.c shell-time.c \
             shell-file.c shell-run.c \
             shell-power.c \

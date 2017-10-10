@@ -386,6 +386,7 @@ struct shell_input {
 #include "shell-powertrace.h"
 #include "shell-ps.h"
 #include "shell-reboot.h"
+#include "shell-unwired.h"
 #include "shell-rsh.h"
 #include "shell-run.h"
 #include "shell-sendtest.h"
@@ -395,7 +396,6 @@ struct shell_input {
 #include "shell-time.h"
 #include "shell-udpsend.h"
 #include "shell-vars.h"
-
 #endif /* SHELL_H_ */
 
 
