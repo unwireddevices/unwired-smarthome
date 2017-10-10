@@ -376,7 +376,7 @@ PROCESS_THREAD(shell_process, ev, data)
   PROCESS_PAUSE();
 
   while(1) {
-    shell_prompt(shell_prompt_text);
+    //shell_prompt(shell_prompt_text);
 
     PROCESS_WAIT_EVENT_UNTIL(ev == shell_event_input);
     {
