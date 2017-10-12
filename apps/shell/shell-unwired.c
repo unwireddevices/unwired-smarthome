@@ -237,7 +237,7 @@ PROCESS_THREAD(unwired_shell_test_process, ev, data)
 {
    uint8_t max_args = 1;
    uint8_t argc;
-   char *args[max_args];
+   char *args[max_args+1];
    PROCESS_BEGIN();
 
    argc = parse_args(data, args, max_args);
