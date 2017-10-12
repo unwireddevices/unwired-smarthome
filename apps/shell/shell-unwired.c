@@ -162,7 +162,9 @@ PROCESS_THREAD(unwired_shell_uptime_process, ev, data)
   printf("\n");
   PROCESS_END();
 }
+
 /*---------------------------------------------------------------------------*/
+
 PROCESS_THREAD(unwired_shell_time_process, ev, data)
 {
   PROCESS_BEGIN();
@@ -171,7 +173,9 @@ PROCESS_THREAD(unwired_shell_time_process, ev, data)
   printf("\n");
   PROCESS_END();
 }
+
 /*---------------------------------------------------------------------------*/
+
 PROCESS_THREAD(unwired_shell_status_process, ev, data)
 {
    PROCESS_BEGIN();
@@ -204,14 +208,18 @@ PROCESS_THREAD(unwired_shell_status_process, ev, data)
    printf("\n");
    PROCESS_END();
 }
+
 /*---------------------------------------------------------------------------*/
+
 PROCESS_THREAD(unwired_shell_timesync_process, ev, data)
 {
   PROCESS_BEGIN();
   send_time_sync_req_packet();
   PROCESS_END();
 }
+
 /*---------------------------------------------------------------------------*/
+
 PROCESS_THREAD(unwired_shell_channel_process, ev, data)
 {
    uint8_t max_args = 2;
@@ -299,7 +307,9 @@ PROCESS_THREAD(unwired_shell_channel_process, ev, data)
    printf("\n");
    PROCESS_END();
 }
+
 /*---------------------------------------------------------------------------*/
+
 PROCESS_THREAD(unwired_shell_panid_process, ev, data)
 {
    uint8_t max_args = 2;
@@ -330,7 +340,9 @@ PROCESS_THREAD(unwired_shell_panid_process, ev, data)
    printf("\n");
    PROCESS_END();
 }
+
 /*---------------------------------------------------------------------------*/
+
 PROCESS_THREAD(unwired_shell_test_process, ev, data)
 {
    uint8_t max_args = 1;
