@@ -83,6 +83,9 @@ SHELL_COMMAND(unwired_shell_timesync_command, "timesync", "timesync: sync time n
 PROCESS(unwired_shell_status_process, "status");
 SHELL_COMMAND(unwired_shell_status_command, "status", "status: show node status", &unwired_shell_status_process);
 
+PROCESS(unwired_shell_panid_process, "panid");
+SHELL_COMMAND(unwired_shell_panid_command, "panid", "panid <set/get> <panid(ABCD)>: set/get panid", &unwired_shell_panid_process);
+
 PROCESS(unwired_shell_channel_process, "channel");
 SHELL_COMMAND(unwired_shell_channel_command, "channel", "channel <set/get> <num>: set/get radio channel", &unwired_shell_channel_process);
 
@@ -140,6 +143,15 @@ str2int_errno_t str2uint8(uint8_t *out, char *s, int base) {
     return STR2INT_SUCCESS;
 }
 
+void set_panid(uint16_t panid)
+{
+   NETSTACK_RADIO.set_value(RADIO_PARAM_PAN_ID, IEEE802154_PANID);
+}
+
+void get_panid(void)
+{
+
+}
 
 /*---------------------------------------------------------------------------*/
 
@@ -288,6 +300,37 @@ PROCESS_THREAD(unwired_shell_channel_process, ev, data)
    PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
+PROCESS_THREAD(unwired_shell_panid_process, ev, data)
+{
+   uint8_t max_args = 2;
+   char *args[max_args+1]; //necessary to allocate on one pointer more
+   uint8_t argc = 0;
+
+   //uint8_t channel = 0;
+
+   PROCESS_BEGIN();
+
+   argc = parse_args(data, args, max_args);
+   if (argc < 1)
+   {
+      printf("PAN ID: No args! Use \"panid <set/get> <panid(ABCD)>\"\n");
+      PROCESS_EXIT();
+   }
+
+   if (!strncmp(args[0], "get", 3))
+   {
+      printf("PAN ID get\n");
+   }
+
+   if (!strncmp(args[0], "set", 3))
+   {
+      printf("PAN ID set\n");
+   }
+
+   printf("\n");
+   PROCESS_END();
+}
+/*---------------------------------------------------------------------------*/
 PROCESS_THREAD(unwired_shell_test_process, ev, data)
 {
    uint8_t max_args = 1;
@@ -315,6 +358,6 @@ void unwired_shell_init(void)
   shell_register_command(&unwired_shell_status_command);
   shell_register_command(&unwired_shell_test_command);
   shell_register_command(&unwired_shell_channel_command);
-
+  shell_register_command(&unwired_shell_panid_command);
 }
 /*---------------------------------------------------------------------------*/
