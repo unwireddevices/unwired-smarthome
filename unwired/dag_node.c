@@ -1271,12 +1271,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
 
    SENSORS_ACTIVATE(batmon_sensor);
 
-   PROCESS_YIELD();
-
-   if (ev != PROCESS_EVENT_CONTINUE)
-   {
-      PROCESS_YIELD();
-   }
+   PROCESS_YIELD_UNTIL(ev == PROCESS_EVENT_CONTINUE);
 
    printf("DAG Node: DAG active, join packet confirmation received, mode set to MODE_NORMAL\n");
    led_mode_set(LED_SLOW_BLINK);
