@@ -69,7 +69,55 @@ SHELL_COMMAND(unwired_shell_timesync_command, "timesync", "timesync: sync time n
 
 PROCESS(unwired_shell_status_process, "status");
 SHELL_COMMAND(unwired_shell_status_command, "status", "status: show node status", &unwired_shell_status_process);
+
+PROCESS(unwired_shell_set_channel_process, "set_channel");
+SHELL_COMMAND(unwired_shell_set_channel_command, "set_channel", "set_channel: change radio channel", &unwired_shell_set_channel_process);
+
+PROCESS(unwired_shell_test_process, "test");
+SHELL_COMMAND(unwired_shell_test_command, "test", "test: test func", &unwired_shell_test_process);
 /*---------------------------------------------------------------------------*/
+
+uint8_t parse_args(char *args_string, char **args, uint8_t max_args)
+{
+   uint8_t i = 0;
+   args[i] = strtok(args_string," ");
+   while (args[i] != NULL && i != max_args)
+   {
+      i++;
+      args[i] = strtok(NULL," ");
+   }
+   return i;
+}
+
+typedef enum str2int_errno_t {
+   STR2INT_SUCCESS,
+   STR2INT_OVERFLOW,
+   STR2INT_UNDERFLOW,
+   STR2INT_INCONVERTIBLE
+} str2int_errno_t;
+
+
+uint8_t str2uint(char *s)
+{
+   int temp = 0;
+   for (uint8_t i = 0; i < 5; i++)
+   {
+      if (s[i] >= 0x30 && s[i] <= 0x39)
+      {
+         temp = temp + (s[i] & 0x0F);
+         temp = temp * 10;
+      }
+      else
+         break;
+   }
+   temp = temp / 10;
+   if (temp > 0xFF)
+      temp = 0;
+   return (uint8_t)temp;
+}
+
+/*---------------------------------------------------------------------------*/
+
 PROCESS_THREAD(unwired_shell_uptime_process, ev, data)
 {
   PROCESS_BEGIN();
@@ -92,7 +140,8 @@ PROCESS_THREAD(unwired_shell_status_process, ev, data)
    PROCESS_BEGIN();
    rpl_dag_t *dag = rpl_get_any_dag();
 
-   if (dag) {
+   if (dag)
+   {
       uip_ipaddr_t *ipaddr_parent = rpl_get_parent_ipaddr(dag->preferred_parent);
       printf("STATUS: rpl parent ip address: ");
       uip_debug_ipaddr_print(ipaddr_parent);
@@ -126,13 +175,61 @@ PROCESS_THREAD(unwired_shell_timesync_process, ev, data)
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
+PROCESS_THREAD(unwired_shell_set_channel_process, ev, data)
+{
+   uint8_t max_args = 1;
+   uint8_t argc = 0;
+   char *args[max_args];
+   const char *nextptr;
+   uint8_t channel = 0;
+
+   PROCESS_BEGIN();
+
+   argc = parse_args(data, args, max_args);
+   if (argc == 0)
+   {
+      printf("No arg!\n");
+      PROCESS_EXIT();
+   }
+
+   channel = shell_strtolong(args[0], &nextptr);
+   //printf("Channel text: %"CHAR"\n", args[0]);
+   //volatile uint8_t channel = str2uint(args[0]);
+
+
+   printf("Number channel: %"PRIu8"\n", channel);
+
+
+
+   PROCESS_END();
+}
+/*---------------------------------------------------------------------------*/
+PROCESS_THREAD(unwired_shell_test_process, ev, data)
+{
+   uint8_t max_args = 1;
+   uint8_t argc;
+   char *args[max_args];
+   PROCESS_BEGIN();
+
+   argc = parse_args(data, args, max_args);
+   printf ("argc: %"PRIu8"\n", argc);
+
+   for (uint8_t i = 0; i < argc; i++)
+   {
+      printf ("%s\n",args[i]);
+   }
+
+   PROCESS_END();
+}
+/*---------------------------------------------------------------------------*/
 void unwired_shell_init(void)
 {
   shell_register_command(&unwired_shell_time_command);
   shell_register_command(&unwired_shell_uptime_command);
   shell_register_command(&unwired_shell_timesync_command);
   shell_register_command(&unwired_shell_status_command);
-
+  shell_register_command(&unwired_shell_test_command);
+  shell_register_command(&unwired_shell_set_channel_command);
 
 }
 /*---------------------------------------------------------------------------*/
