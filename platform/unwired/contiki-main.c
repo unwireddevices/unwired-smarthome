@@ -118,7 +118,7 @@ set_rf_params(void)
   NETSTACK_RADIO.set_object(RADIO_PARAM_64BIT_ADDR, ext_addr, 8);
 
   NETSTACK_RADIO.get_value(RADIO_PARAM_CHANNEL, &val);
-  printf(" Net: Channel %d\n", val);
+  printf(" Channel: %d\n", val);
 
 #if STARTUP_CONF_VERBOSE
   {
@@ -137,7 +137,7 @@ set_rf_params(void)
   printf(" PAN ID: 0x%04X\n", IEEE802154_PANID);
   //printf(" Security level: %u\n", NONCORESEC_CONF_SEC_LVL);
   //printf(" Define leaf: %s\n", RPL_CONF_LEAF_ONLY == 1 ? "Yes" : "No");
-  printf(" RPL probing interval: %u s\n", RPL_CONF_PROBING_INTERVAL/CLOCK_SECOND);
+  printf(" RPL probing interval: %uh(%um)\n", RPL_CONF_PROBING_INTERVAL/CLOCK_SECOND/60/60, RPL_CONF_PROBING_INTERVAL/CLOCK_SECOND/60);
   //printf(" Min DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_MIN);
   //printf(" Max DIO interval(2^x ms): %u\n", RPL_CONF_DIO_INTERVAL_DOUBLINGS+RPL_CONF_DIO_INTERVAL_MIN);
   printf(" Max routes: %u\n", UIP_CONF_MAX_ROUTES);
