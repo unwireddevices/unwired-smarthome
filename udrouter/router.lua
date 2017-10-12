@@ -1,3 +1,4 @@
+#!/usr/bin/lua
 --[[
 /*
  * Copyright (c) 2016, Unwired Devices LLC - http://www.unwireddevices.com/
@@ -25,7 +26,6 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */ ]]--
- #!/usr/bin/lua
 
 local script_dir = (debug.getinfo(1).source:match("@?(.*/)")) or ""
 package.path = package.path..';'..script_dir.."?.lua"
