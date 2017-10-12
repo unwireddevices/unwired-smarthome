@@ -57,6 +57,7 @@
 #include "xxf_types_helper.h"
 #include "ud_binary_protocol.h"
 
+#include "dot-15-4g.h"
 
 /*---------------------------------------------------------------------------*/
 
