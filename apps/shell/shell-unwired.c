@@ -70,8 +70,8 @@ SHELL_COMMAND(unwired_shell_timesync_command, "timesync", "timesync: sync time n
 PROCESS(unwired_shell_status_process, "status");
 SHELL_COMMAND(unwired_shell_status_command, "status", "status: show node status", &unwired_shell_status_process);
 
-PROCESS(unwired_shell_set_channel_process, "set_channel");
-SHELL_COMMAND(unwired_shell_set_channel_command, "set_channel", "set_channel: change radio channel", &unwired_shell_set_channel_process);
+PROCESS(unwired_shell_channel_process, "channel");
+SHELL_COMMAND(unwired_shell_channel_command, "channel", "channel <set/get> <num>: set/get radio channel", &unwired_shell_channel_process);
 
 PROCESS(unwired_shell_test_process, "test");
 SHELL_COMMAND(unwired_shell_test_command, "test", "test: test func", &unwired_shell_test_process);
@@ -114,6 +114,32 @@ uint8_t str2uint(char *s)
    if (temp > 0xFF)
       temp = 0;
    return (uint8_t)temp;
+}
+void set_radio_channel(uint8_t channel)
+{
+   //For cc1310: 0-33 channels(200kHz)
+   //RADIO_CONST_CHANNEL_MAX 33
+
+   if (channel == 0)
+      printf("Channel: Incorrect channel number\n");
+
+   else if (channel == 30 || channel == 29)
+   {
+      uint32_t new_freq = DOT_15_4G_CHAN0_FREQUENCY + (channel * DOT_15_4G_CHANNEL_SPACING);
+      printf("Channel: Set new radio-channel: %u (%lu kHz)\n", channel, new_freq);
+      NETSTACK_RADIO.set_value(RADIO_PARAM_CHANNEL, channel);
+   }
+
+   else
+      printf("Channel: Сhannel %"PRIu8" is not available in the current region(only 29/30 ch). ¯\\_(ツ)_/¯\n", channel);
+}
+
+void get_radio_channel(void)
+{
+   uint8_t channel = 0;
+   NETSTACK_RADIO.get_value(RADIO_PARAM_CHANNEL, (radio_value_t*)&channel);
+   uint32_t freq = DOT_15_4G_CHAN0_FREQUENCY + (channel * DOT_15_4G_CHANNEL_SPACING);
+   printf("Channel: Current radio-channel: %u (%lu kHz)\n", channel, freq);
 }
 
 /*---------------------------------------------------------------------------*/
@@ -175,31 +201,33 @@ PROCESS_THREAD(unwired_shell_timesync_process, ev, data)
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
-PROCESS_THREAD(unwired_shell_set_channel_process, ev, data)
+PROCESS_THREAD(unwired_shell_channel_process, ev, data)
 {
-   uint8_t max_args = 1;
+   uint8_t max_args = 2;
+   char *args[max_args+1]; //necessary to allocate on one pointer more
    uint8_t argc = 0;
-   char *args[max_args];
-   const char *nextptr;
+
    uint8_t channel = 0;
 
    PROCESS_BEGIN();
 
    argc = parse_args(data, args, max_args);
-   if (argc == 0)
+   if (argc < 1)
    {
-      printf("No arg!\n");
+      printf("Channel: No args! Use \"channel <set/get> <num>: set/get radio channel\"\n");
       PROCESS_EXIT();
    }
 
-   channel = shell_strtolong(args[0], &nextptr);
-   //printf("Channel text: %"CHAR"\n", args[0]);
-   //volatile uint8_t channel = str2uint(args[0]);
+   if (!strncmp(args[0], "get", 3))
+   {
+      get_radio_channel();
+   }
 
-
-   printf("Number channel: %"PRIu8"\n", channel);
-
-
+   if (!strncmp(args[0], "set", 3))
+   {
+      channel = str2uint(args[1]); //shell_strtolong(args[1], &nextptr);
+      set_radio_channel(channel);
+   }
 
    printf("\n");
    PROCESS_END();
@@ -231,7 +259,7 @@ void unwired_shell_init(void)
   shell_register_command(&unwired_shell_timesync_command);
   shell_register_command(&unwired_shell_status_command);
   shell_register_command(&unwired_shell_test_command);
-  shell_register_command(&unwired_shell_set_channel_command);
+  shell_register_command(&unwired_shell_channel_command);
 
 }
 /*---------------------------------------------------------------------------*/
