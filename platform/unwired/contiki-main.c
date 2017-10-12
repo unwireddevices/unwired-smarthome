@@ -201,9 +201,9 @@ main(void)
          DRIVERLIB_RELEASE_BUILD);
   printf("\n");
 
-  printf("Random timer...\n");
+  //printf("Random timer...\n");
   // start_rand_timer
-  timer_set(&start_rand_timer, (random_rand() % (CLOCK_SECOND * 4)));
+  //timer_set(&start_rand_timer, (random_rand() % (CLOCK_SECOND * 4)));
 
   do
   {
