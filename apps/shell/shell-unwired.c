@@ -57,7 +57,11 @@
 #include "xxf_types_helper.h"
 #include "ud_binary_protocol.h"
 
+
 /*---------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------*/
+
 PROCESS(unwired_shell_time_process, "time");
 SHELL_COMMAND(unwired_shell_time_command, "time", "time: show the current node time in unix epoch", &unwired_shell_time_process);
 
@@ -75,6 +79,7 @@ SHELL_COMMAND(unwired_shell_channel_command, "channel", "channel <set/get> <num>
 
 PROCESS(unwired_shell_test_process, "test");
 SHELL_COMMAND(unwired_shell_test_command, "test", "test: test func", &unwired_shell_test_process);
+
 /*---------------------------------------------------------------------------*/
 
 uint8_t parse_args(char *args_string, char **args, uint8_t max_args)
@@ -88,14 +93,6 @@ uint8_t parse_args(char *args_string, char **args, uint8_t max_args)
    }
    return i;
 }
-
-typedef enum str2int_errno_t {
-   STR2INT_SUCCESS,
-   STR2INT_OVERFLOW,
-   STR2INT_UNDERFLOW,
-   STR2INT_INCONVERTIBLE
-} str2int_errno_t;
-
 
 uint8_t str2uint(char *s)
 {
@@ -115,6 +112,7 @@ uint8_t str2uint(char *s)
       temp = 0;
    return (uint8_t)temp;
 }
+
 void set_radio_channel(uint8_t channel)
 {
    //For cc1310: 0-33 channels(200kHz)
