@@ -90,7 +90,7 @@ uip_debug_ipaddr_print(const uip_ipaddr_t *addr)
         } else if(i > 0) {
           PRINTA(":");
         }
-        PRINTA("%x", a);
+        PRINTA("%04X", a);
       }
 	}
   }
