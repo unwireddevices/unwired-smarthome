@@ -62,7 +62,7 @@ clean:
 	-rm -f *.hex
 
 net-bootloader-clean:
-	cd ../bootloader && make clean && make -j5 CPU=$(CPU) bootloader.hex
+	cd ../bootloader && make clean
 
 net-bootloader:
 	cd ../bootloader && make -j5 CPU=$(CPU) bootloader.hex
