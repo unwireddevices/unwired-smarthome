@@ -1060,12 +1060,12 @@ PROCESS_THREAD(status_send_process, ev, data)
 
       if (CLASS == CLASS_B)
       {
-         printf("DAG Node: Next status message planned on long interval(%"PRId8" m)\n", LONG_STATUS_INTERVAL/CLOCK_SECOND/60);
+         printf("DAG Node: Next status message planned on long interval(%"PRId8" min)\n", LONG_STATUS_INTERVAL/CLOCK_SECOND/60);
          etimer_set( &status_send_timer, LONG_STATUS_INTERVAL + (random_rand() % LONG_STATUS_INTERVAL) );
       }
       if (CLASS == CLASS_C)
       {
-         printf("DAG Node: Next status message planned on short interval(%"PRId8" m)\n", SHORT_STATUS_INTERVAL/CLOCK_SECOND/60);
+         printf("DAG Node: Next status message planned on short interval(%"PRId8" min)\n", SHORT_STATUS_INTERVAL/CLOCK_SECOND/60);
          etimer_set( &status_send_timer, SHORT_STATUS_INTERVAL + (random_rand() % SHORT_STATUS_INTERVAL) );
       }
 
@@ -1307,7 +1307,6 @@ PROCESS_THREAD(dag_node_process, ev, data)
       process_exit(&maintenance_process);
       process_start(&maintenance_process, NULL);
    }
-
 
    PROCESS_END();
 }
