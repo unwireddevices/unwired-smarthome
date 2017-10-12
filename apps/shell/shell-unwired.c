@@ -42,6 +42,13 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <assert.h>
+#include <ctype.h>
+#include <errno.h>
+#include <limits.h>
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "net/rpl/rpl.h"
 #include "net/rpl/rpl-private.h"
 #include "net/ipv6/uip-ds6.h"
@@ -50,6 +57,7 @@
 #include "net/link-stats.h"
 #include "core/lib/sensors.h"
 #include "batmon-sensor.h"
+#include "ti-lib.h"
 
 #include "rtc-common.h"
 #include "dag_node.h"
@@ -106,32 +114,32 @@ uint8_t str2uint(char *s)
    return (uint8_t)(temp);
 }
 
-void set_radio_channel(uint8_t channel)
-{
-   //For cc1310: 0-33 channels(200kHz)
-   //RADIO_CONST_CHANNEL_MAX 33
 
-   if (channel == 0)
-      printf("Channel: Incorrect channel number\n");
+typedef enum str2int_errno_t{
+   STR2INT_SUCCESS,
+   STR2INT_OVERFLOW,
+   STR2INT_UNDERFLOW,
+   STR2INT_INCONVERTIBLE
+} str2int_errno_t;
 
-   else if (channel == 30 || channel == 29)
-   {
-      uint32_t new_freq = DOT_15_4G_CHAN0_FREQUENCY + (channel * DOT_15_4G_CHANNEL_SPACING);
-      printf("Channel: Set new radio-channel: %u (%lu kHz)\n", channel, new_freq);
-      NETSTACK_RADIO.set_value(RADIO_PARAM_CHANNEL, channel);
-   }
 
-   else
-      printf("Channel: Сhannel %"PRIu8" is not available in the current region(only 29/30 ch). ¯\\_(ツ)_/¯\n", channel);
+str2int_errno_t str2uint8(uint8_t *out, char *s, int base) {
+    char *end;
+    if (s[0] == '\0' || isspace((unsigned char) s[0]))
+        return STR2INT_INCONVERTIBLE;
+    errno = 0;
+    long l = strtol(s, &end, base);
+    /* Both checks are needed because INT_MAX == LONG_MAX is possible. */
+    if (l > 255 || (errno == ERANGE && l == LONG_MAX))
+        return STR2INT_OVERFLOW;
+    if (l < 0 || (errno == ERANGE && l == LONG_MIN))
+        return STR2INT_UNDERFLOW;
+    if (*end != '\0')
+        return STR2INT_INCONVERTIBLE;
+    *out = (uint8_t)l;
+    return STR2INT_SUCCESS;
 }
 
-void get_radio_channel(void)
-{
-   uint8_t channel = 0;
-   NETSTACK_RADIO.get_value(RADIO_PARAM_CHANNEL, (radio_value_t*)&channel);
-   uint32_t freq = DOT_15_4G_CHAN0_FREQUENCY + (channel * DOT_15_4G_CHANNEL_SPACING);
-   printf("Channel: Current radio-channel: %u (%lu kHz)\n", channel, freq);
-}
 
 /*---------------------------------------------------------------------------*/
 
@@ -198,26 +206,82 @@ PROCESS_THREAD(unwired_shell_channel_process, ev, data)
    char *args[max_args+1]; //necessary to allocate on one pointer more
    uint8_t argc = 0;
 
-   uint8_t channel = 0;
-
    PROCESS_BEGIN();
 
    argc = parse_args(data, args, max_args);
    if (argc < 1)
    {
-      printf("Channel: No args! Use \"channel <set/get> <num>: set/get radio channel\"\n");
+      printf("Channel: No args! Use \"channel <set/get> <num>\"\n");
+      printf("\n");
       PROCESS_EXIT();
    }
 
    if (!strncmp(args[0], "get", 3))
    {
-      get_radio_channel();
+      radio_value_t channel = 0;
+      NETSTACK_RADIO.get_value(RADIO_PARAM_CHANNEL, &channel);
+
+      if (ti_lib_chipinfo_chip_family_is_cc26xx())
+      {
+         uint32_t freq_mhz = (2405 + 5 * (channel - 11));
+         printf("Channel get: Current radio-channel: %"PRIint" (%"PRIu32" MHz)\n", (int)channel, freq_mhz);
+      }
+
+      if (ti_lib_chipinfo_chip_family_is_cc13xx())
+      {
+         uint32_t freq_khz = 863125 + (channel * 200);
+         printf("Channel get: Current radio-channel: %"PRIint" (%"PRIu32" kHz)\n", (int)channel, freq_khz);
+      }
    }
 
    if (!strncmp(args[0], "set", 3))
    {
-      channel = str2uint(args[1]); //shell_strtolong(args[1], &nextptr);
-      set_radio_channel(channel);
+      uint8_t channel = 0;
+      str2int_errno_t status = str2uint8(&channel, args[1], 10);
+
+      uint8_t cc1310_max_channel = 33;
+      uint8_t cc1310_min_channel = 0;
+
+      uint8_t cc2650_min_channel = 11;
+      uint8_t cc2650_max_channel = 26;
+
+      if (status != STR2INT_SUCCESS)
+      {
+         printf("Channel set error: Incorrect channel number arg\n");
+         printf("\n");
+         PROCESS_EXIT();
+      }
+
+
+      if (ti_lib_chipinfo_chip_family_is_cc26xx())
+      {
+         if (channel > cc2650_max_channel || channel < cc2650_min_channel)
+            printf("Channel set error: Select a channel in the range %"PRIu8"-%"PRIu8"\n", cc2650_min_channel, cc2650_max_channel);
+         else
+         {
+            uint32_t freq_mhz = (2405 + 5 * (channel - 11));
+            printf("Channel: Set new radio-channel: %"PRIu8" (%"PRIu32" MHz)\n", channel, freq_mhz);
+            NETSTACK_RADIO.set_value(RADIO_PARAM_CHANNEL, channel);
+         }
+      }
+
+      if (ti_lib_chipinfo_chip_family_is_cc13xx())
+      {
+         if (channel > cc1310_max_channel || channel < cc1310_min_channel)
+            printf("Channel set error: Select a channel in the range %"PRIu8"-%"PRIu8"\n", cc1310_min_channel, cc1310_max_channel);
+         else if (channel == 30 || channel == 29)
+         {
+            uint32_t freq_khz = 863125 + (channel * 200);
+            printf("Channel: Set new radio-channel: %"PRIu8" (%"PRIu32" kHz)\n", channel, freq_khz);
+            NETSTACK_RADIO.set_value(RADIO_PARAM_CHANNEL, channel);
+         }
+         else
+         {
+            printf("Channel set error: Сhannel %" PRIu8 " is not available in the current region(only 29/30 ch). ¯\\_(ツ)_/¯\n", channel);
+            printf("\n");
+            PROCESS_EXIT();
+         }
+      }
    }
 
    printf("\n");
