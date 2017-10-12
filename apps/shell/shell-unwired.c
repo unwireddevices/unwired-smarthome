@@ -122,7 +122,7 @@ PROCESS_THREAD(unwired_shell_uptime_process, ev, data)
 {
   PROCESS_BEGIN();
   printf( "Uptime: %" PRIu32 " sec, %" PRIu16 " ms\n", rtc_s(), rtc_ms());
-  printf("\n\n");
+  printf("\n");
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
@@ -131,7 +131,7 @@ PROCESS_THREAD(unwired_shell_time_process, ev, data)
   PROCESS_BEGIN();
   time_data_t time = get_epoch_time();
   printf( "RTC: %" PRIu32 " sec, %" PRIu16 " ms\n", time.seconds, time.milliseconds);
-  printf("\n\n");
+  printf("\n");
   PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
@@ -164,7 +164,7 @@ PROCESS_THREAD(unwired_shell_status_process, ev, data)
    uint8_t temp = batmon_sensor.value(BATMON_SENSOR_TYPE_TEMP);
    printf("STATUS: temp: %"PRIu8"C, voltage: %"PRId16"mv\n", temp, ((batmon_sensor.value(BATMON_SENSOR_TYPE_VOLT) * 125) >> 5));
 
-   printf("\n\n");
+   printf("\n");
    PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
@@ -201,6 +201,7 @@ PROCESS_THREAD(unwired_shell_set_channel_process, ev, data)
 
 
 
+   printf("\n");
    PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
@@ -219,6 +220,7 @@ PROCESS_THREAD(unwired_shell_test_process, ev, data)
       printf ("%s\n",args[i]);
    }
 
+   printf("\n");
    PROCESS_END();
 }
 /*---------------------------------------------------------------------------*/
