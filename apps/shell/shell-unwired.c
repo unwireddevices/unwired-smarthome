@@ -97,21 +97,13 @@ uint8_t parse_args(char *args_string, char **args, uint8_t max_args)
 
 uint8_t str2uint(char *s)
 {
-   int temp = 0;
-   for (uint8_t i = 0; i < 5; i++)
-   {
-      if (s[i] >= 0x30 && s[i] <= 0x39)
-      {
-         temp = temp + (s[i] & 0x0F);
-         temp = temp * 10;
-      }
-      else
-         break;
-   }
-   temp = temp / 10;
-   if (temp > 0xFF)
-      temp = 0;
-   return (uint8_t)temp;
+   uint16_t temp = 0;
+   while (*s)
+      if (*s>=0x30 && *s<=0x39)
+          temp = ((( temp << 2 ) + temp ) << 1) + *s++ - 0x30;
+      else return 0;
+   if (temp>255) temp=0;
+   return (uint8_t)(temp);
 }
 
 void set_radio_channel(uint8_t channel)
