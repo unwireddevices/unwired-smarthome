@@ -82,9 +82,6 @@ volatile static uint8_t uart_returned_data_buf[23];
 /* UART-data */
 struct command_data uart_data;
 
-/* UART-flag for console commands */
-volatile uint8_t uart_flag = 0;
-
 /*---------------------------------------------------------------------------*/
 
 /* Register buttons sensors */
@@ -103,17 +100,6 @@ AUTOSTART_PROCESSES(&dag_node_process, &main_process, &send_data_process);
 static int uart_data_receiver(unsigned char uart_char)
 {
    //printf("uart_data_receiver: New char(%" PRIXX8 ") in buffer: %" PRIu8 ", length: %" PRIu8 " \n", uart_char, uart_data_iterator, uart_returned_data_length);
-
-   if (uart_flag == 2)
-   {
-      uart_console(uart_char);
-      uart_flag = 0;
-   }
-
-   if (uart_char == '/')
-   {
-      uart_flag++;
-   }
 
    if (uart_returned_data_length > 0)
    {
@@ -153,7 +139,6 @@ static int uart_data_receiver(unsigned char uart_char)
 
 static void send_uart_command(struct command_data *uart_data)
 {
-
    disable_interrupts();
    enable_interrupts();
 
