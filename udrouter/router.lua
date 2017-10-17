@@ -456,6 +456,11 @@ local function uart_send(bin_data)
 	elseif (#uart_packet_size_hex == 3) then uart_packet_size_hex = "0"..uart_packet_size_hex
 	end
 
+   --[[
+   while (#uart_packet_size_hex < 16/8*2) do
+      uart_packet_size_hex = "0"..uart_packet_size_hex
+   end
+   ]]
 	local uart_packet_size_hex_b1 = string.sub(uart_packet_size_hex, 1, 2)
 	local uart_packet_size_hex_b2 = string.sub(uart_packet_size_hex, 3, 4)
 
