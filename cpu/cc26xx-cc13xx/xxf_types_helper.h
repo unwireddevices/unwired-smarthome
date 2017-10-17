@@ -23,10 +23,11 @@
 #ifndef PRIx32
    #define PRIx32   "lx"
 #endif
-   #define PRIXX8   "02X"
 
    #define PRIX8   "X"
+   #define PRIXX8   "02X"
    #define PRIX16   "X"
+   #define PRIXX16   "04X"
 #ifndef PRIX32
    #define PRIX32   "lX"
 #endif
