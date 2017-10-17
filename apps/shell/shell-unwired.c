@@ -58,6 +58,7 @@
 #include "core/lib/sensors.h"
 #include "batmon-sensor.h"
 #include "ti-lib.h"
+#include "net/mac/frame802154.h"
 
 #include "rtc-common.h"
 #include "dag_node.h"
@@ -89,9 +90,10 @@ SHELL_COMMAND(unwired_shell_channel_command, "channel", "channel <set/get> <num>
 PROCESS(unwired_shell_test_process, "test");
 SHELL_COMMAND(unwired_shell_test_command, "test", "test: test func", &unwired_shell_test_process);
 
+//команда включения бутлоадера
 /*---------------------------------------------------------------------------*/
 
-uint8_t parse_args(char *args_string, char **args, uint8_t max_args)
+static uint8_t parse_args(char *args_string, char **args, uint8_t max_args)
 {
    uint8_t i = 0;
    args[i] = strtok(args_string," ");
@@ -103,18 +105,6 @@ uint8_t parse_args(char *args_string, char **args, uint8_t max_args)
    return i;
 }
 
-uint8_t str2uint(char *s)
-{
-   uint16_t temp = 0;
-   while (*s)
-      if (*s>=0x30 && *s<=0x39)
-          temp = ((( temp << 2 ) + temp ) << 1) + *s++ - 0x30;
-      else return 0;
-   if (temp>255) temp=0;
-   return (uint8_t)(temp);
-}
-
-
 typedef enum str2int_errno_t{
    STR2INT_SUCCESS,
    STR2INT_OVERFLOW,
@@ -122,13 +112,47 @@ typedef enum str2int_errno_t{
    STR2INT_INCONVERTIBLE
 } str2int_errno_t;
 
+static str2int_errno_t hex_str2uint8(uint8_t *out, char *s) {
+   char *end;
+   if (s[0] == '\0' || isspace((unsigned char) s[0]))
+       return STR2INT_INCONVERTIBLE;
+   errno = 0;
+   long l = strtol(s, &end, 16);
+   /* Both checks are needed because INT_MAX == LONG_MAX is possible. */
+   if (l > 255 || (errno == ERANGE && l == LONG_MAX))
+       return STR2INT_OVERFLOW;
+   if (l < 0 || (errno == ERANGE && l == LONG_MIN))
+       return STR2INT_UNDERFLOW;
+   if (*end != '\0')
+       return STR2INT_INCONVERTIBLE;
+   *out = (uint8_t)l;
+   return STR2INT_SUCCESS;
+}
 
-str2int_errno_t str2uint8(uint8_t *out, char *s, int base) {
+static str2int_errno_t hex_str2uint16(uint16_t *out, char *s) {
+   char *end;
+   if (s[0] == '\0' || isspace((unsigned char) s[0]))
+       return STR2INT_INCONVERTIBLE;
+   errno = 0;
+   long l = strtol(s, &end, 16);
+   /* Both checks are needed because INT_MAX == LONG_MAX is possible. */
+   if (l > 0xFFFF || (errno == ERANGE && l == LONG_MAX))
+       return STR2INT_OVERFLOW;
+   if (l < 0 || (errno == ERANGE && l == LONG_MIN))
+       return STR2INT_UNDERFLOW;
+   if (*end != '\0')
+       return STR2INT_INCONVERTIBLE;
+   *out = (uint16_t)l;
+   return STR2INT_SUCCESS;
+}
+
+
+static str2int_errno_t dec_str2uint8(uint8_t *out, char *s) {
     char *end;
     if (s[0] == '\0' || isspace((unsigned char) s[0]))
         return STR2INT_INCONVERTIBLE;
     errno = 0;
-    long l = strtol(s, &end, base);
+    long l = strtol(s, &end, 10);
     /* Both checks are needed because INT_MAX == LONG_MAX is possible. */
     if (l > 255 || (errno == ERANGE && l == LONG_MAX))
         return STR2INT_OVERFLOW;
@@ -189,7 +213,7 @@ PROCESS_THREAD(unwired_shell_status_process, ev, data)
       printf("STATUS: rpl parent is reachable: %" PRId16 "\n", parent_is_reachable);
 
    }
-   uint8_t temp = batmon_sensor.value(BATMON_SENSOR_TYPE_TEMP);
+   uint8_t temp = (uint8_t)batmon_sensor.value(BATMON_SENSOR_TYPE_TEMP);
    printf("STATUS: temp: %"PRIu8"C, voltage: %"PRId16"mv\n", temp, ((batmon_sensor.value(BATMON_SENSOR_TYPE_VOLT) * 125) >> 5));
 
    printf("\n");
@@ -244,7 +268,7 @@ PROCESS_THREAD(unwired_shell_channel_process, ev, data)
    if (!strncmp(args[0], "set", 3))
    {
       uint8_t channel = 0;
-      str2int_errno_t status = str2uint8(&channel, args[1], 10);
+      str2int_errno_t status = dec_str2uint8(&channel, args[1]);
 
       uint8_t cc1310_max_channel = 33;
       uint8_t cc1310_min_channel = 0;
@@ -303,25 +327,56 @@ PROCESS_THREAD(unwired_shell_panid_process, ev, data)
    char *args[max_args+1]; //necessary to allocate on one pointer more
    uint8_t argc = 0;
 
-   //uint8_t channel = 0;
-
    PROCESS_BEGIN();
 
    argc = parse_args(data, args, max_args);
    if (argc < 1)
    {
-      printf("PAN ID: No args! Use \"panid <set/get> <panid(ABCD)>\"\n");
+      printf("PAN ID: No args! Use \"panid <set/get> <panid(ABCD)>\", value in hex\n");
       PROCESS_EXIT();
    }
 
    if (!strncmp(args[0], "get", 3))
    {
-      printf("PAN ID get\n");
+      if (ti_lib_chipinfo_chip_family_is_cc26xx())
+      {
+         radio_value_t panid = 0;
+         NETSTACK_RADIO.get_value(RADIO_PARAM_PAN_ID, &panid);
+         printf("PAN ID: Current ID %"PRIXX16"\n", panid);
+      }
+      else
+      {
+         printf("PAN ID: Not support in cc1310\n");
+      }
+
    }
 
    if (!strncmp(args[0], "set", 3))
    {
-      printf("PAN ID set\n");
+      if (ti_lib_chipinfo_chip_family_is_cc26xx())
+      {
+         uint16_t panid = 0;
+         str2int_errno_t status = hex_str2uint16(&panid, args[0]);
+         if (status != STR2INT_SUCCESS)
+         {
+            printf("PAN ID set error: Incorrect id value\n");
+            printf("\n");
+            PROCESS_EXIT();
+         }
+         NETSTACK_RADIO.set_value(RADIO_PARAM_PAN_ID, panid);
+         printf("PAN ID: Set new ID %"PRIXX16"\n", panid);
+      }
+      else
+      {
+         frame802154_set_pan_id(0xAAA);
+         //printf("PAN ID: Not support in cc1310\n");
+      }
+   }
+
+
+   if (!strncmp(args[0], "aaa", 3))
+   {
+      frame802154_set_pan_id(0xAAA);
    }
 
    printf("\n");
@@ -338,12 +393,9 @@ PROCESS_THREAD(unwired_shell_test_process, ev, data)
    PROCESS_BEGIN();
 
    argc = parse_args(data, args, max_args);
-   printf ("argc: %"PRIu8"\n", argc);
-
-   for (uint8_t i = 0; i < argc; i++)
-   {
-      printf ("%s\n",args[i]);
-   }
+   uint16_t value = 0;
+   str2int_errno_t status = hex_str2uint16(&value, args[0]);
+   printf("Hex convert: %"PRIu16"(%"PRIXX16"), %"PRIint"\n", value, value, (int)status);
 
    printf("\n");
    PROCESS_END();
