@@ -65,12 +65,9 @@
 #include "xxf_types_helper.h"
 #include "ud_binary_protocol.h"
 
-#include "dot-15-4g.h"
-
 /*---------------------------------------------------------------------------*/
 
 /*---------------------------------------------------------------------------*/
-
 PROCESS(unwired_shell_time_process, "time");
 SHELL_COMMAND(unwired_shell_time_command, "time", "time: show the current node time in unix epoch", &unwired_shell_time_process);
 
@@ -141,16 +138,6 @@ str2int_errno_t str2uint8(uint8_t *out, char *s, int base) {
         return STR2INT_INCONVERTIBLE;
     *out = (uint8_t)l;
     return STR2INT_SUCCESS;
-}
-
-void set_panid(uint16_t panid)
-{
-   NETSTACK_RADIO.set_value(RADIO_PARAM_PAN_ID, IEEE802154_PANID);
-}
-
-void get_panid(void)
-{
-
 }
 
 /*---------------------------------------------------------------------------*/
@@ -361,7 +348,9 @@ PROCESS_THREAD(unwired_shell_test_process, ev, data)
    printf("\n");
    PROCESS_END();
 }
+
 /*---------------------------------------------------------------------------*/
+
 void unwired_shell_init(void)
 {
   shell_register_command(&unwired_shell_time_command);
@@ -372,4 +361,5 @@ void unwired_shell_init(void)
   shell_register_command(&unwired_shell_channel_command);
   shell_register_command(&unwired_shell_panid_command);
 }
+
 /*---------------------------------------------------------------------------*/
