@@ -28,11 +28,9 @@
 
 local current_leaf_mode = arg[1]
 local current_cpu = arg[2]
-local last_leaf_mode
-local last_cpu
-local last_modes = {}
+local current_project = arg[3]
+local last_leaf_mode, last_project, last_cpu
 local filename_last_modes = "/tmp/unwired_last_mode"
-
 
 function table.val_to_str ( v )
    if "string" == type( v ) then
@@ -68,7 +66,7 @@ end
 function table.read(filename)
    local f, err = io.open(filename,"r")
    if not f then
-   	  local nil_table = {}
+      local nil_table = {}
       return nil_table, err
    end
    local tbl = assert(loadstring("return " .. f:read("*a")))
@@ -78,7 +76,6 @@ end
 
 function table.save(tbl, filename)
    local f,err = io.open(filename,"w")
-   local nil_table = {}
    if not f then
       return nil,err
    end
@@ -87,50 +84,35 @@ function table.save(tbl, filename)
    return true
 end
 
+local function main()
+   local os_exit_code = 1
+   if (current_leaf_mode == nil or current_cpu == nil) then
+      print("Arg error")
+      os.exit(os_exit_code)
+   end
 
+   local last_modes, err = table.read(filename_last_modes)
 
+   if (last_modes ~= nil) then
+      if (last_modes.leaf_mode ~= nil and last_modes.cpu ~= nil) then
+         last_leaf_mode = last_modes.leaf_mode
+         last_cpu = last_modes.cpu
+         last_project = last_modes.project
+      end
+   end
 
+   if (err == nil) then
+      if (last_leaf_mode == current_leaf_mode) and (last_cpu == current_cpu) and (last_project == current_project) then
+         os_exit_code = 0
+      end
+   end
 
-local os_exit_code = 1
-if (current_leaf_mode == nil or current_cpu == nil) then
-	print("Arg error")
-	os.exit(os_exit_code)
+   local current_modes = {}
+   current_modes.leaf_mode = current_leaf_mode
+   current_modes.cpu = current_cpu
+   current_modes.project = current_project
+   table.save(current_modes, filename_last_modes)
+   os.exit(os_exit_code)
 end
 
-last_modes, err = table.read(filename_last_modes)
-
-if (last_modes ~= nil) then
-	if (last_modes.leaf_mode ~= nil and last_modes.cpu ~= nil) then
-		last_leaf_mode = last_modes.leaf_mode
-		last_cpu = last_modes.cpu
-	end
-end
-
-if (err == nil) then
-	if (last_leaf_mode == current_leaf_mode) and (last_cpu == current_cpu) then
-		os_exit_code = 0
-	end
-end
-
-local current_modes = {}
-current_modes.leaf_mode = current_leaf_mode
-current_modes.cpu = current_cpu
-table.save(current_modes, filename_last_modes)
-os.exit(os_exit_code)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+main()
