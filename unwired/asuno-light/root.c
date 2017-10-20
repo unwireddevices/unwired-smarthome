@@ -62,9 +62,6 @@
 #include "root.h"
 #include "../root-node.h"
 
-
-#include "../fake_headers.h" //no move up! not "krasivo"!
-
 /*---------------------------------------------------------------------------*/
 
 /* Buttons on DIO 1 */

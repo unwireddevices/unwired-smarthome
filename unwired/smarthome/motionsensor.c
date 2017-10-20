@@ -62,7 +62,6 @@
 #include "../dag_node.h"
 
 #include "net/rpl/rpl-private.h"
-#include "../fake_headers.h" //no move up! not "krasivo"!
 
 #define BUTTON_GPIO_CFG         (IOC_CURRENT_2MA  | IOC_STRENGTH_AUTO | \
                                  IOC_IOPULL_DOWN  | IOC_SLEW_DISABLE  | \

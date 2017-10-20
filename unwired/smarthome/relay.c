@@ -62,8 +62,6 @@
 #include "../int-flash-common.h"
 #include "../dag_node.h"
 
-#include "../fake_headers.h" //no move up! not "krasivo"!
-
 /*---------------------------------------------------------------------------*/
 
 uint8_t relay_1_state = 0;

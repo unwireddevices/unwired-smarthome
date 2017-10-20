@@ -57,8 +57,6 @@
 
 #include "radio_power.h"
 
-#include "../fake_headers.h" //no move up! not "krasivo"!
-
 /*---------------------------------------------------------------------------*/
 
 static struct ctimer net_off_timer;

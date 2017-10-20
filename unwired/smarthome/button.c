@@ -62,8 +62,6 @@
 #include "../dag_node.h"
 
 #include "net/rpl/rpl-private.h"
-#include "../fake_headers.h" //no move up! not "krasivo"!
-
 
 /*---------------------------------------------------------------------------*/
 /* Register button sensors */

@@ -67,8 +67,6 @@
 #include "../int-flash-common.h"
 #include "../rtc-common.h"
 
-#include "../fake_headers.h" //no move up! not "krasivo"!
-
 #define UART_DATA_POLL_INTERVAL 5 //in main timer ticks, one tick ~8ms
 
 /*---------------------------------------------------------------------------*/
