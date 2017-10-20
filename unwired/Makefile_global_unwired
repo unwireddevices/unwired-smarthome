@@ -12,13 +12,15 @@ ifndef BOARD
   ${info Not BOARD define, use: "BOARD=srf06" or "BOARD=udboards". Set default: $(BOARD)}
 endif
 
+
+# 1: target name(project), 2:ID, 3:Power class
 define generate-targets
 $(1):
-	lua ../../tools/selective_clean.lua $(2) $(3) || make cleanall BOARD=$$(BOARD)/$$(CPU) CPU=$$(CPU)
+	lua ../../tools/selective_clean.lua $(1) $(3) $$(CPU) || make cleanall BOARD=$$(BOARD)/$$(CPU) CPU=$$(CPU)
 	make net-bootloader CPU=$$(CPU) BOARD=$$(BOARD)/$$(CPU)
-	make -j5 TARGET=unwired BOARD=$$(BOARD)/$$(CPU) -f makefiles/Makefile.$$@
+	make -j5 TARGET=unwired BOARD=$$(BOARD)/$$(CPU) POWER_CLASS=$(3) -f makefiles/Makefile.$$@
 	arm-none-eabi-size $$@.elf | grep -v text | lua ../../tools/mem_used.lua 125000 20000 || true
-	../bootloader/generate-metadata/generate-metadata $$@.bin 0x0 0x00A10001 1 > /dev/null
+	../bootloader/generate-metadata/generate-metadata $$@.bin 0x0 $(2) 1 > /dev/null
 	srec_cat firmware-metadata.bin -binary $$@.bin -binary -offset 0x100 -o $$@-ota-image.bin -binary
 	srec_cat ../bootloader/bootloader.hex -intel -crop 0x0 0x2000 0x1FFA8 0x20000 $$@-ota-image.bin -binary -offset 0x2000 -crop 0x2000 0x1B000 -o $$@-firmware.hex -intel
 	rm $(1).hex

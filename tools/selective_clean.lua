@@ -26,10 +26,10 @@
  * SUCH DAMAGE.
  */ ]]--
 
-local current_leaf_mode = arg[1]
-local current_cpu = arg[2]
-local current_project = arg[3]
-local last_leaf_mode, last_project, last_cpu
+local current_power_mode = arg[2]
+local current_cpu = arg[3]
+local current_project = arg[1]
+local last_power_mode, last_project, last_cpu
 local filename_last_modes = "/tmp/unwired_last_mode"
 
 function table.val_to_str ( v )
@@ -86,7 +86,7 @@ end
 
 local function main()
    local os_exit_code = 1
-   if (current_leaf_mode == nil or current_cpu == nil) then
+   if (current_power_mode == nil or current_cpu == nil or current_project == nil) then
       print("Arg error")
       os.exit(os_exit_code)
    end
@@ -94,21 +94,21 @@ local function main()
    local last_modes, err = table.read(filename_last_modes)
 
    if (last_modes ~= nil) then
-      if (last_modes.leaf_mode ~= nil and last_modes.cpu ~= nil) then
-         last_leaf_mode = last_modes.leaf_mode
+      if (last_modes.power_mode ~= nil and last_modes.cpu ~= nil) then
+         last_power_mode = last_modes.power_mode
          last_cpu = last_modes.cpu
          last_project = last_modes.project
       end
    end
 
    if (err == nil) then
-      if (last_leaf_mode == current_leaf_mode) and (last_cpu == current_cpu) and (last_project == current_project) then
+      if (last_power_mode == current_power_mode) and (last_cpu == current_cpu) and (last_project == current_project) then
          os_exit_code = 0
       end
    end
 
    local current_modes = {}
-   current_modes.leaf_mode = current_leaf_mode
+   current_modes.power_mode = current_power_mode
    current_modes.cpu = current_cpu
    current_modes.project = current_project
    table.save(current_modes, filename_last_modes)
