@@ -87,6 +87,9 @@ SHELL_COMMAND(unwired_shell_panid_command, "panid", "panid <set/get> <panid(ABCD
 PROCESS(unwired_shell_channel_process, "channel");
 SHELL_COMMAND(unwired_shell_channel_command, "channel", "channel <set/get> <num>: set/get radio channel", &unwired_shell_channel_process);
 
+PROCESS(unwired_shell_bootloader_process, "bootloader");
+SHELL_COMMAND(unwired_shell_bootloader_command, "bootloader", "bootloader: bootloader start", &unwired_shell_bootloader_process);
+
 PROCESS(unwired_shell_test_process, "test");
 SHELL_COMMAND(unwired_shell_test_command, "test", "test: test func", &unwired_shell_test_process);
 
@@ -228,6 +231,17 @@ PROCESS_THREAD(unwired_shell_timesync_process, ev, data)
   send_time_sync_req_packet();
   PROCESS_END();
 }
+
+/*---------------------------------------------------------------------------*/
+
+PROCESS_THREAD(unwired_shell_bootloader_process, ev, data)
+{
+  PROCESS_BEGIN();
+  printf("Bootloader: bootloader activate\n");
+  ti_lib_flash_sector_erase(0x0001F000);
+  PROCESS_END();
+}
+
 
 /*---------------------------------------------------------------------------*/
 
@@ -412,6 +426,8 @@ void unwired_shell_init(void)
   shell_register_command(&unwired_shell_test_command);
   shell_register_command(&unwired_shell_channel_command);
   shell_register_command(&unwired_shell_panid_command);
+  shell_register_command(&unwired_shell_bootloader_command);
+
 }
 
 /*---------------------------------------------------------------------------*/
