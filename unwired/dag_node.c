@@ -127,7 +127,6 @@
 /* struct for simple_udp_send */
 simple_udp_connection_t udp_connection;
 
-volatile uint8_t node_mode;
 volatile uint8_t spi_status;
 
 volatile uint8_t led_mode;
@@ -991,6 +990,10 @@ PROCESS_THREAD(maintenance_process, ev, data)
             net_mode(RADIO_FREEDOM);
             net_off(RADIO_OFF_NOW);
             net_mode(RADIO_HOLD);
+
+            etimer_set( &maintenance_timer, (5 * 60 * 60 * CLOCK_SECOND));
+            PROCESS_WAIT_EVENT_UNTIL( etimer_expired(&maintenance_timer) );
+            watchdog_reboot();
          }
 
          if (CLASS == CLASS_C)
@@ -1280,7 +1283,7 @@ PROCESS_THREAD(dag_node_process, ev, data)
    node_mode = MODE_NORMAL;
    net_mode(RADIO_FREEDOM);
    net_off(RADIO_OFF_NOW);
-   process_start(&time_sync_process, NULL);
+   //process_start(&time_sync_process, NULL); //Start timesync in main process, if necessary
 
    if (spi_status == SPI_EXT_FLASH_ACTIVE)
    {
