@@ -73,9 +73,6 @@ initialize_peripherals() {
 void
 initialize_uart()
 {
-   static int (*input_handler)(unsigned char c);
-   uint32_t ctl_val = UART_CTL_UARTEN | UART_CTL_TXE;
-
    ti_lib_prcm_power_domain_on(PRCM_DOMAIN_SERIAL);
    while(ti_lib_prcm_power_domain_status(PRCM_DOMAIN_SERIAL) != PRCM_DOMAIN_POWER_ON);
    ti_lib_prcm_peripheral_run_enable(PRCM_PERIPH_UART0);
@@ -89,8 +86,23 @@ initialize_uart()
                                   (UART_CONFIG_WLEN_8 | UART_CONFIG_STOP_ONE | UART_CONFIG_PAR_NONE));
    ti_lib_uart_fifo_level_set(UART0_BASE, UART_FIFO_TX7_8, UART_FIFO_RX4_8);
    HWREG(UART0_BASE + UART_O_LCRH) |= UART_LCRH_FEN;
-   if(input_handler) { ctl_val += UART_CTL_RXE; }
-   HWREG(UART0_BASE + UART_O_CTL) = ctl_val;
+   HWREG(UART0_BASE + UART_O_CTL) = UART_CTL_UARTEN | UART_CTL_TXE | UART_CTL_RXE;
+}
+
+void
+deinitialize_uart()
+{
+   while(ti_lib_uart_busy(UART0_BASE));
+   ti_lib_ioc_pin_type_uart(UART0_BASE, IOID_UNUSED, IOID_UNUSED, IOID_UNUSED, IOID_UNUSED);
+   ti_lib_ioc_pin_type_gpio_input(UART_TX_IOID);
+   ti_lib_gpio_clear_event_dio(UART_TX_IOID);
+
+   ti_lib_uart_disable(UART0_BASE);
+   ti_lib_prcm_peripheral_run_disable(PRCM_PERIPH_UART0);
+   ti_lib_prcm_load_set();
+
+   ti_lib_prcm_power_domain_off(PRCM_DOMAIN_SERIAL);
+   while(ti_lib_prcm_power_domain_status(PRCM_DOMAIN_SERIAL) != PRCM_DOMAIN_POWER_OFF);
 }
 
 int
@@ -160,6 +172,7 @@ main(void)
    if (fw_flag == FW_FLAG_NON_UPDATE)
    {
       print_uart_bl("Jump to main image(FW_FLAG_NON_UPDATE)\n\n");
+      deinitialize_uart();
       jump_to_image( (CURRENT_FIRMWARE<<12) );
    }
 
@@ -167,6 +180,7 @@ main(void)
    if (fw_flag == FW_FLAG_ERROR_GI_LOADED)
    {
       print_uart_bl("Jump to main image(ERROR_GI_LOADED)\n\n");
+      deinitialize_uart();
       jump_to_image( (CURRENT_FIRMWARE<<12) );
    }
 
@@ -175,6 +189,7 @@ main(void)
    {
       write_fw_flag(FW_FLAG_NEW_IMG_INT);
       print_uart_bl("Jump to main image(NEW_IMG_INT)\n\n");
+      deinitialize_uart();
       jump_to_image( (CURRENT_FIRMWARE<<12) );
    }
 
